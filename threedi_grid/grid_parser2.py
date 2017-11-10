@@ -15,6 +15,7 @@ from abc import ABCMeta
 from abc import abstractmethod
 
 import numpy as np
+from numpy.ma import masked_where
 import ogr
 from pyproj import transform, Proj
 
@@ -36,6 +37,104 @@ DATASOURCE_FIELD_TYPE = {
     'str': ogr.OFTString,
     'real': ogr.OFTReal,
 }
+
+# class LineKcuFilters:
+#     """
+#     Some explanation on KCU types. Every flowline has an kcu value
+#     to distinguish between the type of lines. In threedicore this
+#     distinguishing will result in the use of different formulation
+#     for velocities on these lines
+#     -1 - 1D boundary
+#     0 - 1D embedded line
+#     1 - 1D isolated line
+#     2 - 1D connected line
+#     3 - 1D long-crested structure
+#     4 - 1D short-crested structure
+#     5 - 1D double connected line
+#     51 - 1D2D single connected line with storage
+#     52 - 1D2D single connected line without storage
+#     53 - 1D2D double connected line with storage
+#     54 - 1D2D double connected line without storage
+#     55 - 1D2D connected line possible breach
+#     56 - 1D2D connected line active breach
+#     100 - 2D line
+#     101 - 2D obstacle (levee) line
+#     """
+#
+#     def __init__(self, array):
+#
+#         self.lines = array['line']
+#         self.kcu = array['kcu']
+#
+#     def filter_1d_links(self):
+#         return masked_where(
+#             (self.tiled_kcu > 0) & (self.tiled_kcu < 10),
+#             self.lines, copy=False)
+#
+#     def filter_all_2d_open_water_links(self):
+#         return masked_where(
+#             (self.tiled_kcu == 100) | (self.tiled_kcu == 101),
+#             self.lines, copy=False)
+#
+#     def filter_2d_groundwater_links(self):
+#         return masked_where(
+#             self.tiled_kcu == -150, self.lines, copy=False
+#         )
+#
+#     def filter_2d_vertical_links(self):
+#         return masked_where(
+#             self.tiled_kcu == 150, self.lines, copy=False
+#         )
+#
+#     def filter_1D_bounds(self):
+#         return masked_where(
+#             self.tiled_kcu == -1, self.lines, copy=False
+#         )
+#
+#     def filter_2d_bounds(self):
+#         return masked_where(
+#             (self.tiled_kcu >= 200) | (self.tiled_kcu < 600),
+#             self.lines, copy=False
+#         )
+#
+#     def filter_all_structures(self):
+#         structure_mask = np.logical_or(self.kcu == 3,  self.kcu == 4)
+#         return np.vstack((self.lines[0][mask], self.lines[1][mask]))
+#
+#     def filter_long_crested_structures(self):
+#         return masked_where(
+#             self.tiled_kcu == 3, self.lines, copy=False
+#         )
+#
+#     def filter_short_crested_structures(self):
+#         return masked_where(
+#             self.tiled_kcu == 4, self.lines, copy=False
+#         )
+#
+#     def filter_2d_open_water_obstacles(self):
+#         return masked_where(
+#             self.tiled_kcu == 101, self.lines, copy=False
+#         )
+#
+#     def filter_1d2d_open_water_links(self):
+#         return masked_where(
+#             (self.tiled_kcu >= 51) & (self.tiled_kcu <= 56),
+#             self.lines, copy=False
+#         )
+#
+#     def filter_1d2d_groundwater_links(self):
+#         # not implemented yet
+#         return masked_where(
+#             (self.tiled_kcu == 57) | (self.tiled_kcu == 58),
+#             self.lines, copy=False
+#         )
+#
+#     def filter_2d_groundwater_bounds(self):
+#         # not implemented yet
+#         return masked_where(
+#             self.tiled_kcu > 600, self.lines, copy=False
+#         )
+
 
 class KCUDescriptor(dict):
 
@@ -65,8 +164,6 @@ class KCUDescriptor(dict):
             150: '2D vertical link',
             -150: '2D groundwater link',
             200: '2D boundary',
-            # 600: '',
-
         }
 
     def get(self, item):
@@ -232,21 +329,22 @@ class Nodes(BaseGridObject):
             return self._pack_up(selection, stack)
         return self._all(stack)
 
-    def get_values(self, field_name, slice_by=None):
+    def get_values(self, field_name, slice_name=''):
         if field_name not in self.fields:
             logger.error("[-] Field name {} does not exist".format(field_name))
             return
-        if slice_by and slice_by not in self.SLICE_NAMES:
-            logger.error("[-] Slice  name {} does not exist".format(slice_by))
+        if slice_name and slice_name not in self.SLICE_NAMES:
+            logger.error("[-] Slice  name {} does not exist".format(slice_name))
             return
 
-        if not slice_by:
+        if not slice_name:
             return self._array[field_name]
-        return self._array[field_name][self.slices[slice_by]]
+        return self._array[field_name][self.slices[slice_name]]
 
     def get_reprojected(self, src_epsg_code, target_epsg_code, slice_name='',
                         stack=True):
-        node_x, node_y = self.get_slice(slice_name, stack=False)
+        node_x = self.get_values('x', slice_name=slice_name)
+        node_y = self.get_values('y', slice_name=slice_name)
         return self._pack_up(
             transform_xys(src_epsg_code, target_epsg_code, node_x, node_y),
             stack
@@ -272,6 +370,16 @@ class Lines(BaseGridObject):
     SLICE_NAMES = _NAMES.values()
     THREEDICORE_NAMES = _NAMES.keys()
 
+    @property
+    def _custom_fields(self):
+        field_is_set = []
+        custom_field_names = ('content_pk', 'content_type')
+        for fn in custom_field_names:
+            attr = getattr(self, fn)
+            if hasattr(attr, 'dtype'):
+                field_is_set.append(fn)
+        return tuple(field_is_set)
+
     def __init__(self, array, meta):
 
         super(Lines, self).__init__(array, meta)
@@ -281,24 +389,33 @@ class Lines(BaseGridObject):
         )
         self._set_bool_attr()
         self._set_cnt_attr()
-        self.line = self._array['line'].T
-        self.kcu = self._array['kcu']
-        self.lik = self._array['lik']
+        # self.line = self._array['line'].T
+        # self.kcu = self._array['kcu']
+        # self.lik = self._array['lik']
+        self.content_pk = None
+        self.content_type = None
+        self._define_masks()
 
     def get_values(self, field_name, slice_name=None):
-        if field_name not in self.fields:
+
+        if field_name not in self.fields and field_name not in self._custom_fields:
             logger.error("[-] Field name {} does not exist".format(field_name))
             return
         if slice_name and slice_name not in self.SLICE_NAMES:
             logger.error("[-] Slice  name {} does not exist".format(slice_name))
             return
-
         if not slice_name:
-            return self._array[field_name]
+            try:
+                return self._array[field_name]
+            except ValueError:
+                return getattr(self, field_name)
         if slice_name and field_name == 'line':
             return self._array[field_name][:, self.slices[slice_name]]
-        return self._array[field_name][self.slices[slice_name]]
-
+        try:
+            return self._array[field_name][self.slices[slice_name]]
+        except ValueError:
+            _arr = getattr(self, field_name)
+            return _arr[self.slices[slice_name]]
 
     def get_slice(self, slice_name='', stack=True):
 
@@ -326,6 +443,66 @@ class Lines(BaseGridObject):
 
             return self._pack_up(selection, stack)
         return self._all(stack)
+
+    def add_1d_object_info(self, id_mapper):
+        """
+        applies only for 1d
+        :return:
+        """
+
+        # TODO channel might be different
+        LINE_TYPES = [
+            constants.TYPE_V2_PIPE, constants.TYPE_V2_CHANNEL,
+            constants.TYPE_V2_CULVERT,
+            constants.TYPE_V2_ORIFICE, constants.TYPE_V2_WEIR]
+
+        # pk template
+        lik_all = self.get_values('lik')
+        lik_1d = self.get_values('lik', '1D_all')
+
+        self.content_pk = np.zeros(lik_all.shape, dtype='i4')
+        self.content_type = np.zeros(lik_all.shape, dtype='U32')
+        _content_pk = np.zeros(lik_1d.shape, dtype='i4')
+        _content_type = np.zeros(lik_1d.shape, dtype='U32')
+
+        sort_idx = np.argsort(lik_1d)
+
+        for line in LINE_TYPES:
+            mapper_idx = id_mapper.obj_slices.get(line)
+            if mapper_idx is None:
+                continue
+            seq_ids = id_mapper.id_mapping[mapper_idx]['seq_id']
+            idx = sort_idx[np.searchsorted(lik_1d, seq_ids, sorter=sort_idx)]
+            _content_pk[idx] = id_mapper.id_mapping[mapper_idx]['pk']
+            _content_type[idx] = id_mapper.id_mapping[mapper_idx]['obj_name']
+        self.content_pk[self.slices['1D_all']] = _content_pk
+        self.content_type[self.slices['1D_all']] = _content_type
+
+    def _define_masks(self):
+        self._structure_mask = np.logical_or(
+            self._array['kcu'] == 3,  self._array['kcu'] == 4)
+
+        self._long_crested_structure_mask = np.where(
+            self._array['kcu'] == 3)
+
+        self._short_crested_structure_mask = np.where(
+            self._array['kcu'] == 4)
+
+        self._2d_open_water_obstacles_mask = np.where(
+            self._array['kcu'] == 101)
+
+        self._2d_open_water_obstacles_mask = np.where(
+            self._array['kcu'] == 101)
+
+        self._active_breach_mask = np.where(
+            self._array['kcu'] == 56)
+
+    def get_by_mask(self, mask_name='active_breach'):
+        mask = getattr(self, '_{}_mask'.format(mask_name))
+        return np.vstack(
+            (self._array['line'][0][mask],
+             self._array['line'][1][mask])
+        )
 
 
 class GridParser(object):
@@ -362,12 +539,33 @@ class GridParser(object):
 
         # numpy array of shape mapping_1d['nend1d'].shape. Will be populated
         # in _add_connection_node_pks()
-        self.connection_node_pks = None
+        self.node_pks = None
+
+    def get_node_pks(self, nodes):
+        """
+        get pks for the given node collection
+        :return:
+        """
+        seq_ids = self.mapping1d['nend1d'][nodes]
+        # template
+        _tmpl = np.zeros(seq_ids.shape, dtype='i4')
+
+        # with argsort
+        sort_idx = np.argsort(seq_ids)
+        idx = sort_idx[np.searchsorted(
+            seq_ids,
+            self.id_mapper.id_mapping[
+                self.id_mapper.obj_slices['v2_connection_nodes']]['seq_id'],
+            sorter=sort_idx)]
+
+        _tmpl[idx] = self.id_mapper.id_mapping[
+            self.id_mapper.obj_slices['v2_connection_nodes']]['pk']
+        return _tmpl
 
     def _add_connection_node_pks(self):
 
         # pk template
-        self.connection_node_pks = np.zeros(
+        self.node_pks = np.zeros(
             self.mapping1d['nend1d'].shape, dtype='i4'
         )
 
@@ -379,41 +577,8 @@ class GridParser(object):
                 self.id_mapper.obj_slices['v2_connection_nodes']]['seq_id'],
             sorter=sort_idx)]
 
-        self.connection_node_pks[idx] = self.id_mapper.id_mapping[
+        self.node_pks[idx] = self.id_mapper.id_mapping[
             self.id_mapper.obj_slices['v2_connection_nodes']]['pk']
-
-
-    def _add_line_content(self):
-        """
-        applies only for 1d
-        :return:
-        """
-
-        # TODO channel might be different
-        LINE_TYPES = [
-            constants.TYPE_V2_PIPE, constants.TYPE_V2_CHANNEL,
-            constants.TYPE_V2_CULVERT,
-            constants.TYPE_V2_ORIFICE, constants.TYPE_V2_WEIR]
-
-
-        # pk template
-        lik_all = self.lines.get_values('lik')
-        lik_1d = self.lines.get_values('lik', '1D_all')
-
-        self.line_content_pk = np.zeros(lik_all.shape, dtype='i4')
-        self.line_content_type = np.zeros(lik_all.shape, dtype='U32')
-
-        sort_idx = np.argsort(lik_1d)
-
-        for line in LINE_TYPES:
-            mapper_idx = self.id_mapper.obj_slices.get(line)
-            if mapper_idx is None:
-                continue
-            seq_ids = self.id_mapper.id_mapping[mapper_idx]['seq_id']
-            idx = sort_idx[np.searchsorted(lik_1d, seq_ids, sorter=sort_idx)]
-            self.line_content_pk[idx] = self.id_mapper.id_mapping[mapper_idx]['pk']
-            self.line_content_type[idx] = self.id_mapper.id_mapping[mapper_idx]['obj_name']
-
 
 
     def _get_dt(self, block_name):
@@ -478,7 +643,9 @@ class GridParser(object):
         self.nodes = Nodes(self._nodes, self.meta)
 
         if self.id_mapper:
+            # TODO maybe not the right spot to call these functions
             self._add_connection_node_pks()
+            self.lines.add_1d_object_info(self.id_mapper)
 
     def seek_file(self, f, section):
         """
@@ -507,17 +674,34 @@ class GridParser(object):
         if record_arr[check_str] != check_number:
             raise NotConsistentException("{}".format(check_number))
 
-    def get_line_coords(self, slice_name='', target_epsg_code='28992'):
+    def get_line_coords_by_slice(self, slice_name='', target_epsg_code='28992'):
         if slice_name and slice_name not in self.lines.SLICE_NAMES:
             logger.error("[-] Slice  name {} does not exist".format(slice_name))
             return
-        nodes_a, nodes_b = self.lines.get_values('line', slice_name)
+        nodes = self.lines.get_values('line', slice_name)
         if target_epsg_code != self.epsg_code:
             node_coords = self.nodes.get_reprojected(
                 self.epsg_code, target_epsg_code).T
         else:
             node_coords = self.nodes.get_all().T
-        return node_coords[nodes_a], node_coords[nodes_b]
+        return node_coords[nodes[0]], node_coords[nodes[1]]
+
+    def get_line_coords_by_mask(self, mask_name='', target_epsg_code='28992'):
+        # if slice_name and slice_name not in self.lines.SLICE_NAMES:
+        #     logger.error("[-] Slice  name {} does not exist".format(slice_name))
+        #     return
+        nodes = self.lines.get_by_mask(mask_name)
+        # nodes_a_coords_x = self.nodes.get_values('x')[nodes[0]]
+        # nodes_a_coords_y = self.nodes.get_values('y')[nodes[0]]
+        # nodes_b_coords_x = self.nodes.get_values('x')[nodes[1]]
+        # nodes_b_coords_y = self.nodes.get_values('y')[nodes[1]]
+
+        if target_epsg_code != self.epsg_code:
+            node_coords = self.nodes.get_reprojected(
+                self.epsg_code, target_epsg_code).T
+        else:
+            node_coords = self.nodes.get_all().T
+        return node_coords[nodes[0]], node_coords[nodes[1]]
 
     def create_node_shape(self, slice='', target_epsg_code='28992'):
 
@@ -567,7 +751,7 @@ class GridParser(object):
             node_coords = self.nodes.get_all().T
 
         seq_ids = self.mapping1d['nend1d'][self.nodes.slices['1D_all']]
-        node_pks = self.connection_node_pks[self.nodes.slices['1D_all']]
+        node_pks = self.node_pks[self.nodes.slices['1D_all']]
 
         for i in xrange(cnt):
             nod_id = start_id + i
@@ -581,7 +765,40 @@ class GridParser(object):
             feature.SetField("con_nod_pk", int(node_pks[i]))
             layer.CreateFeature(feature)
 
-    def create_line_shape(self, slice='', target_epsg_code='28992'):
+    def save_line_data(self, output_format='shapefile', slice='', target_epsg_code='28992'):
+        # TODO add other formats like HDF5
+        func_dict = {
+            'shapefile': '_create_line_shape',
+            'hdf5': '_create_line_hdf5'
+        }
+
+        func = func_dict.get(output_format)
+        getattr(self, func)(slice, target_epsg_code)
+
+    def _collect_line_data(self, slice):
+        nodes = self.lines.get_values('line', slice)[:,]
+        return {
+            'nodes': nodes,
+            'nodes_a': nodes[0],
+            'nodes_b': nodes[1],
+            'node_pks_a': self.get_node_pks(nodes[0]),
+            # node_pks_b': self.get_node_pks(nodes_b)
+            'line_type_int': self.lines.get_values('kcu', slice),
+            'seq_id': self.lines.get_values('lik', slice),
+            'content_type': self.lines.get_values('content_type', slice),
+            'content_pk': self.lines.get_values('content_pk', slice)
+        }
+
+    def _create_line_hdf5(self, slice='', target_epsg_code='28992'):
+
+        # TODO clear all offset issues!!! like this only slices work,
+        # otherwise we have to do [1:] basically everywhere
+        data = self._collect_line_data(slice)
+        node_coords_a, node_coords_b= self.get_line_coords_by_slice(slice, target_epsg_code)
+        data.update({'node_coords_a': node_coords_a, 'node_coords_b': node_coords_b})
+        # TODO create dataset or group or whatever
+
+    def _create_line_shape(self, slice='', target_epsg_code='28992'):
 
         kcu_dict = KCUDescriptor()
         geomtype = 0
@@ -598,27 +815,27 @@ class GridParser(object):
             sr,
             geomtype
         )
-
-        layer.CreateField(ogr.FieldDefn("link_id",
-                                        DATASOURCE_FIELD_TYPE['int']))
-        layer.CreateField(ogr.FieldDefn("kcu",
-                                        DATASOURCE_FIELD_TYPE['int']))
-        layer.CreateField(ogr.FieldDefn("node_a",
-                                        DATASOURCE_FIELD_TYPE['int']))
-        layer.CreateField(ogr.FieldDefn("node_b",
-                                        DATASOURCE_FIELD_TYPE['int']))
-        layer.CreateField(ogr.FieldDefn("kcu_descr",
-                                        DATASOURCE_FIELD_TYPE['str']))
-        layer.CreateField(ogr.FieldDefn("content_type",
-                                        DATASOURCE_FIELD_TYPE['str']))
-        # layer.CreateField(ogr.FieldDefn("object_id",
-        #                                 DATASOURCE_FIELD_TYPE['int']))
-        layer.CreateField(ogr.FieldDefn("seq_id",
-                                        DATASOURCE_FIELD_TYPE['int']))
+        fields = OrderedDict([
+            ('link_id', 'int'),
+            ('kcu', 'int'),
+            ('kcu_descr', 'str'),
+            ('node_a', 'int'),
+            ('node_b', 'int'),
+            ('node_a_pk', 'int'),
+            ('node_b_pk', 'int'),
+            ('cont_type', 'str'),
+            ('cont_pk', 'int'),
+            ('seq_id', 'int')
+        ])
+        for field_name, field_type in fields.iteritems():
+            layer.CreateField(
+                ogr.FieldDefn(
+                    field_name, DATASOURCE_FIELD_TYPE[field_type]
+                )
+            )
         _definition = layer.GetLayerDefn()
 
         # all nodes
-        start_id = 1
         cnt = start_id = self.meta['linall'][0] - 1
 
         # process a subset of nodes
@@ -632,51 +849,49 @@ class GridParser(object):
             cnt = getattr(self.lines, 'count_{}'.format(slice))
             start_id = self.lines.slices[slice].start
 
-        node_a, node_b = self.get_line_coords(slice, target_epsg_code)
-        nodes = self.lines.get_values('line')[:, 1:]
-        # nodes = self.lines.get_values('line')[:, 1:]
-        # node_coords_a = self.nodes.get_slice().T[nodes[0]]
-        # node_coords_b = self.nodes.get_slice().T[nodes[1]]
-        line_type_int = self.lines.get_values('kcu')[1:]
-        seq_id = self.lines.get_values('lik')[1:]
+        # TODO clear all offset issues!!! like this only slices work,
+        # otherwise we have to do [1:] basically everywhere
+
+        node_coords_a, node_coords_b= self.get_line_coords_by_slice(slice, target_epsg_code)
+
+        nodes = self.lines.get_values('line', slice)[:,]
+        nodes_a = nodes[0]
+        nodes_b = nodes[1]
+        node_pks_a = self.get_node_pks(nodes_a)
+        # node_pks_b = self.get_node_pks(nodes_b)
+        line_type_int = self.lines.get_values('kcu', slice)
+        seq_id = self.lines.get_values('lik', slice)
+        content_type = self.lines.get_values('content_type', slice)
+        content_pk = self.lines.get_values('content_pk', slice)
 
         for i in xrange(cnt):
             line_id = start_id + i
             line = ogr.Geometry(ogr.wkbLineString)
-            line.AddPoint(node_a[i][0], node_a[i][1])
-            line.AddPoint(node_b[i][0], node_b[i][1])
-            # line.AddPoint(line_coords[i][0], node_coords_a[i][1])
-            # line.AddPoint(node_coords_b[i][0], node_coords_b[i][1])
+            # line.AddPoint(node_a[i][0], node_a[i][1])
+            # line.AddPoint(node_b[i][0], node_b[i][1])
+            line.AddPoint(node_coords_a[i][0], node_coords_a[i][1])
+            line.AddPoint(node_coords_b[i][0], node_coords_b[i][1])
             feature = ogr.Feature(_definition)
             feature.SetGeometry(line)
             feature.SetField("link_id", int(line_id))
             feature.SetField("kcu", int(line_type_int[i]))
-            feature.SetField("node_a", int(nodes[0][i]))
-            feature.SetField("node_b", int(nodes[1][i]))
+            feature.SetField("node_a", int(nodes_a[i]))
+            feature.SetField("node_b", int(nodes_b[i]))
+            feature.SetField("node_a_pk", int(node_pks_a[i]))
+            # feature.SetField("node_b_pk", int(node_pks_b[i]))
             kcu_descr = ''
             try:
                 kcu_descr = kcu_dict[int(line_type_int[i])]
             except KeyError:
                 pass
             feature.SetField("kcu_descr", kcu_descr)
-            feature.SetField("content_type",)
-            # feature.SetField("object_id", )
+            feature.SetField("cont_type", str(content_type[i]))
+            feature.SetField("cont_pk", int(content_pk[i]))
             feature.SetField("seq_id", int(seq_id[[i]]))
             layer.CreateFeature(feature)
 
-            #   van 1d rekenpunten naar 1d object (bv is het een channel etc)
-#          'nod1d' --> node index --> node x/y --> geom
-#          'nod1d' --> node index --> nend1d --> seq id
-#           array seq --> pk ontbreekt nog
-#
-#
-#   van alle punten en linen naar geometry
-#          afhangelijk van slice, bv
-#   def get_line_geom(self, '1D_bounds'):
-#        nodes = self.lines[1D_bounds]
-#        xy = self.nodes[nodes]
-#
-#
+
+
 
 #   breslocaties --> see LineKcuFilters
 #   structures --> see LineKcuFilters
@@ -732,6 +947,10 @@ class IdMapper(object):
         self.obj_slices = None
         self._process_id_mapping(id_mapping_dict)
         self._define_id_obj_slices()
+
+    def get(self, object_name):
+        idx = self.obj_slices[object_name]
+        return self.id_mapping[idx]
 
     def _process_id_mapping(self, id_mapping_dict):
         """
