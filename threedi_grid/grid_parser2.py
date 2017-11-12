@@ -244,23 +244,28 @@ class BaseGridObject:
         """
         sets the count for each slice on the instance, e.g self.count_2D_open_water
         """
-        for n in self.SLICE_NAMES:
-            setattr(
-                self,
-                'count_{}'.format(n),
-                self.filters[n].stop - self.filters[n].start
-            )
+        for n in self.filters:
+            v = self.filters[n]
+            is_slice = hasattr(v, 'start')
+            if is_slice:
+                cnt = v.stop - v.start
+            else:
+                # TODO boolean mask does not work for filter 'structures'
+                cnt = v[0].size
+            setattr(self, 'count_{}'.format(n), cnt)
 
     def _set_bool_attr(self):
         """
         sets the truth value for each slice on the instance, e.g self.has_2D_open_water
         """
-        for n in self.SLICE_NAMES:
-            setattr(
-                self,
-                'has_{}'.format(n),
-                self.filters[n].stop > self.filters[n].start
-            )
+        for n in self.filters:
+            v = self.filters[n]
+            is_slice = hasattr(v, 'start')
+            if is_slice:
+                truth_value = v.stop > v.start
+            else:
+                truth_value = v[0].size > 0
+            setattr(self, 'has_{}'.format(n), truth_value)
 
     @staticmethod
     def cond_add(start, length, length_next):
@@ -326,7 +331,7 @@ class Nodes(BaseGridObject):
         _filter = self.filters.get(filter_name, None)
         if _filter is None:
             _filter = slice(
-                self.starts_at, self._meta['nodall'][0] - 1
+                self.starts_at, self._meta['nodall'][0]
             )
 
         selection = OrderedDict()
@@ -334,7 +339,7 @@ class Nodes(BaseGridObject):
             try:
                 selection[n] = self._array[n][_filter]
             except ValueError:
-                selection[n] = getattr(self, n)[self.starts_at:][_filter]
+                selection[n] = getattr(self, n)[_filter]
         return selection
 
     # def get_slice(self, slice_name, stack=True):
@@ -467,7 +472,7 @@ class Lines(BaseGridObject):
                 else:
                     selection[n] = self._array[n][_filter]
             except ValueError:
-                selection[n] = getattr(self, n)[self.starts_at:][_filter]
+                selection[n] = getattr(self, n)[:]
         return selection
 
     def add_1d_object_info(self, id_mapper):
@@ -660,7 +665,7 @@ class GridParser(object):
         self.pumps['nodp1d'][:] -= 1
         # references to node index from fortran point of view starting with 1.
         # To integrate flawlessly correct here
-        self._lines['line'][:] -= 1
+        self._lines['line'][:,] -= 1
         # TODO check if we still need this
         # self.line_filters = LineKcuFilters(self._lines)
         self.lines = Lines(self._lines, self.meta)
@@ -698,24 +703,25 @@ class GridParser(object):
         if record_arr[check_str] != check_number:
             raise NotConsistentException("{}".format(check_number))
 
-    def get_line_coords(self, method_type, name, target_epsg_code='28992'):
-        if method_type == 'get_slice':
-            if name and name not in self.lines.SLICE_NAMES:
-                logger.error("[-] Slice  name {} does not exist".format(name))
-                return
-            nodes = self.lines.get_values('line', name)
+    # def get_line_coords(self, method_type, name, target_epsg_code='28992'):
+    #     # if method_type == 'get_slice':
+    #     #     if name and name not in self.lines.SLICE_NAMES:
+    #     #         logger.error("[-] Slice  name {} does not exist".format(name))
+    #     #         return
+    #     #     nodes = self.lines.get_values('line', name)
+    #     #
+    #     # elif method_type == 'get_by_filter':
+    #     #     # TODO validation
+    #     #     res = self.lines.get_by_filter(name, 'line')
+    #     #     nodes = res.values()
+    #
+    #     # if target_epsg_code != self.epsg_code:
+    #     #     node_coords = self.nodes.get_reprojected(
+    #     #         self.epsg_code, target_epsg_code).T        else:
+    #     node_coords = np.vstack(self.nodes.get('x,y')).T
+    #     coords = node_coords.values().T
 
-        elif method_type == 'get_by_filter':
-            # TODO validation
-            res = self.lines.get_by_filter(name, 'line')
-            nodes = res.values()
-
-        if target_epsg_code != self.epsg_code:
-            node_coords = self.nodes.get_reprojected(
-                self.epsg_code, target_epsg_code).T
-        else:
-            node_coords = self.nodes.get_all().T
-        return node_coords[nodes[0]], node_coords[nodes[1]]
+        # return node_coords[coords[0]], node_coords[coords[1]]
 
     def create_node_shape(self, slice='', target_epsg_code='28992'):
 
@@ -779,7 +785,7 @@ class GridParser(object):
             feature.SetField("con_nod_pk", int(node_pks[i]))
             layer.CreateFeature(feature)
 
-    def save_line_data(self, output_format='shapefile', slice='', target_epsg_code='28992'):
+    def save_line_data(self, output_format='shapefile', filter_name='', target_epsg_code='28992'):
         # TODO add other formats like HDF5
         func_dict = {
             'shapefile': '_create_line_shape',
@@ -787,32 +793,33 @@ class GridParser(object):
         }
 
         func = func_dict.get(output_format)
-        getattr(self, func)(slice, target_epsg_code)
+        getattr(self, func)(filter_name, target_epsg_code)
 
-    def _collect_line_data(self, slice):
-        nodes = self.lines.get_values('line', slice)
-        return {
-            'nodes': nodes,
-            'nodes_a': nodes[0],
-            'nodes_b': nodes[1],
-            'node_pks_a': self.get_node_pks(nodes[0]),
-            # node_pks_b': self.get_node_pks(nodes_b)
-            'line_type_int': self.lines.get_values('kcu', slice),
-            'seq_id': self.lines.get_values('lik', slice),
-            'content_type': self.lines.get_values('content_type', slice),
-            'content_pk': self.lines.get_values('content_pk', slice)
-        }
+    # def _collect_line_data(self, slice):
+    #     nodes = self.lines.get_values('line', slice)
+    #     return {
+    #         'nodes': nodes,
+    #         'nodes_a': nodes[0],
+    #         'nodes_b': nodes[1],
+    #         'node_pks_a': self.get_node_pks(nodes[0]),
+    #         # node_pks_b': self.get_node_pks(nodes_b)
+    #         'line_type_int': self.lines.get_values('kcu', slice),
+    #         'seq_id': self.lines.get_values('lik', slice),
+    #         'content_type': self.lines.get_values('content_type', slice),
+    #         'content_pk': self.lines.get_values('content_pk', slice)
+    #     }
 
     def _create_line_hdf5(self, slice='', target_epsg_code='28992'):
 
         # TODO clear all offset issues!!! like this only slices work,
         # otherwise we have to do [1:] basically everywhere
-        data = self._collect_line_data(slice)
-        node_coords_a, node_coords_b= self.get_line_coords('get_slice', slice, target_epsg_code)
-        data.update({'node_coords_a': node_coords_a, 'node_coords_b': node_coords_b})
+        # data = self._collect_line_data(slice)
+        # node_coords_a, node_coords_b= self.get_line_coords('get_slice', slice, target_epsg_code)
+        # data.update({'node_coords_a': node_coords_a, 'node_coords_b': node_coords_b})
         # TODO create dataset or group or whatever
+        pass
 
-    def _create_line_shape(self, slice='', target_epsg_code='28992'):
+    def _create_line_shape(self, filter_name='', target_epsg_code='28992'):
 
         kcu_dict = KCUDescriptor()
         geomtype = 0
@@ -853,8 +860,8 @@ class GridParser(object):
         cnt = start_id = self.meta['linall'][0] - 1
 
         # process a subset of nodes
-        if slice:
-            if not getattr(self.lines, 'has_{}'.format(slice)):
+        if filter_name:
+            if not getattr(self.lines, 'has_{}'.format(filter_name)):
                 logger.error(
                     '[*] Can not create shape, model does not have {}'.format(
                         slice)
@@ -876,16 +883,29 @@ class GridParser(object):
         # seq_id = self.lines.get_values('lik', slice)
         # content_type = self.lines.get_values('content_type', slice)
         # content_pk = self.lines.get_values('content_pk', slice)
-        filtered_lines = self.lines.get_by_filter('short_crested_structure')
-        node_coords_a, node_coords_b= self.get_line_coords('get_by_filter', 'short_crested_structure', target_epsg_code)
+        # filtered_lines = self.lines.get_by_filter('short_crested_structure')
+        # node_coords_a, node_coords_b= self.get_line_coords('get_by_filter', 'short_crested_structure', target_epsg_code)
         # node_pks_a = self.get_node_pks(filtered_lines['node_a'])
         # node_pks_b = self.get_node_pks(filtered_lines['node_b'])
 
-        node_pks_a = self.node_pks(filtered_lines['node_a'])
-        node_pks_b = self.node_pks(filtered_lines['node_b'])
+        line_data = self.lines.get(filter_name=filter_name)
+        node_a = line_data['line'][0]
+        # node_a -= 1
+        node_b = line_data['line'][1]
+        # node_b -= 1
+        coords = self.nodes.get('x,y')
 
+        if target_epsg_code != self.epsg_code:
+            node_coords = np.vstack(transform_xys(self.epsg_code, target_epsg_code, coords['x'], coords['y'])).T
+        else:
+            node_coords = np.vstack((coords['x'], coords['y'])).T
 
-        for i in xrange(56):
+        node_coords_a = node_coords[node_a]
+        node_coords_b = node_coords[node_b]
+        node_pks_a = self.nodes.content_pk[node_a]
+        node_pks_b = self.nodes.content_pk[node_b]
+
+        for i in xrange(cnt):
             line_id = start_id + i
             line = ogr.Geometry(ogr.wkbLineString)
             # line.AddPoint(node_a[i][0], node_a[i][1])
@@ -895,20 +915,20 @@ class GridParser(object):
             feature = ogr.Feature(_definition)
             feature.SetGeometry(line)
             feature.SetField("link_id", int(line_id))
-            feature.SetField("kcu", int(filtered_lines['kcu'][i]))
-            feature.SetField("node_a", int(filtered_lines['node_a'][i]))
-            feature.SetField("node_b", int(filtered_lines['node_b'][i]))
+            feature.SetField("kcu", int(line_data['kcu'][i]))
+            feature.SetField("node_a", int(node_a[i]))
+            feature.SetField("node_b", int(node_b[i]))
             feature.SetField("node_a_pk", int(node_pks_a[i]))
             feature.SetField("node_b_pk", int(node_pks_b[i]))
             kcu_descr = ''
             try:
-                kcu_descr = kcu_dict[int(filtered_lines['kcu'][i])]
+                kcu_descr = kcu_dict[int(line_data['kcu'][i])]
             except KeyError:
                 pass
             feature.SetField("kcu_descr", kcu_descr)
-            feature.SetField("cont_type", str(filtered_lines['content_type'][i]))
-            feature.SetField("cont_pk", int(filtered_lines['content_pk'][i]))
-            feature.SetField("seq_id", int(filtered_lines['lik'][[i]]))
+            feature.SetField("cont_type", str(line_data['content_type'][i]))
+            feature.SetField("cont_pk", int(line_data['content_pk'][i]))
+            feature.SetField("seq_id", int(line_data['lik'][[i]]))
             layer.CreateFeature(feature)
         # for i in xrange(cnt):
         #     line_id = start_id + i
