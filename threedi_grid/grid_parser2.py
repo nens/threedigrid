@@ -217,22 +217,28 @@ class BaseGridObject:
     def __init__(self, array, meta):
         self._array = array
         self._meta = meta
-        self.slices = {}
+        self.starts_at = None  # 0 or 1 based array
+        self.filters = {}
 
     @property
-    def fields(self):
+    def _fields(self):
         return self._array.dtype.names
 
     @abstractmethod
-    def get_values(self):
+    def _custom_fields(self):
         pass
+
+    @property
+    def fields(self):
+        return self._fields + self._custom_fields
 
     @abstractmethod
-    def get_slice(self):
+    def get(self):
         pass
 
-    def get_all(self):
-        return self.get_slice()
+    @property
+    def available_filters(self):
+        return self.filters.keys()
 
     def _set_cnt_attr(self):
         """
@@ -242,7 +248,7 @@ class BaseGridObject:
             setattr(
                 self,
                 'count_{}'.format(n),
-                self.slices[n].stop - self.slices[n].start
+                self.filters[n].stop - self.filters[n].start
             )
 
     def _set_bool_attr(self):
@@ -253,7 +259,7 @@ class BaseGridObject:
             setattr(
                 self,
                 'has_{}'.format(n),
-                self.slices[n].stop > self.slices[n].start
+                self.filters[n].stop > self.filters[n].start
             )
 
     @staticmethod
@@ -262,7 +268,7 @@ class BaseGridObject:
         new_start = end + (1 if length_next > 0 else 0)
         return end, new_start
 
-    def _define_slices(self, start_value, check_value):
+    def _define_filters(self, start_value, check_value):
         """
         """
         names = self.THREEDICORE_NAMES + [0]
@@ -271,7 +277,7 @@ class BaseGridObject:
         start = start_value
         for i, p in enumerate(pairs):
             end, start_nxt = self.cond_add(start, p[0], p[1])
-            self.slices[self.SLICE_NAMES[i]] = slice(start, end)
+            self.filters[self.SLICE_NAMES[i]] = slice(start, end)
             start = start_nxt
 
         if end != check_value:
@@ -280,12 +286,9 @@ class BaseGridObject:
                     check_value, end)
             )
 
-    def _all(self, stack=True):
-        return self._pack_up([self._array[n][:] for n in self.fields], stack)
-
     def _pack_up(self, content, stack):
         if stack:
-            return np.vstack(content)
+            return np.vstack(tuple(content))
         return content
 
 
@@ -304,51 +307,100 @@ class Nodes(BaseGridObject):
     def __init__(self, array, meta):
 
         super(Nodes, self).__init__(array, meta)
-        self.slices = {}
-        self._define_slices(
-            start_value=0, check_value=self._meta['nodall'][0] - 1
+        self.filters = {}
+        self.starts_at = 0
+        self._define_filters(
+            start_value=self.starts_at,
+            check_value=self._meta['nodall'][0] - 1
         )
         self._set_bool_attr()
         self._set_cnt_attr()
+        self.content_pk = None
 
-    def get_slice(self, slice_name='', stack=True):
-        if slice_name:
+    def get(self, fields=None, filter_name=None):
+        _fields = set(self.fields)
+        if fields:
+            _fields = _fields.intersection(
+                set(fields.strip().split(','))
+            )
+        _filter = self.filters.get(filter_name, None)
+        if _filter is None:
+            _filter = slice(
+                self.starts_at, self._meta['nodall'][0] - 1
+            )
+
+        selection = OrderedDict()
+        for n in _fields:
             try:
-                k = self.slices[slice_name]
-            except KeyError:
-                logger.error(
-                    "[!] Could not get data for {}. Valid choices are {}".format(
-                        slice_name, self.SLICE_NAMES)
-                )
-                return
+                selection[n] = self._array[n][_filter]
+            except ValueError:
+                selection[n] = getattr(self, n)[self.starts_at:][_filter]
+        return selection
 
-            if not getattr(self, 'has_{}'.format(slice_name)):
-                logger.info('[*] Model does not have {}'.format(slice_name))
-                return
-            selection = [self._array[n][k] for n in self.fields]
-            return self._pack_up(selection, stack)
-        return self._all(stack)
+    # def get_slice(self, slice_name, stack=True):
+    #     try:
+    #         k = self.slices[slice_name]
+    #     except KeyError:
+    #         logger.error(
+    #             "[!] Could not get data for {}. Valid choices are {}".format(
+    #                 slice_name, self.SLICE_NAMES)
+    #         )
+    #         return
+    #
+    #     if not getattr(self, 'has_{}'.format(slice_name)):
+    #         logger.info('[*] Model does not have {}'.format(slice_name))
+    #         return
+    #     selection = [self._array[n][k] for n in self.fields]
+    #     return self._pack_up(selection, stack)
+    #
+    # def get_values(self, field_name, slice_name=''):
+    #     if field_name not in self.fields:
+    #         logger.error("[-] Field name {} does not exist".format(field_name))
+    #         return
+    #     if slice_name and slice_name not in self.SLICE_NAMES:
+    #         logger.error("[-] Slice  name {} does not exist".format(slice_name))
+    #         return
+    #
+    #     if not slice_name:
+    #         return self._array[field_name][self.starts_at:]
+    #     return self._array[field_name][self.slices[slice_name]]
+    #
+    # def get_reprojected(self, src_epsg_code, target_epsg_code, slice_name='',
+    #                     stack=True):
+    #     node_x = self.get_values('x', slice_name=slice_name)
+    #     node_y = self.get_values('y', slice_name=slice_name)
+    #     return self._pack_up(
+    #         transform_xys(src_epsg_code, target_epsg_code, node_x, node_y),
+    #         stack
+    #     )
 
-    def get_values(self, field_name, slice_name=''):
-        if field_name not in self.fields:
-            logger.error("[-] Field name {} does not exist".format(field_name))
-            return
-        if slice_name and slice_name not in self.SLICE_NAMES:
-            logger.error("[-] Slice  name {} does not exist".format(slice_name))
-            return
+    def add_node_pks(self, mapping1d, id_mapper):
 
-        if not slice_name:
-            return self._array[field_name]
-        return self._array[field_name][self.slices[slice_name]]
-
-    def get_reprojected(self, src_epsg_code, target_epsg_code, slice_name='',
-                        stack=True):
-        node_x = self.get_values('x', slice_name=slice_name)
-        node_y = self.get_values('y', slice_name=slice_name)
-        return self._pack_up(
-            transform_xys(src_epsg_code, target_epsg_code, node_x, node_y),
-            stack
+        # pk template
+        self.content_pk = np.zeros(
+            mapping1d['nend1d'].shape, dtype='i4'
         )
+
+        # with argsort
+        sort_idx = np.argsort(mapping1d['nend1d'])
+        idx = sort_idx[np.searchsorted(
+            mapping1d['nend1d'],
+            id_mapper.id_mapping[
+                id_mapper.obj_slices['v2_connection_nodes']]['seq_id'],
+            sorter=sort_idx)]
+
+        self.content_pk[idx] = id_mapper.id_mapping[
+            id_mapper.obj_slices['v2_connection_nodes']]['pk']
+
+    @property
+    def _custom_fields(self):
+        field_is_set = []
+        custom_field_names = ('content_pk',)
+        for fn in custom_field_names:
+            attr = getattr(self, fn)
+            if hasattr(attr, 'dtype'):
+                field_is_set.append(fn)
+        return tuple(field_is_set)
 
 
 class Lines(BaseGridObject):
@@ -370,6 +422,21 @@ class Lines(BaseGridObject):
     SLICE_NAMES = _NAMES.values()
     THREEDICORE_NAMES = _NAMES.keys()
 
+    def __init__(self, array, meta):
+
+        super(Lines, self).__init__(array, meta)
+        self.filters = {}
+        self.starts_at = 1
+        self._define_filters(
+            start_value=self.starts_at,
+            check_value=self._meta['linall'][0]
+        )
+        self._add_kcu_filters()
+        self._set_bool_attr()
+        self._set_cnt_attr()
+        self.content_pk = None
+        self.content_type = None
+
     @property
     def _custom_fields(self):
         field_is_set = []
@@ -380,69 +447,28 @@ class Lines(BaseGridObject):
                 field_is_set.append(fn)
         return tuple(field_is_set)
 
-    def __init__(self, array, meta):
+    def get(self, fields=None, filter_name=None):
+        _fields = set(self.fields)
+        if fields:
+            _fields = _fields.intersection(
+                set(fields.strip().split(','))
+            )
+        _filter = self.filters.get(filter_name, None)
+        if _filter is None:
+            _filter = slice(
+                self.starts_at, self._meta['linall'][0]
+            )
 
-        super(Lines, self).__init__(array, meta)
-        self.slices = {}
-        self._define_slices(
-            start_value=1, check_value=self._meta['linall'][0]
-        )
-        self._set_bool_attr()
-        self._set_cnt_attr()
-        # self.line = self._array['line'].T
-        # self.kcu = self._array['kcu']
-        # self.lik = self._array['lik']
-        self.content_pk = None
-        self.content_type = None
-        self._define_masks()
-
-    def get_values(self, field_name, slice_name=None):
-
-        if field_name not in self.fields and field_name not in self._custom_fields:
-            logger.error("[-] Field name {} does not exist".format(field_name))
-            return
-        if slice_name and slice_name not in self.SLICE_NAMES:
-            logger.error("[-] Slice  name {} does not exist".format(slice_name))
-            return
-        if not slice_name:
+        selection = OrderedDict()
+        for n in _fields:
             try:
-                return self._array[field_name]
-            except ValueError:
-                return getattr(self, field_name)
-        if slice_name and field_name == 'line':
-            return self._array[field_name][:, self.slices[slice_name]]
-        try:
-            return self._array[field_name][self.slices[slice_name]]
-        except ValueError:
-            _arr = getattr(self, field_name)
-            return _arr[self.slices[slice_name]]
-
-    def get_slice(self, slice_name='', stack=True):
-
-        if slice_name:
-            try:
-                k = self.slices[slice_name]
-            except KeyError:
-                logger.error(
-                    "[!] Could not get data for {}. Valid choices are {}".format(
-                        slice_name, self.SLICE_NAMES)
-                )
-                return
-
-            if not getattr(self, 'has_{}'.format(slice_name)):
-                logger.info('[*] Model does not have {}'.format(slice_name))
-                return
-
-            selection = []
-            for n in self.fields:
                 if n == 'line':
-                    selection.append(self._array[n][0, k])
-                    selection.append(self._array[n][1, k])
+                    selection[n] = self._array[n][:, _filter]
                 else:
-                    selection.append(self._array[n][k])
-
-            return self._pack_up(selection, stack)
-        return self._all(stack)
+                    selection[n] = self._array[n][_filter]
+            except ValueError:
+                selection[n] = getattr(self, n)[self.starts_at:][_filter]
+        return selection
 
     def add_1d_object_info(self, id_mapper):
         """
@@ -457,53 +483,69 @@ class Lines(BaseGridObject):
             constants.TYPE_V2_ORIFICE, constants.TYPE_V2_WEIR]
 
         # pk template
-        lik_all = self.get_values('lik')
-        lik_1d = self.get_values('lik', '1D_all')
+        lik_all = self.get('lik')
+        lik_1d = self.get('lik', '1D_all')
 
-        self.content_pk = np.zeros(lik_all.shape, dtype='i4')
-        self.content_type = np.zeros(lik_all.shape, dtype='U32')
-        _content_pk = np.zeros(lik_1d.shape, dtype='i4')
-        _content_type = np.zeros(lik_1d.shape, dtype='U32')
+        self.content_pk = np.zeros(lik_all['lik'].shape, dtype='i4')
+        self.content_type = np.zeros(lik_all['lik'].shape, dtype='U32')
+        _content_pk = np.zeros(lik_1d['lik'].shape, dtype='i4')
+        _content_type = np.zeros(lik_1d['lik'].shape, dtype='U32')
 
-        sort_idx = np.argsort(lik_1d)
+        sort_idx = np.argsort(lik_1d['lik'])
 
         for line in LINE_TYPES:
             mapper_idx = id_mapper.obj_slices.get(line)
             if mapper_idx is None:
                 continue
             seq_ids = id_mapper.id_mapping[mapper_idx]['seq_id']
-            idx = sort_idx[np.searchsorted(lik_1d, seq_ids, sorter=sort_idx)]
+            idx = sort_idx[np.searchsorted(lik_1d['lik'], seq_ids, sorter=sort_idx)]
             _content_pk[idx] = id_mapper.id_mapping[mapper_idx]['pk']
             _content_type[idx] = id_mapper.id_mapping[mapper_idx]['obj_name']
-        self.content_pk[self.slices['1D_all']] = _content_pk
-        self.content_type[self.slices['1D_all']] = _content_type
+        self.content_pk[self.filters['1D_all']] = _content_pk
+        self.content_type[self.filters['1D_all']] = _content_type
 
-    def _define_masks(self):
-        self._structure_mask = np.logical_or(
+    def _add_kcu_filters(self):
+        self.filters['structures'] = np.logical_or(
             self._array['kcu'] == 3,  self._array['kcu'] == 4)
 
-        self._long_crested_structure_mask = np.where(
+        self.filters['long_crested_structures'] = np.where(
             self._array['kcu'] == 3)
 
-        self._short_crested_structure_mask = np.where(
+        self.filters['short_crested_structures'] = np.where(
             self._array['kcu'] == 4)
 
-        self._2d_open_water_obstacles_mask = np.where(
+        self.filters['2d_open_water_obstacles'] = np.where(
             self._array['kcu'] == 101)
 
-        self._2d_open_water_obstacles_mask = np.where(
-            self._array['kcu'] == 101)
-
-        self._active_breach_mask = np.where(
+        self.filters['active_breach'] = np.where(
             self._array['kcu'] == 56)
 
-    def get_by_mask(self, mask_name='active_breach'):
-        mask = getattr(self, '_{}_mask'.format(mask_name))
-        return np.vstack(
-            (self._array['line'][0][mask],
-             self._array['line'][1][mask])
-        )
 
+    # def get_by_filter(self, filter_name='active_breach', fields=''):
+    #     mask = getattr(self, '_{}_mask'.format(filter_name))
+    #
+    #     _fields = set(self.fields + self._custom_fields)
+    #     if fields:
+    #         _fields = set([fields]).intersection(_fields)
+    #     selection = OrderedDict()
+    #     for n in _fields:
+    #         if n == 'line':
+    #             line_values = self.get_values(n)
+    #             selection['node_a'] = (line_values[0][mask])
+    #             selection['node_b'] = (line_values[1][mask])
+    #         else:
+    #             selection[n] = (self.get_values(n)[mask])
+    #     return selection
+
+    @property
+    def _custom_fields(self):
+        field_is_set = []
+        custom_field_names = ('content_pk', 'content_type')
+        for fn in custom_field_names:
+            attr = getattr(self, fn)
+            if hasattr(attr, 'dtype'):
+                field_is_set.append(fn)
+        return tuple(field_is_set)
 
 class GridParser(object):
 
@@ -546,6 +588,7 @@ class GridParser(object):
         get pks for the given node collection
         :return:
         """
+
         seq_ids = self.mapping1d['nend1d'][nodes]
         # template
         _tmpl = np.zeros(seq_ids.shape, dtype='i4')
@@ -561,25 +604,6 @@ class GridParser(object):
         _tmpl[idx] = self.id_mapper.id_mapping[
             self.id_mapper.obj_slices['v2_connection_nodes']]['pk']
         return _tmpl
-
-    def _add_connection_node_pks(self):
-
-        # pk template
-        self.node_pks = np.zeros(
-            self.mapping1d['nend1d'].shape, dtype='i4'
-        )
-
-        # with argsort
-        sort_idx = np.argsort(self.mapping1d['nend1d'])
-        idx = sort_idx[np.searchsorted(
-            self.mapping1d['nend1d'],
-            self.id_mapper.id_mapping[
-                self.id_mapper.obj_slices['v2_connection_nodes']]['seq_id'],
-            sorter=sort_idx)]
-
-        self.node_pks[idx] = self.id_mapper.id_mapping[
-            self.id_mapper.obj_slices['v2_connection_nodes']]['pk']
-
 
     def _get_dt(self, block_name):
         """
@@ -644,7 +668,7 @@ class GridParser(object):
 
         if self.id_mapper:
             # TODO maybe not the right spot to call these functions
-            self._add_connection_node_pks()
+            self.nodes.add_node_pks(self.mapping1d, self.id_mapper)
             self.lines.add_1d_object_info(self.id_mapper)
 
     def seek_file(self, f, section):
@@ -674,27 +698,17 @@ class GridParser(object):
         if record_arr[check_str] != check_number:
             raise NotConsistentException("{}".format(check_number))
 
-    def get_line_coords_by_slice(self, slice_name='', target_epsg_code='28992'):
-        if slice_name and slice_name not in self.lines.SLICE_NAMES:
-            logger.error("[-] Slice  name {} does not exist".format(slice_name))
-            return
-        nodes = self.lines.get_values('line', slice_name)
-        if target_epsg_code != self.epsg_code:
-            node_coords = self.nodes.get_reprojected(
-                self.epsg_code, target_epsg_code).T
-        else:
-            node_coords = self.nodes.get_all().T
-        return node_coords[nodes[0]], node_coords[nodes[1]]
+    def get_line_coords(self, method_type, name, target_epsg_code='28992'):
+        if method_type == 'get_slice':
+            if name and name not in self.lines.SLICE_NAMES:
+                logger.error("[-] Slice  name {} does not exist".format(name))
+                return
+            nodes = self.lines.get_values('line', name)
 
-    def get_line_coords_by_mask(self, mask_name='', target_epsg_code='28992'):
-        # if slice_name and slice_name not in self.lines.SLICE_NAMES:
-        #     logger.error("[-] Slice  name {} does not exist".format(slice_name))
-        #     return
-        nodes = self.lines.get_by_mask(mask_name)
-        # nodes_a_coords_x = self.nodes.get_values('x')[nodes[0]]
-        # nodes_a_coords_y = self.nodes.get_values('y')[nodes[0]]
-        # nodes_b_coords_x = self.nodes.get_values('x')[nodes[1]]
-        # nodes_b_coords_y = self.nodes.get_values('y')[nodes[1]]
+        elif method_type == 'get_by_filter':
+            # TODO validation
+            res = self.lines.get_by_filter(name, 'line')
+            nodes = res.values()
 
         if target_epsg_code != self.epsg_code:
             node_coords = self.nodes.get_reprojected(
@@ -776,7 +790,7 @@ class GridParser(object):
         getattr(self, func)(slice, target_epsg_code)
 
     def _collect_line_data(self, slice):
-        nodes = self.lines.get_values('line', slice)[:,]
+        nodes = self.lines.get_values('line', slice)
         return {
             'nodes': nodes,
             'nodes_a': nodes[0],
@@ -794,7 +808,7 @@ class GridParser(object):
         # TODO clear all offset issues!!! like this only slices work,
         # otherwise we have to do [1:] basically everywhere
         data = self._collect_line_data(slice)
-        node_coords_a, node_coords_b= self.get_line_coords_by_slice(slice, target_epsg_code)
+        node_coords_a, node_coords_b= self.get_line_coords('get_slice', slice, target_epsg_code)
         data.update({'node_coords_a': node_coords_a, 'node_coords_b': node_coords_b})
         # TODO create dataset or group or whatever
 
@@ -852,19 +866,26 @@ class GridParser(object):
         # TODO clear all offset issues!!! like this only slices work,
         # otherwise we have to do [1:] basically everywhere
 
-        node_coords_a, node_coords_b= self.get_line_coords_by_slice(slice, target_epsg_code)
+        # node_coords_a, node_coords_b= self.get_line_coords('get_slice', slice, target_epsg_code)
+        # nodes = self.lines.get_values('line', slice)
+        # nodes_a = nodes[0]
+        # nodes_b = nodes[1]
+        # node_pks_a = self.get_node_pks(nodes_a)
+        # # node_pks_b = self.get_node_pks(nodes_b)
+        # line_type_int = self.lines.get_values('kcu', slice)
+        # seq_id = self.lines.get_values('lik', slice)
+        # content_type = self.lines.get_values('content_type', slice)
+        # content_pk = self.lines.get_values('content_pk', slice)
+        filtered_lines = self.lines.get_by_filter('short_crested_structure')
+        node_coords_a, node_coords_b= self.get_line_coords('get_by_filter', 'short_crested_structure', target_epsg_code)
+        # node_pks_a = self.get_node_pks(filtered_lines['node_a'])
+        # node_pks_b = self.get_node_pks(filtered_lines['node_b'])
 
-        nodes = self.lines.get_values('line', slice)[:,]
-        nodes_a = nodes[0]
-        nodes_b = nodes[1]
-        node_pks_a = self.get_node_pks(nodes_a)
-        # node_pks_b = self.get_node_pks(nodes_b)
-        line_type_int = self.lines.get_values('kcu', slice)
-        seq_id = self.lines.get_values('lik', slice)
-        content_type = self.lines.get_values('content_type', slice)
-        content_pk = self.lines.get_values('content_pk', slice)
+        node_pks_a = self.node_pks(filtered_lines['node_a'])
+        node_pks_b = self.node_pks(filtered_lines['node_b'])
 
-        for i in xrange(cnt):
+
+        for i in xrange(56):
             line_id = start_id + i
             line = ogr.Geometry(ogr.wkbLineString)
             # line.AddPoint(node_a[i][0], node_a[i][1])
@@ -874,21 +895,46 @@ class GridParser(object):
             feature = ogr.Feature(_definition)
             feature.SetGeometry(line)
             feature.SetField("link_id", int(line_id))
-            feature.SetField("kcu", int(line_type_int[i]))
-            feature.SetField("node_a", int(nodes_a[i]))
-            feature.SetField("node_b", int(nodes_b[i]))
+            feature.SetField("kcu", int(filtered_lines['kcu'][i]))
+            feature.SetField("node_a", int(filtered_lines['node_a'][i]))
+            feature.SetField("node_b", int(filtered_lines['node_b'][i]))
             feature.SetField("node_a_pk", int(node_pks_a[i]))
-            # feature.SetField("node_b_pk", int(node_pks_b[i]))
+            feature.SetField("node_b_pk", int(node_pks_b[i]))
             kcu_descr = ''
             try:
-                kcu_descr = kcu_dict[int(line_type_int[i])]
+                kcu_descr = kcu_dict[int(filtered_lines['kcu'][i])]
             except KeyError:
                 pass
             feature.SetField("kcu_descr", kcu_descr)
-            feature.SetField("cont_type", str(content_type[i]))
-            feature.SetField("cont_pk", int(content_pk[i]))
-            feature.SetField("seq_id", int(seq_id[[i]]))
+            feature.SetField("cont_type", str(filtered_lines['content_type'][i]))
+            feature.SetField("cont_pk", int(filtered_lines['content_pk'][i]))
+            feature.SetField("seq_id", int(filtered_lines['lik'][[i]]))
             layer.CreateFeature(feature)
+        # for i in xrange(cnt):
+        #     line_id = start_id + i
+        #     line = ogr.Geometry(ogr.wkbLineString)
+        #     # line.AddPoint(node_a[i][0], node_a[i][1])
+        #     # line.AddPoint(node_b[i][0], node_b[i][1])
+        #     line.AddPoint(node_coords_a[i][0], node_coords_a[i][1])
+        #     line.AddPoint(node_coords_b[i][0], node_coords_b[i][1])
+        #     feature = ogr.Feature(_definition)
+        #     feature.SetGeometry(line)
+        #     feature.SetField("link_id", int(line_id))
+        #     feature.SetField("kcu", int(line_type_int[i]))
+        #     feature.SetField("node_a", int(nodes_a[i]))
+        #     feature.SetField("node_b", int(nodes_b[i]))
+        #     feature.SetField("node_a_pk", int(node_pks_a[i]))
+        #     # feature.SetField("node_b_pk", int(node_pks_b[i]))
+        #     kcu_descr = ''
+        #     try:
+        #         kcu_descr = kcu_dict[int(line_type_int[i])]
+        #     except KeyError:
+        #         pass
+        #     feature.SetField("kcu_descr", kcu_descr)
+        #     feature.SetField("cont_type", str(content_type[i]))
+        #     feature.SetField("cont_pk", int(content_pk[i]))
+        #     feature.SetField("seq_id", int(seq_id[[i]]))
+        #     layer.CreateFeature(feature)
 
 
 
