@@ -242,7 +242,7 @@ class BaseGridObject:
 
     def _set_cnt_attr(self):
         """
-        sets the count for each slice on the instance, e.g self.count_2D_open_water
+        sets the count for each filter on the instance, e.g self.count_2D_open_water
         """
         for n in self.filters:
             v = self.filters[n]
@@ -341,43 +341,6 @@ class Nodes(BaseGridObject):
             except ValueError:
                 selection[n] = getattr(self, n)[_filter]
         return selection
-
-    # def get_slice(self, slice_name, stack=True):
-    #     try:
-    #         k = self.slices[slice_name]
-    #     except KeyError:
-    #         logger.error(
-    #             "[!] Could not get data for {}. Valid choices are {}".format(
-    #                 slice_name, self.SLICE_NAMES)
-    #         )
-    #         return
-    #
-    #     if not getattr(self, 'has_{}'.format(slice_name)):
-    #         logger.info('[*] Model does not have {}'.format(slice_name))
-    #         return
-    #     selection = [self._array[n][k] for n in self.fields]
-    #     return self._pack_up(selection, stack)
-    #
-    # def get_values(self, field_name, slice_name=''):
-    #     if field_name not in self.fields:
-    #         logger.error("[-] Field name {} does not exist".format(field_name))
-    #         return
-    #     if slice_name and slice_name not in self.SLICE_NAMES:
-    #         logger.error("[-] Slice  name {} does not exist".format(slice_name))
-    #         return
-    #
-    #     if not slice_name:
-    #         return self._array[field_name][self.starts_at:]
-    #     return self._array[field_name][self.slices[slice_name]]
-    #
-    # def get_reprojected(self, src_epsg_code, target_epsg_code, slice_name='',
-    #                     stack=True):
-    #     node_x = self.get_values('x', slice_name=slice_name)
-    #     node_y = self.get_values('y', slice_name=slice_name)
-    #     return self._pack_up(
-    #         transform_xys(src_epsg_code, target_epsg_code, node_x, node_y),
-    #         stack
-    #     )
 
     def add_node_pks(self, mapping1d, id_mapper):
 
@@ -524,23 +487,6 @@ class Lines(BaseGridObject):
 
         self.filters['active_breach'] = np.where(
             self._array['kcu'] == 56)[0]
-
-
-    # def get_by_filter(self, filter_name='active_breach', fields=''):
-    #     mask = getattr(self, '_{}_mask'.format(filter_name))
-    #
-    #     _fields = set(self.fields + self._custom_fields)
-    #     if fields:
-    #         _fields = set([fields]).intersection(_fields)
-    #     selection = OrderedDict()
-    #     for n in _fields:
-    #         if n == 'line':
-    #             line_values = self.get_values(n)
-    #             selection['node_a'] = (line_values[0][mask])
-    #             selection['node_b'] = (line_values[1][mask])
-    #         else:
-    #             selection[n] = (self.get_values(n)[mask])
-    #     return selection
 
     @property
     def _custom_fields(self):
@@ -796,27 +742,8 @@ class GridParser(object):
         func = func_dict.get(output_format)
         getattr(self, func)(filter_name, file_name=file_name, target_epsg_code=target_epsg_code)
 
-    # def _collect_line_data(self, slice):
-    #     nodes = self.lines.get_values('line', slice)
-    #     return {
-    #         'nodes': nodes,
-    #         'nodes_a': nodes[0],
-    #         'nodes_b': nodes[1],
-    #         'node_pks_a': self.get_node_pks(nodes[0]),
-    #         # node_pks_b': self.get_node_pks(nodes_b)
-    #         'line_type_int': self.lines.get_values('kcu', slice),
-    #         'seq_id': self.lines.get_values('lik', slice),
-    #         'content_type': self.lines.get_values('content_type', slice),
-    #         'content_pk': self.lines.get_values('content_pk', slice)
-    #     }
-
     def _create_line_hdf5(self, slice='', target_epsg_code='28992'):
 
-        # TODO clear all offset issues!!! like this only slices work,
-        # otherwise we have to do [1:] basically everywhere
-        # data = self._collect_line_data(slice)
-        # node_coords_a, node_coords_b= self.get_line_coords('get_slice', slice, target_epsg_code)
-        # data.update({'node_coords_a': node_coords_a, 'node_coords_b': node_coords_b})
         # TODO create dataset or group or whatever
         pass
 
@@ -858,7 +785,6 @@ class GridParser(object):
         _definition = layer.GetLayerDefn()
 
         link_ids = None
-        # process a subset of nodes
         if filter_name:
             if not getattr(self.lines, 'has_{}'.format(filter_name)):
                 logger.error(
@@ -890,7 +816,6 @@ class GridParser(object):
         node_coords_b = node_coords[node_b]
         node_pks_a = self.nodes.content_pk[node_a]
         node_pks_b = self.nodes.content_pk[node_b]
-
 
         for i, line_id in enumerate(link_ids):
             line = ogr.Geometry(ogr.wkbLineString)
@@ -949,30 +874,8 @@ class GridParser(object):
 # content_type --> sql object
 # cont_pk --> sql pk
 
-        # layer.CreateField(
-        #     ogr.FieldDefn("link_id", DATASOURCE_FIELD_TYPE['int']))
-        # layer.CreateField(
-        #     ogr.FieldDefn("node_left", DATASOURCE_FIELD_TYPE['int']))
-        # layer.CreateField(
-        #     ogr.FieldDefn("node_right", DATASOURCE_FIELD_TYPE['int']))
-        # layer.CreateField(
-        #     ogr.FieldDefn("kcu", DATASOURCE_FIELD_TYPE['int']))
-        # layer.CreateField(
-        #     ogr.FieldDefn("type", DATASOURCE_FIELD_TYPE['str']))
-        # layer.CreateField(
-        #     ogr.FieldDefn("channel_id", DATASOURCE_FIELD_TYPE['int']))
-        # layer.CreateField(
-        #     ogr.FieldDefn("cont_type", DATASOURCE_FIELD_TYPE['str']))
-        # layer.CreateField(
-        #     ogr.FieldDefn("cont_pk", DATASOURCE_FIELD_TYPE['int']))
-
 
 class IdMapper(object):
-
-    LINE_TYPES = [
-        constants.TYPE_V2_PIPE, constants.TYPE_V2_CHANNEL,
-        constants.TYPE_V2_CULVERT,
-        constants.TYPE_V2_ORIFICE, constants.TYPE_V2_WEIR]
 
     def __init__(self, id_mapping_dict):
         self.id_mapping = None
@@ -1010,19 +913,3 @@ class IdMapper(object):
         for k, v in self._id_mapping_input.iteritems():
             for pk, seq_id in v.iteritems():
                 yield k, pk, seq_id
-
-    def filter_by_pks(self, obj_name, seq_id):
-        sl = self.obj_slices[obj_name]
-        return self.id_mapping[sl]['pk'][np.where(self.id_mapping[sl]['seq_id'] == seq_id)][0]
-
-    def line_idx_to_type_sql(self, line_idx):
-        """
-        Find out what type and sql_id correspond to given line_idx
-        line_idx = network_channel_id in grid_admin.line_attributes
-        """
-        find_idx = unicode(line_idx)
-
-        for line_type in self.LINE_TYPES:
-            if line_type in self.id_mapping:
-                if find_idx in self.reverse_mapping[line_type]:
-                    return line_type, self.reverse_mapping[line_type][find_idx]
