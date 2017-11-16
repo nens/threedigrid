@@ -296,6 +296,11 @@ class BaseGridObject:
             return np.vstack(tuple(content))
         return content
 
+    @staticmethod
+    def _as_array(select):
+        if len(select.values()) > 1:
+            return np.vstack(tuple(select.values()))
+        return select.values()[0]
 
 class Nodes(BaseGridObject):
 
@@ -309,9 +314,10 @@ class Nodes(BaseGridObject):
     SLICE_NAMES = _NAMES.values()
     THREEDICORE_NAMES = _NAMES.keys()
 
-    def __init__(self, array, meta):
+    def __init__(self, array, meta, epsg_code):
 
         super(Nodes, self).__init__(array, meta)
+        self.epsg_code = epsg_code
         self.filters = {}
         self.starts_at = 0
         self._define_filters(
@@ -322,7 +328,60 @@ class Nodes(BaseGridObject):
         self._set_cnt_attr()
         self.content_pk = None
 
-    def get(self, fields=None, filter_name=None):
+    def get(self, fields=None, filter_name=None, as_array=False):
+        _fields = set(self.fields)
+        if fields:
+            _fields = _fields.intersection(
+                set(fields.strip().split(','))
+            )
+        _filter = self.filters.get(filter_name, None)
+        if _filter is None:
+            _filter = slice(self.starts_at, None)
+
+        selection = OrderedDict()
+        for n in _fields:
+            try:
+                selection[n] = self._array[n][_filter]
+            except ValueError:
+                selection[n] = getattr(self, n)[_filter]
+        if as_array:
+            return self._as_array(selection)
+        return selection
+
+    def get_coords(self, filter_slice=None, reproject_to=''):
+        if filter_slice is None:
+            filter_slice = slice(None, None)
+        coords = self.get(fields='x,y')
+        x_coords = coords['x'][filter_slice]
+        y_coords = coords['y'][filter_slice]
+        if reproject_to and reproject_to != self.epsg_code:
+            return np.vstack(transform_xys(self.epsg_code, reproject_to, x_coords, y_coords)).T
+        return np.vstack((x_coords, y_coords)).T
+
+    @property
+    def _custom_fields(self):
+        field_is_set = []
+        custom_field_names = ('content_pk',)
+        for fn in custom_field_names:
+            attr = getattr(self, fn)
+            if hasattr(attr, 'dtype'):
+                field_is_set.append(fn)
+        return tuple(field_is_set)
+
+
+class Breaches(BaseGridObject):
+
+    def __init__(self, array, meta):
+
+        super(Breaches, self).__init__(array, meta)
+        self.filters = {}
+        self.starts_at = 0
+        # self._set_bool_attr()
+        # self._set_cnt_attr()
+        self.content_pk = None
+        self.content_type = 'v2_connected_pnt'
+
+    def get(self, fields=None, filter_name=None, as_array=False):
         _fields = set(self.fields)
         if fields:
             _fields = _fields.intersection(
@@ -340,35 +399,26 @@ class Nodes(BaseGridObject):
                 selection[n] = self._array[n][_filter]
             except ValueError:
                 selection[n] = getattr(self, n)[_filter]
+        if as_array:
+            return self._as_array(selection)
         return selection
 
-    def add_node_pks(self, mapping1d, id_mapper):
+    @property
+    def seq_ids(self):
+        return np.arange(1, self._array['levl'].size + 1)
 
-        # pk template
-        self.content_pk = np.zeros(
-            mapping1d['nend1d'].shape, dtype='i4'
-        )
+    @property
+    def _exclude_fields(self):
+        return tuple(['llev'])
 
-        # with argsort
-        sort_idx = np.argsort(mapping1d['nend1d'])
-        idx = sort_idx[np.searchsorted(
-            mapping1d['nend1d'],
-            id_mapper.id_mapping[
-                id_mapper.obj_slices['v2_connection_nodes']]['seq_id'],
-            sorter=sort_idx)]
-
-        self.content_pk[idx] = id_mapper.id_mapping[
-            id_mapper.obj_slices['v2_connection_nodes']]['pk']
+    @property
+    def fields(self):
+        _diff = tuple(set(self._fields).difference(set(self._exclude_fields)))
+        return _diff + self._custom_fields
 
     @property
     def _custom_fields(self):
-        field_is_set = []
-        custom_field_names = ('content_pk',)
-        for fn in custom_field_names:
-            attr = getattr(self, fn)
-            if hasattr(attr, 'dtype'):
-                field_is_set.append(fn)
-        return tuple(field_is_set)
+        return tuple(['content_pk', 'seq_ids'])
 
 
 class Lines(BaseGridObject):
@@ -415,7 +465,7 @@ class Lines(BaseGridObject):
                 field_is_set.append(fn)
         return tuple(field_is_set)
 
-    def get(self, fields=None, filter_name=None):
+    def get(self, fields=None, filter_name=None, as_array=False):
         _fields = set(self.fields)
         if fields:
             _fields = _fields.intersection(
@@ -436,41 +486,10 @@ class Lines(BaseGridObject):
                     selection[n] = self._array[n][_filter]
             except ValueError:
                 selection[n] = getattr(self, n)[_filter]
+        if as_array:
+            return self._as_array(selection)
+
         return selection
-
-    def add_1d_object_info(self, id_mapper):
-        """
-        applies only for 1d
-        :return:
-        """
-
-        # TODO channel might be different
-        LINE_TYPES = [
-            constants.TYPE_V2_PIPE, constants.TYPE_V2_CHANNEL,
-            constants.TYPE_V2_CULVERT,
-            constants.TYPE_V2_ORIFICE, constants.TYPE_V2_WEIR]
-
-        # pk template
-        lik_all = self._array['lik']
-        lik_1d = self.get('lik', '1D_all')
-
-        self.content_pk = np.zeros(lik_all.shape, dtype='i4')
-        self.content_type = np.zeros(lik_all.shape, dtype='U32')
-        _content_pk = np.zeros(lik_1d['lik'].shape, dtype='i4')
-        _content_type = np.zeros(lik_1d['lik'].shape, dtype='U32')
-
-        sort_idx = np.argsort(lik_1d['lik'])
-
-        for line in LINE_TYPES:
-            mapper_idx = id_mapper.obj_slices.get(line)
-            if mapper_idx is None:
-                continue
-            seq_ids = id_mapper.id_mapping[mapper_idx]['seq_id']
-            idx = sort_idx[np.searchsorted(lik_1d['lik'], seq_ids, sorter=sort_idx)]
-            _content_pk[idx] = id_mapper.id_mapping[mapper_idx]['pk']
-            _content_type[idx] = id_mapper.id_mapping[mapper_idx]['obj_name']
-        self.content_pk[self.filters['1D_all']] = _content_pk
-        self.content_type[self.filters['1D_all']] = _content_type
 
     def _add_kcu_filters(self):
         # self.filters['structures'] = np.logical_or(
@@ -485,8 +504,14 @@ class Lines(BaseGridObject):
         self.filters['2d_open_water_obstacles'] = np.where(
             self._array['kcu'] == 101)[0]
 
-        self.filters['active_breach'] = np.where(
+        self.filters['active_breaches'] = np.where(
             self._array['kcu'] == 56)[0]
+
+        self.filters['potential_breaches'] = np.where(
+            self._array['kcu'] == 55)[0]
+
+        self.filters['all_breaches'] = np.where(
+            (self._array['kcu'] == 55) | (self._array['kcu'] == 56))[0]
 
     @property
     def _custom_fields(self):
@@ -499,176 +524,155 @@ class Lines(BaseGridObject):
         return tuple(field_is_set)
 
 
-class GridParser(object):
+class GridByrd(object):
 
-    def __init__(self, ini_file_path, file_path, id_mapping, epsg_code=28992):
-        self.file_path =  file_path
+    def __init__(self, nodes, lines, breaches, mapping1d, id_mapping_dict, epsg_code=28992):
+        self.nodes = nodes
+        self.lines = lines
+        self.breaches = breaches
+        self.mapping1d = mapping1d
+        self.mapper = IdMapper(id_mapping_dict)
+        self.add_custom_field(
+            field_name='content_pk',
+            field_src='v2_connection_nodes',
+            instance=self.nodes,
+            template_src=self.mapping1d['nend1d'],
+            dtype='i4', sort_by=self.mapping1d['nend1d']
+        )
+        self.add_custom_field(
+            field_name='content_pk',
+            field_src='v2_breach',
+            instance=self.breaches,
+            template_src=self.breaches._array['levl'],
+            dtype='i4', sort_by=self.breaches.seq_ids
+        )
+        self._add_1d_object_info()
         self.epsg_code = epsg_code
 
-        self.parser = configparser.ConfigParser()
-        self.parser.read(ini_file_path)
+    def get_line_coords(self, filter_name='', target_epsg_code=''):
 
-        self.meta = None
+        line_data = self.lines.get(fields='line', filter_name=filter_name)
+        node_a = line_data['line'][0]
+        node_b = line_data['line'][1]
+        coords_a = self.nodes.get_coords(filter_slice=node_a, reproject_to=target_epsg_code)
+        coords_b = self.nodes.get_coords(filter_slice=node_b, reproject_to=target_epsg_code)
+        return (coords_a, coords_b)
 
-        # structured numpy arrays, containing node information
-        self._nodes = None
-        self.nodes = None
-
-        # structured numpy arrays containing line information
-        self._lines = None
-        self.lines = None
-
-        # structured numpy arrays containing 2D cell information
-        self.cells2d = None
-
-        # structured numpy arrays containing pump information
-        self.pumps = None
-
-        self.mapping1d = None
-        self.breaches = None
-        self.id_mapping = None
-        self.id_mapper = None
-        if id_mapping:
-            self.id_mapper = IdMapper(id_mapping)
-
-        # numpy array of shape mapping_1d['nend1d'].shape. Will be populated
-        # in _add_connection_node_pks()
-        self.node_pks = None
-
-    def get_node_pks(self, nodes):
+    def _add_1d_object_info(self):
         """
-        get pks for the given node collection
+        Acts on the lines instance  applies only for 1d
         :return:
         """
 
-        seq_ids = self.mapping1d['nend1d'][nodes]
-        # template
-        _tmpl = np.zeros(seq_ids.shape, dtype='i4')
+        # TODO channel might be different
+        LINE_TYPES = [
+            constants.TYPE_V2_PIPE, constants.TYPE_V2_CHANNEL,
+            constants.TYPE_V2_CULVERT,
+            constants.TYPE_V2_ORIFICE, constants.TYPE_V2_WEIR]
 
-        # with argsort
-        sort_idx = np.argsort(seq_ids)
-        idx = sort_idx[np.searchsorted(
-            seq_ids,
-            self.id_mapper.id_mapping[
-                self.id_mapper.obj_slices['v2_connection_nodes']]['seq_id'],
-            sorter=sort_idx)]
+        # pk template
+        lik_all = self.lines._array['lik']
+        lik_1d = self.lines.get('lik', '1D_all', as_array=True)
 
-        _tmpl[idx] = self.id_mapper.id_mapping[
-            self.id_mapper.obj_slices['v2_connection_nodes']]['pk']
-        return _tmpl
+        self.lines.content_pk = np.zeros(lik_all.shape, dtype='i4')
+        self.lines.content_type = np.zeros(lik_all.shape, dtype='U32')
+        _content_pk = np.zeros(lik_1d.shape, dtype='i4')
+        _content_type = np.zeros(lik_1d.shape, dtype='U32')
 
-    def _get_dt(self, block_name):
-        """
-        """
-        dt_l = []
-        for item in self.parser.sections():
-            if not item.startswith(block_name):
+        sort_idx = np.argsort(lik_1d)
+        obj_slices  = self._get_id_obj_slices()
+        for line in LINE_TYPES:
+            mapper_idx = obj_slices.get(line)
+            if mapper_idx is None:
                 continue
+            seq_ids = self.id_mapping[mapper_idx]['seq_id']
+            idx = sort_idx[np.searchsorted(lik_1d, seq_ids, sorter=sort_idx)]
+            _content_pk[idx] = self.id_mapping[mapper_idx]['pk']
+            _content_type[idx] = self.id_mapping[mapper_idx]['obj_name']
 
-            block, name = item.split('.')
-            dims = tuple(json.loads(self.parser.get(item, 'dimensions')))
-            dt_l.append(
-                (str(name), (str(self.parser.get(item, 'datatype')), dims))
+        onedee_all_slice = self.lines.filters['1D_all']
+        self.lines.content_pk[onedee_all_slice] = _content_pk
+        self.lines.content_type[onedee_all_slice] = _content_type
+
+    def add_custom_field(self, field_name, field_src, instance, template_src, dtype, sort_by):
+        template = np.zeros(template_src.shape, dtype=dtype)
+        setattr(instance, field_name, template)
+        src = self._get_id_obj_slices()[field_src]
+        # with argsort
+        sort_idx = np.argsort(sort_by)
+        idx = sort_idx[np.searchsorted(
+            sort_by,
+            self.id_mapping[src]['seq_id'],
+            sorter=sort_idx)]
+        attr = getattr(instance, field_name)
+        attr[idx] = self.id_mapping[src]['pk']
+
+    def create_breach_shape(self, file_name, target_epsg_code='28992'):
+        line_idx = self.breaches.get('levl', as_array=True)
+        coords_a, coords_b = self.get_line_coords(target_epsg_code=target_epsg_code)
+
+        breach_data = self.breaches.get('levbr,levmat,content_pk,seq_ids')
+
+        kcu_dict = KCUDescriptor()
+        geomtype = 0
+        output_lines = file_name
+        sr = get_spatial_reference(target_epsg_code)
+        # points
+        driver = ogr.GetDriverByName("ESRI Shapefile")
+        if os.path.exists(output_lines):
+            logger.info('Replacing %s', output_lines)
+            driver.DeleteDataSource(str(output_lines))
+        data_source = driver.CreateDataSource(output_lines)
+        layer = data_source.CreateLayer(
+            str(os.path.basename(output_lines)),
+            sr,
+            geomtype
+        )
+        fields = OrderedDict([
+            ('link_id', 'int'),
+            ('kcu', 'int'),
+            ('kcu_descr', 'str'),
+            ('cont_pk', 'int'),
+            ('seq_id', 'int')
+        ])
+        for field_name, field_type in fields.iteritems():
+            layer.CreateField(
+                ogr.FieldDefn(
+                    field_name, DATASOURCE_FIELD_TYPE[field_type]
+                )
             )
-        return np.dtype(dt_l)
+        _definition = layer.GetLayerDefn()
+        for i, line_id in enumerate(line_idx):
+            line = ogr.Geometry(ogr.wkbLineString)
+            line.AddPoint(coords_a[i][0], coords_a[i][1])
+            line.AddPoint(coords_b[i][0], coords_b[i][1])
+            feature = ogr.Feature(_definition)
+            feature.SetGeometry(line)
+            feature.SetField("link_id", int(line_id))
+            kcu = self.lines.get(fields='kcu', as_array=True)[line_id]
+            print('kcu', kcu)
+            feature.SetField("kcu", int(kcu))
+            kcu_descr = ''
+            try:
+                kcu_descr = kcu_dict[kcu]
+            except KeyError:
+                pass
+            feature.SetField("kcu_descr", kcu_descr)
+            feature.SetField("cont_pk", int(breach_data['content_pk'][i]))
+            feature.SetField("seq_id", int(breach_data['seq_ids'][[i]]))
+            layer.CreateFeature(feature)
 
-    def parse(self):
-        """
-        parse the grid.admin file
-        """
-        validation_value = validation_incre = 10
 
-        try:
-            with open(self.file_path, 'rb') as f:
+    @property
+    def id_mapping(self):
+        return self.mapper.id_mapping
 
-                data = self.seek_file(f, 'meta')
-                self.meta = data
-                self._validate_block(f, validation_value)
-                validation_value += validation_incre
-
-                # section names, attribute names and conditions as to read the section or not
-                sections = [
-                    ('nodes', '_nodes', True), ('cells2d', 'cells2d', True),
-                    ('lines', '_lines', True), ('pumps', 'pumps', self.meta['jap1d'][0] > 0),
-                    ('mapping1d', 'mapping1d', any([self.meta['l1dtot'][0], self.meta['n1dtot'][0]]) > 0),
-                    ('breaches', 'breaches', self.meta['levnms'][0] > 0)
-                ]
-
-                for section, attr_name, condition in sections:
-                    if condition:
-                        data = self.seek_file(f, section)
-                        # will produce attributes like so:
-                        # self.nodes = <numpy.array>
-                        setattr(self, attr_name, data)
-                    self._validate_block(f, validation_value)
-                    validation_value += validation_incre
-
-        except IOError:
-            logger.exception('[-] Could not read grid file')
-
-        self._finalize_data()
-
-    def _finalize_data(self):
-        self.pumps['nodp1d'][:] -= 1
-        # references to node index from fortran point of view starting with 1.
-        # To integrate flawlessly correct here
-        self._lines['line'][:,] -= 1
-        # TODO check if we still need this
-        # self.line_filters = LineKcuFilters(self._lines)
-        self.lines = Lines(self._lines, self.meta)
-        self.nodes = Nodes(self._nodes, self.meta)
-
-        if self.id_mapper:
-            # TODO maybe not the right spot to call these functions
-            self.nodes.add_node_pks(self.mapping1d, self.id_mapper)
-            self.lines.add_1d_object_info(self.id_mapper)
-
-    def seek_file(self, f, section):
-        """
-        :param f: file object of the grid.admin file
-        :param dtype: numpy datatype definition
-
-        Helper function for parsing the file and updating results in a
-        dict.
-        """
-        dtype = self._get_dt(section)
-        record_arr = np.fromfile(f, dtype, count=1)
-        return record_arr[0]
-
-    def _validate_block(self, f, check_number, check_str=''):
-        """
-        :param check_number: TODO
-        """
-
-        if not check_str:
-            check_str = "check{}".format(check_number)
-
-        dt = np.dtype([
-            (check_str, constants.DTYPE_INT)])
-        record_arr = np.fromfile(f, dt, count=1)
-
-        if record_arr[check_str] != check_number:
-            raise NotConsistentException("{}".format(check_number))
-
-    # def get_line_coords(self, method_type, name, target_epsg_code='28992'):
-    #     # if method_type == 'get_slice':
-    #     #     if name and name not in self.lines.SLICE_NAMES:
-    #     #         logger.error("[-] Slice  name {} does not exist".format(name))
-    #     #         return
-    #     #     nodes = self.lines.get_values('line', name)
-    #     #
-    #     # elif method_type == 'get_by_filter':
-    #     #     # TODO validation
-    #     #     res = self.lines.get_by_filter(name, 'line')
-    #     #     nodes = res.values()
-    #
-    #     # if target_epsg_code != self.epsg_code:
-    #     #     node_coords = self.nodes.get_reprojected(
-    #     #         self.epsg_code, target_epsg_code).T        else:
-    #     node_coords = np.vstack(self.nodes.get('x,y')).T
-    #     coords = node_coords.values().T
-
-        # return node_coords[coords[0]], node_coords[coords[1]]
+    def _get_id_obj_slices(self):
+        obj_names = np.unique(self.id_mapping['obj_name'])
+        return {
+            n: np.where(self.id_mapping['obj_name'] == n)
+            for n in obj_names
+        }
 
     def create_node_shape(self, slice='', target_epsg_code='28992'):
 
@@ -747,6 +751,8 @@ class GridParser(object):
         # TODO create dataset or group or whatever
         pass
 
+    # def _create_breaches(self):
+
     def _create_line_shape(self, filter_name='', file_name='', target_epsg_code='28992'):
 
         kcu_dict = KCUDescriptor()
@@ -801,33 +807,18 @@ class GridParser(object):
                 link_ids = filter_def
 
         line_data = self.lines.get(filter_name=filter_name)
+        coords_a, coords_b = self.get_line_coords(
+            filter_name=filter_name, target_epsg_code=target_epsg_code
+        )
         node_a = line_data['line'][0]
         node_b = line_data['line'][1]
-        coords = self.nodes.get('x,y')
-        if link_ids is None:
-            link_ids = np.arange(1, node_a.size + 1)
-
-        if target_epsg_code != self.epsg_code:
-            node_coords = np.vstack(transform_xys(self.epsg_code, target_epsg_code, coords['x'], coords['y'])).T
-        else:
-            node_coords = np.vstack((coords['x'], coords['y'])).T
-
-        node_coords_a = node_coords[node_a]
-        node_coords_b = node_coords[node_b]
         node_pks_a = self.nodes.content_pk[node_a]
         node_pks_b = self.nodes.content_pk[node_b]
 
         for i, line_id in enumerate(link_ids):
             line = ogr.Geometry(ogr.wkbLineString)
-            # line.AddPoint(node_a[i][0], node_a[i][1])
-            # line.AddPoint(node_b[i][0], node_b[i][1])
-            try:
-                line.AddPoint(node_coords_a[i][0], node_coords_a[i][1])
-                line.AddPoint(node_coords_b[i][0], node_coords_b[i][1])
-            except:
-                import ipdb;
-                ipdb.set_trace()
-
+            line.AddPoint(coords_a[i][0], coords_a[i][1])
+            line.AddPoint(coords_b[i][0], coords_b[i][1])
             feature = ogr.Feature(_definition)
             feature.SetGeometry(line)
             feature.SetField("link_id", int(line_id))
@@ -848,7 +839,158 @@ class GridParser(object):
             layer.CreateFeature(feature)
 
 
+class GridParser(object):
 
+    # def __new__(cls, ini_file_path, file_path, id_mapping, epsg_code=28992):
+    #
+    #     return super(GridByrd, cls).__new__(text)
+
+
+    def __init__(self, ini_file_path, file_path, id_mapping, epsg_code=28992):
+        self.file_path =  file_path
+        self.epsg_code = epsg_code
+
+        self.parser = configparser.ConfigParser()
+        self.parser.read(ini_file_path)
+
+        self.meta = None
+
+        # structured numpy arrays, containing node information
+        self._nodes = None
+        self.nodes = None
+
+        # structured numpy arrays containing line information
+        self._lines = None
+        self.lines = None
+
+        # structured numpy arrays containing 2D cell information
+        self.cells2d = None
+
+        # structured numpy arrays containing pump information
+        self.pumps = None
+
+        self.mapping1d = None
+        self.breaches = None
+        self.id_mapping = None
+        self.id_mapper = None
+
+        self.breaches = None
+        self._breaches = None
+
+        # numpy array of shape mapping_1d['nend1d'].shape. Will be populated
+        # in _add_connection_node_pks()
+        self.node_pks = None
+        self.parse()
+        lines = Lines(self._lines, self.meta)
+        nodes = Nodes(self._nodes, self.meta, epsg_code)
+        breaches = Breaches(self._breaches, self.meta)
+        self.grid_byrd = GridByrd(
+            nodes, lines, breaches, self.mapping1d, id_mapping, epsg_code)
+
+    def _get_dt(self, block_name):
+        """
+        """
+        dt_l = []
+        for item in self.parser.sections():
+            if not item.startswith(block_name):
+                continue
+
+            block, name = item.split('.')
+            dims = tuple(json.loads(self.parser.get(item, 'dimensions')))
+            dt_l.append(
+                (str(name), (str(self.parser.get(item, 'datatype')), dims))
+            )
+        return np.dtype(dt_l)
+
+    def parse(self):
+        """
+        parse the grid.admin file
+        """
+        validation_value = validation_incre = 10
+
+        try:
+            with open(self.file_path, 'rb') as f:
+
+                data = self.seek_file(f, 'meta')
+                self.meta = data
+                self._validate_block(f, validation_value)
+                validation_value += validation_incre
+
+                # section names, attribute names and conditions as to read the section or not
+                sections = [
+                    ('nodes', '_nodes', True), ('cells2d', 'cells2d', True),
+                    ('lines', '_lines', True), ('pumps', 'pumps', self.meta['jap1d'][0] > 0),
+                    ('mapping1d', 'mapping1d', any([self.meta['l1dtot'][0], self.meta['n1dtot'][0]]) > 0),
+                    ('breaches', '_breaches', self.meta['levnms'][0] > 0)
+                ]
+
+                for section, attr_name, condition in sections:
+                    if condition:
+                        data = self.seek_file(f, section)
+                        # will produce attributes like so:
+                        # self.nodes = <numpy.array>
+                        setattr(self, attr_name, data)
+                    self._validate_block(f, validation_value)
+                    validation_value += validation_incre
+
+        except IOError:
+            logger.exception('[-] Could not read grid file')
+
+        return self._finalize_data()
+
+    def _finalize_data(self):
+        self.pumps['nodp1d'][:] -= 1
+        # references to node index from fortran point of view starting with 1.
+        # To integrate flawlessly correct here
+        self._lines['line'][:,] -= 1
+        self._breaches['levl'][:] -= 1
+
+    def seek_file(self, f, section):
+        """
+        :param f: file object of the grid.admin file
+        :param dtype: numpy datatype definition
+
+        Helper function for parsing the file and updating results in a
+        dict.
+        """
+        dtype = self._get_dt(section)
+        record_arr = np.fromfile(f, dtype, count=1)
+        return record_arr[0]
+
+    def _validate_block(self, f, check_number, check_str=''):
+        """
+        :param check_number: TODO
+        """
+
+        if not check_str:
+            check_str = "check{}".format(check_number)
+
+        dt = np.dtype([
+            (check_str, constants.DTYPE_INT)])
+        record_arr = np.fromfile(f, dt, count=1)
+
+        if record_arr[check_str] != check_number:
+            raise NotConsistentException("{}".format(check_number))
+
+    # def get_line_coords(self, method_type, name, target_epsg_code='28992'):
+    #     # if method_type == 'get_slice':
+    #     #     if name and name not in self.lines.SLICE_NAMES:
+    #     #         logger.error("[-] Slice  name {} does not exist".format(name))
+    #     #         return
+    #     #     nodes = self.lines.get_values('line', name)
+    #     #
+    #     # elif method_type == 'get_by_filter':
+    #     #     # TODO validation
+    #     #     res = self.lines.get_by_filter(name, 'line')
+    #     #     nodes = res.values()
+    #
+    #     # if target_epsg_code != self.epsg_code:
+    #     #     node_coords = self.nodes.get_reprojected(
+    #     #         self.epsg_code, target_epsg_code).T        else:
+    #     node_coords = np.vstack(self.nodes.get('x,y')).T
+    #     coords = node_coords.values().T
+
+        # return node_coords[coords[0]], node_coords[coords[1]]
 
 #   breslocaties --> see LineKcuFilters
 #   structures --> see LineKcuFilters
@@ -879,13 +1021,7 @@ class IdMapper(object):
 
     def __init__(self, id_mapping_dict):
         self.id_mapping = None
-        self.obj_slices = None
         self._process_id_mapping(id_mapping_dict)
-        self._define_id_obj_slices()
-
-    def get(self, object_name):
-        idx = self.obj_slices[object_name]
-        return self.id_mapping[idx]
 
     def _process_id_mapping(self, id_mapping_dict):
         """
@@ -900,16 +1036,13 @@ class IdMapper(object):
             count=sum(len(v) for v in id_mapping_dict.itervalues())
         )
 
-    def _define_id_obj_slices(self):
-        obj_names = np.unique(self.id_mapping['obj_name'])
-        self.obj_slices = {
-            n: np.where(self.id_mapping['obj_name'] == n)
-            for n in obj_names
-        }
-
     def _get_id_mapping_entry(self):
         """
         """
         for k, v in self._id_mapping_input.iteritems():
             for pk, seq_id in v.iteritems():
                 yield k, pk, seq_id
+
+def parse_factory(ini_file_path, file_path, id_mapping, epsg_code=28992):
+    gp = GridParser(ini_file_path, file_path, id_mapping, epsg_code=28992)
+    return gp.grid_byrd
