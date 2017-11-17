@@ -15,8 +15,10 @@ from abc import ABCMeta
 from abc import abstractmethod
 
 import numpy as np
+import h5py
 from numpy.ma import masked_where
 import ogr
+import osr
 from pyproj import transform, Proj
 
 # from threedi_utils.gis import get_extent, get_bbox
@@ -440,9 +442,10 @@ class Lines(BaseGridObject):
     SLICE_NAMES = _NAMES.values()
     THREEDICORE_NAMES = _NAMES.keys()
 
-    def __init__(self, array, meta):
+    def __init__(self, array, meta, epsg_code):
 
         super(Lines, self).__init__(array, meta)
+        self.epsg_code = epsg_code
         self.filters = {}
         self.starts_at = 1
         self._define_filters(
@@ -454,6 +457,10 @@ class Lines(BaseGridObject):
         self._set_cnt_attr()
         self.content_pk = None
         self.content_type = None
+        self.ax = None
+        self.ay = None
+        self.bx = None
+        self.by = None
 
     @property
     def _custom_fields(self):
@@ -465,7 +472,7 @@ class Lines(BaseGridObject):
                 field_is_set.append(fn)
         return tuple(field_is_set)
 
-    def get(self, fields=None, filter_name=None, as_array=False):
+    def get(self, fields=None, filter_name=None, as_array=False, reproject_to=None):
         _fields = set(self.fields)
         if fields:
             _fields = _fields.intersection(
@@ -486,9 +493,32 @@ class Lines(BaseGridObject):
                     selection[n] = self._array[n][_filter]
             except ValueError:
                 selection[n] = getattr(self, n)[_filter]
+        if reproject_to and self._includes_coords(selection):
+            selection = self._reproject(selection, reproject_to)
+
         if as_array:
             return self._as_array(selection)
 
+        return selection
+
+    def _includes_coords(self, selection):
+        if any(['ax' in selection and 'ay' in selection,
+                'bx' in selection and 'by' in selection]):
+            return True
+        return False
+
+    def _reproject(self, selection, target_epsg_code):
+        if target_epsg_code == self.epsg_code:
+            return selection
+        for x, y in (('ax', 'ay'), ('bx', 'by')):
+            if x not in selection:
+                continue
+            tx, ty = transform_xys(
+                self.epsg_code, target_epsg=target_epsg_code,
+                x_array=selection[x], y_array=selection[y]
+            )
+            selection[x] = tx
+            selection[y] = ty
         return selection
 
     def _add_kcu_filters(self):
@@ -516,7 +546,8 @@ class Lines(BaseGridObject):
     @property
     def _custom_fields(self):
         field_is_set = []
-        custom_field_names = ('content_pk', 'content_type')
+        custom_field_names = (
+            'content_pk', 'content_type', 'ax', 'ay', 'bx', 'by')
         for fn in custom_field_names:
             attr = getattr(self, fn)
             if hasattr(attr, 'dtype'):
@@ -524,9 +555,46 @@ class Lines(BaseGridObject):
         return tuple(field_is_set)
 
 
+class Levee(object):
+
+    def __init__(self):
+        f = "/home/lars.claussen/Development/threedigrid/data/grid.hdf5"
+        self.grid_file = h5py.File(f, 'a')
+        self.levee_group = self.grid_file.get('levee')
+
+    def get_levee_geoms(self, target_epsg_code):
+
+        raw_geoms = self.levee_group.get('geoms')
+        source_epsg_code = raw_geoms.attrs['epsg_code'][0]
+        geom_type = raw_geoms.attrs['storage_type'][0]
+
+        _transform = None
+        if target_epsg_code and target_epsg_code != source_epsg_code:
+            source = osr.SpatialReference()
+            source.ImportFromEPSG(int(source_epsg_code))
+
+            target = osr.SpatialReference()
+            target.ImportFromEPSG(int(target_epsg_code))
+
+            _transform = osr.CoordinateTransformation(source, target)
+
+        levee_geoms = []
+        for raw_geom in raw_geoms:
+            geom = ogr.CreateGeometryFromWkb(raw_geom.tobytes())
+            if _transform:
+                geom.Transform(transform)
+            levee_geoms.append(geom)
+        return levee_geoms
+
+
+
 class GridByrd(object):
 
     def __init__(self, nodes, lines, breaches, mapping1d, id_mapping_dict, epsg_code=28992):
+
+        f = "/home/lars.claussen/Development/threedigrid/data/grid.hdf5"
+        self.grid_file = h5py.File(f, 'a')
+
         self.nodes = nodes
         self.lines = lines
         self.breaches = breaches
@@ -547,16 +615,22 @@ class GridByrd(object):
             dtype='i4', sort_by=self.breaches.seq_ids
         )
         self._add_1d_object_info()
+        self._add_coords_to_lines()
         self.epsg_code = epsg_code
+        self.levees = Levee()
 
-    def get_line_coords(self, filter_name='', target_epsg_code=''):
 
-        line_data = self.lines.get(fields='line', filter_name=filter_name)
-        node_a = line_data['line'][0]
-        node_b = line_data['line'][1]
-        coords_a = self.nodes.get_coords(filter_slice=node_a, reproject_to=target_epsg_code)
-        coords_b = self.nodes.get_coords(filter_slice=node_b, reproject_to=target_epsg_code)
-        return (coords_a, coords_b)
+    def _add_coords_to_lines(self):
+        """
+
+        :return:
+        """
+        l = self.lines._array['line']
+        xy = self.nodes.get('x,y')
+        self.lines.ax = xy['x'][l[0]]
+        self.lines.bx = xy['x'][l[1]]
+        self.lines.ay = xy['y'][l[0]]
+        self.lines.by = xy['y'][l[1]]
 
     def _add_1d_object_info(self):
         """
@@ -607,24 +681,23 @@ class GridByrd(object):
         attr = getattr(instance, field_name)
         attr[idx] = self.id_mapping[src]['pk']
 
-    def create_breach_shape(self, file_name, target_epsg_code='28992'):
+    def create_potential_breach_lines_shape(self, file_name, target_epsg_code='28992'):
         line_idx = self.breaches.get('levl', as_array=True)
-        coords_a, coords_b = self.get_line_coords(target_epsg_code=target_epsg_code)
+        line_dict = self.lines.get(reproject_to=target_epsg_code)
 
         breach_data = self.breaches.get('levbr,levmat,content_pk,seq_ids')
 
         kcu_dict = KCUDescriptor()
         geomtype = 0
-        output_lines = file_name
         sr = get_spatial_reference(target_epsg_code)
         # points
         driver = ogr.GetDriverByName("ESRI Shapefile")
-        if os.path.exists(output_lines):
-            logger.info('Replacing %s', output_lines)
-            driver.DeleteDataSource(str(output_lines))
-        data_source = driver.CreateDataSource(output_lines)
+        if os.path.exists(file_name):
+            logger.info('Replacing %s', file_name)
+            driver.DeleteDataSource(str(file_name))
+        data_source = driver.CreateDataSource(file_name)
         layer = data_source.CreateLayer(
-            str(os.path.basename(output_lines)),
+            str(os.path.basename(file_name)),
             sr,
             geomtype
         )
@@ -642,15 +715,19 @@ class GridByrd(object):
                 )
             )
         _definition = layer.GetLayerDefn()
+
+        # self.grid_file
         for i, line_id in enumerate(line_idx):
             line = ogr.Geometry(ogr.wkbLineString)
-            line.AddPoint(coords_a[i][0], coords_a[i][1])
-            line.AddPoint(coords_b[i][0], coords_b[i][1])
+            for x,y in (('ax', 'ay'),('bx', 'by')):
+                line.AddPoint(
+                    line_dict[x][line_idx][i],
+                    line_dict[y][line_idx][i]
+                )
             feature = ogr.Feature(_definition)
             feature.SetGeometry(line)
             feature.SetField("link_id", int(line_id))
-            kcu = self.lines.get(fields='kcu', as_array=True)[line_id]
-            print('kcu', kcu)
+            kcu = line_dict['kcu'][line_idx][i]
             feature.SetField("kcu", int(kcu))
             kcu_descr = ''
             try:
@@ -661,6 +738,71 @@ class GridByrd(object):
             feature.SetField("cont_pk", int(breach_data['content_pk'][i]))
             feature.SetField("seq_id", int(breach_data['seq_ids'][[i]]))
             layer.CreateFeature(feature)
+
+    def create_breach_points_shape(self, file_name, target_epsg_code='28992'):
+        line_idx = self.breaches.get('levl', as_array=True)
+        line_dict = self.lines.get(reproject_to=target_epsg_code)
+
+        breach_data = self.breaches.get('levbr,levmat,content_pk,seq_ids')
+
+        kcu_dict = KCUDescriptor()
+        geomtype = 0
+        sr = get_spatial_reference(target_epsg_code)
+        # points
+        driver = ogr.GetDriverByName("ESRI Shapefile")
+        if os.path.exists(file_name):
+            logger.info('Replacing %s', file_name)
+            driver.DeleteDataSource(str(file_name))
+        data_source = driver.CreateDataSource(file_name)
+        layer = data_source.CreateLayer(
+            str(os.path.basename(file_name)),
+            sr,
+            geomtype
+        )
+        fields = OrderedDict([
+            ('link_id', 'int'),
+            ('kcu', 'int'),
+            ('kcu_descr', 'str'),
+            ('cont_pk', 'int'),
+            ('seq_id', 'int')
+        ])
+        for field_name, field_type in fields.iteritems():
+            layer.CreateField(
+                ogr.FieldDefn(
+                    field_name, DATASOURCE_FIELD_TYPE[field_type]
+                )
+            )
+        _definition = layer.GetLayerDefn()
+
+        levee_geoms = self.levees.get_levee_geoms(target_epsg_code=target_epsg_code)
+        # self.grid_file
+        for i, line_id in enumerate(line_idx):
+            print(line_id)
+            line = ogr.Geometry(ogr.wkbLineString)
+            for x, y in (('ax', 'ay'), ('bx', 'by')):
+                line.AddPoint(
+                    line_dict[x][line_idx][i],
+                    line_dict[y][line_idx][i]
+                )
+            for levee_geom in levee_geoms:
+                if not levee_geom.Intersect(line):
+                    continue
+                intersection = levee_geom.Intersection(line)
+                feature = ogr.Feature(_definition)
+                feature.SetGeometry(intersection)
+                feature.SetField("link_id", int(line_id))
+                kcu = line_dict['kcu'][line_idx][i]
+                feature.SetField("kcu", int(kcu))
+                kcu_descr = ''
+                try:
+                    kcu_descr = kcu_dict[kcu]
+                except KeyError:
+                    pass
+                feature.SetField("kcu_descr", kcu_descr)
+                feature.SetField("cont_pk", int(breach_data['content_pk'][i]))
+                feature.SetField("seq_id", int(breach_data['seq_ids'][[i]]))
+                layer.CreateFeature(feature)
+                break
 
 
     @property
@@ -806,19 +948,20 @@ class GridByrd(object):
             else:
                 link_ids = filter_def
 
-        line_data = self.lines.get(filter_name=filter_name)
-        coords_a, coords_b = self.get_line_coords(
-            filter_name=filter_name, target_epsg_code=target_epsg_code
-        )
+        line_data = self.lines.get(filter_name=filter_name, target_epsg_code=target_epsg_code)
+        if link_ids is None:
+            link_ids = np.arange(1, line_data['kcu'].size + 1)
+
         node_a = line_data['line'][0]
         node_b = line_data['line'][1]
         node_pks_a = self.nodes.content_pk[node_a]
         node_pks_b = self.nodes.content_pk[node_b]
-
         for i, line_id in enumerate(link_ids):
             line = ogr.Geometry(ogr.wkbLineString)
-            line.AddPoint(coords_a[i][0], coords_a[i][1])
-            line.AddPoint(coords_b[i][0], coords_b[i][1])
+            line.AddPoint(line_data['ax'][i], line_data['ay'][i])
+            line.AddPoint(line_data['bx'][i], line_data['by'][i])
+            # line.AddPoint(coords_a[i][0], coords_a[i][1])
+            # line.AddPoint(coords_b[i][0], coords_b[i][1])
             feature = ogr.Feature(_definition)
             feature.SetGeometry(line)
             feature.SetField("link_id", int(line_id))
@@ -881,8 +1024,8 @@ class GridParser(object):
         # in _add_connection_node_pks()
         self.node_pks = None
         self.parse()
-        lines = Lines(self._lines, self.meta)
         nodes = Nodes(self._nodes, self.meta, epsg_code)
+        lines = Lines(self._lines, self.meta, epsg_code)
         breaches = Breaches(self._breaches, self.meta)
         self.grid_byrd = GridByrd(
             nodes, lines, breaches, self.mapping1d, id_mapping, epsg_code)

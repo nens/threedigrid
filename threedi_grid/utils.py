@@ -55,3 +55,21 @@ def pairwise(iterable):
     a, b = tee(iterable)
     next(b, None)
     return izip(a, b)
+
+
+def select_by_bbox(pts, xy_lower_left, xy_upper_right):
+
+    # points = [(random.random(), random.random()) for i in range(100)]
+    #
+    # bx1, bx2 = sorted([random.random(), random.random()])
+    # by1, by2 = sorted([random.random(), random.random()])
+
+    # pts = np.array(points)
+
+    ll = np.array(xy_lower_left)  # lower-left
+    ur = np.array(xy_upper_right)  # upper-right
+
+    # ll = np.array([bx1, by1])  # lower-left
+    # ur = np.array([bx2, by2])  # upper-right
+    xy_pts = pts[:, [0, 1]]
+    return pts[np.all((ll <= xy_pts) & (xy_pts <= ur), axis=1)]
