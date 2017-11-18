@@ -20,6 +20,7 @@ from numpy.ma import masked_where
 import ogr
 import osr
 from pyproj import transform, Proj
+import geojson
 
 # from threedi_utils.gis import get_extent, get_bbox
 from threedi_grid.utils import get_spatial_reference
@@ -373,17 +374,50 @@ class Nodes(BaseGridObject):
 
 class Breaches(BaseGridObject):
 
-    def __init__(self, array, meta):
+    def __init__(self, array, meta, epsg_code):
 
         super(Breaches, self).__init__(array, meta)
+        self.epsg_code = epsg_code
         self.filters = {}
         self.starts_at = 0
         # self._set_bool_attr()
         # self._set_cnt_attr()
         self.content_pk = None
+        self.x = None
+        self.y = None
         self.content_type = 'v2_connected_pnt'
+        self.json_content = None
 
-    def get(self, fields=None, filter_name=None, as_array=False):
+    @property
+    def as_geojson(self):
+        geos = []
+        selection = self.get('levl,seq_ids,x,y', reproject_to='4236')
+        for i in xrange(selection['x'].size):
+            pt = geojson.Point((selection['x'][i], selection['y'][i]))
+            breach_meta = [
+                    ['object_type', constants.TYPE_V2_BREACH],
+                    ['line_idx', int(selection['levl'][i])],
+                    ['breach_idx', int(selection['seq_ids'][i])],
+                    ]
+            breach_props = dict(
+                object_type=constants.TYPE_V2_BREACH,
+                props={},
+                line_idx=int(selection['levl'][i]),
+                breach_idx=int(selection['seq_ids'][i]),
+                meta=breach_meta,
+                )
+            feat = geojson.Feature(
+                geometry=pt,
+                properties=breach_props,
+                )
+            geos.append(feat)
+        return json.dumps({
+            'type': 'FeatureCollection',
+            'features': geos,
+        })
+
+
+    def get(self, fields=None, filter_name=None, as_array=False, reproject_to=''):
         _fields = set(self.fields)
         if fields:
             _fields = _fields.intersection(
@@ -391,9 +425,7 @@ class Breaches(BaseGridObject):
             )
         _filter = self.filters.get(filter_name, None)
         if _filter is None:
-            _filter = slice(
-                self.starts_at, self._meta['nodall'][0]
-            )
+            _filter = slice(self.starts_at, None)
 
         selection = OrderedDict()
         for n in _fields:
@@ -401,6 +433,10 @@ class Breaches(BaseGridObject):
                 selection[n] = self._array[n][_filter]
             except ValueError:
                 selection[n] = getattr(self, n)[_filter]
+
+        if reproject_to:
+            selection = self._reproject(selection, reproject_to)
+
         if as_array:
             return self._as_array(selection)
         return selection
@@ -420,8 +456,20 @@ class Breaches(BaseGridObject):
 
     @property
     def _custom_fields(self):
-        return tuple(['content_pk', 'seq_ids'])
+        return tuple(['content_pk', 'seq_ids', 'x', 'y', 'kcu'])
 
+    def _reproject(self, selection, target_epsg_code):
+        if target_epsg_code == self.epsg_code:
+            return selection
+        if 'x' not in selection and 'y' not in selection:
+            return selection
+        tx, ty = transform_xys(
+            self.epsg_code, target_epsg=target_epsg_code,
+            x_array=selection['x'], y_array=selection['y']
+        )
+        selection['x'] = tx
+        selection['y'] = ty
+        return selection
 
 class Lines(BaseGridObject):
 
@@ -559,33 +607,42 @@ class Levee(object):
 
     def __init__(self):
         f = "/home/lars.claussen/Development/threedigrid/data/grid.hdf5"
+        f = "/Users/lars/gitHub/threedigrid/data/grid.hdf5"
         self.grid_file = h5py.File(f, 'a')
-        self.levee_group = self.grid_file.get('levee')
+        self.group = self.grid_file.get('levee')
+        self.geoms = []
+        self.current_epsg = None
 
-    def get_levee_geoms(self, target_epsg_code):
+    def load_geoms(self):
 
-        raw_geoms = self.levee_group.get('geoms')
+        raw_geoms = self.group.get('geoms')
         source_epsg_code = raw_geoms.attrs['epsg_code'][0]
+        self.current_epsg = source_epsg_code
         geom_type = raw_geoms.attrs['storage_type'][0]
+        for raw_geom in raw_geoms:
+            geom = ogr.CreateGeometryFromWkb(raw_geom.tobytes())
+            self.geoms.append(geom)
+
+    def get_levee_geoms(self, target_epsg_code=''):
+
+        if all([self.geoms,
+                target_epsg_code,
+                target_epsg_code == self.current_epsg]):
+            return self.geoms
 
         _transform = None
-        if target_epsg_code and target_epsg_code != source_epsg_code:
+        if target_epsg_code and target_epsg_code != self.current_epsg:
             source = osr.SpatialReference()
-            source.ImportFromEPSG(int(source_epsg_code))
+            source.ImportFromEPSG(int(self.current_epsg))
 
             target = osr.SpatialReference()
             target.ImportFromEPSG(int(target_epsg_code))
 
             _transform = osr.CoordinateTransformation(source, target)
-
-        levee_geoms = []
-        for raw_geom in raw_geoms:
-            geom = ogr.CreateGeometryFromWkb(raw_geom.tobytes())
-            if _transform:
-                geom.Transform(transform)
-            levee_geoms.append(geom)
-        return levee_geoms
-
+        if self.geoms and _transform:
+            return [geom.Transform(transform) for geom in self.geoms]
+        self.load_geoms()
+        return self.geoms
 
 
 class GridByrd(object):
@@ -593,6 +650,7 @@ class GridByrd(object):
     def __init__(self, nodes, lines, breaches, mapping1d, id_mapping_dict, epsg_code=28992):
 
         f = "/home/lars.claussen/Development/threedigrid/data/grid.hdf5"
+        f = "/Users/lars/gitHub/threedigrid/data/grid.hdf5"
         self.grid_file = h5py.File(f, 'a')
 
         self.nodes = nodes
@@ -619,10 +677,8 @@ class GridByrd(object):
         self.epsg_code = epsg_code
         self.levees = Levee()
 
-
     def _add_coords_to_lines(self):
         """
-
         :return:
         """
         l = self.lines._array['line']
@@ -631,6 +687,30 @@ class GridByrd(object):
         self.lines.bx = xy['x'][l[1]]
         self.lines.ay = xy['y'][l[0]]
         self.lines.by = xy['y'][l[1]]
+
+    def add_coords_to_breaches(self):
+
+        line_dict = self.lines.get()
+        line_idx = self.breaches.get('levl', as_array=True)
+        self.breaches.x = np.zeros(line_idx.shape, dtype='f8')
+        self.breaches.y = np.zeros(line_idx.shape, dtype='f8')
+        self.breaches.kcu = line_dict['kcu'][line_idx]
+
+        levee_geoms = self.levees.get_levee_geoms()
+        for i, line_id in enumerate(line_idx):
+            line = ogr.Geometry(ogr.wkbLineString)
+            for x, y in (('ax', 'ay'), ('bx', 'by')):
+                line.AddPoint(
+                    line_dict[x][line_idx][i],
+                    line_dict[y][line_idx][i]
+                )
+            for levee_geom in levee_geoms:
+                if not levee_geom.Intersect(line):
+                    continue
+                intersection = levee_geom.Intersection(line)
+                self.breaches.x[i] = intersection.GetX()
+                self.breaches.y[i] = intersection.GetY()
+                break
 
     def _add_1d_object_info(self):
         """
@@ -1026,7 +1106,7 @@ class GridParser(object):
         self.parse()
         nodes = Nodes(self._nodes, self.meta, epsg_code)
         lines = Lines(self._lines, self.meta, epsg_code)
-        breaches = Breaches(self._breaches, self.meta)
+        breaches = Breaches(self._breaches, self.meta, epsg_code)
         self.grid_byrd = GridByrd(
             nodes, lines, breaches, self.mapping1d, id_mapping, epsg_code)
 
