@@ -25,5 +25,5 @@ deploy:
     secure: PLEASE_REPLACE_ME
   on:
     tags: true
-    repo: larsclaussen/threedigrid
+    repo: nens/threedigrid
     python: 3.6
