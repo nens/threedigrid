@@ -32,6 +32,18 @@ There are several ways to accomplish this, see the following thread for an overv
  https://gis.stackexchange.com/questions/9553/installing-gdal-and-ogr-for-python
 
 
+Docker
+------
+
+To run threedigrid in a docker::
+
+   $ cd <project_root>
+   $ docker build .
+   $ docker run -it <image id> ipython
+
+To run the tests in the docker same steps as above, then::
+    $ docker run -it <image id> pytest tests
+
 Features
 --------
  - access to the threedicore administration by a single instance of the ``GridH5Admin`` object
