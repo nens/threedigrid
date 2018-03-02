@@ -15,7 +15,7 @@ requirements = ['Click>=6.0', ]
 
 setup_requirements = [ ]
 
-test_requirements = [ ]
+test_requirements = ['pytest==3.4.1']
 
 setup(
     author="Lars Claussen",
@@ -44,11 +44,11 @@ setup(
     include_package_data=True,
     keywords='threedigrid',
     name='threedigrid',
-    packages=find_packages(include=['threedigrid']),
+    packages=find_packages(include=['threedigrid/gridadmin', 'threedigrid/orm']),
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
-    url='https://github.com/larsclaussen/threedigrid',
+    url='https://github.com/nens/threedigrid',
     version='0.1.0',
     zip_safe=False,
 )
