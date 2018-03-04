@@ -32,17 +32,17 @@ There are several ways to accomplish this, see the following thread for an overv
  https://gis.stackexchange.com/questions/9553/installing-gdal-and-ogr-for-python
 
 
-Docker
-------
+Tests
+-----
 
-To run threedigrid in a docker::
+Tests can be run best in a docker container::
 
    $ cd <project_root>
    $ docker build .
-   $ docker run -it <image id> ipython
+   $ docker run --rm <image id> pytest --cov=threedigrid
 
 To run the tests in the docker same steps as above, then::
-    $ docker run -it <image id> pytest tests
+    $ docker run -it <image id> pytest --cov=threedigrid
 
 Features
 --------
