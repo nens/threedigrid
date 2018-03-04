@@ -3,11 +3,10 @@ threedigrid
 ===========
 
 
-.. image:: https://img.shields.io/pypi/v/threedigrid.svg
-        :target: https://pypi.python.org/pypi/threedigrid
 
-.. image:: https://img.shields.io/travis/larsclaussen/threedigrid.svg
+.. image:: https://travis-ci.org/nens/threedigrid.svg?branch=master
         :target: https://travis-ci.org/larsclaussen/threedigrid
+
 
 .. image:: https://readthedocs.org/projects/threedigrid/badge/?version=latest
         :target: https://threedigrid.readthedocs.io/en/latest/?badge=latest
@@ -15,8 +14,7 @@ threedigrid
 
 
 
-
-Grid Admin Python package.
+Python package for the threedigrid administration.
 
 
 * Free software: BSD license
@@ -41,8 +39,6 @@ Tests can be run best in a docker container::
    $ docker build .
    $ docker run --rm <image id> pytest --cov=threedigrid
 
-To run the tests in the docker same steps as above, then::
-    $ docker run -it <image id> pytest --cov=threedigrid
 
 Features
 --------
