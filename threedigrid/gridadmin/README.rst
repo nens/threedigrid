@@ -64,7 +64,7 @@ Quick start
 
 Get a grid admin instance::
 
-    from python_flow.gridadmin.gridadmin import GridH5Admin
+    from threedigrid.gridadmin.gridadmin import GridH5Admin
 
     f = 'gridadmin.h5'
     ga = GridH5Admin(f)
