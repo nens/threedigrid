@@ -1,26 +1,15 @@
 # Config file for automatic testing at travis-ci.org
+sudo: required
 
 language: python
 python:
   - 2.7
 
-# Command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
-install: pip install -r requirements.txt
+services:
+  - docker
 
-# Command to run tests, e.g. python setup.py test
-script: pytest tests
+before_install:
+  - docker build -t threedigrid/test .
 
-# Assuming you have installed the travis-ci CLI tool, after you
-# create the Github repo and add it to Travis, run the
-# following command to finish PyPI deployment setup:
-# $ travis encrypt --add deploy.password
-deploy:
-  provider: pypi
-  distributions: sdist bdist_wheel
-  user: larsclaussen
-  password:
-    secure: PLEASE_REPLACE_ME
-  on:
-    tags: true
-    repo: nens/threedigrid
-    python: 3.6
+script:
+  - docker run --rm carlad/sinatra pytest --cov=threedigrid

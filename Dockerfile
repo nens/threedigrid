@@ -15,5 +15,5 @@ RUN apt-get update && apt-get install -y \
 RUN pip install -U pip
 WORKDIR /code
 COPY requirements.txt /code/requirements.txt
-RUN pip install -r /code/requirements.txt
+RUN pip install --use-wheel -r requirements.txt
 COPY . /code
