@@ -11,9 +11,17 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = ['Click>=6.0', ]
+requirements = [
+    'Click>=6.0',
+    'numpy>=1.13',
+    'h5py>=2.7.1',
+    'mercantile>=1.0.1',
+    'pyproj>=1.9.5.1',
+    'Shapely>=1.6.4',
+    'geojson>=2.3.0'
+]
 
-setup_requirements = [ ]
+setup_requirements = []
 
 test_requirements = ['pytest==3.4.1']
 
@@ -27,12 +35,8 @@ setup(
         'Natural Language :: English',
         "Programming Language :: Python :: 2",
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
     ],
-    description="Grid Admin Python package.",
+    description="Python package for the threedigrid administration",
     entry_points={
         'console_scripts': [
             'threedigrid=threedigrid.cli:main',
@@ -44,7 +48,7 @@ setup(
     include_package_data=True,
     keywords='threedigrid',
     name='threedigrid',
-    packages=find_packages(include=['threedigrid/gridadmin', 'threedigrid/orm']),
+    packages=find_packages(include=['threedigrid', 'orm']),
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,

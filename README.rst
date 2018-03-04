@@ -21,6 +21,14 @@ Python package for the threedigrid administration.
 * Documentation: https://threedigrid.readthedocs.io.
 
 
+Features
+========
+ - access to the threedicore administration by a single instance of the ``GridH5Admin`` object
+ - query the model data by pre-defined subsets and django style filters
+ - export model data to gis formats like shapefile, geopackage
+ - serialize model data as geojson
+
+
 Installation
 ============
 
@@ -79,12 +87,6 @@ Tests can be run best in a docker container::
    $ docker run --rm <image id> pytest --cov=threedigrid
 
 
-Features
-========
- - access to the threedicore administration by a single instance of the ``GridH5Admin`` object
- - query the model data by pre-defined subsets and django style filters
- - export model data to gis formats like shapefile, geopackage
- - serialize model data as geojson
 
 Credits
 =======
