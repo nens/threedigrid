@@ -12,4 +12,4 @@ before_install:
   - docker build -t threedigrid/test .
 
 script:
-  - docker run --rm carlad/sinatra pytest --cov=threedigrid
+  - docker run --rm threedigrid/test pytest --cov=threedigrid
