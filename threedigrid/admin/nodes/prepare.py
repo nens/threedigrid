@@ -4,8 +4,8 @@ from __future__ import unicode_literals
 from __future__ import print_function
 
 import numpy as np
-from threedigrid.gridadmin import constants
-from threedigrid.gridadmin.prepare_utils import (
+from threedigrid.admin import constants
+from threedigrid.admin.prepare_utils import (
         db_objects_to_numpy_array_dict, add_or_update_datasets)
 
 
@@ -93,5 +93,3 @@ class PrepareManholes:
              'calculation_type', 'shape', 'drain_level', 'width',
              'manhole_indicator', 'zoom_category'],
             manhole_numpy_array_dict['pk'], content_pk)
-
-

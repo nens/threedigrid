@@ -5,9 +5,10 @@ from __future__ import print_function
 
 from constants import SHP_DRIVER_NAME, GEO_PACKAGE_DRIVER_NAME
 
-from base.models import Model as BaseModel
-from .fields import LineArrayField, GeomArrayField
-from .filters import FILTER_MAP
+from threedigrid.orm.base.models import Model as BaseModel
+from threedigrid.orm.fields import LineArrayField
+from threedigrid.orm.fields import GeomArrayField
+from threedigrid.orm.filters import FILTER_MAP
 
 
 class Model(BaseModel):

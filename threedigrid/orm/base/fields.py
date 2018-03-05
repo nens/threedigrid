@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
+
 class ArrayField:
     """
     Generic field that can be used to describe values

@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from __future__ import print_function
 
 import exporters
-from threedigrid.gridadmin import constants
+from threedigrid.admin import constants
 from threedigrid.orm.models import Model
 from threedigrid.orm.fields import (
     ArrayField, PointArrayField)
@@ -29,4 +29,3 @@ class Breaches(Model):
         self._exporters = [
             exporters.BreachesOgrExporter(self),
         ]
-

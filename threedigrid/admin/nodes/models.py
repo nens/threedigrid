@@ -14,8 +14,9 @@ from threedigrid.orm.fields import ArrayField
 from threedigrid.orm.fields import PointArrayField
 from threedigrid.orm.fields import PolygonArrayField
 from threedigrid.orm.utils import transform_xys
-from threedigrid.gridadmin.utils import get_smallest_uint_dtype
+from threedigrid.admin.utils import get_smallest_uint_dtype
 import subsets
+
 
 def pairwise(iterable):
     # from https://docs.python.org/2/library/
@@ -24,7 +25,6 @@ def pairwise(iterable):
     a, b = tee(iterable)
     next(b, None)
     return izip(a, b)
-
 
 
 NODE_SUBSETS = {

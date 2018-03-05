@@ -6,8 +6,27 @@ from __future__ import print_function
 import geojson
 import json
 import numpy as np
-from .models import Pipes, Channels, Weirs, Culverts, Orifices
-from threedigrid.gridadmin import constants
+from threedigrid.admin.lines.models import Channels
+from threedigrid.admin.lines.models import Culverts
+from threedigrid.admin.lines.models import Pipes
+from threedigrid.admin.lines.models import Orifices
+from threedigrid.admin.lines.models import Weirs
+from threedigrid.admin import constants
+
+
+FRICTION_CHEZY = 1
+FRICTION_MANNING = 2
+
+PIPE_FRICTION_FORMATS = {
+    FRICTION_CHEZY: 'Chezy, %0.0f [m(1/2)/s]',
+    FRICTION_MANNING: 'Manning, %0.3f s/[m1/3]'
+}
+
+SHAPE_RECTANGLE = 1
+SHAPE_CIRCLE = 2
+SHAPE_EGG = 3
+SHAPE_TABULATED_RECTANGLE = 5
+SHAPE_TABULATED_TRAPEZIUM = 6
 
 
 def format_to_str(value, empty_value='--', format_string='%0.2f'):
@@ -20,27 +39,11 @@ def format_to_str(value, empty_value='--', format_string='%0.2f'):
     return format_string % value
 
 
-FRICTION_CHEZY = 1
-FRICTION_MANNING = 2
-
-PIPE_FRICTION_FORMATS = {
-    FRICTION_CHEZY: 'Chezy, %0.0f [m(1/2)/s]',
-    FRICTION_MANNING: 'Manning, %0.3f s/[m1/3]'
-}
-
-
 def friction_str(friction_value, friction_type):
     if friction_type not in PIPE_FRICTION_FORMATS:
         return 'unknown type=%d value=%f' % (friction_type, friction_value)
 
     return PIPE_FRICTION_FORMATS[friction_type] % friction_value
-
-
-SHAPE_RECTANGLE = 1
-SHAPE_CIRCLE = 2
-SHAPE_EGG = 3
-SHAPE_TABULATED_RECTANGLE = 5
-SHAPE_TABULATED_TRAPEZIUM = 6
 
 
 def cross_section_str(width, height, shape):

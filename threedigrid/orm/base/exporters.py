@@ -28,7 +28,7 @@ class BaseOgrExporter(BaseExporterObject):
     driver = None
 
     def set_driver(self, driver_name='', extension=''):
-        assert any((driver_name, extension)) == True, \
+        assert any((driver_name, extension)), \
             'either driver_name or extension must be given'
         if not driver_name:
             driver_name = constants.EXTENSION_TO_DRIVER_MAP[extension.lower()]

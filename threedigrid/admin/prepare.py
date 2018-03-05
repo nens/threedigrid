@@ -5,21 +5,21 @@ from __future__ import print_function
 
 import logging
 import os
-from threedigrid.gridadmin.h5py_datasource import H5pyGroup
-from threedigrid.gridadmin.idmapper import IdMapper
-from threedigrid.gridadmin import constants
-from threedigrid.gridadmin.gridadmin import GridH5Admin
+from threedigrid.admin.h5py_datasource import H5pyGroup
+from threedigrid.admin.idmapper import IdMapper
+from threedigrid.admin import constants
+from threedigrid.admin.gridadmin import GridH5Admin
 
-from .breaches.prepare import PrepareBreaches
-from .lines.prepare import (
+from threedigrid.admin.breaches.prepare import PrepareBreaches
+from threedigrid.admin.lines.prepare import (
     PrepareLines, PrepareChannels, PreparePipes, PrepareWeirs,
     PrepareOrifices, PrepareCulverts)
 
-from .levees.prepare import PrepareLevees
-from .nodes.prepare import (
+from threedigrid.admin.levees.prepare import PrepareLevees
+from threedigrid.admin.nodes.prepare import (
     PrepareNodes, PrepareManholes, PrepareConnectionNodes)
-from .pumps.prepare import PreparePumps
-from .levees.models import Levees
+from threedigrid.admin.pumps.prepare import PreparePumps
+from threedigrid.admin.levees.models import Levees
 
 logger = logging.getLogger(__name__)
 
@@ -180,8 +180,10 @@ class GridAdminH5Prepare(object):
         # Prepare breaches
         if has_breaches:
             PrepareBreaches.prepare_datasource(
-                H5pyGroup(h5py_file, 'breaches', required=True), line_group['kcu'],
-                id_mapper, levees, line_group['line_coords'])
+                H5pyGroup(h5py_file, 'breaches', required=True),
+                line_group['kcu'], id_mapper, levees,
+                line_group['line_coords']
+            )
 
             h5py_file['breaches'].attrs['prepared'] = 1
 

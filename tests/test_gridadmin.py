@@ -11,15 +11,15 @@ import shutil
 import numpy as np
 import ogr
 
-from threedigrid.gridadmin.gridadmin import GridH5Admin
-from threedigrid.gridadmin.nodes.exporters import CellsOgrExporter
-from threedigrid.gridadmin.nodes.exporters import NodesOgrExporter
-from threedigrid.gridadmin.lines.exporters import LinesOgrExporter
-from threedigrid.gridadmin.breaches.exporters import BreachesOgrExporter
-from threedigrid.gridadmin.constants import SUBSET_1D_ALL
-from threedigrid.gridadmin.constants import SUBSET_2D_OPEN_WATER
-from threedigrid.gridadmin.constants import NO_DATA_VALUE
-from threedigrid.gridadmin.lines.serializers import ChannelsGeoJsonSerializer
+from threedigrid.admin.gridadmin import GridH5Admin
+from threedigrid.admin.nodes.exporters import CellsOgrExporter
+from threedigrid.admin.nodes.exporters import NodesOgrExporter
+from threedigrid.admin.lines.exporters import LinesOgrExporter
+from threedigrid.admin.breaches.exporters import BreachesOgrExporter
+from threedigrid.admin.constants import SUBSET_1D_ALL
+from threedigrid.admin.constants import SUBSET_2D_OPEN_WATER
+from threedigrid.admin.constants import NO_DATA_VALUE
+from threedigrid.admin.lines.serializers import ChannelsGeoJsonSerializer
 
 test_file_dir = os.path.join(
     os.getcwd(), "tests/test_files")

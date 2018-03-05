@@ -7,13 +7,12 @@ from collections import OrderedDict
 
 from osgeo import ogr
 
-from threedigrid.gridadmin.utils import reshape_flat_array
-from threedigrid.gridadmin.utils import get_spatial_reference
+from threedigrid.admin.utils import reshape_flat_array
+from threedigrid.admin.utils import get_spatial_reference
 from threedigrid.orm.base.exporters import BaseOgrExporter
-from threedigrid.gridadmin.constants import GEO_PACKAGE_DRIVER_NAME
-from threedigrid.gridadmin.constants import OGR_FIELD_TYPE_MAP
-from threedigrid.gridadmin.constants import SHP_DRIVER_NAME
-from threedigrid.gridadmin.constants import TYPE_FUNC_MAP
+from threedigrid.admin.constants import GEO_PACKAGE_DRIVER_NAME
+from threedigrid.admin.constants import OGR_FIELD_TYPE_MAP
+from threedigrid.admin.constants import SHP_DRIVER_NAME
 
 logger = logging.getLogger(__name__)
 
@@ -80,8 +79,12 @@ class LeveeOgrExporter(BaseOgrExporter):
             #     print("value  ", value)
 
             feature.SetField(str('id'), int(levee_data['id'][i]))
-            feature.SetField(str('cr_level'), float(levee_data['crest_level'][i]))
-            feature.SetField(str('mx_depth'), float(levee_data['max_breach_depth'][i]))
+            feature.SetField(
+                str('cr_level'), float(levee_data['crest_level'][i])
+            )
+            feature.SetField(
+                str('mx_depth'), float(levee_data['max_breach_depth'][i])
+            )
 
             layer.CreateFeature(feature)
             feature.Destroy()
