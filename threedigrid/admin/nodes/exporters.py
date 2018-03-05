@@ -11,14 +11,14 @@ from osgeo import ogr
 
 from threedigrid.orm.base.exporters import BaseOgrExporter
 
-from threedigrid.gridadmin.utils import get_spatial_reference
-from threedigrid.gridadmin.constants import OGR_FIELD_TYPE_MAP
-from threedigrid.gridadmin.constants import SHP_DRIVER_NAME
-from threedigrid.gridadmin.constants import GEO_PACKAGE_DRIVER_NAME
-from threedigrid.gridadmin.constants import NODE_BASE_FIELDS
-from threedigrid.gridadmin.constants import NODE_1D_FIELDS
-from threedigrid.gridadmin.constants import NODE_FIELD_NAME_MAP
-from threedigrid.gridadmin.constants import TYPE_FUNC_MAP
+from threedigrid.admin.utils import get_spatial_reference
+from threedigrid.admin.constants import OGR_FIELD_TYPE_MAP
+from threedigrid.admin.constants import SHP_DRIVER_NAME
+from threedigrid.admin.constants import GEO_PACKAGE_DRIVER_NAME
+from threedigrid.admin.constants import NODE_BASE_FIELDS
+from threedigrid.admin.constants import NODE_1D_FIELDS
+from threedigrid.admin.constants import NODE_FIELD_NAME_MAP
+from threedigrid.admin.constants import TYPE_FUNC_MAP
 
 logger = logging.getLogger(__name__)
 

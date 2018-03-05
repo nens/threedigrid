@@ -7,8 +7,8 @@ import numpy as np
 import constants
 import logging
 
-from threedigrid.gridadmin.utils import get_or_create_group
-from threedigrid.gridadmin.constants import TYPE_CODE_MAP
+from threedigrid.admin.utils import get_or_create_group
+from threedigrid.admin.constants import TYPE_CODE_MAP
 
 logger = logging.getLogger(__name__)
 

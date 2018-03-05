@@ -9,12 +9,12 @@ from collections import OrderedDict
 
 from osgeo import ogr
 
-from threedigrid.gridadmin.utils import reshape_flat_array
-from threedigrid.gridadmin.utils import get_spatial_reference
-from threedigrid.gridadmin.utils import KCUDescriptor
-from threedigrid.gridadmin.constants import GEO_PACKAGE_DRIVER_NAME
-from threedigrid.gridadmin.constants import OGR_FIELD_TYPE_MAP
-from threedigrid.gridadmin.constants import SHP_DRIVER_NAME
+from threedigrid.admin.utils import reshape_flat_array
+from threedigrid.admin.utils import get_spatial_reference
+from threedigrid.admin.utils import KCUDescriptor
+from threedigrid.admin.constants import GEO_PACKAGE_DRIVER_NAME
+from threedigrid.admin.constants import OGR_FIELD_TYPE_MAP
+from threedigrid.admin.constants import SHP_DRIVER_NAME
 from threedigrid.orm.base.exporters import BaseOgrExporter
 
 logger = logging.getLogger(__name__)

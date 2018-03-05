@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
+
 class NotConsistentException(Exception):
     """Is raises when data is not consistent"""
     pass

@@ -23,7 +23,7 @@ requirements = [
 
 setup_requirements = []
 
-test_requirements = ['pytest==3.4.1']
+test_requirements = ['pytest==3.4.1', ]
 
 setup(
     author="Lars Claussen",
@@ -48,7 +48,9 @@ setup(
     include_package_data=True,
     keywords='threedigrid',
     name='threedigrid',
-    packages=find_packages(include=['threedigrid', 'orm']),
+    # packages=find_packages(include=['threedigrid']),
+    packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
+    # packages=find_packages(),
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,

@@ -4,8 +4,8 @@ from __future__ import unicode_literals
 from __future__ import print_function
 
 import numpy as np
-from threedigrid.gridadmin.utils import PKMapper
-from threedigrid.gridadmin.prepare_utils import db_objects_to_numpy_array_dict
+from threedigrid.admin.utils import PKMapper
+from threedigrid.admin.prepare_utils import db_objects_to_numpy_array_dict
 
 
 class PreparePumps:

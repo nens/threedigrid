@@ -7,8 +7,8 @@ import h5py
 import numpy as np
 from shapely import wkt
 from shapely.geometry import MultiPoint, Point
-from threedigrid.gridadmin import constants
-from threedigrid.gridadmin.prepare_utils import (
+from threedigrid.admin import constants
+from threedigrid.admin.prepare_utils import (
         db_objects_to_numpy_array_dict, add_or_update_datasets)
 
 
@@ -190,11 +190,11 @@ class PrepareLines(object):
                 datasource.set('content_type', [str(x) for x in content_type])
 
         if 'line_coords' not in datasource.keys():
-            l = as_numpy_array(datasource['line'])
+            line = as_numpy_array(datasource['line'])
             x, y = as_numpy_array(node_coordinates[0]),\
                 as_numpy_array(node_coordinates[1])
             datasource.set('line_coords', np.array(
-                [x[l[0]], y[l[0]], x[l[1]], y[l[1]]]))
+                [x[line[0]], y[line[0]], x[line[1]], y[line[1]]]))
 
         if has_1d and 'line_geometries' not in datasource.keys():
             line_geometries = cls.make_line_geometries(datasource,

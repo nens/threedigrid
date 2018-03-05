@@ -5,10 +5,14 @@ from __future__ import print_function
 
 import numpy as np
 from base.fields import ArrayField
-from .utils import (
-    transform_xys, angle_in_degrees,
-    select_points_by_tile, select_lines_by_tile, select_lines_by_bbox,
-    select_points_by_bbox, reshape_flat_array, get_bbox_by_point)
+from threedigrid.orm.utils import angle_in_degrees
+from threedigrid.orm.utils import get_bbox_by_point
+from threedigrid.orm.utils import reshape_flat_array
+from threedigrid.orm.utils import select_points_by_tile
+from threedigrid.orm.utils import select_lines_by_tile
+from threedigrid.orm.utils import select_lines_by_bbox
+from threedigrid.orm.utils import select_points_by_bbox
+from threedigrid.orm.utils import transform_xys
 
 
 class GeomArrayField(ArrayField):
@@ -128,6 +132,7 @@ class LineArrayField(GeomArrayField):
 
 
 class MultiLineArrayField(GeomArrayField):
+
     def reproject(self, values, source_epsg, target_epsg):
         """
         Reproject the line/bbox coordinates:

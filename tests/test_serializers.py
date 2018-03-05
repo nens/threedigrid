@@ -7,9 +7,9 @@ import os
 import unittest
 import json
 
-from threedigrid.gridadmin.gridadmin import GridH5Admin
-from threedigrid.gridadmin.lines.serializers import ChannelsGeoJsonSerializer
-from threedigrid.gridadmin.lines.serializers import WeirsGeoJsonSerializer
+from threedigrid.admin.gridadmin import GridH5Admin
+from threedigrid.admin.lines.serializers import ChannelsGeoJsonSerializer
+from threedigrid.admin.lines.serializers import WeirsGeoJsonSerializer
 
 test_file_dir = os.path.join(
     os.getcwd(), "tests/test_files")

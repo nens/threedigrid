@@ -55,7 +55,7 @@ container for structured, annotated data. The basic definition of a model looks 
         line = IndexArrayField(to='Nodes')
         line_geometries = MultiLineArrayField()
 
-The most important functionality exposed by a model instance, obviously, is: 
+The most important functionality exposed by a model instance, obviously, is:
 filtering, geo transformations, data serialisation and data export.
 
 
@@ -64,7 +64,7 @@ Quick start
 
 Get a grid admin instance::
 
-    from threedigrid.gridadmin.gridadmin import GridH5Admin
+    from threedigrid import GridH5Admin
 
     f = 'gridadmin.h5'
     ga = GridH5Admin(f)
@@ -176,7 +176,7 @@ The API includes Geojson serializers to convert model data to
 geojson. Serializers can be used on models that have filtering/subset and reprojection,
 for example generating the geojson of all 2D open water channels in WGS84::
 
-    from python_flow.gridadmin.lines.serializers import ChannelsGeoJsonSerializer
+    from threedigrid.admin.lines.serializers import ChannelsGeoJsonSerializer
 
     channels_wgs84 = ga.lines.channels.subset('1D_ALL').reproject_to('4326')
 
@@ -189,14 +189,14 @@ Exporters
 Like serializers, exporters allow to export model data to files. For example exporting
 all 2D open water lines in WGS84 into a shape file::
 
-    from python_flow.gridadmin.lines.exporters import LinesOgrExporter
+    from threedigrid.admin.lines.exporters import LinesOgrExporter
 
     line_2d_open_water_wgs84 = ga.lines.subset('2D_OPEN_WATER').reproject_to('4326')
 
-    exporter = LinesOgrExporter(line_2d_open_water_wgs84) 
+    exporter = LinesOgrExporter(line_2d_open_water_wgs84)
     exporter.save('/tmp/line.shp', line_2d_open_water_wgs84.data, '4326')
 
-   
+
 Note: most models have shortcut methods for exporting their data for shape files and geopackages, like::
 
     # Shape file

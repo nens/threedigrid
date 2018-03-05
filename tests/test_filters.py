@@ -77,7 +77,7 @@ class PointFilterTests(unittest.TestCase):
     def test_point_filter(self):
         f = PointFilter('coord_cells', self.field, np.array([1, 5]))
         filtered = f.filter(
-            {'coord_cells': np.array([[0,2], [0,2], [6,6], [10,11]])}
+            {'coord_cells': np.array([[0, 2], [0, 2], [6, 6], [10, 11]])}
         )
         self.assertTrue(filtered[0])
         self.assertFalse(filtered[1])

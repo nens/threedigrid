@@ -5,8 +5,8 @@ from __future__ import print_function
 
 import json
 import geojson
-from .models import Pumps
-from threedigrid.gridadmin import constants
+from threedigrid.admin.pumps.models import Pumps
+from threedigrid.admin import constants
 
 
 def format_to_str(value, empty_value='--', format_string='%0.2f'):
