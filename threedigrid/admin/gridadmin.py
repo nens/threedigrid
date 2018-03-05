@@ -10,14 +10,14 @@ import numpy as np
 
 from threedigrid.orm.utils import transform_xys
 
-from .lines.models import Lines
-from .nodes.models import Nodes
-from .nodes.models import Cells
-from .nodes.models import Grid
-from .breaches.models import Breaches
-from .pumps.models import Pumps
-from .levees.models import Levees
-from .h5py_datasource import H5pyGroup
+from threedigrid.admin.lines.models import Lines
+from threedigrid.admin.nodes.models import Nodes
+from threedigrid.admin.nodes.models import Cells
+from threedigrid.admin.nodes.models import Grid
+from threedigrid.admin.breaches.models import Breaches
+from threedigrid.admin.pumps.models import Pumps
+from threedigrid.admin.levees.models import Levees
+from threedigrid.admin.h5py_datasource import H5pyGroup
 import constants
 
 logger = logging.getLogger(__name__)

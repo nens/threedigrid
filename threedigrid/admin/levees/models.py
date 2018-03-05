@@ -8,7 +8,7 @@ import ogr
 from threedigrid.orm.models import Model
 from threedigrid.orm.fields import MultiLineArrayField
 from threedigrid.orm.fields import ArrayField
-from threedigrid.gridadmin.utils import reshape_flat_array
+from threedigrid.admin.utils import reshape_flat_array
 
 import exporters
 

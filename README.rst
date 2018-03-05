@@ -83,8 +83,8 @@ Tests
 Tests can be run best in a docker container::
 
    $ cd <project_root>
-   $ docker build .
-   $ docker run --rm <image id> pytest --cov=threedigrid
+   $ docker build -t threedigrid:test .
+   $ docker run --rm threedigrid:test pytest --cov=threedigrid --flake8
 
 
 

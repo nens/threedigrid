@@ -5,7 +5,7 @@ from __future__ import print_function
 
 import ogr
 import numpy as np
-from threedigrid.gridadmin import constants
+from threedigrid.admin import constants
 
 
 def as_numpy_array(array):

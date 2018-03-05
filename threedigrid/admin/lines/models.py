@@ -13,7 +13,6 @@ from threedigrid.orm.base.fields import IndexArrayField
 import subsets
 
 
-
 LINE_SUBSETS = {
     'kcu__in': subsets.KCU__IN_SUBSETS
 }

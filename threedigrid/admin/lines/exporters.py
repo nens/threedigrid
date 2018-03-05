@@ -9,16 +9,16 @@ import logging
 from osgeo import ogr
 from shapely.geometry import LineString
 
-from threedigrid.gridadmin.utils import get_spatial_reference
-from threedigrid.gridadmin.utils import KCUDescriptor
+from threedigrid.admin.utils import get_spatial_reference
+from threedigrid.admin.utils import KCUDescriptor
 from threedigrid.orm.base.exporters import BaseOgrExporter
-from threedigrid.gridadmin.constants import GEO_PACKAGE_DRIVER_NAME
-from threedigrid.gridadmin.constants import OGR_FIELD_TYPE_MAP
-from threedigrid.gridadmin.constants import SHP_DRIVER_NAME
-from threedigrid.gridadmin.constants import LINE_BASE_FIELDS
-from threedigrid.gridadmin.constants import LINE_1D_FIELDS
-from threedigrid.gridadmin.constants import LINE_FIELD_NAME_MAP
-from threedigrid.gridadmin.constants import TYPE_FUNC_MAP
+from threedigrid.admin.constants import GEO_PACKAGE_DRIVER_NAME
+from threedigrid.admin.constants import OGR_FIELD_TYPE_MAP
+from threedigrid.admin.constants import SHP_DRIVER_NAME
+from threedigrid.admin.constants import LINE_BASE_FIELDS
+from threedigrid.admin.constants import LINE_1D_FIELDS
+from threedigrid.admin.constants import LINE_FIELD_NAME_MAP
+from threedigrid.admin.constants import TYPE_FUNC_MAP
 
 
 logger = logging.getLogger(__name__)
@@ -86,7 +86,7 @@ class LinesOgrExporter(BaseOgrExporter):
                 line.AddPoint(line_data['line_coords'][2][i],
                               line_data['line_coords'][3][i])
             elif geom_source == 'from_spatialite':
-                linepoints = line_data['line_geometries'][i].reshape(2,-1).T
+                linepoints = line_data['line_geometries'][i].reshape(2, -1).T
                 line_geom = LineString(linepoints)
                 line = ogr.CreateGeometryFromWkt(line_geom.wkt)
 

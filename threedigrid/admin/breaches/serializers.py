@@ -6,8 +6,8 @@ from __future__ import print_function
 import numpy as np
 import geojson
 import json
-from .models import Breaches
-from threedigrid.gridadmin import constants
+from threedigrid.admin.breaches.models import Breaches
+from threedigrid.admin import constants
 
 
 class BreachesGeoJsonSerializer():

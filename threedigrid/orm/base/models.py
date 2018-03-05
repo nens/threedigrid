@@ -11,10 +11,12 @@ from itertools import chain
 
 from abc import ABCMeta
 from collections import OrderedDict
-from .exceptions import OperationNotSupportedError
 
-from .fields import ArrayField, IndexArrayField
-from .filters import SliceFilter, get_filter
+from threedigrid.orm.base.exceptions import OperationNotSupportedError
+from threedigrid.orm.base.fields import ArrayField
+from threedigrid.orm.base.fields import IndexArrayField
+from threedigrid.orm.base.filters import get_filter
+from threedigrid.orm.base.filters import SliceFilter
 
 logger = logging.getLogger(__name__)
 
@@ -348,7 +350,7 @@ class Model:
         """
 
         _tmp = OrderedDict()
-        for k,v in selection.iteritems():
+        for k, v in selection.iteritems():
             try:
                 _tmp[k] = v[:]
             except TypeError:

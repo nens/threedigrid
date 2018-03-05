@@ -5,8 +5,10 @@ from __future__ import print_function
 
 import geojson
 import json
-from .models import ConnectionNodes, Manholes, AddedCalculationNodes
-from threedigrid.gridadmin import constants
+from threedigrid.admin.nodes.models import AddedCalculationNodes
+from threedigrid.admin.nodes.models import ConnectionNodes
+from threedigrid.admin.nodes.models import Manholes
+from threedigrid.admin import constants
 
 
 class ManholesGeoJsonSerializer():
