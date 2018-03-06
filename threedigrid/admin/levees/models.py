@@ -10,7 +10,7 @@ from threedigrid.orm.fields import MultiLineArrayField
 from threedigrid.orm.fields import ArrayField
 from threedigrid.admin.utils import reshape_flat_array
 
-import exporters
+from threedigrid.admin.levees import exporters
 
 
 class Levees(Model):

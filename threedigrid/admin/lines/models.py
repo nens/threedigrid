@@ -3,14 +3,14 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
-import exporters
 import numpy as np
 
+from threedigrid.admin.lines import exporters
 from threedigrid.orm.models import Model
 from threedigrid.orm.fields import (
     ArrayField, LineArrayField, MultiLineArrayField)
 from threedigrid.orm.base.fields import IndexArrayField
-import subsets
+from threedigrid.admin.lines import subsets
 
 
 LINE_SUBSETS = {
