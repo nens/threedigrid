@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
-import exporters
+from threedigrid.admin.breaches import exporters
 from threedigrid.admin import constants
 from threedigrid.orm.models import Model
 from threedigrid.orm.fields import (
