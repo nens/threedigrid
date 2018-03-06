@@ -32,6 +32,10 @@ Features
 Installation
 ============
 
+Using pip::
+
+    $ pip install threedigrid
+
 To be able to use the full range of features you need to install the python gdal bindings.
 There are several ways to accomplish this, see the following thread for an overview:
 
@@ -43,7 +47,7 @@ Quick start
 
 Get a grid admin instance::
 
-    from threedigrid.gridadmin.gridadmin import GridH5Admin
+    from threedigrid import GridH5Admin
 
     f = 'gridadmin.h5'
     ga = GridH5Admin(f)
