@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 from __future__ import print_function
 
 import numpy as np
-import exporters
 
 from itertools import izip
 from itertools import tee
@@ -15,7 +14,8 @@ from threedigrid.orm.fields import PointArrayField
 from threedigrid.orm.fields import PolygonArrayField
 from threedigrid.orm.utils import transform_xys
 from threedigrid.admin.utils import get_smallest_uint_dtype
-import subsets
+from threedigrid.admin.nodes import exporters
+from threedigrid.admin.nodes import subsets
 
 
 def pairwise(iterable):
