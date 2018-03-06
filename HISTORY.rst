@@ -5,7 +5,9 @@ History
 0.1.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- All imports are absolute.
+
+- Added install info using pip.
 
 
 0.1.0 (2018-03-05)
