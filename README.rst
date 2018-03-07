@@ -45,6 +45,18 @@ There are several ways to accomplish this, see the following thread for an overv
 Quick start
 ===========
 
+Console script
+--------------
+
+Using the kick_start shortcut, simply run::
+
+    $ kick_starter --grid-file=<the to grid file>
+
+This will invoke an ipython session with a ``GridH5Admin`` instance already loaded.
+
+
+(I)Python shell
+---------------
 Get a grid admin instance::
 
     from threedigrid import GridH5Admin
