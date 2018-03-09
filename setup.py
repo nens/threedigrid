@@ -29,12 +29,14 @@ setup(
     author="Lars Claussen",
     author_email='lars.claussen@nelen-schuurmans.nl',
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Natural Language :: English',
         "Programming Language :: Python :: 2",
         'Programming Language :: Python :: 2.7',
+        'Topic :: Scientific/Engineering'
+        'Topic :: Scientific/Engineering :: GIS',
     ],
     description="Python package for the threedigrid administration",
     entry_points={
