@@ -70,10 +70,8 @@ class GridAdminTest(unittest.TestCase):
         model_extent = self.parser.get_model_extent()
         np.testing.assert_almost_equal(
             model_extent,
-            np.array([
-                [105427.6, 105427.6],
-                [523463.32684827, 523463.32684827]
-            ])
+            np.array([105427.6, 511727.0515702,
+                      115887., 523463.3268483])
         )
 
     def test_get_model_extent_extra_extent(self):
@@ -85,9 +83,7 @@ class GridAdminTest(unittest.TestCase):
         model_extent = self.parser.get_model_extent(**extra_extent)
         np.testing.assert_equal(
             model_extent,
-            np.array([[ 90000.,  90000.],
-                      [580000., 580000.]
-            ])
+            np.array([100000., 90000., 550000., 580000.])
         )
 
     def test_get_model_extent_extra_extent2(self):
@@ -99,9 +95,7 @@ class GridAdminTest(unittest.TestCase):
         model_extent = self.parser.get_model_extent(**extra_extent)
         np.testing.assert_almost_equal(
             model_extent,
-            np.array([[105427.6, 105427.6],
-                      [580000., 580000.]
-            ])
+            np.array([105427.6, 106666.6, 550000., 580000.])
         )
 
     def test_properties(self):
