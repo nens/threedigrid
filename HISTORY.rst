@@ -2,7 +2,7 @@
 History
 =======
 
-0.1.2 (unreleased)
+0.1.2 (2018-03-12)
 ------------------
 
 - Get model extent now always returns a bbox (minX, minY, maxX, maxY)
