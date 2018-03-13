@@ -5,7 +5,10 @@ from __future__ import print_function
 
 import logging
 
-import mercantile
+try:
+    import mercantile
+except ImportError:
+    pass
 import numpy as np
 from pyproj import transform, Proj
 import osr

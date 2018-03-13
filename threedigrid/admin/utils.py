@@ -7,7 +7,10 @@ import logging
 from itertools import izip
 from itertools import tee
 
-import mercantile
+try:
+    import mercantile
+except ImportError:
+    pass
 import numpy as np
 from pyproj import transform, Proj
 import osr
