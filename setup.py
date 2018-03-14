@@ -15,7 +15,6 @@ requirements = [
     'Click>=6.0',
     'numpy>=1.13',
     'h5py>=2.7.1',
-    'mercantile>=1.0.1',
     'pyproj>=1.9.5.1',
     'Shapely>=1.6.4',
     'geojson>=2.3.0'
@@ -48,10 +47,14 @@ setup(
     include_package_data=True,
     keywords='threedigrid',
     name='threedigrid',
-    packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
+    packages=find_packages(
+        exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
+    extras_require={
+        'TILE': ['mercantile>=1.0.1'],
+    },
     url='https://github.com/nens/threedigrid',
     version='0.1.3.dev0',
     zip_safe=False,

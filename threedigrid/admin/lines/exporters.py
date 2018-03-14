@@ -9,7 +9,7 @@ import logging
 from osgeo import ogr
 from shapely.geometry import LineString
 
-from threedigrid.admin.utils import get_spatial_reference
+from threedigrid.orm.utils import get_spatial_reference
 from threedigrid.admin.utils import KCUDescriptor
 from threedigrid.orm.base.exporters import BaseOgrExporter
 from threedigrid.admin.constants import GEO_PACKAGE_DRIVER_NAME

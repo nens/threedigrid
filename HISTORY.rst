@@ -5,7 +5,7 @@ History
 0.1.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+-
 
 
 0.1.2 (2018-03-12)

@@ -5,15 +5,25 @@ from __future__ import print_function
 
 import logging
 
-try:
-    import mercantile
-except ImportError:
-    pass
 import numpy as np
 from pyproj import transform, Proj
 import osr
 
+# only available with extra setup option [TILE]
+try:
+    import mercantile
+except ImportError:
+    mercantile = None
+
 logger = logging.getLogger(__name__)
+
+MERCANTILE_EPSG_CODE = '4326'
+
+BBOX_LEFT = 0
+BBOX_TOP = 1
+BBOX_RIGHT = 2
+BBOX_BOTTOM = 3
+
 
 
 def angle_in_degrees(x0, y0, x1, y1):
@@ -104,14 +114,6 @@ def get_spatial_reference(epsg_code):
         raise
 
 
-MERCANTILE_EPSG_CODE = '4326'
-
-BBOX_LEFT = 0
-BBOX_TOP = 1
-BBOX_RIGHT = 2
-BBOX_BOTTOM = 3
-
-
 def transform_bbox(bbox, source_epsg_code, target_epsg_code):
     """
     Transform bbox from source_epsg_code to target_epsg_code,
@@ -165,6 +167,12 @@ def get_bbox_for_tile(tile_xyz=(0, 0, 0), target_epsg_code='4326'):
     array([  212572.58551456,  5468921.2451706 ,   212705.73721283,
             5469031.60724307])
     """
+    if mercantile is None:
+        raise ImportError(
+            'Could not import mercantile, you need to install threedigrid '
+            'with the extra [TILE], e.g '
+            'pip install threedigrid[TILE]==<version>'
+        )
     bbox = np.array(
         mercantile.bounds(
             mercantile.Tile(
