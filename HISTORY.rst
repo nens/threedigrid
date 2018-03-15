@@ -5,7 +5,9 @@ History
 0.1.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Remove property ``has_groundwater`` from ``GridH5Admin``.
+  Should always be provided by the threedicore itself. Gives a warning for
+  backwards compatibility.
 
 
 0.1.2 (2018-03-12)
