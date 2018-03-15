@@ -7,8 +7,8 @@ from collections import OrderedDict
 
 from osgeo import ogr
 
-from threedigrid.orm.utils import reshape_flat_array
-from threedigrid.orm.utils import get_spatial_reference
+from threedigrid.numpy_utils import reshape_flat_array
+from threedigrid.geo_utils import get_spatial_reference
 from threedigrid.orm.base.exporters import BaseOgrExporter
 from threedigrid.admin.constants import GEO_PACKAGE_DRIVER_NAME
 from threedigrid.admin.constants import OGR_FIELD_TYPE_MAP

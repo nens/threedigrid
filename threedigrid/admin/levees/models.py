@@ -5,10 +5,10 @@ from __future__ import print_function
 
 import ogr
 
+from threedigrid.numpy_utils import reshape_flat_array
 from threedigrid.orm.models import Model
 from threedigrid.orm.fields import MultiLineArrayField
 from threedigrid.orm.fields import ArrayField
-from threedigrid.orm.utils import reshape_flat_array
 
 from threedigrid.admin.levees import exporters
 

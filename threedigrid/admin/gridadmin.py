@@ -8,7 +8,7 @@ import logging
 import h5py
 import numpy as np
 
-from threedigrid.orm.utils import transform_bbox
+from threedigrid.geo_utils import transform_bbox
 
 from threedigrid.admin.lines.models import Lines
 from threedigrid.admin.nodes.models import Nodes

@@ -12,17 +12,26 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
-    'Click>=6.0',
     'numpy>=1.13',
     'h5py>=2.7.1',
+]
+
+# for extra 'cmd'
+cmd_line_requirements = [
+    'Click>=6.0'
+]
+
+# for extra 'geo'
+geo_requirements = [
+    'mercantile>=1.0.1',
     'pyproj>=1.9.5.1',
     'Shapely>=1.6.4',
-    'geojson>=2.3.0'
+    'geojson>=2.3.0',
 ]
 
 setup_requirements = []
 
-test_requirements = ['pytest==3.4.1', ]
+test_requirements = ['pytest==3.4.1']
 
 setup(
     author="Lars Claussen",
@@ -38,7 +47,7 @@ setup(
     description="Python package for the threedigrid administration",
     entry_points={
         'console_scripts': [
-            'threedigrid=threedigrid.cli:main',
+            'threedigrid=threedigrid.cli:main [cmd]',
         ],
     },
     install_requires=requirements,
@@ -53,7 +62,8 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     extras_require={
-        'TILE': ['mercantile>=1.0.1'],
+        'geo': geo_requirements,
+        'cmd': cmd_line_requirements,
     },
     url='https://github.com/nens/threedigrid',
     version='0.1.3.dev0',
