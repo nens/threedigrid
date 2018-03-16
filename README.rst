@@ -48,11 +48,19 @@ Quick start
 Console script
 --------------
 
-Using the kick_start shortcut, simply run::
+Using the 3digrid_explore shortcut, simply run::
 
-    $ kick_starter --grid-file=<the to grid file>
+    $ 3digrid_explore --grid-file=<the to grid file> --ipy
 
 This will invoke an ipython session with a ``GridH5Admin`` instance already loaded.
+
+To get a quick overview of the threedimodels meta data ommit the ``--ipy`` or
+explicitly run::
+
+    $ 3digrid_explore --grid-file=<the to grid file> --no-ipy
+
+This will produce output like this::
+
 
 
 (I)Python shell

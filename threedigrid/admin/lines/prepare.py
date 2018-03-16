@@ -109,12 +109,13 @@ class PrepareLines(object):
                 line_geometries[line_idx] = PrepareLines._cut_geometries(
                     geom,
                     start_x[line_idx], start_y[line_idx],
-                    end_x[line_idx], end_y[line_idx])
+                    end_x[line_idx], end_y[line_idx],
+                    datasource['kcu'][line_idx])
 
         return line_geometries
 
     @staticmethod
-    def _cut_geometries(geom, start_x, start_y, end_x, end_y):
+    def _cut_geometries(geom, start_x, start_y, end_x, end_y, kcu):
         """
         Segmentize line geometry based on start and end points from calc
         line segments
@@ -136,6 +137,7 @@ class PrepareLines(object):
             end_distance = round(geom.project(end_points[piece]), 3)
             coords = list(geom.coords)
             start_set = False
+            # no additional calc points
             if start_distance <= 0.0 and end_distance >= geom.length:
                 linestring = np.array(
                     [(start_points[piece].x, start_points[piece].y)] +
@@ -145,17 +147,24 @@ class PrepareLines(object):
                 cut_geometries[piece] = linestring.flatten('F')
 
             for i, p in enumerate(coords):
+                # dist to vertex
                 pd = round(geom.project(Point(p)), 3)
 
+                # should not happen but sometimes drawing direction does not
+                # correspond with start and endpoints, so flip them
                 if start_distance > end_distance:
                     # This is not safe!!!!!!
+                    # TODO: check if this actually can happen
                     start_distance, end_distance = end_distance, start_distance
                     start_points, end_points = end_points, start_points
 
+                # check for start point
                 if (pd == start_distance) and not start_set:
                     start_pnt = []
                     start_i = i
                     start_set = True
+                # should not happen but in case pd (point) and first vertex
+                # do not have the same position move pd back
                 elif (pd > start_distance) and not start_set:
                     start_pnt = [
                         (start_points[piece].x, start_points[piece].y)]
