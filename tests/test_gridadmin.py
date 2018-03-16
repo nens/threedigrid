@@ -248,12 +248,39 @@ class GridAdminCellsTest(unittest.TestCase):
         )
 
     def test_get_id_from_xy(self):
-
-        self.assertIsNone(self.parser.cells.get_id_from_xy(1.,2.))
+        # should yield tow ids, one for 2d, one for groundwater
+        self.assertListEqual(self.parser.cells.get_id_from_xy(1.,2.), [])
         # first coordinate pair + some offset
         x = self.parser.cells.coordinates[0][1] + 0.5
         y = self.parser.cells.coordinates[1][1] + 0.5
-        self.assertEqual(self.parser.cells.get_id_from_xy(x,y), 1)
+        self.assertListEqual(self.parser.cells.get_id_from_xy(x,y), [1, 6537])
+
+    def test_get_id_from_xy_2d_open_water(self):
+
+        self.assertListEqual(
+            self.parser.cells.get_id_from_xy(
+                1.,2., subset_name='2d_open_water'), [])
+        # first coordinate pair + some offset
+        x = self.parser.cells.coordinates[0][1] + 0.5
+        y = self.parser.cells.coordinates[1][1] + 0.5
+        self.assertEqual(
+            self.parser.cells.get_id_from_xy(
+                x,y, subset_name='2d_open_water'
+            ), [1]
+        )
+
+    def test_get_id_from_xy_groundwater(self):
+
+        self.assertListEqual(self.parser.cells.get_id_from_xy(
+            1.,2., subset_name='groundwater_all'), [])
+        # first coordinate pair + some offset
+        x = self.parser.cells.coordinates[0][1] + 0.5
+        y = self.parser.cells.coordinates[1][1] + 0.5
+        self.assertEqual(
+            self.parser.cells.get_id_from_xy(
+                x,y, subset_name='groundwater_all'
+            ), [6537]
+        )
 
     def test_exporters(self):
         self.assertEqual(len(self.parser.cells._exporters), 1)
