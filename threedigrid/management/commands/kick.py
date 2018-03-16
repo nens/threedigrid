@@ -4,8 +4,9 @@
 from IPython.terminal.embed import InteractiveShellEmbed
 
 import click
-from admin.gridadmin import GridH5Admin
-from threedigrid.help_texts import model_overview
+
+from threedigrid.admin.gridadmin import GridH5Admin
+from threedigrid.management.help_texts import model_overview
 
 @click.command()
 @click.option('--grid-file', prompt='Path to the admin file',
@@ -26,6 +27,18 @@ def kick_start(grid_file, ipy):
         click.secho(info_txt, bg='green', fg='black', bold=True)
         ipshell = InteractiveShellEmbed(exit_msg='Ciao...\n')
         ipshell()
+
+@click.command()
+@click.option('--grid-file', prompt='Path to the admin file',
+              help='Path to the admin file', type=click.Path(exists=True))
+@click.argument('model')
+@click.argument('subset')
+def export_to(grid_file, model, subset):
+    grid = GridH5Admin(grid_file)
+    m = getattr(grid, model)
+    s = getattr(m, "subset")(subset)
+    click.echo(s.data)
+
 
 if __name__ == "__main__":
     kick_start()
