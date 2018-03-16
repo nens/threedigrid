@@ -142,9 +142,7 @@ class Cells(Nodes):
         if subset_name:
             inst = self.subset(subset_name)
         id = inst.filter(cell_coords__contains_point=xy).id
-        if id.size == 1:
-            return int(id[0])
-        return None
+        return id.tolist()
 
     def __repr__(self):
         return "<orm cells instance of {}>".format(self.model_name)
