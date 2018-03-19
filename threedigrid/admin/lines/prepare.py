@@ -96,6 +96,7 @@ class PrepareLines(object):
         start_y = datasource['line_coords'][1][:]
         end_x = datasource['line_coords'][2][:]
         end_y = datasource['line_coords'][3][:]
+        kcu = datasource['kcu'][:]
         xys = np.array(zip(start_x.T, end_x.T, start_y.T, end_y.T))
         for i in range(len(line_geometries)):
             line_geometries[i] = np.array(xys[i])
@@ -110,12 +111,16 @@ class PrepareLines(object):
                     geom,
                     start_x[line_idx], start_y[line_idx],
                     end_x[line_idx], end_y[line_idx],
-                    datasource['kcu'][line_idx])
+                    kcu[line_idx])
 
         return line_geometries
 
+    # @staticmethod
+    # def interpolate_point(line_geom, pnt):
+    #     line_geom.interpolate(line_geom.project(pnt))
+
     @staticmethod
-    def _cut_geometries(geom, start_x, start_y, end_x, end_y, kcu):
+    def _cut_geometries(geom, start_x, start_y, end_x, end_y, kcu_array):
         """
         Segmentize line geometry based on start and end points from calc
         line segments
@@ -132,17 +137,23 @@ class PrepareLines(object):
         end_points = MultiPoint(zip(end_x, end_y))
 
         for piece in range(len(cut_geometries)):
-
-            start_distance = round(geom.project(start_points[piece]), 3)
-            end_distance = round(geom.project(end_points[piece]), 3)
+            kcu = kcu_array[piece]
+            if kcu == 0:
+                start_pnt = geom.interpolate(geom.project(start_points[piece]))
+                end_pnt = geom.interpolate(geom.project(end_points[piece]))
+            else:
+                start_pnt = start_points[piece]
+                end_pnt = end_points[piece]
+            start_distance = round(geom.project(start_pnt), 3)
+            end_distance = round(geom.project(end_pnt), 3)
             coords = list(geom.coords)
             start_set = False
             # no additional calc points
             if start_distance <= 0.0 and end_distance >= geom.length:
                 linestring = np.array(
-                    [(start_points[piece].x, start_points[piece].y)] +
+                    [(start_pnt.x, start_pnt.y)] +
                     coords[1:-1] +
-                    [(end_points[piece].x, end_points[piece].y)])
+                    [(end_pnt.x, end_pnt.y)])
                 # "F" means to flatten in column-major (Fortran- style) order
                 cut_geometries[piece] = linestring.flatten('F')
 
@@ -167,13 +178,13 @@ class PrepareLines(object):
                 # do not have the same position move pd back
                 elif (pd > start_distance) and not start_set:
                     start_pnt = [
-                        (start_points[piece].x, start_points[piece].y)]
+                        (start_pnt.x, start_pnt.y)]
                     start_i = i
                     start_set = True
                 if pd >= end_distance:
                     linestring = np.array(
                         start_pnt + coords[start_i: i] +
-                        [(end_points[piece].x, end_points[piece].y)])
+                        [(end_pnt.x, end_pnt.y)])
                     # "F" means to flatten in column-major (Fortran- style)
                     # order
                     cut_geometries[piece] = linestring.flatten('F')
@@ -208,7 +219,6 @@ class PrepareLines(object):
         if has_1d and 'line_geometries' not in datasource.keys():
             line_geometries = cls.make_line_geometries(datasource,
                                                        threedi_datasource)
-            # import ipdb;ipdb.set_trace()
             datasource.set('line_geometries', np.array(line_geometries))
 
 
