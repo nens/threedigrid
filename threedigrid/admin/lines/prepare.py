@@ -115,9 +115,6 @@ class PrepareLines(object):
 
         return line_geometries
 
-    # @staticmethod
-    # def interpolate_point(line_geom, pnt):
-    #     line_geom.interpolate(line_geom.project(pnt))
 
     @staticmethod
     def _cut_geometries(geom, start_x, start_y, end_x, end_y, kcu_array):
