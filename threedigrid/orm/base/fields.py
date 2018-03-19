@@ -26,3 +26,7 @@ class ArrayField:
 class IndexArrayField(ArrayField):
     def __init__(self, to=None):
         self.to = to
+
+
+class TimeSeriesArrayField(ArrayField):
+    pass

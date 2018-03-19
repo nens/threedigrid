@@ -30,6 +30,9 @@ class Model(BaseModel):
                         selection[field_name])
         return selection
 
+    def _is_coords(self, field_name):
+        return isinstance(self.get_field(field_name), GeomArrayField)
+
     def _includes_coords(self, selection):
         """
         Returns: true if selection contains any data that
@@ -49,10 +52,22 @@ class Model(BaseModel):
         Note: the last reproject_to is used:
             reproject_to('28992').reproject_to('4326') == reproject_to('4326')
         """
+        new_class_kwargs = dict(self.class_kwargs)
+        new_class_kwargs.update({
+            'reproject_to_epsg': target_epsg_code})
+
         return self.__init_class(
-            self.__class__, self.slice_filters,
-            only_fields=self.only_fields,
-            reproject_to_epsg=target_epsg_code)
+            self.__class__, **new_class_kwargs)
+
+    def __do_reproject_value(self, value, field_name, target_epsg_code):
+        if target_epsg_code == self.epsg_code:
+            # Already done
+            return value
+
+        field = self.get_field(field_name)
+
+        return field.reproject(
+            value, self.epsg_code, target_epsg_code)
 
     def __do_reproject(self, selection, target_epsg_code):
         """

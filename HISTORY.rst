@@ -1,11 +1,25 @@
-=======
 History
 =======
 
 0.1.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Added basic result proccesing for line/node data.
+ 
+- The filter mask is computed only for array's affected and 
+  before applying it to all array's
+
+- The 'only' filter works much faster because the filter mask 
+  is only applied on fields that are affected.
+
+- The filter mask is cached on the line/node instance after getting
+  the first value. You can thus do something like:
+ 
+      queryset = gridadmin.lines.filter(kcu=2)
+      ids = queryset.id
+      line_coords = queryset.line_coords
+
+  and the filter mask will only be computed once.
 
 
 0.1.3 (2018-03-16)

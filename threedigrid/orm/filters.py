@@ -24,6 +24,9 @@ class BboxFilter(GeomFilter):
         self.bbox = values
         assert hasattr(self.field, 'get_mask_by_bbox')
 
+    def get_field_name(self):
+        return self.key
+
     def filter(self, nparray_dict):
         return self.field.get_mask_by_bbox(
             self.bbox, nparray_dict[self.key],
@@ -49,6 +52,9 @@ class PointFilter(GeomFilter):
         self.key = key
         self.x, self.y = values
         assert hasattr(self.field, 'get_mask_by_point')
+
+    def get_field_name(self):
+        return self.key
 
     def filter(self, nparray_dict):
         return self.field.get_mask_by_point(
@@ -79,6 +85,9 @@ class TileFilter(GeomFilter):
         self.key = key
         self.x, self.y, self.z = values
         assert hasattr(self.field, 'get_mask_by_tile')
+
+    def get_field_name(self):
+        return self.key
 
     def filter(self, nparray_dict, target_epsg_code):
         return self.field.get_mask_by_tile(

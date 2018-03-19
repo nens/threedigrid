@@ -49,6 +49,43 @@ class H5pyGroup(DataSource):
     def getattr(self, name):
         return self._h5py_file.attrs[name]
 
-
     def keys(self):
         return self._source.keys()
+
+
+class H5pyResultGroup(H5pyGroup):
+    def __init__(self, h5py_file, group_name, netcdf_file,
+                 meta=None, required=False):
+        super(H5pyResultGroup, self).__init__(
+            h5py_file, group_name, meta, required)
+        self.netcdf_file = netcdf_file
+
+    def keys(self):
+        keys = super(H5pyResultGroup, self).keys()
+        keys += self.netcdf_file.variables.keys()
+        return list(set(keys))
+
+    def get(self, name):
+        # meta is special
+        if name == 'meta':
+            return self.meta
+
+        if name in self._source:
+            return self._source.get(name)
+
+        if name in self.netcdf_file.variables:
+            return self.netcdf_file.variables.get(name)
+
+        return None
+
+    def __getitem__(self, name):
+        # meta is special
+        if name == 'meta':
+            return self.meta
+
+        if name in self._source:
+            return self._source[name]
+
+        if name in self.netcdf_file.variables:
+            return self.netcdf_file.variables[name]
+
