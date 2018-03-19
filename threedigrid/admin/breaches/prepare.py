@@ -15,6 +15,10 @@ def as_numpy_array(array):
 
 
 class PrepareBreaches(object):
+    """
+    prepares breaches for visualization
+    """
+
     @staticmethod
     def get_coordinates(levees, line_coords, levl):
         breaches_x = np.zeros(levl.shape, dtype='f8')

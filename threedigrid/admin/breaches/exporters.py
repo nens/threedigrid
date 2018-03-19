@@ -21,6 +21,10 @@ logger = logging.getLogger(__name__)
 
 
 class BreachesOgrExporter(BaseOgrExporter):
+    """
+    ogr exporter for breaches. See ``<instance>.supported_drivers`` to
+    get a list of supported drivers
+    """
     def __init__(self, breaches):
         self._breaches = breaches
         self.supported_drivers = {
@@ -29,6 +33,14 @@ class BreachesOgrExporter(BaseOgrExporter):
         }
 
     def save(self, file_name, breach_data, target_epsg_code, **kwargs):
+        """
+        save breaches to file
+
+        :param file_name: file name including full path
+        :param breach_data: queryset
+        :param target_epsg_code: desired epsg code for coords
+        :param kwargs: does not take extra kwargs
+        """
         assert self.driver is not None
         selection = breach_data
         kcu_dict = KCUDescriptor()
