@@ -19,7 +19,6 @@ from threedigrid.admin.breaches.exporters import BreachesOgrExporter
 from threedigrid.admin.constants import SUBSET_1D_ALL
 from threedigrid.admin.constants import SUBSET_2D_OPEN_WATER
 from threedigrid.admin.constants import NO_DATA_VALUE
-from threedigrid.admin.lines.serializers import ChannelsGeoJsonSerializer
 
 test_file_dir = os.path.join(
     os.getcwd(), "tests/test_files")
@@ -52,7 +51,8 @@ class GridAdminTest(unittest.TestCase):
 
     def test_get_extent_subset_twodee(self):
         extent_2D = self.parser.get_extent_subset(
-        subset_name=SUBSET_2D_OPEN_WATER)
+            subset_name=SUBSET_2D_OPEN_WATER
+        )
         # should contain values
         self.assertTrue(np.any(extent_2D != NO_DATA_VALUE))
 
@@ -60,7 +60,7 @@ class GridAdminTest(unittest.TestCase):
         extent_1D = self.parser.get_extent_subset(
             subset_name=SUBSET_1D_ALL)
         extent_2D = self.parser.get_extent_subset(
-        subset_name=SUBSET_2D_OPEN_WATER)
+            subset_name=SUBSET_2D_OPEN_WATER)
         # should be different
         self.assertTrue(
             np.any(np.not_equal(extent_1D, extent_2D))
@@ -88,8 +88,8 @@ class GridAdminTest(unittest.TestCase):
 
     def test_get_model_extent_extra_extent2(self):
         onedee_extra = np.array([
-            106666.6, 106666.6, 550000.0, 580000.0]
-        )
+            106666.6, 106666.6, 550000.0, 580000.0
+        ])
 
         extra_extent = {'extra_extent': [onedee_extra]}
         model_extent = self.parser.get_model_extent(**extra_extent)
@@ -139,8 +139,8 @@ class GridAdminLinesTest(unittest.TestCase):
         self.parser.lines.to_shape(self.f)
         self.assertTrue(os.path.exists, self.f)
         s = ogr.Open(self.f)
-        l = s.GetLayer()
-        self.assertEqual(l.GetFeatureCount(), self.parser.lines.id.size)
+        lyr = s.GetLayer()
+        self.assertEqual(lyr.GetFeatureCount(), self.parser.lines.id.size)
 
 
 class GridAdminGridTest(unittest.TestCase):
@@ -193,8 +193,8 @@ class GridAdminNodeTest(unittest.TestCase):
         self.parser.nodes.to_shape(self.f)
         self.assertTrue(os.path.exists, self.f)
         s = ogr.Open(self.f)
-        l = s.GetLayer()
-        self.assertEqual(l.GetFeatureCount(), self.parser.nodes.id.size)
+        lyr = s.GetLayer()
+        self.assertEqual(lyr.GetFeatureCount(), self.parser.nodes.id.size)
 
 
 class GridAdminBreachTest(unittest.TestCase):
@@ -226,8 +226,8 @@ class GridAdminBreachTest(unittest.TestCase):
         self.parser.breaches.to_shape(self.f)
         self.assertTrue(os.path.exists, self.f)
         s = ogr.Open(self.f)
-        l = s.GetLayer()
-        self.assertEqual(l.GetFeatureCount(), self.parser.breaches.id.size)
+        lyr = s.GetLayer()
+        self.assertEqual(lyr.GetFeatureCount(), self.parser.breaches.id.size)
 
 
 class GridAdminCellsTest(unittest.TestCase):
