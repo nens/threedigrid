@@ -49,6 +49,5 @@ class H5pyGroup(DataSource):
     def getattr(self, name):
         return self._h5py_file.attrs[name]
 
-
     def keys(self):
         return self._source.keys()

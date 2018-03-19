@@ -5,6 +5,9 @@ History
 0.1.4 (unreleased)
 ------------------
 
+- Define extra's to make the standard threedigrid distribution as
+  lightweight as possible.
+
 - Convert strings in ``attrs`` to ``numpy.string_`` to fix crashes under
   Windows.
 

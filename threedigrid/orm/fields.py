@@ -4,15 +4,16 @@ from __future__ import unicode_literals
 from __future__ import print_function
 
 import numpy as np
+
 from base.fields import ArrayField
-from threedigrid.orm.utils import angle_in_degrees
-from threedigrid.orm.utils import get_bbox_by_point
-from threedigrid.orm.utils import reshape_flat_array
-from threedigrid.orm.utils import select_points_by_tile
-from threedigrid.orm.utils import select_lines_by_tile
-from threedigrid.orm.utils import select_lines_by_bbox
-from threedigrid.orm.utils import select_points_by_bbox
-from threedigrid.orm.utils import transform_xys
+from threedigrid.numpy_utils import angle_in_degrees
+from threedigrid.numpy_utils import get_bbox_by_point
+from threedigrid.numpy_utils import reshape_flat_array
+from threedigrid.numpy_utils import select_lines_by_bbox
+from threedigrid.geo_utils import select_points_by_tile
+from threedigrid.geo_utils import select_lines_by_tile
+from threedigrid.geo_utils import select_points_by_bbox
+from threedigrid.geo_utils import transform_xys
 
 
 class GeomArrayField(ArrayField):
