@@ -156,15 +156,16 @@ class GridH5Admin(object):
     def model_slug(self):
         return self.h5py_file.attrs['model_slug']
 
-    @property
-    def has_groundwater(self):
-        # TODO threedicore will provide info, change accordingly
-        return self.nodes.has_groundwater
-
     def _set_props(self):
         for prop, value in self.h5py_file.attrs.iteritems():
             if prop and prop.startswith('has_'):
-                setattr(self, prop, bool(value))
+                try:
+                    setattr(self, prop, bool(value))
+                except AttributeError:
+                    logger.warning(
+                        'Can not set property {}, already exists'.format(prop)
+                    )
+                    pass
 
     @property
     def has_levees(self):

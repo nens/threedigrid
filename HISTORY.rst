@@ -2,10 +2,23 @@
 History
 =======
 
-0.1.3 (unreleased)
+0.1.4 (unreleased)
 ------------------
 
-- Define mercantile as an extra dependency following PEP 508.
+- Define extra's to make the standard threedigrid distribution as
+  lightweight as possible.
+
+- Convert strings in ``attrs`` to ``numpy.string_`` to fix crashes under
+  Windows.
+
+
+0.1.3 (2018-03-16)
+------------------
+
+- Remove property ``has_groundwater`` from ``GridH5Admin``.
+  Should always be provided by the threedicore itself. Gives a warning for
+  backwards compatibility.
+>>>>>>> bc8c458307d7436de7a88f5a924196e2687ea291
 
 
 0.1.2 (2018-03-12)

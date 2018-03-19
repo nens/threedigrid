@@ -66,6 +66,6 @@ setup(
         'cmd': cmd_line_requirements,
     },
     url='https://github.com/nens/threedigrid',
-    version='0.1.3.dev0',
+    version='0.1.4.dev0',
     zip_safe=False,
 )
