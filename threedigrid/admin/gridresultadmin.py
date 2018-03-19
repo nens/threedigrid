@@ -1,9 +1,13 @@
 from netCDF4 import Dataset
-from threedigrid.admin.nodes.models import Nodes
-from threedigrid.admin.nodes.timeseries_mixin import NodeResultsMixin
+from threedigrid.admin.breaches.models import Breaches
+from threedigrid.admin.breaches.timeseries_mixin import BreachResultsMixin
+from threedigrid.admin.h5py_datasource import H5pyResultGroup
 from threedigrid.admin.lines.models import Lines
 from threedigrid.admin.lines.timeseries_mixin import LineResultsMixin
-from threedigrid.admin.h5py_datasource import H5pyResultGroup
+from threedigrid.admin.nodes.models import Nodes
+from threedigrid.admin.nodes.timeseries_mixin import NodeResultsMixin
+from threedigrid.admin.pumps.models import Pumps
+from threedigrid.admin.pumps.timeseries_mixin import PumpResultsMixin
 from threedigrid.admin.gridadmin import GridH5Admin
 
 
@@ -23,3 +27,15 @@ class GridH5ResultAdmin(GridH5Admin):
         return Nodes(
             H5pyResultGroup(self.h5py_file, 'nodes', self.netcdf_file),
             **dict(self._grid_kwargs, **{'mixin': NodeResultsMixin}))
+
+    @property
+    def breaches(self):
+        return Breaches(
+            H5pyResultGroup(self.h5py_file, 'breaches', self.netcdf_file),
+            **dict(self._grid_kwargs, **{'mixin': BreachResultsMixin}))
+
+    @property
+    def pumps(self):
+        return Pumps(
+            H5pyResultGroup(self.h5py_file, 'pumps', self.netcdf_file),
+            **dict(self._grid_kwargs, **{'mixin': PumpResultsMixin}))

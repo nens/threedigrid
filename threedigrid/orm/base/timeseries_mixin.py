@@ -14,7 +14,6 @@ class ResultMixin(object):
     def __init__(self, *args, **kwargs):
         # pop mixin specific fields and store them
         # in the class_kwargs
-        print('__init__', args, kwargs)
         self.timeseries_mask = kwargs.pop('timeseries_mask', None)
         self.class_kwargs.update({
             'timeseries_mask': self.timeseries_mask})
