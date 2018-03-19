@@ -5,7 +5,8 @@ History
 0.1.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Convert strings in ``attrs`` to ``numpy.string_`` to fix crashes under
+  Windows.
 
 
 0.1.3 (2018-03-16)
