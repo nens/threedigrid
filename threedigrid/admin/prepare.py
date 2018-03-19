@@ -5,6 +5,9 @@ from __future__ import print_function
 
 import logging
 import os
+
+import numpy as np
+
 from threedigrid.admin.h5py_datasource import H5pyGroup
 from threedigrid.admin.idmapper import IdMapper
 from threedigrid.admin import constants
@@ -56,6 +59,8 @@ class GridAdminH5Prepare(object):
         # and possible other meta data..
         if extra_attrs:
             for key, value in extra_attrs.iteritems():
+                if isinstance(value, basestring):
+                    value = np.string_(value)
                 h5py_file.attrs[key] = value
 
         # Step 3: prepare the ID mapper

@@ -226,11 +226,6 @@ class Model:
             self.__class__, [SliceFilter(slice_filter)] + self.slice_filters)
 
     @property
-    def has_groundwater(self):
-        req = self.subset('2D_GROUNDWATER').data
-        return len(req['id']) > 0
-
-    @property
     def known_subset(self):
         if not hasattr(self, 'SUBSETS'):
             return "has no subsets defined"

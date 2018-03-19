@@ -8,7 +8,7 @@ import logging
 import h5py
 import numpy as np
 
-from threedigrid.orm.utils import transform_xys
+from threedigrid.orm.utils import transform_bbox
 
 from threedigrid.admin.lines.models import Lines
 from threedigrid.admin.nodes.models import Nodes
@@ -120,8 +120,8 @@ class GridH5Admin(object):
             return
 
         if target_epsg_code and target_epsg_code != self.epsg_code:
-            extent = transform_xys(
-                extent[::2], extent[1::2], self.epsg_code, target_epsg_code,
+            extent = transform_bbox(
+                extent, self.epsg_code, target_epsg_code,
             )
         return extent
 
@@ -139,7 +139,6 @@ class GridH5Admin(object):
             taken into account in the model extent calculation
         :returns numpy array of xy-min/xy-max pairs
         """
-        max_extent = np.zeros((2, 2))
         bbox = kwargs.get('extra_extent', [])
         for k in constants.SUBSET_NAME_H5_ATTR_MAP.keys():
             sub_extent = self.get_extent_subset(
@@ -148,24 +147,25 @@ class GridH5Admin(object):
                 continue
             bbox.append(sub_extent)
 
-        merged_pnts = np.concatenate(bbox)
-        max_extent[0] = np.min(merged_pnts, axis=0)
-        max_extent[1] = np.max(merged_pnts, axis=0)
-        return max_extent
+        x = np.array(bbox)[:, [0, 2]]
+        y = np.array(bbox)[:, [1, 3]]
+
+        return np.array([np.min(x), np.min(y), np.max(x), np.max(y)])
 
     @property
     def model_slug(self):
         return self.h5py_file.attrs['model_slug']
 
-    @property
-    def has_groundwater(self):
-        # TODO threedicore will provide info, change accordingly
-        return self.nodes.has_groundwater
-
     def _set_props(self):
         for prop, value in self.h5py_file.attrs.iteritems():
             if prop and prop.startswith('has_'):
-                setattr(self, prop, bool(value))
+                try:
+                    setattr(self, prop, bool(value))
+                except AttributeError:
+                    logger.warning(
+                        'Can not set property {}, already exists'.format(prop)
+                    )
+                    pass
 
     @property
     def has_levees(self):

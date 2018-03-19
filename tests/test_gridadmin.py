@@ -70,10 +70,8 @@ class GridAdminTest(unittest.TestCase):
         model_extent = self.parser.get_model_extent()
         np.testing.assert_almost_equal(
             model_extent,
-            np.array([
-                [105427.6, 105427.6],
-                [523463.32684827, 523463.32684827]
-            ])
+            np.array([105427.6, 511727.0515702,
+                      115887., 523463.3268483])
         )
 
     def test_get_model_extent_extra_extent(self):
@@ -85,9 +83,7 @@ class GridAdminTest(unittest.TestCase):
         model_extent = self.parser.get_model_extent(**extra_extent)
         np.testing.assert_equal(
             model_extent,
-            np.array([[ 90000.,  90000.],
-                      [580000., 580000.]
-            ])
+            np.array([100000., 90000., 550000., 580000.])
         )
 
     def test_get_model_extent_extra_extent2(self):
@@ -99,9 +95,7 @@ class GridAdminTest(unittest.TestCase):
         model_extent = self.parser.get_model_extent(**extra_extent)
         np.testing.assert_almost_equal(
             model_extent,
-            np.array([[105427.6, 105427.6],
-                      [580000., 580000.]
-            ])
+            np.array([105427.6, 106666.6, 550000., 580000.])
         )
 
     def test_properties(self):
@@ -254,12 +248,39 @@ class GridAdminCellsTest(unittest.TestCase):
         )
 
     def test_get_id_from_xy(self):
-
-        self.assertIsNone(self.parser.cells.get_id_from_xy(1.,2.))
+        # should yield tow ids, one for 2d, one for groundwater
+        self.assertListEqual(self.parser.cells.get_id_from_xy(1.,2.), [])
         # first coordinate pair + some offset
         x = self.parser.cells.coordinates[0][1] + 0.5
         y = self.parser.cells.coordinates[1][1] + 0.5
-        self.assertEqual(self.parser.cells.get_id_from_xy(x,y), 1)
+        self.assertListEqual(self.parser.cells.get_id_from_xy(x,y), [1, 6537])
+
+    def test_get_id_from_xy_2d_open_water(self):
+
+        self.assertListEqual(
+            self.parser.cells.get_id_from_xy(
+                1.,2., subset_name='2d_open_water'), [])
+        # first coordinate pair + some offset
+        x = self.parser.cells.coordinates[0][1] + 0.5
+        y = self.parser.cells.coordinates[1][1] + 0.5
+        self.assertEqual(
+            self.parser.cells.get_id_from_xy(
+                x,y, subset_name='2d_open_water'
+            ), [1]
+        )
+
+    def test_get_id_from_xy_groundwater(self):
+
+        self.assertListEqual(self.parser.cells.get_id_from_xy(
+            1.,2., subset_name='groundwater_all'), [])
+        # first coordinate pair + some offset
+        x = self.parser.cells.coordinates[0][1] + 0.5
+        y = self.parser.cells.coordinates[1][1] + 0.5
+        self.assertEqual(
+            self.parser.cells.get_id_from_xy(
+                x,y, subset_name='groundwater_all'
+            ), [6537]
+        )
 
     def test_exporters(self):
         self.assertEqual(len(self.parser.cells._exporters), 1)

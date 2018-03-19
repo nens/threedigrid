@@ -56,6 +56,6 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/nens/threedigrid',
-    version='0.1.2.dev0',
+    version='0.1.4.dev0',
     zip_safe=False,
 )
