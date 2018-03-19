@@ -21,6 +21,8 @@ History
 
   and the filter mask will only be computed once.
 
+- Convert strings in ``attrs`` to ``numpy.string_`` to fix crashes under
+  Windows.
 
 0.1.3 (2018-03-16)
 ------------------
