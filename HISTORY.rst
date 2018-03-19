@@ -5,6 +5,9 @@ History
 0.1.4 (unreleased)
 ------------------
 
+- Use  linear referencing for embedded channels to keep the original geometry
+  intact when preparing line geometries for visualisation.
+
 - Convert strings in ``attrs`` to ``numpy.string_`` to fix crashes under
   Windows.
 
