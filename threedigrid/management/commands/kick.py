@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-"""Console script for threedigrid."""
-
-from IPython.terminal.embed import InteractiveShellEmbed
+"""Console scripts for threedigrid."""
 
 import click
+from IPython.terminal.embed import InteractiveShellEmbed
 
 from threedigrid.admin.gridadmin import GridH5Admin
 from threedigrid.management.help_texts import model_overview
@@ -11,9 +10,12 @@ from threedigrid.management.help_texts import model_overview
 @click.command()
 @click.option('--grid-file', prompt='Path to the admin file',
               help='Path to the admin file', type=click.Path(exists=True))
-@click.option('--ipy/--no-ipy', default=False, help='Start an interactive ipdb session')
+@click.option('--ipy/--no-ipy', default=False, help='Start an interactive ipython session')
 def kick_start(grid_file, ipy):
-    """Console script for threedigrid."""
+    """
+    :param grid_file: Path to the admin file
+    :param ipy: Start an interactive ipython session
+    """
 
     grid = GridH5Admin(grid_file)
 
@@ -28,12 +30,20 @@ def kick_start(grid_file, ipy):
         ipshell = InteractiveShellEmbed(exit_msg='Ciao...\n')
         ipshell()
 
+
 @click.command()
 @click.option('--grid-file', prompt='Path to the admin file',
               help='Path to the admin file', type=click.Path(exists=True))
 @click.argument('model')
 @click.argument('subset')
 def export_to(grid_file, model, subset):
+    """
+
+    :param grid_file:  Path to the admin file
+    :param model: name of the grid admin model, e.g Nodes/Lines/...
+    :param subset:
+    :return:
+    """
     grid = GridH5Admin(grid_file)
     m = getattr(grid, model)
     s = getattr(m, "subset")(subset)
