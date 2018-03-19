@@ -11,18 +11,14 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = [
+lightweight_requirements = [
     'numpy>=1.13',
     'h5py>=2.7.1',
 ]
 
-# for extra 'cmd'
-cmd_line_requirements = [
-    'Click>=6.0'
-]
-
 # for extra 'geo'
 geo_requirements = [
+    'Click>=6.0',
     'mercantile>=1.0.1',
     'pyproj>=1.9.5.1',
     'Shapely>=1.6.4',
@@ -47,10 +43,10 @@ setup(
     description="Python package for the threedigrid administration",
     entry_points={
         'console_scripts': [
-            'threedigrid=threedigrid.cli:main [cmd]',
+            'threedigrid=threedigrid.cli:main [geo]',
         ],
     },
-    install_requires=requirements,
+    install_requires=lightweight_requirements,
     license="BSD license",
     long_description=readme + '\n\n' + history,
     include_package_data=True,
@@ -63,7 +59,6 @@ setup(
     tests_require=test_requirements,
     extras_require={
         'geo': geo_requirements,
-        'cmd': cmd_line_requirements,
     },
     url='https://github.com/nens/threedigrid',
     version='0.1.4.dev0',
