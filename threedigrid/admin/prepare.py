@@ -42,7 +42,6 @@ def skip_prepare(h5py_file, group_name, attr_name, overwrite):
 def prepare_lines_onedee(
         h5py_file, threedi_datasource, klass, attr_name, overwrite=False):
 
-
     if skip_prepare(h5py_file, 'lines', attr_name, overwrite):
         return
 
@@ -324,7 +323,9 @@ class GridAdminH5Export(object):
         if not self.ga.has_groundwater:
             logger.info(
                 "[*] Model {} does not have groundwater, "
-                "skipping export groundwater cells...".format(self.ga.model_name)
+                "skipping export groundwater cells...".format(
+                    self.ga.model_name
+                )
             )
             return
         dest_gw = os.path.join(self._dest, constants.GROUNDWATER_SHP)
