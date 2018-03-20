@@ -7,7 +7,11 @@ Welcome to threedigrid's documentation!
 
    readme
    installation
-   modules
+   api
+   breaches
+   lines
+   kcu
+   fields
    contributing
    authors
    history

@@ -49,6 +49,15 @@ class PrepareBreaches(object):
     @classmethod
     def prepare_datasource(cls, datasource, kcu, id_mapper,
                            levees, line_coords):
+        """
+        :param datasource: datasource for breaches like HFD5 group
+        :param kcu: array of kcu values for datasource
+        :param id_mapper: threedigrid.admin.idmapper.IdMapper instance
+        :param levees: threedigrid.admin.levees.model.Levees instance
+        :param line_coords: coordinates from Lines instance
+        :return:
+        """
+
         # TODO: Check values below
         if 'id' not in datasource.keys():
             datasource.set(

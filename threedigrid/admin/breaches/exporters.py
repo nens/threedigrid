@@ -1,5 +1,25 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
 # -*- coding: utf-8 -*-
+"""
+Exporters
+---------
+At this moment there is one exporter for breach data, called ``BreachesOgrExporter``.
+For an overview of supported drivers call::
+
+    >>> from threedigrid.admin.breaches.exporters import BreachesOgrExporter
+    >>> from threedigrid.admin.gridadmin import GridH5Admin
+
+    >>> f = 'gridadmin.h5'
+    >>> ga = GridH5Admin(f)
+
+    >>> # get all active breaches
+    >>> active_breaches = ga.breaches.filter(kcu__eq=56)
+
+    >>> exporter = BreachesOgrExporter(active_breaches)
+    >>> exporter.supported_drivers
+    >>> {u'ESRI Shapefile', u'GPKG'}
+
+"""
 from __future__ import unicode_literals
 from __future__ import print_function
 

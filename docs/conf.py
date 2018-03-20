@@ -23,6 +23,7 @@ import sys
 sys.path.insert(0, os.path.abspath('..'))
 
 import threedigrid
+from threedigrid.admin import breaches
 
 # -- General configuration ---------------------------------------------
 
@@ -48,7 +49,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'threedigrid'
-copyright = u"2018, Lars Claussen"
+copyright = u"2018, Nelen & Schuurmans"
 author = u"Lars Claussen"
 
 # The version info for the project you're documenting, acts as replacement
