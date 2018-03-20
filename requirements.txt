@@ -1,6 +1,6 @@
 numpy==1.13.1
 h5py==2.7.1
-mercantile==1.0.1
-pyproj==1.9.5.1
-Shapely==1.6.4
-geojson==2.3.0
+mercantile[geo]==1.0.1
+pyproj[geo]==1.9.5.1
+Shapely[geo]==1.6.4
+geojson[geo]==2.3.0
