@@ -18,6 +18,7 @@ from threedigrid.orm.base.exceptions import OperationNotSupportedError
 from threedigrid.orm.base.fields import ArrayField
 from threedigrid.orm.base.fields import IndexArrayField
 from threedigrid.orm.base.fields import TimeSeriesArrayField
+from threedigrid.orm.base.fields import MappedSubsetTimeSeriesArrayField
 from threedigrid.orm.base.filters import get_filter
 from threedigrid.orm.base.filters import SliceFilter
 
@@ -118,6 +119,9 @@ class Model:
         return self.get_field(field_name).get_value(
             self._datasource, field_name)
 
+    def _get_filter(self, *args, **kwargs):
+        return get_filter(*args, **kwargs)
+
     def get_filtered_field_value(self, field_name):
         value = self.get_field_value(field_name)
 
@@ -134,7 +138,9 @@ class Model:
         else:
             timeseries_filter = slice(None)
 
-        if isinstance(self.get_field(field_name), TimeSeriesArrayField):
+        field_instance = self.get_field(field_name)
+
+        if isinstance(field_instance, TimeSeriesArrayField):
             # _filter = [timeseries_filter, self.boolean_mask_filter]
             # Fast slicing by first using timeseries_filter and
             # and than slice based on boolean_mask_filter
@@ -142,7 +148,57 @@ class Model:
 
             # TODO: if the result is many timeseries, perform boolean_filter
             # per batch
-            value = value[timeseries_filter, :][:, self.boolean_mask_filter]
+
+            if isinstance(field_instance, MappedSubsetTimeSeriesArrayField):
+                # Get mappings (boolean_masks) for how the values in the
+                # netCDF should map to the gridadmin(h5) array's.
+                #   This is done by computing the mask array's for the subset
+                #   definitions of the MappedSubsetTimeSeriesArrayField
+                mappings = field_instance.get_mappings(value, self)
+
+                data = None
+
+                for subset_mask, subset_value in mappings:
+                    # Convert self.boolean_mask_filter to boolean mask array
+                    # if it is a slice.
+
+                    if isinstance(self.boolean_mask_filter, slice):
+                        # Convert to boolean mask
+                        boolean_mask = np.full(
+                            subset_mask.shape, False)
+                        boolean_mask[self.boolean_mask_filter] = True
+                    else:
+                        boolean_mask = self.boolean_mask_filter
+
+                    mapped_mask = boolean_mask[subset_mask]
+
+                    # Are there any values to select?
+                    if np.any(mapped_mask):
+                        # We need to get some values.
+                        result = subset_value[
+                            timeseries_filter, :][:, mapped_mask]
+                        if data is None:
+                            # Initialize the data with shape:
+                            # (len(timeseries), len(filtered_boolean_mask))
+                            data = np.full(
+                                (result.shape[0],
+                                 boolean_mask.shape[-1]),
+                                field_instance.null_value)
+                        data[:, boolean_mask & subset_mask] = result
+                    elif data is None:
+                        # Make sure the array is always initialized with null
+                        # values. Get the first column of results to determine
+                        # the shape of the data to return
+                        fake_result = subset_value[timeseries_filter, 1]
+                        data = np.full(
+                            (fake_result.shape[0],
+                             boolean_mask.shape[-1]),
+                            field_instance.null_value)
+
+                    value = data[:, self.boolean_mask_filter]
+            else:
+                value =\
+                    value[timeseries_filter, :][:, self.boolean_mask_filter]
         else:
             _filter = [slice(None)] * (
                 len(value.shape) - 1) + [self.boolean_mask_filter]
