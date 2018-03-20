@@ -8,6 +8,9 @@ History
 - Use  linear referencing for embedded channels to keep the original geometry
   intact when preparing line geometries for visualisation.
 
+- Define extra's to make the standard threedigrid distribution as
+  lightweight as possible.
+
 - Convert strings in ``attrs`` to ``numpy.string_`` to fix crashes under
   Windows.
 
