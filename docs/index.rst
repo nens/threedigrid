@@ -1,5 +1,5 @@
 Welcome to threedigrid's documentation!
-======================================
+=======================================
 
 .. toctree::
    :maxdepth: 2
@@ -8,8 +8,7 @@ Welcome to threedigrid's documentation!
    readme
    installation
    api
-   breaches
-   lines
+   admin
    kcu
    fields
    contributing
