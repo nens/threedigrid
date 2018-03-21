@@ -1,5 +1,8 @@
+API documentation
+=================
+
 Introduction
-============
+------------
 
 One of the main challenges of the 3Di backend is the efficient combination of different
 data sources, as well as different abstraction levels. The grid administration itself
@@ -15,6 +18,7 @@ would be read and append by the python code. Luckily, hdf5 is able to do exactly
     extensible, allowing applications to evolve in their use of HDF5. The HDF5
     Technology suite includes tools and applications for managing, manipulating,
     viewing, and analyzing data in the HDF5 format.
+
 
 The benefits of this approach are divers (to name the most important):
     - the HDF5 Fortran Library is well documented and tested
@@ -43,7 +47,7 @@ the grid admin a model maps to a hdf5 group. The group itself has been populated
 different sources but once the data is there is has the same function as a django model.
 
 Models
-======
+------
 
 The threedicore consists of three main data types: grid cells, flow lines and calculation nodes.
 Not so surprisingly, these data structures are described in form of models which basically is a
@@ -57,27 +61,6 @@ container for structured, annotated data. The basic definition of a model looks 
 
 The most important functionality exposed by a model instance, obviously, is:
 filtering, geo transformations, data serialisation and data export.
-
-
-Quick start
------------
-
-Get a grid admin instance::
-
-    from threedigrid import GridH5Admin
-
-    f = 'gridadmin.h5'
-    ga = GridH5Admin(f)
-
-
-The grid admin directly holds some model specific attributes like whether the model has a 1D or 2D
-or groundwater section::
-
-    In [4]: ga.has_groundwater
-    Out[4]: False
-
-    In [5]: ga.has_1d
-    Out[5]: True
 
 
 Filtering
@@ -152,6 +135,7 @@ To retrieve data of a subset use the ``subset()`` method like so::
 Fields
 ------
 
+
 **ArrayField**
 
 The most basic/generic field is an ArrayField. It can be used to describe values that are to be retrieved from a (hdf5) Datasource.
@@ -168,9 +152,11 @@ Base geometry field, allows spatial filters.
 
 Used for representing point geometries. Implements the reproject method.
 
+Also see :ref:`fields-label`
+
 
 Serializers
-===========
+-----------
 
 The API includes Geojson serializers to convert model data to
 geojson. Serializers can be used on models that have filtering/subset and reprojection,
@@ -184,7 +170,7 @@ for example generating the geojson of all 2D open water channels in WGS84::
 
 
 Exporters
-=========
+---------
 
 Like serializers, exporters allow to export model data to files. For example exporting
 all 2D open water lines in WGS84 into a shape file::
