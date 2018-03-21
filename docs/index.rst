@@ -2,15 +2,14 @@ Welcome to threedigrid's documentation!
 =======================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
 
    readme
    installation
    api
-   admin
-   kcu
-   fields
+   api_reference
+   miscellaneous
    contributing
    authors
    history

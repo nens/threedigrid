@@ -2,13 +2,14 @@
 # -*- coding: utf-8 -*-
 """
 Models
-------
+++++++
+
 Breaches are better described as possible breach locations
 as they represent the intersection between threedicore
-1d-2d flow lines and levee geometries from the models spatailite
-database. That is, once the kcu (the type classifier) of the 1d-2d flow line
-has the value 56 there actually will be an active link between the 1d and
-the 2d calculation nodes.
+1d-2d flow lines and levee geometries from the models spatialite
+database. That is, once the kcu (the type classifier, see :ref:`kcu-label`)
+of the 1d-2d flow line has the value 56 there actually will be an active
+link between the 1d and the 2d calculation nodes.
 
 To query the ``Breaches`` model::
 

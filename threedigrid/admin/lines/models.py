@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Models
-------
+++++++
 In the threedicore lines are called flow lines and represent links between
 calculation points. They can exist between 1d and 2d points, between surface
 and groundwater nodes etc. The line type is described by the kcu attribute
