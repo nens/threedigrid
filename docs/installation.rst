@@ -4,15 +4,19 @@
 Installation
 ============
 
-
 Stable release
 --------------
 
-To install threedigrid, run this command in your terminal:
+The standard threedigrid distribution is pretty lightweight, installing as little dependencies
+as possible. If you want to make use of all capabilities threedigrid has to ofter (e.g. spatial
+operations and command line tools) install like this::
 
-.. code-block:: console
+    $ pip install threedigrid[geo]
 
-    $ pip install threedigrid
+If you want to use the ogr exporters you'll also need to install the python gdal bindings.
+There are several ways to accomplish this, see the following thread for an overview:
+
+ https://gis.stackexchange.com/questions/9553/installing-gdal-and-ogr-for-python
 
 This is the preferred method to install threedigrid, as it will always install the most recent stable release.
 
