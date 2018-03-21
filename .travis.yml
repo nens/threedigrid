@@ -13,4 +13,6 @@ before_install:
 
 script:
   - docker run --rm threedigrid/test pytest --cov=threedigrid
-  - docker run --rm threedigrid/test bash -c 'cd /code/docs && make html'
+  - docker run --rm threedigrid/test bash -c 'cd /code/docs && sphinx-build -nW -b html -d _build/doctrees . _build/html'
+
+
