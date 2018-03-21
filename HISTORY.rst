@@ -5,6 +5,8 @@ History
 0.1.4 (unreleased)
 ------------------
 
+- Added documentation and setup for ``sphinx`` documentation pipeline.
+
 - Use  linear referencing for embedded channels to keep the original geometry
   intact when preparing line geometries for visualisation.
 
