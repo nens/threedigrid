@@ -1,5 +1,8 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
 # -*- coding: utf-8 -*-
+"""
+Base fields
+"""
 from __future__ import unicode_literals
 from __future__ import print_function
 
@@ -24,5 +27,8 @@ class ArrayField:
 
 
 class IndexArrayField(ArrayField):
+    """
+    Simple pointer
+    """
     def __init__(self, to=None):
         self.to = to
