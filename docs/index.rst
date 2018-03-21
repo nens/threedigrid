@@ -1,14 +1,15 @@
 Welcome to threedigrid's documentation!
-======================================
+=======================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
 
    readme
    installation
-   usage
-   modules
+   api
+   api_reference
+   miscellaneous
    contributing
    authors
    history

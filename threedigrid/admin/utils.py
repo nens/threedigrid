@@ -140,8 +140,32 @@ def create_np_lookup_index_for(search_array, index_array):
 
 class KCUDescriptor(dict):
     """
-    dict like object that provides human readable descriptions
-    for threedicore kcu codes
+    A dictionary-like object that provides human readable descriptions
+    for threedicore kcu codes::
+
+            0: '1d embedded line',
+            1: '1d isolated line',
+            2: '1d connected line',
+            3: '1d long-crested structure',
+            4: '1d short-crested structure',
+            5: '1d double connected line',
+            51: '1d2d single connected line with storage',
+            52: '1d2d single connected line without storage',
+            53: '1d2d double connected line with storage',
+            54: '1d2d double connected line without storage',
+            55: '1d2d connected line possible breach',
+            56: '1d2d connected line active breach',
+            57: '1d2d groundwater link',
+            58: '1d2d groundwater link # diff to 57? ',
+            100: '2d line',
+            101: '2d obstacle (levee) line',
+            150: '2d vertical link',
+            -150: '2d groundwater link',
+            200: '2d boundary',
+            300: '2d boundary',
+            400: '2d boundary',
+            500: '2d boundary',
+
     """
 
     def __init__(self, *arg, **kw):

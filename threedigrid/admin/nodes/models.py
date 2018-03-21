@@ -1,12 +1,21 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
 # -*- coding: utf-8 -*-
+"""
+Models
+++++++
+
+The ``Nodes`` models represent the actual calculation points of the
+threedicore and derived information like the cells they lie in.
+
+For examples how to query the ``Nodes`` model see :ref:`api-label`
+
+
+"""
+
 from __future__ import unicode_literals
 from __future__ import print_function
 
 import numpy as np
-
-from itertools import izip
-from itertools import tee
 
 from threedigrid.orm.models import Model
 from threedigrid.orm.fields import ArrayField
@@ -16,15 +25,6 @@ from threedigrid.geo_utils import transform_xys
 from threedigrid.admin.utils import get_smallest_uint_dtype
 from threedigrid.admin.nodes import exporters
 from threedigrid.admin.nodes import subsets
-
-
-def pairwise(iterable):
-    # from https://docs.python.org/2/library/
-    # itertools.html#recipes
-    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
-    a, b = tee(iterable)
-    next(b, None)
-    return izip(a, b)
 
 
 NODE_SUBSETS = {
@@ -98,6 +98,14 @@ class Manholes(ConnectionNodes):
 
 
 class Cells(Nodes):
+    """
+    Model that represents the threedicore calculation cells. ``Cells`` are
+    a sub-class of ``Nodes`` because they share the same attributes.
+    ``Cells``, however, also have a z_coordinate, the bottom level of
+    the grid cell and cell_coords, the lower left and upper right coordinates
+    of the cells extent.
+
+    """
 
     z_coordinate = ArrayField()
 
@@ -152,9 +160,17 @@ class Cells(Nodes):
 
 
 class Grid(Model):
-    """nodm, nodn and nodk have the same size as nodes and cells
-    which is why this model lives in the nodes/model module. In fact
-    they are attributes of the cell coordinates"""
+    """
+    Implemented fields:
+
+        - nodm
+        - nodn
+        - nodk
+
+    They all have the same size as nodes and cells, which is why this
+    model lives in the nodes/model module. In fact they are attributes
+    of the cell coordinates
+    """
 
     nodm = ArrayField()  #
     nodn = ArrayField()
@@ -171,7 +187,9 @@ class Grid(Model):
         get the node grid to pixel map
 
         :param dem_pixelsize: pixelsize of the geo tiff
-        dem_shape: shape of the numpy representation of the geo tiff
+        :param dem_shape: shape of the numpy representation of the geo tiff
+
+        :return: flipped array of the dem_shape that matches the geotiff
         """
 
         # Convert nod_grid to smallest uint type possible
