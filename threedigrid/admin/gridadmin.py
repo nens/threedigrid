@@ -189,7 +189,9 @@ class GridH5Admin(object):
 
     @property
     def has_levees(self):
-        return hasattr(self, "levees")
+        if not hasattr(self, "levees"):
+            return False
+        return bool(self.levees.id.size)
 
     @property
     def threedicore_version(self):
