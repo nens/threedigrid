@@ -23,6 +23,7 @@ import sys
 sys.path.insert(0, os.path.abspath('..'))
 
 import threedigrid
+from threedigrid.admin import breaches
 
 # -- General configuration ---------------------------------------------
 
@@ -48,7 +49,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'threedigrid'
-copyright = u"2018, Lars Claussen"
+copyright = u"2018, Nelen & Schuurmans"
 author = u"Lars Claussen"
 
 # The version info for the project you're documenting, acts as replacement
@@ -89,14 +90,25 @@ html_theme = 'alabaster'
 # Theme options are theme-specific and customize the look and feel of a
 # theme further.  For a list of options available for each theme, see the
 # documentation.
-#
-# html_theme_options = {}
+html_theme_options = {
+    'show_powered_by': False,
+    'github_user': 'nens',
+    'github_repo': 'threedigrid',
+    'github_banner': True,
+    'show_related': False,
+    'note_bg': '#FFF59C'
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+# html_static_path = ['_static']
 
+# If true, links to the reST sources are added to the pages.
+html_show_sourcelink = False
+
+# If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
+html_show_sphinx = False
 
 # -- Options for HTMLHelp output ---------------------------------------
 

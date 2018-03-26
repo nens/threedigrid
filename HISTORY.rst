@@ -21,6 +21,11 @@ History
 
   and the filter mask will only be computed once.
 
+- Added documentation and setup for ``sphinx`` documentation pipeline.
+
+- Use  linear referencing for embedded channels to keep the original geometry
+  intact when preparing line geometries for visualisation.
+
 - Define extra's to make the standard threedigrid distribution as
   lightweight as possible.
 

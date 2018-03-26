@@ -1,5 +1,25 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
 # -*- coding: utf-8 -*-
+"""
+Exporters
+---------
+At this moment there is one exporter for breach data, called ``BreachesOgrExporter``.
+For an overview of supported drivers call::
+
+    >>> from threedigrid.admin.breaches.exporters import BreachesOgrExporter
+    >>> from threedigrid.admin.gridadmin import GridH5Admin
+
+    >>> f = 'gridadmin.h5'
+    >>> ga = GridH5Admin(f)
+
+    >>> # get all active breaches
+    >>> active_breaches = ga.breaches.filter(kcu__eq=56)
+
+    >>> exporter = BreachesOgrExporter(active_breaches)
+    >>> exporter.supported_drivers
+    >>> {u'ESRI Shapefile', u'GPKG'}
+
+"""
 from __future__ import unicode_literals
 from __future__ import print_function
 
@@ -21,6 +41,10 @@ logger = logging.getLogger(__name__)
 
 
 class BreachesOgrExporter(BaseOgrExporter):
+    """
+    ogr exporter for breaches. See ``<instance>.supported_drivers`` to
+    get a list of supported drivers
+    """
     def __init__(self, breaches):
         self._breaches = breaches
         self.supported_drivers = {
@@ -29,6 +53,14 @@ class BreachesOgrExporter(BaseOgrExporter):
         }
 
     def save(self, file_name, breach_data, target_epsg_code, **kwargs):
+        """
+        save breaches to file
+
+        :param file_name: file name including full path
+        :param breach_data: queryset
+        :param target_epsg_code: desired epsg code for coords
+        :param kwargs: does not take extra kwargs
+        """
         assert self.driver is not None
         selection = breach_data
         kcu_dict = KCUDescriptor()
