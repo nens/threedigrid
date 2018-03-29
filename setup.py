@@ -16,6 +16,10 @@ lightweight_requirements = [
     'h5py>=2.7.1',
 ]
 
+results_requirements = [
+    'netCDF4>=1.3.1',
+]
+
 # for extra 'geo'
 geo_requirements = [
     'Click>=6.0',
@@ -59,6 +63,7 @@ setup(
     tests_require=test_requirements,
     extras_require={
         'geo': geo_requirements,
+        'results': results_requirements,
     },
     url='https://github.com/nens/threedigrid',
     version='0.1.4.dev0',

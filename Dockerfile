@@ -10,6 +10,9 @@ RUN apt-get update && apt-get install -y \
     git \
     python-pip \
     python-gdal \
+    libhdf5-serial-dev \
+    netcdf-bin \
+    libnetcdf-dev \
     software-properties-common \
 && rm -rf /var/lib/apt/lists/*
 
@@ -21,4 +24,5 @@ COPY requirements_dev.txt /code/requirements_dev.txt
 RUN pip install --use-wheel -r requirements_dev.txt
 COPY requirements.txt /code/requirements.txt
 RUN pip install --use-wheel -r requirements.txt
+#RUN HDF5_DIR=/usr/local/hdf5 pip install netCDF4
 COPY . /code

@@ -22,6 +22,32 @@ class ResultMixin(object):
         """
         Allows filtering on timeseries.
 
+        You can either filter by start_time and end_time or indexes.
+
+        Example usage for start_time and end_time filter::
+
+            >>>> from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
+            >>>> nc = "/code/tests/test_files/subgrid_map.nc"
+            >>>> f = "/code/tests/test_files/gridadmin.h5"
+            >>> gr = GridH5ResultAdmin(f, nc)
+            >>> gr.nodes.timeseries(start_time=0, end_time=10).s1
+
+        Example usage for index filter::
+
+            >>> from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
+            >>> nc = "/code/tests/test_files/subgrid_map.nc"
+            >>> f = "/code/tests/test_files/gridadmin.h5"
+            >>> gr = GridH5ResultAdmin(f, nc)
+            >>> qs_s1 = gr.nodes.timeseries(indexes=[1,2,3]).s1
+            >>> qs_s1.shape
+            >>> (3, 25156)
+
+        A more complex example combining filters::
+
+            >>>> breaches_u1 = gr.lines.filter(kcu__eq=55).timeseries(indexes=[10,11]).u1
+            >>>> breaches_u1.shape
+            >>>> (2, 16)
+
         :return: new instance with filtering options enabled
         """
 
