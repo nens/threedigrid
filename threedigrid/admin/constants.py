@@ -237,3 +237,6 @@ SUBSET_NAME_H5_ATTR_MAP = {
 }
 
 NO_DATA_VALUE = -9999.
+
+# the default slice for result timeseries
+DEFAULT_CHUNK_TIMESERIES = slice(0, 10)

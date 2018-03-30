@@ -49,11 +49,34 @@ class IdMapper(object):
         return self._id_mapping.value
 
     def get_by_name(self, obj_name):
+        """
+        get a slice of ``obj_slices``. That is, a structured array for
+        one specific object type (like v2_channels)
+
+        :param obj_name: name of a given object, for example v2_channel
+
+        :return: a structured array with fields
+            'obj_code', '<i4',
+            ('pk', '<i4'),
+            ('seq_id', '<i4')
+        """
         obj_code = constants.TYPE_CODE_MAP[obj_name]
         idx = self.obj_slices[obj_code]
         return self.id_mapping[idx]
 
     def get_by_code(self, obj_code):
+        """
+        get a slice of ``obj_slices``. That is, a structured array for
+        one specific object type (like v2_channels)
+
+        :param obj_code: code for a given object, for example 2 for
+            v2_channel. See TYPE_CODE_MAP in threedigrid.admin.constants
+        :return: a structured array with fields
+            'obj_code', '<i4',
+            ('pk', '<i4'),
+            ('seq_id', '<i4')
+
+        """
         idx = self.obj_slices[obj_code]
         return self.id_mapping[idx]
 

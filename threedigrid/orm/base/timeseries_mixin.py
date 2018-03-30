@@ -1,3 +1,8 @@
+# (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+from __future__ import print_function
+
 import numpy as np
 
 DEFAULT_TIMESERIES = slice(0, 10)
@@ -26,9 +31,9 @@ class ResultMixin(object):
 
         Example usage for start_time and end_time filter::
 
-            >>>> from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
-            >>>> nc = "/code/tests/test_files/subgrid_map.nc"
-            >>>> f = "/code/tests/test_files/gridadmin.h5"
+            >>> from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
+            >>> nc = "/code/tests/test_files/subgrid_map.nc"
+            >>> f = "/code/tests/test_files/gridadmin.h5"
             >>> gr = GridH5ResultAdmin(f, nc)
             >>> gr.nodes.timeseries(start_time=0, end_time=10).s1
 
@@ -38,15 +43,23 @@ class ResultMixin(object):
             >>> nc = "/code/tests/test_files/subgrid_map.nc"
             >>> f = "/code/tests/test_files/gridadmin.h5"
             >>> gr = GridH5ResultAdmin(f, nc)
-            >>> qs_s1 = gr.nodes.timeseries(indexes=[1,2,3]).s1
+            >>> qs_s1 = gr.nodes.timeseries(indexes=[1, 2, 3]).s1
             >>> qs_s1.shape
             >>> (3, 25156)
 
         A more complex example combining filters::
 
-            >>>> breaches_u1 = gr.lines.filter(kcu__eq=55).timeseries(indexes=[10,11]).u1
-            >>>> breaches_u1.shape
-            >>>> (2, 16)
+            >>> breaches_u1 = gr.lines.filter(kcu__eq=55).timeseries(indexes=[10, 11, 12, 13]).u1  # noqa
+            >>> breaches_u1.shape
+            >>> (4, 16)
+
+        Filtering by indexes works with both lists (like in the examples above)
+        and slices. This code yields exactly the same result
+
+            >>> breaches_u1_slice = gr.lines.filter(kcu__eq=55).timeseries(indexes=slice(10,14)).u1  # noqa
+            >>> breaches_u1_slice.shape
+            >>> (4, 16)
+            >>> assert np.all(breaches_u1 == breaches_u1_slice)
 
         :return: new instance with filtering options enabled
         """
