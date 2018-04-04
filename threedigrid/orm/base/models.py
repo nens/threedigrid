@@ -82,7 +82,7 @@ class Model:
             # pass kwargs to mixin
             if isinstance(mixin, ResultMixin.__class__):
                 netcdf_keys = self._datasource.netcdf_file.variables.keys()
-                super(Model, self).__init__(netcdf_keys)
+                super(Model, self).__init__(netcdf_keys, **kwargs)
             else:
                 super(Model, self).__init__(**kwargs)
 

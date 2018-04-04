@@ -7,15 +7,15 @@ import logging
 
 from netCDF4 import Dataset
 from threedigrid.admin.breaches.models import Breaches
-from threedigrid.admin.breaches.timeseries_mixin import BreachAggregateResultsMixin
+from threedigrid.admin.breaches.timeseries_mixin import BreachResultsMixin
 from threedigrid.admin.constants import DEFAULT_CHUNK_TIMESERIES
 from threedigrid.admin.h5py_datasource import H5pyResultGroup
 from threedigrid.admin.lines.models import Lines
-from threedigrid.admin.lines.timeseries_mixin import LineAggregateResultsMixin
+from threedigrid.admin.lines.timeseries_mixin import LineResultsMixin
 from threedigrid.admin.nodes.models import Nodes
-from threedigrid.admin.nodes.timeseries_mixin import NodeAggregateResultsMixin
+from threedigrid.admin.nodes.timeseries_mixin import NodeResultsMixin
 from threedigrid.admin.pumps.models import Pumps
-from threedigrid.admin.pumps.timeseries_mixin import PumpAggregateResultsMixin
+from threedigrid.admin.pumps.timeseries_mixin import PumpResultsMixin
 from threedigrid.admin.gridadmin import GridH5Admin
 
 logger = logging.getLogger(__name__)
@@ -60,22 +60,22 @@ class GridH5ResultAdmin(GridH5Admin):
     def lines(self):
         return Lines(
             H5pyResultGroup(self.h5py_file, 'lines', self.netcdf_file),
-            **dict(self._grid_kwargs, **{'mixin': LineAggregateResultsMixin}))
+            **dict(self._grid_kwargs, **{'mixin': LineResultsMixin}))
 
     @property
     def nodes(self):
         return Nodes(
             H5pyResultGroup(self.h5py_file, 'nodes', self.netcdf_file),
-            **dict(self._grid_kwargs, **{'mixin': NodeAggregateResultsMixin}))
+            **dict(self._grid_kwargs, **{'mixin': NodeResultsMixin}))
 
     @property
     def breaches(self):
         return Breaches(
             H5pyResultGroup(self.h5py_file, 'breaches', self.netcdf_file),
-            **dict(self._grid_kwargs, **{'mixin': BreachAggregateResultsMixin}))
+            **dict(self._grid_kwargs, **{'mixin': BreachResultsMixin}))
 
     @property
     def pumps(self):
         return Pumps(
             H5pyResultGroup(self.h5py_file, 'pumps', self.netcdf_file),
-            **dict(self._grid_kwargs, **{'mixin': PumpAggregateResultsMixin}))
+            **dict(self._grid_kwargs, **{'mixin': PumpResultsMixin}))

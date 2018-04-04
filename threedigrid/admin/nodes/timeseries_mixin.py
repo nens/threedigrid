@@ -6,21 +6,12 @@ from itertools import product
 
 class NodeResultsMixin(ResultMixin):
 
-    def __init__(self, netcdf_keys):
-        super(ResultMixin, self).__init__()
-
-        variables = NODE_VARIABLES.intersection(netcdf_keys)
-        for var in variables:
-            setattr(self, var, TimeSeriesArrayField())
-
-
-class NodeAggregateResultsMixin(NodeResultsMixin):
-
-    def __init__(self, netcdf_keys):
-        super(NodeAggregateResultsMixin, self).__init__(netcdf_keys)
+    def __init__(self, netcdf_keys, **kwargs):
+        super(NodeResultsMixin, self).__init__(**kwargs)
 
         possible_vars = map(lambda x: x[0] + '_' + x[1],
-            product(NODE_VARIABLES, AGGREGATION_OPTIONS))
+                            product(NODE_VARIABLES, AGGREGATION_OPTIONS))
+        possible_vars += NODE_VARIABLES
         variables = set(possible_vars).intersection(netcdf_keys)
         for var in variables:
             setattr(self, var, TimeSeriesArrayField())

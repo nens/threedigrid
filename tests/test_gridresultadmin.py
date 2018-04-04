@@ -29,7 +29,21 @@ test_file_dir = os.path.join(
 
 # the testfile is a copy of the v2_bergermeer gridadmin file
 result_file = os.path.join(test_file_dir, "subgrid_map.nc")
+agg_result_file = os.path.join(test_file_dir, 'flow_aggregate.nc')
 grid_file = os.path.join(test_file_dir, "gridadmin.h5")
+
+@pytest.fixture()
+def agg_gr():
+    gr = GridH5ResultAdmin(grid_file, agg_result_file)
+    yield gr
+    gr.close()
+
+
+@pytest.fixture()
+def gr():
+    gr = GridH5ResultAdmin(grid_file, result_file)
+    yield gr
+    gr.close()
 
 
 def test_nodes_timeseries_index_filter():
@@ -79,3 +93,21 @@ def test_set_timeseries_chunk_size_raises_value_error():
 
     with pytest.raises(ValueError):
         gr.set_timeseries_chunk_size('20.5')
+
+
+def test_get_aggregate_results_variables(agg_gr):
+    assert 's1_max' in agg_gr.netcdf_file.variables.keys()
+    assert 'vol_max' in agg_gr.netcdf_file.variables.keys()
+    assert hasattr(agg_gr.nodes, 's1_max')
+    assert hasattr(agg_gr.nodes, 'vol_max')
+    assert agg_gr.nodes.s1_max.shape[0] > 0
+    assert agg_gr.nodes.vol_max.shape[0] > 0
+
+
+def test_get_results_variables(gr):
+    assert 's1' in gr.netcdf_file.variables.keys()
+    assert 'vol' in gr.netcdf_file.variables.keys()
+    assert hasattr(gr.nodes, 's1')
+    assert hasattr(gr.nodes, 'vol')
+    assert gr.nodes.s1.shape[0] > 0
+    assert gr.nodes.vol.shape[0] > 0

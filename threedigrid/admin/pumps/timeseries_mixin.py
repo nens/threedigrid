@@ -6,21 +6,12 @@ from itertools import product
 
 class PumpResultsMixin(ResultMixin):
 
-    def __init__(self, netcdf_keys):
-        super(ResultMixin, self).__init__()
-
-        variables = PUMP_VARIABLES.intersection(netcdf_keys)
-        for var in variables:
-            setattr(self, var, TimeSeriesArrayField())
-
-
-class PumpAggregateResultsMixin(PumpResultsMixin):
-
-    def __init__(self, dynamic_keys):
-        super(PumpAggregateResultsMixin, self).__init__()
+    def __init__(self, netcdf_keys, **kwargs):
+        super(PumpResultsMixin, self).__init__(**kwargs)
 
         possible_vars = map(lambda x: x[0] + '_' + x[1],
-            product(PUMP_VARIABLES, AGGREGATION_OPTIONS))
-        variables = set(possible_vars).intersection(dynamic_keys)
+                            product(PUMP_VARIABLES, AGGREGATION_OPTIONS))
+        possible_vars += PUMP_VARIABLES
+        variables = set(possible_vars).intersection(netcdf_keys)
         for var in variables:
             setattr(self, var, TimeSeriesArrayField())

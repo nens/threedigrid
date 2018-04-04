@@ -8,21 +8,12 @@ from itertools import product
 
 class LineResultsMixin(ResultMixin):
 
-    def __init__(self, netcdf_keys):
-        super(ResultMixin, self).__init__()
-
-        variables = LINE_VARIABLES.intersection(netcdf_keys)
-        for var in variables:
-            setattr(self, var, TimeSeriesArrayField())
-
-
-class LineAggregateResultsMixin(LineResultsMixin):
-
-    def __init__(self, dynamic_keys):
-        super(LineAggregateResultsMixin, self).__init__()
+    def __init__(self, netcdf_keys, **kwargs):
+        super(LineResultsMixin, self).__init__(**kwargs)
 
         possible_vars = map(lambda x: x[0] + '_' + x[1],
-            product(LINE_VARIABLES, AGGREGATION_OPTIONS))
-        variables = set(possible_vars).intersection(dynamic_keys)
+                            product(LINE_VARIABLES, AGGREGATION_OPTIONS))
+        possible_vars += LINE_VARIABLES
+        variables = set(possible_vars).intersection(netcdf_keys)
         for var in variables:
             setattr(self, var, TimeSeriesArrayField())
