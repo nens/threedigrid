@@ -179,7 +179,6 @@ class Model:
         the ArrayField
         instance.
         """
-
         # Note: don't use getattr(self, XX) in this function,
         # it will lead to a max recursion error
         attr = super(Model, self).__getattribute__(attr_name)
@@ -198,6 +197,7 @@ class Model:
 
         # Default behaviour, return the attribute from superclass
         return attr
+
 
     @property
     def fields(self):

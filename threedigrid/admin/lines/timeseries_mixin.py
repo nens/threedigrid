@@ -1,3 +1,5 @@
+# (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
+# -*- coding: utf-8 -*-
 from threedigrid.orm.base.timeseries_mixin import ResultMixin
 from threedigrid.orm.base.fields import TimeSeriesArrayField
 from threedigrid.admin.constants import AGGREGATION_OPTIONS, LINE_VARIABLES
