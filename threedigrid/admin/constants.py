@@ -243,7 +243,7 @@ DEFAULT_CHUNK_TIMESERIES = slice(0, 10)
 
 
 ###############################################################################
-# aggregation variables
+# White list of variables and aggregation variables
 AGGREGATION_OPTIONS = {
     'min',
     'max',

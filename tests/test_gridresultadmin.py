@@ -32,6 +32,7 @@ result_file = os.path.join(test_file_dir, "subgrid_map.nc")
 agg_result_file = os.path.join(test_file_dir, 'flow_aggregate.nc')
 grid_file = os.path.join(test_file_dir, "gridadmin.h5")
 
+
 @pytest.fixture()
 def agg_gr():
     gr = GridH5ResultAdmin(grid_file, agg_result_file)
@@ -95,7 +96,7 @@ def test_set_timeseries_chunk_size_raises_value_error():
         gr.set_timeseries_chunk_size('20.5')
 
 
-def test_get_aggregate_results_variables(agg_gr):
+def test_get_node_aggregate_netcdf_results(agg_gr):
     assert 's1_max' in agg_gr.netcdf_file.variables.keys()
     assert 'vol_max' in agg_gr.netcdf_file.variables.keys()
     assert hasattr(agg_gr.nodes, 's1_max')
@@ -104,7 +105,16 @@ def test_get_aggregate_results_variables(agg_gr):
     assert agg_gr.nodes.vol_max.shape[0] > 0
 
 
-def test_get_results_variables(gr):
+def test_get_line_aggregate_netcdf_results(agg_gr):
+    assert 'q_max' in agg_gr.netcdf_file.variables.keys()
+    assert 'u1_max' in agg_gr.netcdf_file.variables.keys()
+    assert hasattr(agg_gr.lines, 'q_max')
+    assert hasattr(agg_gr.lines, 'u1_max')
+    assert agg_gr.lines.q_max.shape[0] > 0
+    assert agg_gr.lines.u1_max.shape[0] > 0
+
+
+def test_get_node_netcdf_results(gr):
     assert 's1' in gr.netcdf_file.variables.keys()
     assert 'vol' in gr.netcdf_file.variables.keys()
     assert hasattr(gr.nodes, 's1')
