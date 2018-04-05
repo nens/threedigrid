@@ -4,17 +4,20 @@ History
 0.1.4 (unreleased)
 ------------------
 
+- Changed ResultMixin to dynamically add attributes based on the netcdf
+  variables.
+
 - Added basic result proccesing for line/node data.
- 
-- The filter mask is computed only for array's affected and 
+
+- The filter mask is computed only for array's affected and
   before applying it to all array's
 
-- The 'only' filter works much faster because the filter mask 
+- The 'only' filter works much faster because the filter mask
   is only applied on fields that are affected.
 
 - The filter mask is cached on the line/node instance after getting
   the first value. You can thus do something like:
- 
+
       queryset = gridadmin.lines.filter(kcu=2)
       ids = queryset.id
       line_coords = queryset.line_coords

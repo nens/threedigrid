@@ -5,6 +5,7 @@ from __future__ import print_function
 
 import logging
 from itertools import izip
+from itertools import product
 from itertools import tee
 
 import numpy as np
@@ -255,3 +256,19 @@ def get_smallest_uint_dtype(maxval):
             return dt
     raise ValueError(
         "Value of %s exceeds all possible maximum dtype values." % maxval)
+
+
+def combine_vars(prod_a, prod_b, combinator='_'):
+    """Return the cartesian product of prod_a with prod_b, combined together with
+    comibnator.
+
+    >>> combine_vars({'a', 'b'}, {'c', 'd'})
+    ['a_c', 'a_d', 'b_c', 'b_d']
+
+    :param prod_a: (iterable)
+    :param prod_b: (iterable)
+    :param combinator: (string)
+    :return: (list) ∏ (set_a, set_b)
+    """
+    return map(lambda x: x[0] + combinator + x[1],
+               product(prod_a, prod_b))
