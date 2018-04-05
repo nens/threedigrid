@@ -45,9 +45,6 @@ explicitly run::
 
     $ 3digrid_explore --grid-file=<the to grid file> --no-ipy
 
-This will produce output like this::
-
-
 
 (I)Python shell
 ---------------
