@@ -258,16 +258,16 @@ def get_smallest_uint_dtype(maxval):
         "Value of %s exceeds all possible maximum dtype values." % maxval)
 
 
-def combine_vars(prod_a, prod_b, combinator='_'):
+def combine_vars(prod_a, prod_b, join_str='_'):
     """Return the cartesian product of prod_a with prod_b, combined together with
-    comibnator.
+    join_str.
 
     >>> combine_vars({'a', 'b'}, {'c', 'd'})
     ['a_c', 'a_d', 'b_c', 'b_d']
 
     :param prod_a: (iterable)
     :param prod_b: (iterable)
-    :param combinator: (string)
+    :param join_str: (string)
     :return: (list) ∏ (set_a, set_b)
     """
     return map(lambda x: x[0] + combinator + x[1],
