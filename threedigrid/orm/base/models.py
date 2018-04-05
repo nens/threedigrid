@@ -20,6 +20,7 @@ from threedigrid.orm.base.fields import IndexArrayField
 from threedigrid.orm.base.fields import TimeSeriesArrayField
 from threedigrid.orm.base.filters import get_filter
 from threedigrid.orm.base.filters import SliceFilter
+from threedigrid.orm.base.timeseries_mixin import ResultMixin
 
 logger = logging.getLogger(__name__)
 
@@ -79,7 +80,11 @@ class Model:
         if mixin:
             extend_instance(self, mixin)
             # pass kwargs to mixin
-            super(Model, self).__init__(**kwargs)
+            if isinstance(mixin, ResultMixin.__class__):
+                netcdf_keys = self._datasource.netcdf_file.variables.keys()
+                super(Model, self).__init__(netcdf_keys, **kwargs)
+            else:
+                super(Model, self).__init__(**kwargs)
 
         # Cache the boolean filter mask for this instance
         # after it has been computed once
