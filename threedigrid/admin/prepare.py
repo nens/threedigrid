@@ -5,6 +5,9 @@ from __future__ import print_function
 
 import logging
 import os
+
+import numpy as np
+
 from threedigrid.admin.h5py_datasource import H5pyGroup
 from threedigrid.admin.idmapper import IdMapper
 from threedigrid.admin import constants
@@ -39,7 +42,6 @@ def skip_prepare(h5py_file, group_name, attr_name, overwrite):
 def prepare_lines_onedee(
         h5py_file, threedi_datasource, klass, attr_name, overwrite=False):
 
-
     if skip_prepare(h5py_file, 'lines', attr_name, overwrite):
         return
 
@@ -56,6 +58,8 @@ class GridAdminH5Prepare(object):
         # and possible other meta data..
         if extra_attrs:
             for key, value in extra_attrs.iteritems():
+                if isinstance(value, basestring):
+                    value = np.string_(value)
                 h5py_file.attrs[key] = value
 
         # Step 3: prepare the ID mapper
@@ -319,7 +323,9 @@ class GridAdminH5Export(object):
         if not self.ga.has_groundwater:
             logger.info(
                 "[*] Model {} does not have groundwater, "
-                "skipping export groundwater cells...".format(self.ga.model_name)
+                "skipping export groundwater cells...".format(
+                    self.ga.model_name
+                )
             )
             return
         dest_gw = os.path.join(self._dest, constants.GROUNDWATER_SHP)

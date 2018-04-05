@@ -1,3 +1,3 @@
 # -*- coding: utf-8 -*-
 
-from admin.gridadmin import GridH5Admin
+__version__ = '0.1.4.dev0'

@@ -115,21 +115,27 @@ class PrepareLines(object):
 
         return line_geometries
 
-    # @staticmethod
-    # def interpolate_point(line_geom, pnt):
-    #     line_geom.interpolate(line_geom.project(pnt))
 
     @staticmethod
     def _cut_geometries(geom, start_x, start_y, end_x, end_y, kcu_array):
         """
         Segmentize line geometry based on start and end points from calc
         line segments
-        :return:
-        array of seperate line geometries for number of calc lines on geometry
-        array[
-            [x1, x2, x3, y1, y2, y3],
-            [x1, x2, y1, y2]
-        ]
+
+        :param geom: orginal geometry from the sqlite database
+        :param start_x: threedicore x-coordinates for start points
+        :param start_y: threedicore y-coordinates for start points
+        :param end_x: threedicore x-coordinates for end points
+        :param end_y: threedicore y-coordinates for end points
+        :kcu_array: corresponding kcu values for threedicore coordinates
+
+        :returns  an array of seperate line geometries for number of
+        calc lines on geometry, like so::
+
+            array[
+                [x1, x2, x3, y1, y2, y3],
+                [x1, x2, y1, y2]
+            ]
         """
 
         cut_geometries = np.zeros((len(start_x),), dtype=DT_VARIABLE)

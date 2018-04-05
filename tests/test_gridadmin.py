@@ -19,7 +19,6 @@ from threedigrid.admin.breaches.exporters import BreachesOgrExporter
 from threedigrid.admin.constants import SUBSET_1D_ALL
 from threedigrid.admin.constants import SUBSET_2D_OPEN_WATER
 from threedigrid.admin.constants import NO_DATA_VALUE
-from threedigrid.admin.lines.serializers import ChannelsGeoJsonSerializer
 
 test_file_dir = os.path.join(
     os.getcwd(), "tests/test_files")
@@ -52,7 +51,8 @@ class GridAdminTest(unittest.TestCase):
 
     def test_get_extent_subset_twodee(self):
         extent_2D = self.parser.get_extent_subset(
-        subset_name=SUBSET_2D_OPEN_WATER)
+            subset_name=SUBSET_2D_OPEN_WATER
+        )
         # should contain values
         self.assertTrue(np.any(extent_2D != NO_DATA_VALUE))
 
@@ -60,7 +60,7 @@ class GridAdminTest(unittest.TestCase):
         extent_1D = self.parser.get_extent_subset(
             subset_name=SUBSET_1D_ALL)
         extent_2D = self.parser.get_extent_subset(
-        subset_name=SUBSET_2D_OPEN_WATER)
+            subset_name=SUBSET_2D_OPEN_WATER)
         # should be different
         self.assertTrue(
             np.any(np.not_equal(extent_1D, extent_2D))
@@ -70,10 +70,8 @@ class GridAdminTest(unittest.TestCase):
         model_extent = self.parser.get_model_extent()
         np.testing.assert_almost_equal(
             model_extent,
-            np.array([
-                [105427.6, 105427.6],
-                [523463.32684827, 523463.32684827]
-            ])
+            np.array([105427.6, 511727.0515702,
+                      115887., 523463.3268483])
         )
 
     def test_get_model_extent_extra_extent(self):
@@ -85,23 +83,19 @@ class GridAdminTest(unittest.TestCase):
         model_extent = self.parser.get_model_extent(**extra_extent)
         np.testing.assert_equal(
             model_extent,
-            np.array([[ 90000.,  90000.],
-                      [580000., 580000.]
-            ])
+            np.array([100000., 90000., 550000., 580000.])
         )
 
     def test_get_model_extent_extra_extent2(self):
         onedee_extra = np.array([
-            106666.6, 106666.6, 550000.0, 580000.0]
-        )
+            106666.6, 106666.6, 550000.0, 580000.0
+        ])
 
         extra_extent = {'extra_extent': [onedee_extra]}
         model_extent = self.parser.get_model_extent(**extra_extent)
         np.testing.assert_almost_equal(
             model_extent,
-            np.array([[105427.6, 105427.6],
-                      [580000., 580000.]
-            ])
+            np.array([105427.6, 106666.6, 550000., 580000.])
         )
 
     def test_properties(self):
@@ -145,8 +139,8 @@ class GridAdminLinesTest(unittest.TestCase):
         self.parser.lines.to_shape(self.f)
         self.assertTrue(os.path.exists, self.f)
         s = ogr.Open(self.f)
-        l = s.GetLayer()
-        self.assertEqual(l.GetFeatureCount(), self.parser.lines.id.size)
+        lyr = s.GetLayer()
+        self.assertEqual(lyr.GetFeatureCount(), self.parser.lines.id.size)
 
 
 class GridAdminGridTest(unittest.TestCase):
@@ -199,8 +193,8 @@ class GridAdminNodeTest(unittest.TestCase):
         self.parser.nodes.to_shape(self.f)
         self.assertTrue(os.path.exists, self.f)
         s = ogr.Open(self.f)
-        l = s.GetLayer()
-        self.assertEqual(l.GetFeatureCount(), self.parser.nodes.id.size)
+        lyr = s.GetLayer()
+        self.assertEqual(lyr.GetFeatureCount(), self.parser.nodes.id.size)
 
 
 class GridAdminBreachTest(unittest.TestCase):
@@ -232,8 +226,8 @@ class GridAdminBreachTest(unittest.TestCase):
         self.parser.breaches.to_shape(self.f)
         self.assertTrue(os.path.exists, self.f)
         s = ogr.Open(self.f)
-        l = s.GetLayer()
-        self.assertEqual(l.GetFeatureCount(), self.parser.breaches.id.size)
+        lyr = s.GetLayer()
+        self.assertEqual(lyr.GetFeatureCount(), self.parser.breaches.id.size)
 
 
 class GridAdminCellsTest(unittest.TestCase):
@@ -254,12 +248,39 @@ class GridAdminCellsTest(unittest.TestCase):
         )
 
     def test_get_id_from_xy(self):
-
-        self.assertIsNone(self.parser.cells.get_id_from_xy(1.,2.))
+        # should yield tow ids, one for 2d, one for groundwater
+        self.assertListEqual(self.parser.cells.get_id_from_xy(1.,2.), [])
         # first coordinate pair + some offset
         x = self.parser.cells.coordinates[0][1] + 0.5
         y = self.parser.cells.coordinates[1][1] + 0.5
-        self.assertEqual(self.parser.cells.get_id_from_xy(x,y), 1)
+        self.assertListEqual(self.parser.cells.get_id_from_xy(x,y), [1, 6537])
+
+    def test_get_id_from_xy_2d_open_water(self):
+
+        self.assertListEqual(
+            self.parser.cells.get_id_from_xy(
+                1.,2., subset_name='2d_open_water'), [])
+        # first coordinate pair + some offset
+        x = self.parser.cells.coordinates[0][1] + 0.5
+        y = self.parser.cells.coordinates[1][1] + 0.5
+        self.assertEqual(
+            self.parser.cells.get_id_from_xy(
+                x,y, subset_name='2d_open_water'
+            ), [1]
+        )
+
+    def test_get_id_from_xy_groundwater(self):
+
+        self.assertListEqual(self.parser.cells.get_id_from_xy(
+            1.,2., subset_name='groundwater_all'), [])
+        # first coordinate pair + some offset
+        x = self.parser.cells.coordinates[0][1] + 0.5
+        y = self.parser.cells.coordinates[1][1] + 0.5
+        self.assertEqual(
+            self.parser.cells.get_id_from_xy(
+                x,y, subset_name='groundwater_all'
+            ), [6537]
+        )
 
     def test_exporters(self):
         self.assertEqual(len(self.parser.cells._exporters), 1)

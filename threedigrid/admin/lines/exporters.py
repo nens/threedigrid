@@ -1,5 +1,9 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
 # -*- coding: utf-8 -*-
+"""
+Exporters
+---------
+"""
 from __future__ import unicode_literals
 from __future__ import print_function
 
@@ -9,7 +13,7 @@ import logging
 from osgeo import ogr
 from shapely.geometry import LineString
 
-from threedigrid.admin.utils import get_spatial_reference
+from threedigrid.geo_utils import get_spatial_reference
 from threedigrid.admin.utils import KCUDescriptor
 from threedigrid.orm.base.exporters import BaseOgrExporter
 from threedigrid.admin.constants import GEO_PACKAGE_DRIVER_NAME

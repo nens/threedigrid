@@ -2,11 +2,33 @@
 History
 =======
 
-0.1.2 (unreleased)
+0.1.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Added documentation and setup for ``sphinx`` documentation pipeline.
 
+- Use  linear referencing for embedded channels to keep the original geometry
+  intact when preparing line geometries for visualisation.
+
+- Define extra's to make the standard threedigrid distribution as
+  lightweight as possible.
+
+- Convert strings in ``attrs`` to ``numpy.string_`` to fix crashes under
+  Windows.
+
+
+0.1.3 (2018-03-16)
+------------------
+
+- Remove property ``has_groundwater`` from ``GridH5Admin``.
+  Should always be provided by the threedicore itself. Gives a warning for
+  backwards compatibility.
+
+
+0.1.2 (2018-03-12)
+------------------
+
+- Get model extent now always returns a bbox (minX, minY, maxX, maxY)
 
 0.1.1 (2018-03-06)
 ------------------
