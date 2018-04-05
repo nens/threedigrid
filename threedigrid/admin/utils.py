@@ -270,5 +270,5 @@ def combine_vars(prod_a, prod_b, join_str='_'):
     :param join_str: (string)
     :return: (list) ∏ (set_a, set_b)
     """
-    return map(lambda x: x[0] + combinator + x[1],
+    return map(lambda x: x[0] + join_str + x[1],
                product(prod_a, prod_b))
