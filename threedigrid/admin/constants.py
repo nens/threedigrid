@@ -78,7 +78,7 @@ try:
         'float': ogr.OFTReal,
     }
 except AttributeError:
-    pass
+    OGR_FIELD_TYPE_MAP = {}
 
 SHP_DRIVER_NAME = 'ESRI Shapefile'
 GEO_PACKAGE_DRIVER_NAME = 'GPKG'
