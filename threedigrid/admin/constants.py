@@ -3,7 +3,11 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
-import ogr
+try:
+    from osgeo import ogr
+except ImportError:
+    ogr = None
+
 from collections import OrderedDict
 
 LONLAT_DIGITS = 7  # 7 decimals is about 11mm accuracy
