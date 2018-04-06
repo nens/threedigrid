@@ -70,13 +70,15 @@ HAS_2D_KEY = 'has_2d'
 HAS_PUMPSTATIONS_KEY = 'has_pumpstations'
 HAS_BREACHES_KEY = 'has_breaches'
 
-
-OGR_FIELD_TYPE_MAP = {
-    'int': ogr.OFTInteger,
-    'str': ogr.OFTString,
-    'real': ogr.OFTReal,
-    'float': ogr.OFTReal,
-}
+try:
+    OGR_FIELD_TYPE_MAP = {
+        'int': ogr.OFTInteger,
+        'str': ogr.OFTString,
+        'real': ogr.OFTReal,
+        'float': ogr.OFTReal,
+    }
+except AttributeError:
+    pass
 
 SHP_DRIVER_NAME = 'ESRI Shapefile'
 GEO_PACKAGE_DRIVER_NAME = 'GPKG'
