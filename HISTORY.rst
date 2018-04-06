@@ -5,6 +5,8 @@ History
 0.1.4 (unreleased)
 ------------------
 
+- Make ogr/gdal imports optional to avoid breaking parts of the documentation.
+
 - Added documentation and setup for ``sphinx`` documentation pipeline.
 
 - Use  linear referencing for embedded channels to keep the original geometry

@@ -10,10 +10,19 @@ from __future__ import print_function
 import os
 import logging
 
-from osgeo import ogr
-from shapely.geometry import LineString
+try:
+    from osgeo import ogr
+except ImportError:
+    ogr = None
+
+try:
+    from shapely import geometry as shapely_geom
+except ImportError:
+    shapely_geom = None
+
 
 from threedigrid.geo_utils import get_spatial_reference
+from threedigrid.geo_utils import raise_import_exception
 from threedigrid.admin.utils import KCUDescriptor
 from threedigrid.orm.base.exporters import BaseOgrExporter
 from threedigrid.admin.constants import GEO_PACKAGE_DRIVER_NAME
@@ -64,6 +73,10 @@ class LinesOgrExporter(BaseOgrExporter):
         if kwargs:
             geom_source = kwargs['geom']
 
+        # shapely is needed for the LineString creation, check if installed
+        if geom_source == 'from_spatialite' and shapely_geom is None:
+            raise_import_exception('shapely')
+
         self.del_datasource(file_name)
         data_source = self.driver.CreateDataSource(file_name)
         layer = data_source.CreateLayer(
@@ -91,7 +104,7 @@ class LinesOgrExporter(BaseOgrExporter):
                               line_data['line_coords'][3][i])
             elif geom_source == 'from_spatialite':
                 linepoints = line_data['line_geometries'][i].reshape(2, -1).T
-                line_geom = LineString(linepoints)
+                line_geom = shapely_geom.LineString(linepoints)
                 line = ogr.CreateGeometryFromWkt(line_geom.wkt)
 
             feature = ogr.Feature(_definition)
