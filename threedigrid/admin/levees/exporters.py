@@ -5,14 +5,15 @@ import os
 import logging
 from collections import OrderedDict
 
-from osgeo import ogr
+try:
+    from osgeo import ogr
+except ImportError:
+    ogr = None
 
 from threedigrid.numpy_utils import reshape_flat_array
 from threedigrid.geo_utils import get_spatial_reference
 from threedigrid.orm.base.exporters import BaseOgrExporter
-from threedigrid.admin.constants import GEO_PACKAGE_DRIVER_NAME
-from threedigrid.admin.constants import OGR_FIELD_TYPE_MAP
-from threedigrid.admin.constants import SHP_DRIVER_NAME
+from threedigrid.admin import exporter_constants as const
 
 logger = logging.getLogger(__name__)
 
@@ -28,8 +29,8 @@ class LeveeOgrExporter(BaseOgrExporter):
         """
         self._levees = levees
         self.supported_drivers = {
-            GEO_PACKAGE_DRIVER_NAME,
-            SHP_DRIVER_NAME,
+            const,GEO_PACKAGE_DRIVER_NAME,
+            const.SHP_DRIVER_NAME,
         }
         self.driver = None
 
