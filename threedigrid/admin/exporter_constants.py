@@ -6,7 +6,7 @@
 try:
     from osgeo import ogr
 except ImportError:
-    pass
+    ogr = None
 
 if ogr is not None:
     OGR_FIELD_TYPE_MAP = {
