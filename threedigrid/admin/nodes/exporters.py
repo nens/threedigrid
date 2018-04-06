@@ -7,14 +7,15 @@ import os
 import logging
 from collections import OrderedDict
 
-from osgeo import ogr
+try:
+    from osgeo import ogr
+except ImportError:
+    ogr = None
 
 from threedigrid.orm.base.exporters import BaseOgrExporter
 
-from threedigrid.admin.utils import get_spatial_reference
-from threedigrid.admin.constants import OGR_FIELD_TYPE_MAP
-from threedigrid.admin.constants import SHP_DRIVER_NAME
-from threedigrid.admin.constants import GEO_PACKAGE_DRIVER_NAME
+from threedigrid.geo_utils import get_spatial_reference
+from threedigrid.admin import exporter_constants as const
 from threedigrid.admin.constants import NODE_BASE_FIELDS
 from threedigrid.admin.constants import NODE_1D_FIELDS
 from threedigrid.admin.constants import NODE_FIELD_NAME_MAP
@@ -34,8 +35,8 @@ class NodesOgrExporter(BaseOgrExporter):
         """
         self._nodes = nodes
         self.supported_drivers = {
-            GEO_PACKAGE_DRIVER_NAME,
-            SHP_DRIVER_NAME,
+            const.GEO_PACKAGE_DRIVER_NAME,
+            const.SHP_DRIVER_NAME,
         }
 
     def save(self, file_name, node_data, target_epsg_code, **kwargs):
@@ -61,7 +62,8 @@ class NodesOgrExporter(BaseOgrExporter):
 
         for field_name, field_type in fields.iteritems():
             layer.CreateField(ogr.FieldDefn(
-                    str(field_name), OGR_FIELD_TYPE_MAP[field_type])
+                    str(field_name),
+                    const.OGR_FIELD_TYPE_MAP[field_type])
             )
         _definition = layer.GetLayerDefn()
 
@@ -92,8 +94,8 @@ class CellsOgrExporter(BaseOgrExporter):
         """
         self._cells = cells
         self.supported_drivers = {
-            GEO_PACKAGE_DRIVER_NAME,
-            SHP_DRIVER_NAME,
+            const.GEO_PACKAGE_DRIVER_NAME,
+            const.SHP_DRIVER_NAME,
         }
         self.driver = None
 
@@ -123,7 +125,8 @@ class CellsOgrExporter(BaseOgrExporter):
         for field_name, field_type in fields.iteritems():
             layer.CreateField(
                 ogr.FieldDefn(
-                    str(field_name), OGR_FIELD_TYPE_MAP[field_type]
+                    str(field_name),
+                    const.OGR_FIELD_TYPE_MAP[field_type]
                 )
             )
 

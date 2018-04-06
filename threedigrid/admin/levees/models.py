@@ -1,14 +1,24 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
 # -*- coding: utf-8 -*-
+"""
+Models
+++++++
+
+The ``Levees`` model.
+"""
 from __future__ import unicode_literals
 from __future__ import print_function
 
-import ogr
+try:
+    from osgeo import ogr
+except ImportError:
+    ogr = None
 
+from threedigrid.numpy_utils import reshape_flat_array
+from threedigrid.geo_utils import raise_import_exception
 from threedigrid.orm.models import Model
 from threedigrid.orm.fields import MultiLineArrayField
 from threedigrid.orm.fields import ArrayField
-from threedigrid.admin.utils import reshape_flat_array
 
 from threedigrid.admin.levees import exporters
 
@@ -35,6 +45,14 @@ class Levees(Model):
         return self._geoms
 
     def load_geoms(self):
+        """
+        load levee geometries originating
+        from model DB
+        """
+
+        # works on premise of ogr install
+        if ogr is None:
+            raise_import_exception('ogr')
 
         if self._geoms:
             return

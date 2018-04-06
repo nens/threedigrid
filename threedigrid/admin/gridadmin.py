@@ -1,5 +1,8 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
 # -*- coding: utf-8 -*-
+"""
+Main entry point for threedigrid applications.
+"""
 from __future__ import unicode_literals
 from __future__ import print_function
 
@@ -8,7 +11,7 @@ import logging
 import h5py
 import numpy as np
 
-from threedigrid.orm.utils import transform_bbox
+from threedigrid.geo_utils import transform_bbox
 
 from threedigrid.admin.lines.models import Lines
 from threedigrid.admin.nodes.models import Nodes
@@ -24,8 +27,20 @@ logger = logging.getLogger(__name__)
 
 
 class GridH5Admin(object):
+    """
+    Parses the hdf5 gridadmin file and exposes the model instances, e.g.::
+
+        >>> ga = GridH5Admin(file_path)
+        >>> ga.nodes
+        >>> ga.lines
+        >>> ...
+    """
 
     def __init__(self, h5_file_path, file_modus='r'):
+        """
+        :param h5_file_path: path to the gridadmin file
+        :param file_modus: mode with which to open the file (defaults to r=READ)
+        """
 
         self.grid_file = h5_file_path
         self.h5py_file = h5py.File(h5_file_path, file_modus)
@@ -77,14 +92,17 @@ class GridH5Admin(object):
 
     @property
     def revision_hash(self):
+        """mercurial revision hash of the model"""
         return self.h5py_file.attrs['revision_hash']
 
     @property
     def revision_nr(self):
+        """mercurial revision nr or id of the model"""
         return self.h5py_file.attrs['revision_nr']
 
     @property
     def model_name(self):
+        """name of the model the gridadmin file belongs to"""
         return self.h5py_file.attrs['model_name']
 
     @property
@@ -99,7 +117,7 @@ class GridH5Admin(object):
             Valid input: '1D_all', '2D_groundwater'
         :param target_epsg_code: string representation of the desired
             output epsg code
-        :returns numpy array of xy-min/xy-max pairs
+        :return: numpy array of xy-min/xy-max pairs
         """
         attr_name = constants.SUBSET_NAME_H5_ATTR_MAP.get(subset_name.upper())
         extent = self.h5py_file.attrs.get(attr_name, None)
@@ -137,7 +155,9 @@ class GridH5Admin(object):
         :param kwargs:
             extra_extent: list of xy-min/xy-max pairs that need to be
             taken into account in the model extent calculation
-        :returns numpy array of xy-min/xy-max pairs
+
+        :return: numpy array of xy-min/xy-max pairs
+
         """
         bbox = kwargs.get('extra_extent', [])
         for k in constants.SUBSET_NAME_H5_ATTR_MAP.keys():
@@ -169,7 +189,9 @@ class GridH5Admin(object):
 
     @property
     def has_levees(self):
-        return hasattr(self, "levees")
+        if not hasattr(self, "levees"):
+            return False
+        return bool(self.levees.id.size)
 
     @property
     def threedicore_version(self):

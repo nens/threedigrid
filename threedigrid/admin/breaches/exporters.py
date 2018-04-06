@@ -1,5 +1,25 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
 # -*- coding: utf-8 -*-
+"""
+Exporters
+---------
+At this moment there is one exporter for breach data, called ``BreachesOgrExporter``.
+For an overview of supported drivers call::
+
+    >>> from threedigrid.admin.breaches.exporters import BreachesOgrExporter
+    >>> from threedigrid.admin.gridadmin import GridH5Admin
+
+    >>> f = 'gridadmin.h5'
+    >>> ga = GridH5Admin(f)
+
+    >>> # get all active breaches
+    >>> active_breaches = ga.breaches.filter(kcu__eq=56)
+
+    >>> exporter = BreachesOgrExporter(active_breaches)
+    >>> exporter.supported_drivers
+    >>> {u'ESRI Shapefile', u'GPKG'}
+
+"""
 from __future__ import unicode_literals
 from __future__ import print_function
 
@@ -7,29 +27,41 @@ import os
 import logging
 from collections import OrderedDict
 
-from osgeo import ogr
-
-from threedigrid.admin.utils import reshape_flat_array
-from threedigrid.admin.utils import get_spatial_reference
+try:
+    from osgeo import ogr
+except ImportError:
+    ogr = None
+    
+from threedigrid.numpy_utils import reshape_flat_array
+from threedigrid.geo_utils import get_spatial_reference
 from threedigrid.admin.utils import KCUDescriptor
-from threedigrid.admin.constants import GEO_PACKAGE_DRIVER_NAME
-from threedigrid.admin.constants import OGR_FIELD_TYPE_MAP
-from threedigrid.admin.constants import SHP_DRIVER_NAME
+from threedigrid.admin import exporter_constants as const
 from threedigrid.orm.base.exporters import BaseOgrExporter
 
 logger = logging.getLogger(__name__)
 
 
-
 class BreachesOgrExporter(BaseOgrExporter):
+    """
+    ogr exporter for breaches. See ``<instance>.supported_drivers`` to
+    get a list of supported drivers
+    """
     def __init__(self, breaches):
         self._breaches = breaches
         self.supported_drivers = {
-            SHP_DRIVER_NAME,
-            GEO_PACKAGE_DRIVER_NAME,
+            const.SHP_DRIVER_NAME,
+            const.GEO_PACKAGE_DRIVER_NAME,
         }
 
     def save(self, file_name, breach_data, target_epsg_code, **kwargs):
+        """
+        save breaches to file
+
+        :param file_name: file name including full path
+        :param breach_data: queryset
+        :param target_epsg_code: desired epsg code for coords
+        :param kwargs: does not take extra kwargs
+        """
         assert self.driver is not None
         selection = breach_data
         kcu_dict = KCUDescriptor()
@@ -51,7 +83,8 @@ class BreachesOgrExporter(BaseOgrExporter):
         for field_name, field_type in fields.iteritems():
             layer.CreateField(
                 ogr.FieldDefn(
-                    str(field_name), OGR_FIELD_TYPE_MAP[field_type]
+                    str(field_name),
+                    const.OGR_FIELD_TYPE_MAP[field_type]
                 )
             )
         _definition = layer.GetLayerDefn()

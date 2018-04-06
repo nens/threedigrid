@@ -5,6 +5,16 @@ History
 0.1.4 (unreleased)
 ------------------
 
+- Make ogr/gdal imports optional to avoid breaking parts of the documentation.
+
+- Added documentation and setup for ``sphinx`` documentation pipeline.
+
+- Use  linear referencing for embedded channels to keep the original geometry
+  intact when preparing line geometries for visualisation.
+
+- Define extra's to make the standard threedigrid distribution as
+  lightweight as possible.
+
 - Convert strings in ``attrs`` to ``numpy.string_`` to fix crashes under
   Windows.
 

@@ -1,5 +1,14 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
 # -*- coding: utf-8 -*-
+"""
+Models
+++++++
+In the threedicore lines are called flow lines and represent links between
+calculation points. They can exist between 1d and 2d points, between surface
+and groundwater nodes etc. The line type is described by the kcu attribute
+For an overview of the kcu types see :ref:`kcu-label`.
+"""
+
 from __future__ import unicode_literals
 from __future__ import print_function
 
@@ -19,6 +28,24 @@ LINE_SUBSETS = {
 
 
 class Lines(Model):
+    """
+    fields originating from threedicore:
+
+        - kcu (line type)
+        - lik ()
+        - line (index of node representing start/end point)
+
+    added fields from spatialite database:
+
+        - content_pk (primary key database)
+        - content_type (type of object as stored in
+          database, e.g v2_channel, v2_weir etc)
+
+    custom fields
+        - line_coords (coordinate pairs start/end point)
+        - line_geometries (geometries from content_type)
+
+    """
     kcu = ArrayField()
     lik = ArrayField()
     line = IndexArrayField(to='Nodes')

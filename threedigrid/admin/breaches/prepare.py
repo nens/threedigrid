@@ -3,9 +3,15 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
-import ogr
+try:
+    from osgeo import ogr
+except ImportError:
+    ogr = None
+
 import numpy as np
+
 from threedigrid.admin import constants
+from threedigrid.geo_utils import raise_import_exception
 
 
 def as_numpy_array(array):
@@ -15,6 +21,13 @@ def as_numpy_array(array):
 
 
 class PrepareBreaches(object):
+    """
+    prepares breaches for visualization
+    """
+    def __init__(self):
+        if ogr is None:
+            raise_import_exception('ogr')
+
     @staticmethod
     def get_coordinates(levees, line_coords, levl):
         breaches_x = np.zeros(levl.shape, dtype='f8')
@@ -45,6 +58,15 @@ class PrepareBreaches(object):
     @classmethod
     def prepare_datasource(cls, datasource, kcu, id_mapper,
                            levees, line_coords):
+        """
+        :param datasource: datasource for breaches like HFD5 group
+        :param kcu: array of kcu values for datasource
+        :param id_mapper: threedigrid.admin.idmapper.IdMapper instance
+        :param levees: threedigrid.admin.levees.model.Levees instance
+        :param line_coords: coordinates from Lines instance
+        :return:
+        """
+
         # TODO: Check values below
         if 'id' not in datasource.keys():
             datasource.set(
