@@ -29,7 +29,7 @@ class LeveeOgrExporter(BaseOgrExporter):
         """
         self._levees = levees
         self.supported_drivers = {
-            const,GEO_PACKAGE_DRIVER_NAME,
+            const.GEO_PACKAGE_DRIVER_NAME,
             const.SHP_DRIVER_NAME,
         }
         self.driver = None
