@@ -45,8 +45,8 @@ setup(
     description="Python package for the threedigrid administration",
     entry_points={
         'console_scripts': [
-            'threedigrid=threedigrid.management.commands.kick:kick_start',
-            'threedigrid_exp=threedigrid.management.commands.kick:export_to',
+            '3digrid_explore=threedigrid.management.commands.kick:kick_start',
+            '3digrid_export=threedigrid.management.commands.kick:export_to',
         ],
     },
     install_requires=lightweight_requirements,
