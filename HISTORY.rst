@@ -5,11 +5,14 @@ History
 0.1.4 (unreleased)
 ------------------
 
+- Add click console scripts ``3digrid_explore`` and ``3digrid_export`` for
+  quick overviews and data exports.
+
 - Make ogr/gdal imports optional to avoid breaking parts of the documentation.
 
 - Added documentation and setup for ``sphinx`` documentation pipeline.
 
-- Use  linear referencing for embedded channels to keep the original geometry
+- Use linear referencing for embedded channels to keep the original geometry
   intact when preparing line geometries for visualisation.
 
 - Define extra's to make the standard threedigrid distribution as

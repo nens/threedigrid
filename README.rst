@@ -31,6 +31,44 @@ Features
 Quick start
 -----------
 
+The standard threedigrid distribution is pretty lightweight, installing as little dependencies
+as possible. If you want to make use of all capabilities threedigrid has to ofter (e.g. spatial
+operations and command line tools) install like this::
+
+    $ pip install threedigrid[geo]
+
+
+Console scripts
++++++++++++++++
+
+Using the 3digrid_explore shortcut, simply run::
+
+    $ 3digrid_explore --grid-file=<path to grid file> --ipy
+
+This will invoke an ipython session with a ``GridH5Admin`` instance already loaded.
+
+To get a quick overview of the threedimodels meta data omit the ``--ipy`` option or
+explicitly run::
+
+    $ 3digrid_explore --grid-file=<the to grid file> --no-ipy
+
+This will give you output like this::
+
+    Overview of model specifics:
+
+    model slug:              v2_bergermeer-v2_bergermeer_bres_maalstop-58-b1f8179f1f3c2333adb08c9e6933fa7b9a8cd163
+    threedicore version:     0-20180315-3578e9b-1
+    threedi version:         1.63.dev0
+    has 1d:                  True
+    has 2d:                  True
+    has groundwater:         True
+    has levees:              True
+    has breaches:            True
+    has pumpstations:        True
+
+
+(I)Python shell
++++++++++++++++
 Get a grid admin instance::
 
     from threedigrid.admin.gridadmin import GridH5Admin

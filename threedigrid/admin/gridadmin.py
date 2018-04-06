@@ -197,6 +197,10 @@ class GridH5Admin(object):
     def threedicore_version(self):
         return self.h5py_file.attrs['threedicore_version']
 
+    @property
+    def threedi_version(self):
+        return self.h5py_file.attrs['threedi_version']
+
     def get_from_meta(self, prop_name):
         if prop_name not in self.h5py_file['meta'].keys():
             return None
