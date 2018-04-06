@@ -9,6 +9,7 @@ Welcome to threedigrid's documentation!
    installation
    api
    api_reference
+   console
    miscellaneous
    contributing
    authors
