@@ -3,11 +3,6 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
-try:
-    from osgeo import ogr
-except ImportError:
-    ogr = None
-
 from collections import OrderedDict
 
 LONLAT_DIGITS = 7  # 7 decimals is about 11mm accuracy
@@ -69,19 +64,6 @@ HAS_1D_KEY = 'has_1d'
 HAS_2D_KEY = 'has_2d'
 HAS_PUMPSTATIONS_KEY = 'has_pumpstations'
 HAS_BREACHES_KEY = 'has_breaches'
-
-try:
-    OGR_FIELD_TYPE_MAP = {
-        'int': ogr.OFTInteger,
-        'str': ogr.OFTString,
-        'real': ogr.OFTReal,
-        'float': ogr.OFTReal,
-    }
-except AttributeError:
-    OGR_FIELD_TYPE_MAP = {}
-
-SHP_DRIVER_NAME = 'ESRI Shapefile'
-GEO_PACKAGE_DRIVER_NAME = 'GPKG'
 
 
 ###############################################################################

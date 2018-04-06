@@ -23,7 +23,6 @@ import sys
 sys.path.insert(0, os.path.abspath('..'))
 
 import threedigrid
-from threedigrid.admin import breaches
 
 # -- General configuration ---------------------------------------------
 

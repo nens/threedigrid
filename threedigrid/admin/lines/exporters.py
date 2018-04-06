@@ -25,9 +25,7 @@ from threedigrid.geo_utils import get_spatial_reference
 from threedigrid.geo_utils import raise_import_exception
 from threedigrid.admin.utils import KCUDescriptor
 from threedigrid.orm.base.exporters import BaseOgrExporter
-from threedigrid.admin.constants import GEO_PACKAGE_DRIVER_NAME
-from threedigrid.admin.constants import OGR_FIELD_TYPE_MAP
-from threedigrid.admin.constants import SHP_DRIVER_NAME
+from threedigrid.admin import exporter_constants as const
 from threedigrid.admin.constants import LINE_BASE_FIELDS
 from threedigrid.admin.constants import LINE_1D_FIELDS
 from threedigrid.admin.constants import LINE_FIELD_NAME_MAP
@@ -48,8 +46,8 @@ class LinesOgrExporter(BaseOgrExporter):
         """
         self._lines = lines
         self.supported_drivers = {
-            GEO_PACKAGE_DRIVER_NAME,
-            SHP_DRIVER_NAME,
+            const.GEO_PACKAGE_DRIVER_NAME,
+            const.SHP_DRIVER_NAME,
         }
         self.driver = None
 
@@ -89,7 +87,8 @@ class LinesOgrExporter(BaseOgrExporter):
             fields.update(LINE_1D_FIELDS)
         for field_name, field_type in fields.iteritems():
             layer.CreateField(ogr.FieldDefn(
-                    str(field_name), OGR_FIELD_TYPE_MAP[field_type])
+                    str(field_name),
+                    const.OGR_FIELD_TYPE_MAP[field_type])
             )
         _definition = layer.GetLayerDefn()
 
