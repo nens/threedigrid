@@ -31,8 +31,8 @@ Features
 Quick start
 -----------
 
-Console script
---------------
+Console scripts
++++++++++++++++
 
 Using the 3digrid_explore shortcut, simply run::
 
@@ -40,14 +40,28 @@ Using the 3digrid_explore shortcut, simply run::
 
 This will invoke an ipython session with a ``GridH5Admin`` instance already loaded.
 
-To get a quick overview of the threedimodels meta data ommit the ``--ipy`` or
+To get a quick overview of the threedimodels meta data omit the ``--ipy`` option or
 explicitly run::
 
     $ 3digrid_explore --grid-file=<the to grid file> --no-ipy
 
+This will give you output like this::
+
+    Overview of model specifics:
+
+    model slug:              v2_bergermeer-v2_bergermeer_bres_maalstop-58-b1f8179f1f3c2333adb08c9e6933fa7b9a8cd163
+    threedicore version:     0-20180315-3578e9b-1
+    threedi version:         1.63.dev0
+    has 1d:                  True
+    has 2d:                  True
+    has groundwater:         True
+    has levees:              True
+    has breaches:            True
+    has pumpstations:        True
+
 
 (I)Python shell
----------------
++++++++++++++++
 Get a grid admin instance::
 
     from threedigrid.admin.gridadmin import GridH5Admin

@@ -16,10 +16,6 @@ file_type_choice_map = {'shape': 'to_shape', 'gpkg': 'to_gpkg'}
 @click.option('--ipy/--no-ipy', default=False,
               help='Start an interactive ipython session')
 def kick_start(grid_file, ipy):
-    """
-    :param grid_file: Path to the admin file
-    :param ipy: Start an interactive ipython session
-    """
     grid = GridH5Admin(grid_file)
 
     txt = help_texts.model_overview(grid_file)

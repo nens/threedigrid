@@ -25,13 +25,16 @@ def model_overview(grid_file):
 
     grid = GridH5Admin(grid_file)
     _attrs = OrderedDict([
+        ('model_slug', ''),
         ('threedicore_version', ''),
         ('threedi_version', ''),
         ('has_1d', ''),
         ('has_2d', ''),
         ('has_groundwater', ''),
-        ('has_levees', '')]
-    )
+        ('has_levees', ''),
+        ('has_breaches', ''),
+        ('has_pumpstations', ''),
+    ])
 
     for k in _attrs.iterkeys():
         if not hasattr(grid, k):

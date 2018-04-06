@@ -22,3 +22,4 @@ RUN pip install --use-wheel -r requirements_dev.txt
 COPY requirements.txt /code/requirements.txt
 RUN pip install --use-wheel -r requirements.txt
 COPY . /code
+RUN pip install --editable /code
