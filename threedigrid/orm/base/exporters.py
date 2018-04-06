@@ -3,16 +3,25 @@ from abc import abstractmethod
 import os
 import logging
 
-from osgeo import ogr
-from osgeo import gdal
+try:
+    from osgeo import ogr
+except ImportError:
+    ogr = None
+
+try:
+    from osgeo import gdal
+except ImportError:
+    gdal = None
 
 from threedigrid.orm import constants
 from threedigrid.orm.base.exceptions import DriverNotSupportedError
+from threedigrid.geo_utils import raise_import_exception
 
 logger = logging.getLogger(__name__)
 
 
 class BaseExporterObject:
+
     __metaclass__ = ABCMeta
 
     @abstractmethod
@@ -27,6 +36,12 @@ class BaseOgrExporter(BaseExporterObject):
 
     driver = None
 
+    def __init__(self):
+        if ogr is None:
+            raise_import_exception('ogr')
+        if gdal is None:
+            raise_import_exception('gdal')
+            
     def set_driver(self, driver_name='', extension=''):
         assert any((driver_name, extension)), \
             'either driver_name or extension must be given'
