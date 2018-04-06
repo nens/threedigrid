@@ -44,14 +44,16 @@ def kick_start(grid_file, ipy):
               help='Filter by a subset like 1D_all '
                    '(applies only for models nodes and lines')
 def export_to(grid_file, file_type, output_file, model, subset):
+    success_msg = 'Successfully created {} '.format(output_file)
     grid = GridH5Admin(grid_file)
     m = getattr(grid, model)
     export_func = file_type_choice_map[file_type]
     if subset:
         getattr(m.subset(subset), export_func)(output_file)
+        click.secho(success_msg, fg='green', bold=True)
         return
     getattr(m, export_func)(output_file)
-
+    click.secho(success_msg, fg='green', bold=True)
 
 if __name__ == "__main__":
     kick_start()

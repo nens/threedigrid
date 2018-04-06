@@ -43,7 +43,7 @@ Console scripts
 
 Using the 3digrid_explore shortcut, simply run::
 
-    $ 3digrid_explore --grid-file=<the to grid file> --ipy
+    $ 3digrid_explore --grid-file=<path to grid file> --ipy
 
 This will invoke an ipython session with a ``GridH5Admin`` instance already loaded.
 
