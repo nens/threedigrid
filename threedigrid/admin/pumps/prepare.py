@@ -33,6 +33,10 @@ class PreparePumps:
             if dataset_name == 'id':
                 # Replace data with 1-xx
                 data = np.arange(1, data.size + 1)
+
+            # insert trash element
+            data = np.insert(data.copy(), 0, 0, axis=len(data.shape) - 2)
+
             datasource.set(dataset_name, data)
 
         # Step 2: Postprocessing data

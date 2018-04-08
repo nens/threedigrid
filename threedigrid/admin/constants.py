@@ -225,3 +225,25 @@ SUBSET_NAME_H5_ATTR_MAP = {
 }
 
 NO_DATA_VALUE = -9999.
+
+# the default slice for result timeseries
+DEFAULT_CHUNK_TIMESERIES = slice(0, 10)
+
+
+###############################################################################
+# White list of variables and aggregation variables
+AGGREGATION_OPTIONS = {
+    'min',
+    'max',
+    'avg',
+    'med',
+    'cum',
+    'cum_positive',
+    'cum_negative'
+}
+
+NODE_VARIABLES = {'s1', 'su', 'vol', 'rain'}
+LINE_VARIABLES = {'au', 'u1', 'q'}
+PUMP_VARIABLES = {'q_pump', }
+BREACH_VARIABLES = {'breach_depth', 'breach_width'}
+LEVEES_VARIABLES = {}

@@ -10,6 +10,9 @@ RUN apt-get update && apt-get install -y \
     git \
     python-pip \
     python-gdal \
+    libhdf5-serial-dev \
+    netcdf-bin \
+    libnetcdf-dev \
     software-properties-common \
 && rm -rf /var/lib/apt/lists/*
 
@@ -21,4 +24,4 @@ COPY requirements_dev.txt /code/requirements_dev.txt
 RUN pip install --use-wheel -r requirements_dev.txt
 COPY requirements.txt /code/requirements.txt
 COPY . /code
-RUN pip install --use-wheel --editable /code/.[geo]
+RUN pip install --use-wheel --editable /code/.[geo,results]
