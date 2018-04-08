@@ -24,4 +24,4 @@ COPY requirements_dev.txt /code/requirements_dev.txt
 RUN pip install --use-wheel -r requirements_dev.txt
 COPY requirements.txt /code/requirements.txt
 COPY . /code
-RUN pip install --use-wheel --editable /code/.[geo]
+RUN pip install --use-wheel --editable /code/.[geo,results]
