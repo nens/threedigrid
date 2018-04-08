@@ -43,8 +43,7 @@ setup(
         'Natural Language :: English',
         "Programming Language :: Python :: 2",
         'Programming Language :: Python :: 2.7',
-        'Topic :: Scientific/Engineering'
-        'Topic :: Scientific/Engineering :: GIS',
+        'Topic :: Scientific/Engineering',
     ],
     description="Python package for the threedigrid administration",
     entry_points={
