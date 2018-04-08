@@ -1,7 +1,7 @@
 History
 =======
 
-0.1.4 (unreleased)
+0.1.4 (2018-04-08)
 ------------------
 
 - Changed ResultMixin to dynamically add attributes based on the netcdf
