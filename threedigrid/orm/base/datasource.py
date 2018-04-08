@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from __future__ import print_function
 
 
-class DataSource:
+class DataSource(object):
     """
     Datasource containing a 'dict' like object
     acting as the main datasource for the gridadmin
