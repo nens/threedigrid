@@ -9,16 +9,27 @@ from itertools import izip
 from itertools import tee
 from itertools import chain
 
+from h5py._hl.dataset import Dataset
+
 from abc import ABCMeta
 from collections import OrderedDict
 
 from threedigrid.orm.base.exceptions import OperationNotSupportedError
 from threedigrid.orm.base.fields import ArrayField
 from threedigrid.orm.base.fields import IndexArrayField
+from threedigrid.orm.base.fields import TimeSeriesArrayField
 from threedigrid.orm.base.filters import get_filter
 from threedigrid.orm.base.filters import SliceFilter
+from threedigrid.orm.base.timeseries_mixin import ResultMixin
 
 logger = logging.getLogger(__name__)
+
+
+def extend_instance(obj, cls):
+    """Apply mixins to a class instance after creation"""
+    base_cls = obj.__class__
+    base_cls_name = obj.__class__.__name__
+    obj.__class__ = type(base_cls_name, (base_cls, cls), {})
 
 
 def pairwise(iterable):
@@ -44,7 +55,7 @@ class Model:
 
     def __init__(self, datasource=None, slice_filters=[],
                  epsg_code=None, only_fields=[], reproject_to_epsg=None,
-                 has_1d=None, **kwargs):
+                 has_1d=None, mixin=None, **kwargs):
         """
         Initialize a Model with a datasource, filters
         and a epsg_code.
@@ -57,6 +68,28 @@ class Model:
         self.slice_filters = slice_filters
         self.only_fields = only_fields
         self.reproject_to_epsg = reproject_to_epsg
+
+        self.class_kwargs = {
+            'slice_filters': slice_filters,
+            'only_fields': only_fields,
+            'reproject_to_epsg': reproject_to_epsg,
+            'mixin': mixin,
+        }
+
+        # Extend the class with the mixin, if set
+        if mixin:
+            extend_instance(self, mixin)
+            # pass kwargs to mixin
+            if isinstance(mixin, ResultMixin.__class__):
+                netcdf_keys = self._datasource.netcdf_file.variables.keys()
+                super(Model, self).__init__(netcdf_keys, **kwargs)
+            else:
+                super(Model, self).__init__(**kwargs)
+
+        # Cache the boolean filter mask for this instance
+        # after it has been computed once
+        self._boolean_mask_filter = None
+        self._mixin = mixin
 
         if not epsg_code:
             epsg_code = self._datasource.getattr('epsg_code')
@@ -90,6 +123,55 @@ class Model:
         return self.get_field(field_name).get_value(
             self._datasource, field_name)
 
+    def get_filtered_field_value(self, field_name):
+        value = self.get_field_value(field_name)
+
+        # Transform the base_filter by prepending slice(None) to
+        # match the dimensionality of the nparray_dict[key].shape
+        #
+        #      shape(100,) => _filter = [base_filter]
+        #      shape(2, 100)  => _filter = [slice(None), base_filter]
+        #
+        #      Note: x[slice(None),[1,2,3]] == x[:,[1,2,3]]
+
+        if hasattr(self, 'get_timeseries_mask_filter'):
+            timeseries_filter = self.get_timeseries_mask_filter()
+        else:
+            timeseries_filter = slice(None)
+
+        if isinstance(self.get_field(field_name), TimeSeriesArrayField):
+            # _filter = [timeseries_filter, self.boolean_mask_filter]
+            # Fast slicing by first using timeseries_filter and
+            # and than slice based on boolean_mask_filter
+            # Can use a lot more memory though....
+
+            # TODO: if the result is many timeseries, perform boolean_filter
+            # per batch
+            value = value[timeseries_filter, :][:, self.boolean_mask_filter]
+        else:
+            _filter = [slice(None)] * (
+                len(value.shape) - 1) + [self.boolean_mask_filter]
+
+            # By default load all data from H5,
+            # this is WAY much faster
+            if isinstance(value, Dataset):
+                value = value[:]
+
+            # Perform slicing by applying the mask
+            value = value[_filter]
+
+        # Reproject any coordinates if a reproject_to_epsg is set and
+        # there are coordinatefields in the selection
+        if self.reproject_to_epsg and self._is_coords(field_name):
+            value = self.__do_reproject_value(
+                    value, field_name, self.reproject_to_epsg)
+
+        if isinstance(value, np.ma.core.MaskedArray):
+            # Always return the data of a masked array
+            value = value.data
+
+        return value
+
     def __getattribute__(self, attr_name):
         """
         Override the __getattribute__ methode to return
@@ -97,7 +179,6 @@ class Model:
         the ArrayField
         instance.
         """
-
         # Note: don't use getattr(self, XX) in this function,
         # it will lead to a max recursion error
         attr = super(Model, self).__getattribute__(attr_name)
@@ -111,11 +192,12 @@ class Model:
 
             # Use the get function to retrieve the computed/filtered
             # value for the ArrayField with name: 'name'
-            get_func = super(Model, self).__getattribute__('to_dict')
-            return get_func()[attr_name]
+            return super(Model, self).__getattribute__(
+                'get_filtered_field_value')(attr_name)
 
         # Default behaviour, return the attribute from superclass
         return attr
+
 
     @property
     def fields(self):
@@ -124,19 +206,15 @@ class Model:
         """
         return [x for x in self._field_names if x != 'meta']
 
-    def __init_class(self, klass, slice_filters, only_fields=[],
-                     reproject_to_epsg=None):
+    def __init_class(self, klass, **kwargs):
         """
         Returns: a new instance of 'klass' with new filters and
                  same datasource.
         """
+
         return klass(
             datasource=self._datasource,
-            slice_filters=slice_filters,
-            only_fields=only_fields,
-            epsg_code=self.epsg_code,
-            reproject_to_epsg=reproject_to_epsg,
-            has_1d=self.has_1d)
+            **kwargs)
 
     def __get_filters(self, **kwargs):
         """
@@ -177,7 +255,11 @@ class Model:
         self.__class__ instance
         """
         slice_filters = self.__get_filters(**kwargs)
-        return self.__init_class(klass, slice_filters)
+        new_class_kwargs = dict(self.class_kwargs)
+        new_class_kwargs.update(
+            {'slice_filters': slice_filters})
+
+        return self.__init_class(klass, **new_class_kwargs)
 
     def filter(self, **kwargs):
         """
@@ -193,7 +275,12 @@ class Model:
         Returns: a new instance of the object with the extra filters added.
         """
         slice_filters = self.__get_filters(**kwargs)
-        return self.__init_class(self.__class__, slice_filters)
+        new_class_kwargs = dict(self.class_kwargs)
+        new_class_kwargs.update(
+            {'slice_filters': slice_filters})
+
+        return self.__init_class(
+            self.__class__, **new_class_kwargs)
 
     def slice(self, s, override_filter_error=False):
         """
@@ -222,8 +309,13 @@ class Model:
                 'Type %s not supported, must be a slice' % type(s,)
             )
 
+        new_class_kwargs = dict(self.class_kwargs)
+        new_class_kwargs.update(
+            {'slice_filters':
+             [SliceFilter(slice_filter)] + self.slice_filters})
+
         return self.__init_class(
-            self.__class__, [SliceFilter(slice_filter)] + self.slice_filters)
+            self.__class__, new_class_kwargs)
 
     @property
     def known_subset(self):
@@ -286,9 +378,12 @@ class Model:
             if x not in self.fields:
                 raise Exception("Unknown field name: {0}".format(x))
 
+        new_class_kwargs = dict(self.class_kwargs)
+        new_class_kwargs.update(
+            {'only_fields': self.only_fields + list(args)})
+
         return self.__init_class(
-            self.__class__, self.slice_filters,
-            only_fields=self.only_fields + list(args))
+            self.__class__, **new_class_kwargs)
 
     def __do_filter(self):
         """
@@ -358,7 +453,14 @@ class Model:
         """
         # Note: the __do_filter functions returns
         # a dictionairy by default.
-        return self.__do_filter()
+
+        selection = OrderedDict()
+
+        for n in self.fields:
+            if not self.only_fields or n in self.only_fields:
+                selection[n] = self.get_filtered_field_value(n)
+
+        return selection
 
     def to_list(self):
         """
@@ -367,7 +469,7 @@ class Model:
 
         # Filter results and transform the result to
         # and np.ndarray
-        selection = self.__do_filter()
+        selection = self.to_dict()
         if len(selection.values()) > 1:
             array = np.array(selection.values())
         else:
@@ -395,11 +497,50 @@ class Model:
         # in data
         return [dict(zip(selection.keys(), x)) for x in data]
 
+    @property
+    def boolean_mask_filter(self):
+        selection = OrderedDict()
+
+        # Compute the boolean mask filter
+        # that can be applied to all array's
+        # based on the specified filters
+        if self._boolean_mask_filter is None:
+
+            # If no filters are defined
+            if not self.slice_filters:
+                # Select everything
+                return slice(None)
+
+            # Only load the fields that need to be filtered
+            filter_field_names = [
+                x.get_field_name() for x in self.slice_filters]
+
+            for name in [x for x in filter_field_names if x]:
+                selection[name] = self.get_field_value(name)
+
+            boolean_mask_filter = None
+            # Compute the the filter
+            for filter_instance in self.slice_filters:
+                filter_bool_mask = filter_instance.get_boolean_mask_filter(
+                        selection, self)
+
+                if boolean_mask_filter is None:
+                    boolean_mask_filter = filter_bool_mask
+                else:
+                    # apply the filter_bool_mask on the boolean_mask_filter
+                    # where the boolean_mask_filter is still "True".
+                    boolean_mask_filter[
+                        boolean_mask_filter == True] &= filter_bool_mask # noqa
+
+            self._boolean_mask_filter = boolean_mask_filter
+
+        return self._boolean_mask_filter
+
     def to_array(self):
         """
         Returns: the filtered values as a numpy array
         """
-        selection = self.__do_filter()
+        selection = self.to_dict()
         if len(selection.values()) > 1:
             return np.array(selection.values())
         return selection.values()[0]

@@ -58,6 +58,15 @@ class BaseFilter(object):
 
         self._do_filter(base_filter, nparray_dict)
 
+    def get_boolean_mask_filter(self, nparray_dict, model):
+        base_filter = self.filter(nparray_dict)
+        self._do_filter(base_filter, nparray_dict)
+
+        return base_filter
+
+    def get_field_name(self):
+        raise NotImplementedError()
+
 
 class BaseCompareFilter(BaseFilter):
     """
@@ -74,6 +83,9 @@ class BaseCompareFilter(BaseFilter):
         self._key = key
         self._field = field
         self._value = value
+
+    def get_field_name(self):
+        return self._key
 
     def __repr__(self):
         return "{0}({1} {2} {3})".format(
@@ -151,6 +163,9 @@ class SliceFilter(BaseFilter):
 
     def filter(self, nparray_dict):
         return self._slice
+
+    def get_field_name(self):
+        return None
 
     def __repr__(self):
         return "SliceFilter({0})".format(
