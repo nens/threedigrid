@@ -36,3 +36,22 @@ class IndexArrayField(ArrayField):
 
 class TimeSeriesArrayField(ArrayField):
     pass
+
+
+class MArrayField(TimeSeriesArrayField):
+    """
+    Generic field that can be used to describe values
+    to be retrieved from a Datasource.
+    """
+    @staticmethod
+    def get_value(datasource, name):
+        """
+        Returns: the data from the datasource
+                 or None if 'name' is not in the datasource
+
+        Optional transforms can be done here.
+        """
+        if name in datasource.keys():
+            return datasource[name]
+
+        return None

@@ -247,3 +247,5 @@ LINE_VARIABLES = {'au', 'u1', 'q'}
 PUMP_VARIABLES = {'q_pump', }
 BREACH_VARIABLES = {'breach_depth', 'breach_width'}
 LEVEES_VARIABLES = {}
+
+NODE_MESH_VARS = {'Mesh1D', 'Mesh2D'}

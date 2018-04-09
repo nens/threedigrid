@@ -96,9 +96,13 @@ class Model:
         self.epsg_code = epsg_code
 
         # Cache the field names
-        self._field_names = [
+
+        _field_names = [
             x for x in dir(self.__class__)
-            if isinstance(getattr(self.__class__, x), ArrayField)]
+            if isinstance(getattr(self.__class__, x), (ArrayField, TimeSeriesArrayField))]
+        self._field_names = set(self._field_names).union(set(_field_names))
+
+
         self.has_1d = has_1d
         self.model_name = '-'.join(
             (self._datasource.getattr('model_name'),
@@ -133,7 +137,7 @@ class Model:
         #      shape(2, 100)  => _filter = [slice(None), base_filter]
         #
         #      Note: x[slice(None),[1,2,3]] == x[:,[1,2,3]]
-
+        import ipdb;ipdb.set_trace()
         if hasattr(self, 'get_timeseries_mask_filter'):
             timeseries_filter = self.get_timeseries_mask_filter()
         else:
@@ -204,7 +208,7 @@ class Model:
         """
         Returns: a list of ArrayFields names (excluding 'meta')
         """
-        return [x for x in self._field_names if x != 'meta']
+        return [unicode(x) for x in self._field_names if x != 'meta']
 
     def __init_class(self, klass, **kwargs):
         """
