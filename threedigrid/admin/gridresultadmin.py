@@ -37,6 +37,7 @@ class GridH5ResultAdmin(GridH5Admin):
         super(GridH5ResultAdmin, self).__init__(h5_file_path, file_modus)
         self.netcdf_file = Dataset(netcdf_file_path)
         self._timeseries_chunk_size = DEFAULT_CHUNK_TIMESERIES
+        self._check_threedicore_version()
 
     def set_timeseries_chunk_size(self, new_chunk_size):
         """
@@ -79,3 +80,20 @@ class GridH5ResultAdmin(GridH5Admin):
         return Pumps(
             H5pyResultGroup(self.h5py_file, 'pumps', self.netcdf_file),
             **dict(self._grid_kwargs, **{'mixin': PumpResultsMixin}))
+
+    def _check_threedicore_version(self):
+        try:
+            threedicore_version = self.netcdf_file.getncattr(
+                'threedicore_version'
+            )
+        except AttributeError:
+            logger.error(
+                'Attribute threedicore_version could not be found in result file')  # noqa
+            return ''
+        if threedicore_version != self.threedicore_version:
+            logger.warning(
+                '[!] threedicore version differ! \n'
+                'Version result file has been created with: %s\n'
+                'Version gridadmin file has been created with: %s',
+                threedicore_version, self.threedicore_version
+            )

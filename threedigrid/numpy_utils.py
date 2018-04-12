@@ -254,3 +254,39 @@ def get_bbox_intersections(bbox_array, bbox):
 
 def reshape_flat_array(flat_array):
     return flat_array.reshape(2, -1)
+
+
+def create_np_lookup_index_for(search_array, index_array):
+    """
+    Return a np.ndarray which can be used to lookup the indices
+    from index_array
+
+    This can be used to map values of two array's like:
+
+    search_array = np.array([7, 8, 2])
+    index_array = np.array([2, 7, 8])
+    lookup = create_np_lookup_index_for(search_array, index_array)
+    indices_of_search_array_in_index_array = lookup[search_array]
+
+    index_array[indices_of_search_array_in_index_array] == search_array
+    (If all elements could be found)
+
+    :param search_array: the np.ndarray with values that should be available
+                         for the lookup
+    :param index_array:  the np.ndarray from which the indexes should be
+                         searchable by value
+
+    :return: an np.ndarray with the values of index_array as indices, or -1
+             if the value is not in index_array
+
+    examples:
+
+    >>> create_np_lookup_index_for(np.array([7, 8, 2]), np.array([2, 7, 8]))
+    array([1, 2, 0])
+    """
+
+    sort_idx = np.argsort(index_array)
+    lookup = sort_idx[np.searchsorted(
+        index_array, search_array, sorter=sort_idx)]
+
+    return lookup
