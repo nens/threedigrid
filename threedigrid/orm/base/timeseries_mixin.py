@@ -117,3 +117,4 @@ class ResultMixin(object):
         if self.timeseries_mask is not None:
             value = value[self.timeseries_mask]
         return value
+
