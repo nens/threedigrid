@@ -242,10 +242,36 @@ AGGREGATION_OPTIONS = {
     'cum_negative'
 }
 
-NODE_VARIABLES = {'s1', 'su', 'vol', 'rain'}
-LINE_VARIABLES = {'au', 'u1', 'q'}
-PUMP_VARIABLES = {'q_pump', }
-BREACH_VARIABLES = {'breach_depth', 'breach_width'}
-LEVEES_VARIABLES = {}
 
-NODE_MESH_VARS = {'Mesh1D', 'Mesh2D'}
+###############################################################################
+# result netCDF variables
+
+# values of *_COMPOSITE_FIELDS are the variables names as known in
+# the result netCDF file. They are split into 1D and 2D subsets.
+# As threedigrid has its own subsection ecosystem they are merged
+# into a single field (e.g. the keys of *_COMPOSITE_FIELDS).
+
+# calc nodes
+NODE_COMPOSITE_FIELDS = {
+    's1': ['Mesh1D_s1', 'Mesh2D_s1'],
+    'vol': ['Mesh1D_vol', 'Mesh2D_vol'],
+    'su': ['Mesh1D_su', 'Mesh2D_su'],
+    'rain': ['Mesh1D_rain', 'Mesh2D_rain'],
+    'q_lat': ['Mesh1D_q_lat', 'Mesh2D_q_lat'],
+}
+NODE_VARIABLES = NODE_COMPOSITE_FIELDS.keys()
+
+# flow links
+LINE_COMPOSITE_FIELDS = {
+    'au': ['Mesh1D_au', 'Mesh2D_au'],
+    'u1': ['Mesh1D_u1', 'Mesh2D_u1'],
+    'q': ['Mesh1D_q', 'Mesh2D_q'],
+}
+LINE_VARIABLES = LINE_COMPOSITE_FIELDS.keys()
+
+# pumpstations
+PUMP_VARIABLES = ['Mesh1D_q_pump',]
+
+# breaches
+BREACH_VARIABLES = ['Mesh1D_breach_depth', 'Mesh1D_breach_width']
+LEVEES_VARIABLES = []
