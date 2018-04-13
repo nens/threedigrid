@@ -39,7 +39,14 @@ class IndexArrayField(ArrayField):
 
 
 class TimeSeriesArrayField(ArrayField):
-    pass
+
+    @staticmethod
+    def get_value(datasource, name, **kwargs):
+        timeseries_filter = kwargs.get('timeseries_filter', slice(None))
+        v = datasource[name][timeseries_filter]
+        if v.size > 0:
+            return v
+        return np.array([])
 
 
 class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
@@ -57,6 +64,10 @@ class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
         }
 
     """
+
+    def __init__(self, needs_lookup):
+        self._needs_lookup = needs_lookup
+
     @staticmethod
     def get_value(datasource, name, **kwargs):
         """
@@ -91,14 +102,14 @@ class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
         for source_name in source_names:
             if source_name not in datasource.keys():
                 continue
-            values.append(datasource[source_name])
+            values.append(datasource[source_name][timeseries_filter])
 
         if not values:
-            return None
+            return np.array([])
         # combine the two source to a single source
         # if timeseries_filter is None and lookup_index is None:
         #     return np.hstack([x[:,] for x in values])
-        hs = np.hstack([x[timeseries_filter] for x in values])
+        hs = np.hstack(values)
         del values
         # sort the stacked array by lookup
         if lookup_index is not None:

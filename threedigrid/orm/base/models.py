@@ -58,7 +58,7 @@ class Model:
 
     def __init__(self, datasource=None, slice_filters=[],
                  epsg_code=None, only_fields=[], reproject_to_epsg=None,
-                 has_1d=None, mixin=None, **kwargs):
+                 has_1d=None, mixin=None, timeseries_chunk_size=None, **kwargs):
         """
         Initialize a Model with a datasource, filters
         and a epsg_code.
@@ -71,13 +71,13 @@ class Model:
         self.slice_filters = slice_filters
         self.only_fields = only_fields
         self.reproject_to_epsg = reproject_to_epsg
-        self._kwargs = kwargs
 
         self.class_kwargs = {
             'slice_filters': slice_filters,
             'only_fields': only_fields,
             'reproject_to_epsg': reproject_to_epsg,
             'mixin': mixin,
+            'timeseries_chunk_size': timeseries_chunk_size
         }
 
         # Extend the class with the mixin, if set
@@ -119,8 +119,7 @@ class Model:
         """
         return super(Model, self).__getattribute__(field_name)
 
-    @property
-    def _lookup_index(self):
+    def _get_lookup_index(self, field_name):
         """
         creates a look up index array for the model fields which
         can be used to align result arrays to the ordering of
@@ -129,8 +128,13 @@ class Model:
 
         :return: numpy lookup index array
             (see ``threedigrid.numpy_utils.create_np_lookup_index_for()``
-            for details)
+            for details) or None if the field does not have a the
+            ``_needs_lookup`` attribute or if the attribute is False
         """
+        f = self.get_field(field_name)
+        if not hasattr(f, '_needs_lookup') or not getattr(f, '_needs_lookup'):
+            return self._lookup
+
         if self._lookup is None:
             _id = self.get_field_value('id')
             _mesh_id = self.get_field_value(
@@ -169,7 +173,7 @@ class Model:
             timeseries_filter = self.get_timeseries_mask_filter()
 
         kwargs = {
-            'lookup_index': self._lookup_index,
+            'lookup_index': self._get_lookup_index(field_name),
             'timeseries_filter': timeseries_filter
         }
 
@@ -197,7 +201,6 @@ class Model:
         #     # per batch
         #     value = value[timeseries_filter, :][:, self.boolean_mask_filter]
         # else:
-        # import ipdb;ipdb.set_trace()
         _filter = [slice(None)] * (
             len(value.shape) - 1) + [self.boolean_mask_filter]
 
@@ -568,14 +571,14 @@ class Model:
             timeseries_filter = slice(None)
             if hasattr(self, 'get_timeseries_mask_filter'):
                 timeseries_filter = self.get_timeseries_mask_filter()
-            kwargs = {
-                'lookup_index': self._lookup_index,
-                'timeseries_filter': timeseries_filter
-            }
+            # kwargs = {
+            #     'lookup_index': self._lookup_index,
+            #     'timeseries_filter': timeseries_filter
+            # }
 
             for name in [x for x in filter_field_names if x]:
                 selection[name] = self.get_field_value(
-                    name, **kwargs)
+                    name)
 
             boolean_mask_filter = None
             # Compute the the filter

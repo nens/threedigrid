@@ -250,13 +250,13 @@ extended by a set of result fields, like s1 for nodes for example::
      u'cell_coords']
 
 
-A query that includes TimeSeriesArrayField fields or field derived from this
+A query that includes TimeSeriesArrayField fields or fields derived from this
 type by default will yield a time series chunk of 10. The default can be
 altered by calling::
 
     >>> gr.set_timeseries_chunk_size(50)
 
-To see the current setting
+To see the current setting::
 
     >>> gr.timeseries_chunk_size
 
@@ -277,7 +277,7 @@ Example usage for start_time and end_time filter::
 
 The filtering is lazy, to retrieve the query results call ``qs.data`` or if you
 are interested in a specific field like ``s1`` for instance, call ``qs.s1``.
-You can see how many timesteps are captured by calling qs.s1.shape
+You can see how many timesteps are captured by calling qs.s1.shape::
 
     >>> qs.s1.shape
     >>> (2, 15604)
@@ -299,7 +299,6 @@ water depth of the first 4 time steps and their corresponding node ids::
          (0, 5.0013032438928677),
          (0, 5.0016998451768755),
          (0, 5.0020966845033916)]
-
 
 
 .. _benchmarks-label:

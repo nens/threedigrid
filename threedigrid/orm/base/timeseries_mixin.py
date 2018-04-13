@@ -5,7 +5,8 @@ from __future__ import print_function
 
 import numpy as np
 
-DEFAULT_TIMESERIES = slice(0, 10)
+from threedigrid.orm import constants
+from threedigrid.orm.base.fields import TimeSeriesCompositeArrayField
 
 
 class ResultMixin(object):
@@ -15,6 +16,7 @@ class ResultMixin(object):
     """
 
     timeseries_mask = None
+    done_composition = False
 
     def __init__(self, *args, **kwargs):
         # pop mixin specific fields and store them
@@ -22,6 +24,41 @@ class ResultMixin(object):
         self.timeseries_mask = kwargs.pop('timeseries_mask', None)
         self.class_kwargs.update({
             'timeseries_mask': self.timeseries_mask})
+        if not self.done_composition:
+            self._set_composite_field_names()
+
+    def _set_composite_field_names(self):
+
+        composite_field_name_dict = '{model_name}_COMPOSITE_FIELDS'.format(
+                model_name=self.__class__.__name__.upper())
+        if not hasattr(constants, composite_field_name_dict):
+            return
+
+        composite_fields = getattr(
+            constants, composite_field_name_dict
+        )
+
+        for var in composite_fields.keys():
+            setattr(
+                self, var, TimeSeriesCompositeArrayField(
+                    needs_lookup=True)
+            )
+        self.update_field_names(composite_fields.keys(), exclude_private=True)
+        self.done_composition = True
+
+    def update_field_names(self, field_names, exclude_private=True):
+        """
+
+        :param field_names: iterable of field names
+        :param exclude_private: fields starting with '_' will be excluded
+        """
+        # remove private fields
+        fnames = [x for x in field_names if
+                  exclude_private and not x.startswith('_')]
+
+        # combine with existing fields
+        self._field_names = set(
+            fnames).union(set(self.fields))
 
     def timeseries(self, start_time=None, end_time=None, indexes=None):
         """
@@ -69,7 +106,7 @@ class ResultMixin(object):
         timeseries_mask = True
 
         if not any((start_time, end_time, indexes)):
-            raise Exception(
+            raise KeyError(
                 "Please provide either start_time, end_time or indexes")
 
         if any((start_time, end_time)):
@@ -85,7 +122,7 @@ class ResultMixin(object):
             elif isinstance(indexes, slice):
                 self.timeseries_mask = indexes
             else:
-                raise Exception(
+                raise TypeError(
                     "indexes should either be a list/tuple or a slice")
 
         # Create a copy of the class_kwargs
@@ -105,7 +142,7 @@ class ResultMixin(object):
         """
         if self.timeseries_mask is not None:
             return self.timeseries_mask
-        return self._kwargs.get('timeseries_chunk_size')
+        return self.class_kwargs.get('timeseries_chunk_size')
 
     @property
     def timestamps(self):

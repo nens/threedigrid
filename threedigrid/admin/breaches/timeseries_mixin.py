@@ -23,3 +23,4 @@ class BreachResultsMixin(ResultMixin):
         variables = set(possible_vars).intersection(netcdf_keys)
         for var in variables:
             setattr(self, var, TimeSeriesArrayField())
+        self.update_field_names(variables, exclude_private=True)

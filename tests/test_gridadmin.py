@@ -122,11 +122,11 @@ class GridAdminLinesTest(unittest.TestCase):
 
     def test_fields(self):
         # Check dtype names
-        self.assertEqual(self.parser.lines.fields, [
+        assert set(self.parser.lines.fields) == {
             'content_pk', 'content_type', 'id', 'kcu',
             'lik', 'line', 'line_coords', 'line_geometries',
             'zoom_category'
-        ])
+        }
 
     def test_exporters(self):
         self.assertEqual(len(self.parser.lines._exporters), 1)
@@ -149,10 +149,9 @@ class GridAdminGridTest(unittest.TestCase):
         self.parser = GridH5Admin(grid_admin_h5_file)
 
     def test_fields(self):
-        self.assertEqual(
-            self.parser.grid.fields,
-            ['id', 'nodk', 'nodm', 'nodn']
-        )
+        assert set(self.parser.grid.fields) == {
+            'id', 'nodk', 'nodm', 'nodn'
+        }
 
     @unittest.skip('TODO')
     def test_get_pixel_map(self):
@@ -171,10 +170,10 @@ class GridAdminNodeTest(unittest.TestCase):
 
     def test_fields(self):
         # Check fields
-        self.assertEqual(
-            self.parser.nodes.fields,
-            ['cell_coords', 'content_pk', 'coordinates', 'id', 'node_type',
-             'seq_id', 'zoom_category'])
+        assert set(self.parser.nodes.fields) == {
+            'cell_coords', 'content_pk', 'coordinates', 'id', 'node_type',
+            'seq_id', 'zoom_category'
+        }
 
     def test_locations_2d(self):
         self.assertGreater(len(self.parser.nodes.locations_2d), 0)
@@ -209,11 +208,10 @@ class GridAdminBreachTest(unittest.TestCase):
 
     def test_fields(self):
         # Check fields
-        self.assertEqual(
-            self.parser.breaches.fields,
-            ['content_pk', 'coordinates', 'id', 'kcu',
-             'levbr', 'levl', 'levmat', 'seq_ids']
-        )
+        assert set(self.parser.breaches.fields) == {
+            'content_pk', 'coordinates', 'id', 'kcu',
+            'levbr', 'levl', 'levmat', 'seq_ids'
+        }
 
     def test_exporters(self):
         self.assertEqual(len(self.parser.breaches._exporters), 1)
@@ -241,11 +239,10 @@ class GridAdminCellsTest(unittest.TestCase):
 
     def test_fields(self):
         # should have also z_coordinate
-        self.assertEqual(
-            self.parser.cells.fields,
-            ['cell_coords', 'content_pk', 'coordinates', 'id', 'node_type',
-             'seq_id', 'z_coordinate', 'zoom_category']
-        )
+        assert set(self.parser.cells.fields) == {
+            'cell_coords', 'content_pk', 'coordinates', 'id', 'node_type',
+            'seq_id', 'z_coordinate', 'zoom_category'
+        }
 
     def test_get_id_from_xy(self):
         # should yield tow ids, one for 2d, one for groundwater

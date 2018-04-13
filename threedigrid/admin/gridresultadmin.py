@@ -36,13 +36,14 @@ class GridH5ResultAdmin(GridH5Admin):
         """
         super(GridH5ResultAdmin, self).__init__(h5_file_path, file_modus)
         self.netcdf_file = Dataset(netcdf_file_path)
-        self._timeseries_chunk_size = DEFAULT_CHUNK_TIMESERIES
+        self.set_timeseries_chunk_size(DEFAULT_CHUNK_TIMESERIES.stop)
         self._check_threedicore_version()
 
     def set_timeseries_chunk_size(self, new_chunk_size):
         """
         overwrite the default chunk size for timeseries queries.
-        :param new_chunk_size <int>: new chunk size for timeseries queries
+        :param new_chunk_size <int> or <slice>: new chunk size for
+            timeseries queries
         :raises ValueError when the given value is less than 1
         """
         _chunk_size = int(new_chunk_size)
@@ -50,7 +51,8 @@ class GridH5ResultAdmin(GridH5Admin):
             raise ValueError('Chunk size must be greater than 0')
         self._timeseries_chunk_size = slice(0, _chunk_size)
         logger.info(
-            'New chunk for timeseries size has been set to %d', _chunk_size
+            'New chunk for timeseries size has been set to %d',
+            new_chunk_size
         )
         self._grid_kwargs.update(
             {'timeseries_chunk_size': self._timeseries_chunk_size}

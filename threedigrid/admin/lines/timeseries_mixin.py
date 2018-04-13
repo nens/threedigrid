@@ -21,10 +21,10 @@ class LineResultsMixin(ResultMixin):
         """
         super(LineResultsMixin, self).__init__(**kwargs)
 
-        for var in LINES_COMPOSITE_FIELDS.keys():
-            setattr(self, var, TimeSeriesCompositeArrayField())
-        self._field_names = set(
-            LINES_COMPOSITE_FIELDS.keys()).union(set(self.fields))
+        # for var in LINES_COMPOSITE_FIELDS.keys():
+        #     setattr(self, var, TimeSeriesCompositeArrayField())
+        # self._field_names = set(
+        #     LINES_COMPOSITE_FIELDS.keys()).union(set(self.fields))
         #
         # possible_vars = combine_vars(LINE_VARIABLES, AGGREGATION_OPTIONS)
         # possible_vars += LINE_VARIABLES

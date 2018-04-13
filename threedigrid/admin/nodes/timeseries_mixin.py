@@ -34,10 +34,10 @@ class NodeResultsMixin(ResultMixin):
         # # To add result fields to the instance
         # self._field_names = variables.union(set(self.fields))
         # self.composit = NODE_COMPOSITE_FIELDS
-        for var in NODES_COMPOSITE_FIELDS.keys():
-            setattr(self, var, TimeSeriesCompositeArrayField())
-        # remove private fields
-        fnames = [x for x in NODES_COMPOSITE_FIELDS.keys()
-                  if not x.startswith('_')]
-        self._field_names = set(
-            fnames).union(set(self.fields))
+        # for var in NODES_COMPOSITE_FIELDS.keys():
+        #     setattr(self, var, TimeSeriesCompositeArrayField())
+        # # remove private fields
+        # fnames = [x for x in NODES_COMPOSITE_FIELDS.keys()
+        #           if not x.startswith('_')]
+        # self._field_names = set(
+        #     fnames).union(set(self.fields))

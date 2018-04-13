@@ -28,7 +28,7 @@ test_file_dir = os.path.join(
     os.getcwd(), "tests/test_files")
 
 # the testfile is a copy of the v2_bergermeer gridadmin file
-result_file = os.path.join(test_file_dir, "subgrid_map.nc")
+result_file = os.path.join(test_file_dir, "results_3di.nc")
 agg_result_file = os.path.join(test_file_dir, 'flow_aggregate.nc')
 grid_file = os.path.join(test_file_dir, "gridadmin.h5")
 
@@ -47,44 +47,94 @@ def gr():
     gr.close()
 
 
-def test_nodes_timeseries_index_filter():
+def test_nodes_timeseries_start_end_time_kwargs(gr):
+    qs_s1 = gr.nodes.timeseries(start_time=0, end_time=500).s1
+    assert qs_s1.shape[0] == 17
 
-    gr = GridH5ResultAdmin(grid_file, result_file)
+
+def test_nodes_timeseries_start_time_only_kwarg(gr):
+    qs = gr.nodes.timeseries(start_time=450)
+    assert qs.s1.shape[0] == 6
+
+
+def test_nodes_timeseries_end_time_only_kwarg(gr):
+    qs = gr.nodes.timeseries(end_time=500)
+    assert qs.s1.shape[0] == 17
+
+
+def test_nodes_timeseries_index_filter(gr):
     qs_s1 = gr.nodes.timeseries(indexes=[1, 2, 3]).s1
     assert qs_s1.shape[0] == 3
 
 
-def test_nodes_timeseries_slice_filter():
-
-    gr = GridH5ResultAdmin(grid_file, result_file)
+def test_nodes_timeseries_slice_filter(gr):
     qs_s1 = gr.nodes.timeseries(indexes=slice(1, 4)).s1
     assert qs_s1.shape[0] == 3
 
 
-def test_lines_timeseries_index_filter():
+def test_breach_result_fields(gr):
+    assert set(gr.breaches.fields) == {
+        'levbr', 'Mesh1D_breach_width', 'levl', 'Mesh1D_breach_depth',
+        'coordinates', 'kcu', 'levmat', 'seq_ids', 'content_pk', 'id'
+    }
 
-    gr = GridH5ResultAdmin(grid_file, result_file)
+
+def test_pump_result_fields(gr):
+
+    assert set(gr.pumps.fields) == {
+        'zoom_category','bottom_level', 'display_name', 'lower_stop_level',
+        'node_coordinates', 'coordinates', 'start_level', 'Mesh1D_q_pump',
+        'capacity', 'id', 'node2_id', 'node1_id'}
+
+
+def test_pump_timeseries_slice_filter(gr):
+    qs = gr.pumps.timeseries(indexes=slice(1, 4)).Mesh1D_q_pump
+    assert qs.shape[0] == 3
+
+
+def test_pump_timeseries_index_filter(gr):
+    qs = gr.pumps.timeseries(indexes=[1, 2, 3]).Mesh1D_q_pump
+    assert qs.shape[0] == 3
+
+
+def test_breach_timeseries_slice_filter(gr):
+    qs = gr.breaches.timeseries(indexes=slice(1, 4)).Mesh1D_breach_depth
+    assert qs.shape[0] == 3
+
+
+def test_breach_timeseries_index_filter(gr):
+    qs = gr.breaches.timeseries(indexes=[1, 2, 3]).Mesh1D_breach_width
+    assert qs.shape[0] == 3
+
+
+def test_lines_timeseries_index_filter(gr):
     qs_u1 = gr.lines.timeseries(indexes=[1, 2, 3, 4, 5]).u1
     assert qs_u1.shape[0] == 5
 
-
-def test_lines_timeseries_slice_filter():
-
-    gr = GridH5ResultAdmin(grid_file, result_file)
+def test_lines_timeseries_slice_filter(gr):
     qs_u1 = gr.lines.timeseries(indexes=slice(1, 4)).u1
     assert qs_u1.shape[0] == 3
 
 
-def test_set_timeseries_chunk_size():
-    gr = GridH5ResultAdmin(grid_file, result_file)
+def test_set_timeseries_chunk_size(gr):
     # default should be 10
     assert gr.timeseries_chunk_size == 10
     gr.set_timeseries_chunk_size(15)
     assert gr.timeseries_chunk_size == 15
 
 
-def test_set_timeseries_chunk_size_raises_value_error():
-    gr = GridH5ResultAdmin(grid_file, result_file)
+def test_missing_kwargs_raises_key_error(gr):
+    # default should be 10
+    with pytest.raises(KeyError):
+        gr.lines.timeseries().u1
+
+def test_index_key_raises_type_error(gr):
+    # default should be 10
+    with pytest.raises(TypeError):
+        gr.lines.timeseries(indexes='wrong').u1
+
+
+def test_set_timeseries_chunk_size_raises_value_error(gr):
     # default should be 10
     with pytest.raises(ValueError):
         gr.set_timeseries_chunk_size(0)
@@ -96,28 +146,42 @@ def test_set_timeseries_chunk_size_raises_value_error():
         gr.set_timeseries_chunk_size('20.5')
 
 
-def test_get_node_aggregate_netcdf_results(agg_gr):
-    assert 's1_max' in agg_gr.netcdf_file.variables.keys()
-    assert 'vol_max' in agg_gr.netcdf_file.variables.keys()
-    assert hasattr(agg_gr.nodes, 's1_max')
-    assert hasattr(agg_gr.nodes, 'vol_max')
-    assert agg_gr.nodes.s1_max.shape[0] > 0
-    assert agg_gr.nodes.vol_max.shape[0] > 0
+def test_get_timeseries_mask_filter(gr):
+    assert gr.timeseries_chunk_size == 10
+    gr.set_timeseries_chunk_size(50)
+    mask_f = gr.nodes.get_timeseries_mask_filter()
+    assert mask_f == slice(0, 50, None)
 
 
-def test_get_line_aggregate_netcdf_results(agg_gr):
-    assert 'q_max' in agg_gr.netcdf_file.variables.keys()
-    assert 'u1_max' in agg_gr.netcdf_file.variables.keys()
-    assert hasattr(agg_gr.lines, 'q_max')
-    assert hasattr(agg_gr.lines, 'u1_max')
-    assert agg_gr.lines.q_max.shape[0] > 0
-    assert agg_gr.lines.u1_max.shape[0] > 0
+def test_timestamps(gr):
+    np.testing.assert_array_equal(gr.nodes.timestamps, gr.lines.timestamps)
+    n_qs = gr.nodes.timeseries(start_time=0, end_time=500)
+    l_qs = gr.lines.timeseries(start_time=0, end_time=500)
+    np.testing.assert_array_equal(n_qs.timestamps, l_qs.timestamps)
 
 
-def test_get_node_netcdf_results(gr):
-    assert 's1' in gr.netcdf_file.variables.keys()
-    assert 'vol' in gr.netcdf_file.variables.keys()
-    assert hasattr(gr.nodes, 's1')
-    assert hasattr(gr.nodes, 'vol')
-    assert gr.nodes.s1.shape[0] > 0
-    assert gr.nodes.vol.shape[0] > 0
+# def test_get_node_aggregate_netcdf_results(agg_gr):
+#     assert 's1_max' in agg_gr.netcdf_file.variables.keys()
+#     assert 'vol_max' in agg_gr.netcdf_file.variables.keys()
+#     assert hasattr(agg_gr.nodes, 's1_max')
+#     assert hasattr(agg_gr.nodes, 'vol_max')
+#     assert agg_gr.nodes.s1_max.shape[0] > 0
+#     assert agg_gr.nodes.vol_max.shape[0] > 0
+#
+#
+# def test_get_line_aggregate_netcdf_results(agg_gr):
+#     assert 'q_max' in agg_gr.netcdf_file.variables.keys()
+#     assert 'u1_max' in agg_gr.netcdf_file.variables.keys()
+#     assert hasattr(agg_gr.lines, 'q_max')
+#     assert hasattr(agg_gr.lines, 'u1_max')
+#     assert agg_gr.lines.q_max.shape[0] > 0
+#     assert agg_gr.lines.u1_max.shape[0] > 0
+
+
+# def test_get_node_netcdf_results(gr):
+#     assert 's1' in gr.netcdf_file.variables.keys()
+#     assert 'vol' in gr.netcdf_file.variables.keys()
+#     assert hasattr(gr.nodes, 's1')
+#     assert hasattr(gr.nodes, 'vol')
+#     assert gr.nodes.s1.shape[0] > 0
+#     assert gr.nodes.vol.shape[0] > 0
