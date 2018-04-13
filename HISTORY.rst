@@ -4,8 +4,9 @@ History
 0.1.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
-
+- Added support for composite fields that are able to fetch data from
+  multiple source variables into a single field. Like this
+  result_3di netcdf can be queried the same way like gridadmin files.
 
 0.1.4 (2018-04-08)
 ------------------
