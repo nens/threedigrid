@@ -15,6 +15,18 @@ EXTENSION_TO_DRIVER_MAP = {
 }
 
 ###############################################################################
+# White list of variables and aggregation variables
+AGGREGATION_OPTIONS = {
+    'min',
+    'max',
+    'avg',
+    'med',
+    'cum',
+    'cum_positive',
+    'cum_negative'
+}
+
+###############################################################################
 # result netCDF variables
 
 # values of *_COMPOSITE_FIELDS are the variables names as known in

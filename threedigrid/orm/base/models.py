@@ -71,6 +71,7 @@ class Model:
         self.slice_filters = slice_filters
         self.only_fields = only_fields
         self.reproject_to_epsg = reproject_to_epsg
+        self._kwargs = kwargs
 
         self.class_kwargs = {
             'slice_filters': slice_filters,
