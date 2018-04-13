@@ -52,6 +52,9 @@ class GridH5ResultAdmin(GridH5Admin):
         logger.info(
             'New chunk for timeseries size has been set to %d', _chunk_size
         )
+        self._grid_kwargs.update(
+            {'timeseries_chunk_size': self._timeseries_chunk_size}
+        )
 
     @property
     def timeseries_chunk_size(self):

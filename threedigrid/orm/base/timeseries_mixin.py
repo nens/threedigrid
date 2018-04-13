@@ -105,8 +105,7 @@ class ResultMixin(object):
         """
         if self.timeseries_mask is not None:
             return self.timeseries_mask
-
-        return DEFAULT_TIMESERIES
+        return self._kwargs.get('timeseries_chunk_size')
 
     @property
     def timestamps(self):

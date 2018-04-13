@@ -31,6 +31,7 @@ NODES_COMPOSITE_FIELDS = {
     'q_lat': ['Mesh2D_q_lat', 'Mesh1D_q_lat'],
     '_mesh_id': ['Mesh2DNode_id', 'Mesh1DNode_id'],
 }
+
 NODES_VARIABLES = NODES_COMPOSITE_FIELDS.keys()
 
 # flow links
