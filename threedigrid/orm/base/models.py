@@ -12,6 +12,8 @@ from itertools import chain
 from h5py._hl.dataset import Dataset
 
 from abc import ABCMeta
+from abc import abstractmethod
+
 from collections import OrderedDict
 
 from threedigrid.orm.base.exceptions import OperationNotSupportedError
@@ -21,6 +23,7 @@ from threedigrid.orm.base.fields import TimeSeriesArrayField
 from threedigrid.orm.base.filters import get_filter
 from threedigrid.orm.base.filters import SliceFilter
 from threedigrid.orm.base.timeseries_mixin import ResultMixin
+from threedigrid.numpy_utils import create_np_lookup_index_for
 
 logger = logging.getLogger(__name__)
 
@@ -64,6 +67,7 @@ class Model:
         an instance that implements the same interface.
         """
         self._datasource = datasource
+        self._lookup = None
         self.starts_at = 0  # 0 or 1 based array
         self.slice_filters = slice_filters
         self.only_fields = only_fields
@@ -96,9 +100,12 @@ class Model:
         self.epsg_code = epsg_code
 
         # Cache the field names
-        self._field_names = [
+
+        _field_names = [
             x for x in dir(self.__class__)
-            if isinstance(getattr(self.__class__, x), ArrayField)]
+            if isinstance(getattr(self.__class__, x), (ArrayField, TimeSeriesArrayField))]
+        self._field_names = set(self._field_names).union(set(_field_names))
+
         self.has_1d = has_1d
         self.model_name = '-'.join(
             (self._datasource.getattr('model_name'),
@@ -112,7 +119,28 @@ class Model:
         """
         return super(Model, self).__getattribute__(field_name)
 
-    def get_field_value(self, field_name):
+    @property
+    def _lookup_index(self):
+        """
+        creates a look up index array for the model fields which
+        can be used to align result arrays to the ordering of
+        grid admin arrays because it is not guaranteed  that their
+        ordering is identical
+
+        :return: numpy lookup index array
+            (see ``threedigrid.numpy_utils.create_np_lookup_index_for()``
+            for details)
+        """
+        if self._lookup is None:
+            _id = self.get_field_value('id')
+            _mesh_id = self.get_field_value(
+                '_mesh_id',
+            )
+            self._lookup = create_np_lookup_index_for(_id[:], _mesh_id)
+
+        return self._lookup
+
+    def get_field_value(self, field_name, **kwargs):
         """
         Returns: the value for the ArrayField with name field_name
         on the instance.
@@ -120,11 +148,32 @@ class Model:
         With this in place we can later override the ArrayField
         get_value method for field specific conversion, if needed.
         """
+        update_dict = {
+            'model_name': self.__class__.__name__,
+        }
+
+        kwargs.update(update_dict)
         return self.get_field(field_name).get_value(
-            self._datasource, field_name)
+            self._datasource, field_name, **kwargs)
 
     def get_filtered_field_value(self, field_name):
-        value = self.get_field_value(field_name)
+        """
+        Gets the values for the given field and applies the
+        defined filters
+
+        :param field_name: name of the models field
+        :return: numpy array containing the filtered fields values
+        """
+        timeseries_filter = slice(None)
+        if hasattr(self, 'get_timeseries_mask_filter'):
+            timeseries_filter = self.get_timeseries_mask_filter()
+
+        kwargs = {
+            'lookup_index': self._lookup_index,
+            'timeseries_filter': timeseries_filter
+        }
+
+        value = self.get_field_value(field_name, **kwargs)
 
         # Transform the base_filter by prepending slice(None) to
         # match the dimensionality of the nparray_dict[key].shape
@@ -133,32 +182,32 @@ class Model:
         #      shape(2, 100)  => _filter = [slice(None), base_filter]
         #
         #      Note: x[slice(None),[1,2,3]] == x[:,[1,2,3]]
+        # if hasattr(self, 'get_timeseries_mask_filter'):
+        #     timeseries_filter = self.get_timeseries_mask_filter()
+        # else:
+        #     timeseries_filter = slice(None)
 
-        if hasattr(self, 'get_timeseries_mask_filter'):
-            timeseries_filter = self.get_timeseries_mask_filter()
-        else:
-            timeseries_filter = slice(None)
+        # if isinstance(self.get_field(field_name), TimeSeriesArrayField):
+        #     # _filter = [timeseries_filter, self.boolean_mask_filter]
+        #     # Fast slicing by first using timeseries_filter and
+        #     # and than slice based on boolean_mask_filter
+        #     # Can use a lot more memory though....
+        #
+        #     # TODO: if the result is many timeseries, perform boolean_filter
+        #     # per batch
+        #     value = value[timeseries_filter, :][:, self.boolean_mask_filter]
+        # else:
+        # import ipdb;ipdb.set_trace()
+        _filter = [slice(None)] * (
+            len(value.shape) - 1) + [self.boolean_mask_filter]
 
-        if isinstance(self.get_field(field_name), TimeSeriesArrayField):
-            # _filter = [timeseries_filter, self.boolean_mask_filter]
-            # Fast slicing by first using timeseries_filter and
-            # and than slice based on boolean_mask_filter
-            # Can use a lot more memory though....
+        # By default load all data from H5,
+        # this is WAY much faster
+        if isinstance(value, Dataset):
+            value = value[:]
 
-            # TODO: if the result is many timeseries, perform boolean_filter
-            # per batch
-            value = value[timeseries_filter, :][:, self.boolean_mask_filter]
-        else:
-            _filter = [slice(None)] * (
-                len(value.shape) - 1) + [self.boolean_mask_filter]
-
-            # By default load all data from H5,
-            # this is WAY much faster
-            if isinstance(value, Dataset):
-                value = value[:]
-
-            # Perform slicing by applying the mask
-            value = value[_filter]
+        # Perform slicing by applying the mask
+        value = value[_filter]
 
         # Reproject any coordinates if a reproject_to_epsg is set and
         # there are coordinatefields in the selection
@@ -204,7 +253,7 @@ class Model:
         """
         Returns: a list of ArrayFields names (excluding 'meta')
         """
-        return [x for x in self._field_names if x != 'meta']
+        return [unicode(x) for x in self._field_names if x != 'meta']
 
     def __init_class(self, klass, **kwargs):
         """
@@ -504,6 +553,7 @@ class Model:
         # Compute the boolean mask filter
         # that can be applied to all array's
         # based on the specified filters
+
         if self._boolean_mask_filter is None:
 
             # If no filters are defined
@@ -515,8 +565,17 @@ class Model:
             filter_field_names = [
                 x.get_field_name() for x in self.slice_filters]
 
+            timeseries_filter = slice(None)
+            if hasattr(self, 'get_timeseries_mask_filter'):
+                timeseries_filter = self.get_timeseries_mask_filter()
+            kwargs = {
+                'lookup_index': self._lookup_index,
+                'timeseries_filter': timeseries_filter
+            }
+
             for name in [x for x in filter_field_names if x]:
-                selection[name] = self.get_field_value(name)
+                selection[name] = self.get_field_value(
+                    name, **kwargs)
 
             boolean_mask_filter = None
             # Compute the the filter
