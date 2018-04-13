@@ -10,6 +10,7 @@ from threedigrid.orm import constants
 
 import numpy as np
 
+
 class ArrayField:
     """
     Generic field that can be used to describe values
