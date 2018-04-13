@@ -160,7 +160,7 @@ def test_timestamps(gr):
     np.testing.assert_array_equal(n_qs.timestamps, l_qs.timestamps)
 
 
-# commented for now until the new aggregate.nc is finished 
+# commented for now until the new aggregate.nc is finished
 
 # def test_get_node_aggregate_netcdf_results(agg_gr):
 #     assert 's1_max' in agg_gr.netcdf_file.variables.keys()
