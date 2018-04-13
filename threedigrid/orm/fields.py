@@ -1,189 +1,105 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
 # -*- coding: utf-8 -*-
+"""
+Base fields
+"""
 from __future__ import unicode_literals
 from __future__ import print_function
 
+from threedigrid.orm import constants
+
 import numpy as np
 
-from base.fields import ArrayField
-from threedigrid.numpy_utils import angle_in_degrees
-from threedigrid.numpy_utils import get_bbox_by_point
-from threedigrid.numpy_utils import reshape_flat_array
-from threedigrid.numpy_utils import select_lines_by_bbox
-from threedigrid.geo_utils import select_points_by_tile
-from threedigrid.geo_utils import select_lines_by_tile
-from threedigrid.geo_utils import select_points_by_bbox
-from threedigrid.geo_utils import transform_xys
-
-
-class GeomArrayField(ArrayField):
+class ArrayField:
     """
-    Base geometry field
+    Generic field that can be used to describe values
+    to be retrieved from a Datasource.
     """
-    def reproject(self, values, source_epsg, target_epsg):
-        raise NotImplemented()
+    @staticmethod
+    def get_value(datasource, name, **kwargs):
+        """
+        Returns: the data from the datasource
+                 or None if 'name' is not in the datasource
 
-    def to_centroid(self, values):
-        raise NotImplemented()
+        Optional transforms can be done here.
+        """
+        if name in datasource.keys():
+            return datasource[name]
 
-
-class PointArrayField(GeomArrayField):
-    def reproject(self, values, source_epsg, target_epsg):
-        """
-        Reproject the point coordinates: x_array=values[0], y_array=values[1]
-        from source_epsg to target_epsg.
-        """
-        return transform_xys(
-            values[0], values[1],
-            source_epsg, target_epsg)
-
-    def get_mask_by_bbox(self, bbox, values, include_intersections=False):
-        """
-        Return as boolean mask (np.array) for line/bbox in "values"
-            x_array=values[0], y_array=values[1]
-        within bbox (x1, y1, x2, y2)
-        """
-        # For points include_intersections can be ignored
-        return select_points_by_bbox(values, bbox)
-
-    def get_mask_by_tile(self, tile_xyz, target_epsg, values,
-                         include_intersections=False):
-        """
-        Return as boolean mask (np.array) for points in "values"
-        within tile_xyz bbox projected to target_epsg.
-        """
-        # For points include_intersections can be ignored
-        return select_points_by_tile(
-            tile_xyz, target_epsg, values)
-
-    def to_centroid(self, values):
-        """
-        Returns: the centroid of the point coordinates:
-                 x_array=values[0], y_array=values[1]
-        """
-        return values
+        return None
 
 
-class LineArrayField(GeomArrayField):
+class IndexArrayField(ArrayField):
     """
-    Field which handles line/bbox geoms values:
-
-        x1_array=values[0], y1_array=values[1],
-        x2_array=values[2], y2_array=values[3]
+    Simple pointer
     """
-
-    def reproject(self, values, source_epsg, target_epsg):
-        """
-        Reproject the line/bbox coordinates:
-            x1_array=values[0], y1_array=values[1],
-            x2_array=values[2], y2_array=values[3]
-        from source_epsg to target_epsg.
-        """
-        return np.vstack((
-                transform_xys(
-                    values[0], values[1],
-                    source_epsg, target_epsg),
-                transform_xys(
-                    values[2], values[3],
-                    source_epsg, target_epsg)))
-
-    def get_mask_by_bbox(self, bbox, values,
-                         include_intersections=False):
-        """
-        Return as boolean mask (np.array) for line/bbox in "values"
-            x1_array=values[0], y1_array=values[1],
-            x2_array=values[2], y2_array=values[3]
-        within bbox (x1, y1, x2, y2)
-        """
-        return select_lines_by_bbox(values, bbox, include_intersections)
-
-    def get_mask_by_tile(self, tile_xyz, target_epsg, values,
-                         include_intersections=False):
-        """
-        Return as boolean mask (np.array) for line/bbox in "values"
-            x1_array=values[0], y1_array=values[1],
-            x2_array=values[2], y2_array=values[3]
-        within tile_xyz bbox projected to target_epsg.
-        """
-        return select_lines_by_tile(
-            tile_xyz, target_epsg, values, include_intersections)
-
-    def to_centroid(self, values):
-        """
-        :return: the centroid (float) for the line coordinates:
-                    x1_array=values[0], y1_array=values[1],
-                    x2_array=values[2], y2_array=values[3]
-        """
-        return np.array(
-            ((values[0] + values[2]) / 2.0,
-             (values[1] + values[3]) / 2.0))
-
-    def get_angles_in_degrees(self, values):
-        """
-        Returns: the angles in degrees of the lines
-        made up by the points:
-
-            x1_array=values[0], y1_array=values[1],
-            x2_array=values[2], y2_array=values[3]
-
-        with the (horizontal) x-axis
-        """
-        return angle_in_degrees(
-                values[0], values[1], values[2], values[3])
+    def __init__(self, to=None):
+        self.to = to
 
 
-class MultiLineArrayField(GeomArrayField):
-
-    def reproject(self, values, source_epsg, target_epsg):
-        """
-        Reproject the line/bbox coordinates:
-            x1_array=values[0], y1_array=values[1],
-            x2_array=values[2], y2_array=values[3]
-        from source_epsg to target_epsg.
-        """
-        reshaped_values = map(reshape_flat_array, values)
-        transform_values = map(
-            lambda x: transform_xys(
-                x[0], x[1], source_epsg, target_epsg).flatten(),
-            reshaped_values)
-
-        return np.array(transform_values)
-
-
-class PolygonArrayField(GeomArrayField):
-    """
-    Field which handles line/bbox geoms values:
-
-        x1_array=values[0], y1_array=values[1],
-        x2_array=values[2], y2_array=values[3]
-
-    """
-    def get_mask_by_point(self, pnt, values):
-
-        return get_bbox_by_point(pnt, values)
-
-    def reproject(self, values, source_epsg, target_epsg):
-        """
-        Reproject the cell coordinates (lower left and
-        upper right corners):
-            x1_array=values[0], y1_array=values[1],
-            x2_array=values[2], y2_array=values[3],
-        from source_epsg to target_epsg.
-        """
-        return np.vstack((
-                np.array(transform_xys(
-                    values[0], values[1],
-                    source_epsg, target_epsg)
-                ),
-                np.array(transform_xys(
-                    values[2], values[3],
-                    source_epsg, target_epsg)
-                ),
-        ))
-
-
-class BboxArrayField(LineArrayField):
-    """
-    For now handled same as lines.
-    """
+class TimeSeriesArrayField(ArrayField):
     pass
+
+
+class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
+    """
+    Field for composite arrays.
+
+    Result (netCDF) files split their data into subsets, e.g. 1D and 2D.
+    A composite field can be used to combine several data source fields
+    into a single model field by specifying a composition dict. Example::
+
+        LINE_COMPOSITE_FIELDS = {
+            'au': ['Mesh1D_au', 'Mesh2D_au'],
+            'u1': ['Mesh1D_u1', 'Mesh2D_u1'],
+            'q': ['Mesh1D_q', 'Mesh2D_q']
+        }
+
+    """
+    @staticmethod
+    def get_value(datasource, name, **kwargs):
+        """
+        :param datasource: a datasource object that can return data on
+            __getitem__()
+        :param name: the name of the section to read, e.g a HF5
+            group or netCDF variable
+        :param kwargs:
+            timeseries_filter (optional): read only a slice of
+                the time dimension
+            model_name: name of the model the field belongs to.
+                Is used for a reverse lookup of the composite fields
+            lookup_index (optional): a numpy array that will be used
+                to sort the values by this lookup index
+
+        Returns: the data from the datasource
+                 or None if 'name' is not in the datasource
+
+        Optional transforms can be done here.
+        """
+        timeseries_filter = kwargs.get('timeseries_filter', slice(None))
+        model_name = kwargs.get('model_name')
+        lookup_index = kwargs.get('lookup_index')
+
+        composite_fields = getattr(
+            constants, '{model_name}_COMPOSITE_FIELDS'.format(
+                model_name=model_name.upper())
+        )
+
+        values = []
+        source_names = composite_fields.get(name)
+        for source_name in source_names:
+            if source_name not in datasource.keys():
+                continue
+            values.append(datasource[source_name])
+
+        if not values:
+            return None
+        # combine the two source to a single source
+        # if timeseries_filter is None and lookup_index is None:
+        #     return np.hstack([x[:,] for x in values])
+        hs = np.hstack([x[timeseries_filter] for x in values])
+        del values
+        # sort the stacked array by lookup
+        if lookup_index is not None:
+            return hs[:, lookup_index]
+        return hs
