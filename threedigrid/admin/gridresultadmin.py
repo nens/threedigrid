@@ -63,6 +63,10 @@ class GridH5ResultAdmin(GridH5Admin):
         return self._timeseries_chunk_size.stop
 
     @property
+    def time_units(self):
+        return self.netcdf_file.variables['time'].getncattr('units')
+
+    @property
     def lines(self):
         return Lines(
             H5pyResultGroup(self.h5py_file, 'lines', self.netcdf_file),

@@ -48,6 +48,12 @@ class TimeSeriesArrayField(ArrayField):
             return v
         return np.array([])
 
+    @staticmethod
+    def get_unit(datasource, name, **kwargs):
+        if not hasattr(datasource, 'unit'):
+            return ''
+        return datasource.unit(name)
+
 
 class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
     """
@@ -115,3 +121,18 @@ class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
         if lookup_index is not None:
             return hs[:, lookup_index]
         return hs
+
+    @staticmethod
+    def get_unit(datasource, name, **kwargs):
+
+        model_name = kwargs.get('model_name')
+        composite_fields = getattr(
+            constants, '{model_name}_COMPOSITE_FIELDS'.format(
+                model_name=model_name.upper())
+        )
+        units = []
+        source_names = composite_fields.get(name)
+
+        units = [datasource.unit(source_name) for source_name in source_names]
+        assert all(x == units[0] for x in units) == True, 'composite fields must have the same units'
+        return units[0]

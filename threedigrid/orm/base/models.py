@@ -259,6 +259,14 @@ class Model:
         """
         return [unicode(x) for x in self._field_names if x != 'meta']
 
+    def get_field_unit(self, field_name):
+        if not hasattr(self._datasource, "unit"):
+            return ""
+        return self.get_field(field_name).get_unit(
+            self._datasource, field_name,
+            model_name=self.__class__.__name__)
+
+
     def __init_class(self, klass, **kwargs):
         """
         Returns: a new instance of 'klass' with new filters and
