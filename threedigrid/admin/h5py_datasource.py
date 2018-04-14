@@ -78,11 +78,14 @@ class H5pyResultGroup(H5pyGroup):
 
         return None
 
-    def unit(self, name):
-        v = self.get(name)
+    def attr(self, var_name, attr_name):
+        v = self.get(var_name)
         if v is None or not hasattr(v, 'getncattr'):
             return ''
-        return self.get(name).getncattr('units')
+        try:
+            return v.getncattr(attr_name)
+        except AttributeError:
+            pass
 
     def __getitem__(self, name):
         # meta is special

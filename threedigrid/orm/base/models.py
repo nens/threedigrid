@@ -20,12 +20,48 @@ from threedigrid.orm.base.exceptions import OperationNotSupportedError
 from threedigrid.orm.base.fields import ArrayField
 from threedigrid.orm.base.fields import IndexArrayField
 from threedigrid.orm.base.fields import TimeSeriesArrayField
+from threedigrid.orm.base.fields import TimeSeriesCompositeArrayField
+from threedigrid.orm import constants
+
 from threedigrid.orm.base.filters import get_filter
 from threedigrid.orm.base.filters import SliceFilter
 from threedigrid.orm.base.timeseries_mixin import ResultMixin
 from threedigrid.numpy_utils import create_np_lookup_index_for
 
 logger = logging.getLogger(__name__)
+
+_meta_fields = ['units']
+
+class _Meta(object):
+    def __init__(self, inst):
+        from collections import defaultdict
+        from collections import namedtuple
+        #import ipdb;ipdb.set_trace()
+        meta_values = defaultdict(list)
+        for _field in inst.fields:
+            for m in _meta_fields:
+                if self._is_type_composite(inst, _field):
+                    meta_values[_field].append(self._get_composite_meta(inst, _field, m))
+                else:
+                    meta_values[_field].append(inst._datasource.attr(_field, m))
+            nt = namedtuple(_field, ','.join(_meta_fields))
+            setattr(self, _field, nt(*meta_values[_field]))
+
+    def _is_type_composite(self, inst, name):
+        field = inst.get_field(name)
+        return isinstance(field, TimeSeriesCompositeArrayField)
+
+    def _get_composite_meta(self, inst, name, meta_field):
+        model_name = inst.__class__.__name__
+        composite_fields = getattr(
+            constants, '{model_name}_COMPOSITE_FIELDS'.format(
+                model_name=model_name.upper())
+        )
+        source_names = composite_fields.get(name)
+        #import ipdb;ipdb.set_trace()
+        meta_attrs = [inst._datasource.attr(source_name, meta_field) for source_name in source_names]
+        assert all(x == meta_attrs[0] for x in meta_attrs) == True, 'composite fields must have the same {}'.format(meta_field)
+        return meta_attrs[0]
 
 
 def extend_instance(obj, cls):
@@ -161,6 +197,10 @@ class Model:
         return self.get_field(field_name).get_value(
             self._datasource, field_name, **kwargs)
 
+    @property
+    def _Meta(self):
+        return _Meta(self)
+
     def get_filtered_field_value(self, field_name):
         """
         Gets the values for the given field and applies the
@@ -251,7 +291,6 @@ class Model:
         # Default behaviour, return the attribute from superclass
         return attr
 
-
     @property
     def fields(self):
         """
@@ -260,8 +299,9 @@ class Model:
         return [unicode(x) for x in self._field_names if x != 'meta']
 
     def get_field_unit(self, field_name):
-        if not hasattr(self._datasource, "unit"):
-            return ""
+        ff = self.get_field(field_name)
+        import ipdb;ipdb.set_trace()
+        return self.get_field(field_name).unit
         return self.get_field(field_name).get_unit(
             self._datasource, field_name,
             model_name=self.__class__.__name__)
