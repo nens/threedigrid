@@ -86,6 +86,7 @@ class H5pyResultGroup(H5pyGroup):
             return v.getncattr(attr_name)
         except AttributeError:
             pass
+        return ''
 
     def __getitem__(self, name):
         # meta is special

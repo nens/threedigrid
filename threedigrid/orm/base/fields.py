@@ -48,12 +48,6 @@ class TimeSeriesArrayField(ArrayField):
             return v
         return np.array([])
 
-    @staticmethod
-    def get_unit(datasource, name, **kwargs):
-        if not hasattr(datasource, 'unit'):
-            return ''
-        return datasource.unit(name)
-
 
 class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
     """
@@ -71,11 +65,11 @@ class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
 
     """
 
-    def __init__(self, needs_lookup):
+    def __init__(self, needs_lookup=True, meta=None):
         self._needs_lookup = needs_lookup
+        self._meta = meta
 
-    @staticmethod
-    def get_value(datasource, name, **kwargs):
+    def get_value(self, datasource, name, **kwargs):
         """
         :param datasource: a datasource object that can return data on
             __getitem__()
@@ -95,16 +89,10 @@ class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
         Optional transforms can be done here.
         """
         timeseries_filter = kwargs.get('timeseries_filter', slice(None))
-        model_name = kwargs.get('model_name')
         lookup_index = kwargs.get('lookup_index')
 
-        composite_fields = getattr(
-            constants, '{model_name}_COMPOSITE_FIELDS'.format(
-                model_name=model_name.upper())
-        )
-
         values = []
-        source_names = composite_fields.get(name)
+        source_names = self._meta.composite_fields.get(name)
         for source_name in source_names:
             if source_name not in datasource.keys():
                 continue
@@ -118,21 +106,6 @@ class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
         hs = np.hstack(values)
         del values
         # sort the stacked array by lookup
-        if lookup_index is not None:
+        if self._needs_lookup and lookup_index is not None:
             return hs[:, lookup_index]
         return hs
-
-    @staticmethod
-    def get_unit(datasource, name, **kwargs):
-
-        model_name = kwargs.get('model_name')
-        composite_fields = getattr(
-            constants, '{model_name}_COMPOSITE_FIELDS'.format(
-                model_name=model_name.upper())
-        )
-        units = []
-        source_names = composite_fields.get(name)
-
-        units = [datasource.unit(source_name) for source_name in source_names]
-        assert all(x == units[0] for x in units) == True, 'composite fields must have the same units'
-        return units[0]

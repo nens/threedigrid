@@ -3,10 +3,81 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
+from collections import defaultdict
+from collections import namedtuple
+
 import numpy as np
 
 from threedigrid.orm import constants
 from threedigrid.orm.base.fields import TimeSeriesCompositeArrayField
+
+
+class Options(object):
+    """
+    class that adds meta data to a ResultMixin instance. The meta data includes
+    entries for the ``_meta_fields`` collection (if found).
+
+        >>> from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
+        >>> f = "/code/tests/test_files/results_3di.nc"
+        >>> ff = "/code/tests/test_files/gridadmin.h5"
+        >>> gr = GridH5ResultAdmin(ff, f)
+        >>> gr.nodes._meta.s1
+        >>> s1(units=u'm', long_name=u'waterlevel', standard_name=u'water_surface_height_above_reference_datum')
+
+    """
+    def __init__(self, inst):
+        """
+        :param inst: model instance
+        """
+        self.inst = inst
+        if hasattr(self.inst.Meta, "field_attrs"):
+            self._set_field_attrs()
+
+    def _get_meta_values(self, field):
+        meta_values = defaultdict(list)
+        for m in self.inst.Meta.field_attrs:
+            if self._is_type_composite(field):
+                meta_values[field].append(
+                    self._get_composite_meta(field, m)
+                )
+            else:
+                meta_values[field].append(
+                    self.inst._datasource.attr(field, m)
+                )
+        return meta_values
+
+    def _set_field_attrs(self):
+
+        for _field in self.inst.fields:
+            meta_values = self._get_meta_values(_field)
+            nt = namedtuple(_field, ','.join(self.inst.Meta.field_attrs))
+            setattr(self, _field, nt(*meta_values[_field]))
+
+    def _is_type_composite(self, field_name):
+        """
+        :param field_name: name of the field
+        """
+        field = self.inst.get_field(field_name)
+        return isinstance(field, TimeSeriesCompositeArrayField)
+
+    def _get_composite_meta(self, name, meta_field, exclude={'rain'}):
+
+        model_name = self.inst.__class__.__name__
+        composite_fields = getattr(
+            constants, '{model_name}_COMPOSITE_FIELDS'.format(
+                model_name=model_name.upper())
+        )
+        source_names = composite_fields.get(name)
+        meta_attrs = [self.inst._datasource.attr(source_name, meta_field)
+                      for source_name in source_names]
+        try:
+            assert all(x == meta_attrs[0] for x in meta_attrs) == True, \
+                'composite fields must have the same {}'.format(meta_field)
+        except AssertionError:
+            if name not in exclude:
+                raise
+            pass
+        return meta_attrs[0]
 
 
 class ResultMixin(object):
@@ -14,7 +85,6 @@ class ResultMixin(object):
     Subclass this mixin and add the result
     fields as 'TimeSeriesArrayField'
     """
-
     timeseries_mask = None
     done_composition = False
 
@@ -29,21 +99,21 @@ class ResultMixin(object):
 
     def _set_composite_field_names(self):
 
-        composite_field_name_dict = '{model_name}_COMPOSITE_FIELDS'.format(
-                model_name=self.__class__.__name__.upper())
-        if not hasattr(constants, composite_field_name_dict):
+        # composite_field_name_dict = '{model_name}_COMPOSITE_FIELDS'.format(
+        #         model_name=self.__class__.__name__.upper())
+        # if not hasattr(constants, composite_field_name_dict):
+        #     return
+        if not self.Meta.composite_fields:
             return
 
-        composite_fields = getattr(
-            constants, composite_field_name_dict
-        )
-
-        for var in composite_fields.keys():
+        for var in self.Meta.composite_fields.keys():
             setattr(
                 self, var, TimeSeriesCompositeArrayField(
-                    needs_lookup=True)
+                    needs_lookup=True, meta=self.Meta)
             )
-        self.update_field_names(composite_fields.keys(), exclude_private=True)
+        self.update_field_names(
+            self.Meta.composite_fields.keys(), exclude_private=True
+        )
         self.done_composition = True
 
     def update_field_names(self, field_names, exclude_private=True):
@@ -153,3 +223,18 @@ class ResultMixin(object):
         if self.timeseries_mask is not None:
             value = value[self.timeseries_mask]
         return value
+
+    @property
+    def _meta(self):
+        """
+        meta class that add meta data to a ResultMixin instance. The meta data includes
+        entries for the ``_meta_fields`` collection (if found).
+
+            >>> from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
+            >>> f = "/code/tests/test_files/results_3di.nc"
+            >>> ff = "/code/tests/test_files/gridadmin.h5"
+            >>> gr = GridH5ResultAdmin(ff, f)
+            >>> gr.nodes._meta.s1
+            >>> s1(units=u'm', long_name=u'waterlevel', standard_name=u'water_surface_height_above_reference_datum')
+        """
+        return Options(self)
