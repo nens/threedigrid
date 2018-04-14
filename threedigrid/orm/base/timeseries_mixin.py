@@ -8,7 +8,6 @@ from collections import namedtuple
 
 import numpy as np
 
-from threedigrid.orm import constants
 from threedigrid.orm.base.fields import TimeSeriesCompositeArrayField
 
 
@@ -62,12 +61,7 @@ class Options(object):
 
     def _get_composite_meta(self, name, meta_field, exclude={'rain'}):
 
-        model_name = self.inst.__class__.__name__
-        composite_fields = getattr(
-            constants, '{model_name}_COMPOSITE_FIELDS'.format(
-                model_name=model_name.upper())
-        )
-        source_names = composite_fields.get(name)
+        source_names = self.inst.Meta.composite_fields.get(name)
         meta_attrs = [self.inst._datasource.attr(source_name, meta_field)
                       for source_name in source_names]
         try:
