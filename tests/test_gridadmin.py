@@ -122,7 +122,7 @@ class GridAdminLinesTest(unittest.TestCase):
 
     def test_fields(self):
         # Check dtype names
-        assert set(self.parser.lines.fields) == {
+        assert set(self.parser.lines._meta.get_fields().keys()) == {
             'content_pk', 'content_type', 'id', 'kcu',
             'lik', 'line', 'line_coords', 'line_geometries',
             'zoom_category'
@@ -149,7 +149,7 @@ class GridAdminGridTest(unittest.TestCase):
         self.parser = GridH5Admin(grid_admin_h5_file)
 
     def test_fields(self):
-        assert set(self.parser.grid.fields) == {
+        assert set(self.parser.grid._meta.get_fields().keys()) == {
             'id', 'nodk', 'nodm', 'nodn'
         }
 
@@ -170,7 +170,7 @@ class GridAdminNodeTest(unittest.TestCase):
 
     def test_fields(self):
         # Check fields
-        assert set(self.parser.nodes.fields) == {
+        assert set(self.parser.nodes._meta.get_fields().keys()) == {
             'cell_coords', 'content_pk', 'coordinates', 'id', 'node_type',
             'seq_id', 'zoom_category'
         }
@@ -208,7 +208,7 @@ class GridAdminBreachTest(unittest.TestCase):
 
     def test_fields(self):
         # Check fields
-        assert set(self.parser.breaches.fields) == {
+        assert set(self.parser.breaches._meta.get_fields().keys()) == {
             'content_pk', 'coordinates', 'id', 'kcu',
             'levbr', 'levl', 'levmat', 'seq_ids'
         }
@@ -239,7 +239,7 @@ class GridAdminCellsTest(unittest.TestCase):
 
     def test_fields(self):
         # should have also z_coordinate
-        assert set(self.parser.cells.fields) == {
+        assert set(self.parser.cells._meta.get_fields().keys()) == {
             'cell_coords', 'content_pk', 'coordinates', 'id', 'node_type',
             'seq_id', 'z_coordinate', 'zoom_category'
         }

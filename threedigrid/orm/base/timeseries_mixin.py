@@ -14,7 +14,7 @@ class ResultMixin(object):
     fields as 'TimeSeriesArrayField'
     """
     timeseries_mask = None
-    done_composition = False
+    _done_composition = False
 
     def __init__(self, *args, **kwargs):
         # pop mixin specific fields and store them
@@ -22,7 +22,7 @@ class ResultMixin(object):
         self.timeseries_mask = kwargs.pop('timeseries_mask', None)
         self.class_kwargs.update({
             'timeseries_mask': self.timeseries_mask})
-        if not self.done_composition:
+        if not self._done_composition and hasattr(self, 'Meta'):
             self._set_composite_field_names()
 
     def _set_composite_field_names(self):
@@ -39,24 +39,11 @@ class ResultMixin(object):
                 self, var, TimeSeriesCompositeArrayField(
                     needs_lookup=True, meta=self.Meta)
             )
-        self._meta._update_field_names(
+        self._meta.update_field_names(
             self.Meta.composite_fields.keys(), exclude_private=True
         )
         self.done_composition = True
 
-    # def update_field_names(self, field_names, exclude_private=True):
-    #     """
-    #
-    #     :param field_names: iterable of field names
-    #     :param exclude_private: fields starting with '_' will be excluded
-    #     """
-    #     # remove private fields
-    #     fnames = [x for x in field_names if
-    #               exclude_private and not x.startswith('_')]
-    #
-    #     # combine with existing fields
-    #     self._field_names = set(
-    #         fnames).union(set(self.fields))
 
     def timeseries(self, start_time=None, end_time=None, indexes=None):
         """

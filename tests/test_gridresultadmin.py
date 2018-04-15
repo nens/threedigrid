@@ -73,7 +73,7 @@ def test_nodes_timeseries_slice_filter(gr):
 
 
 def test_breach_result_fields(gr):
-    assert set(gr.breaches.fields) == {
+    assert set(gr.breaches._meta.get_fields().keys()) == {
         'levbr', 'Mesh1D_breach_width', 'levl', 'Mesh1D_breach_depth',
         'coordinates', 'kcu', 'levmat', 'seq_ids', 'content_pk', 'id'
     }
@@ -81,7 +81,7 @@ def test_breach_result_fields(gr):
 
 def test_pump_result_fields(gr):
 
-    assert set(gr.pumps.fields) == {
+    assert set(gr.pumps._meta.get_fields().keys()) == {
         'zoom_category','bottom_level', 'display_name', 'lower_stop_level',
         'node_coordinates', 'coordinates', 'start_level', 'Mesh1D_q_pump',
         'capacity', 'id', 'node2_id', 'node1_id'}

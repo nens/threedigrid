@@ -17,6 +17,8 @@ class LineResultsMixin(ResultMixin):
             '_mesh_id': ['Mesh2DLine_id', 'Mesh1DLine_id'],  # private
         }
 
+        lookup_fields = ('id', '_mesh_id')
+
     def __init__(self, netcdf_keys, **kwargs):
         """Instantiate a line with netcdf results.
 

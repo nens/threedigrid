@@ -27,7 +27,6 @@ from threedigrid.orm import constants
 from threedigrid.orm.base.filters import get_filter
 from threedigrid.orm.base.filters import SliceFilter
 from threedigrid.orm.base.timeseries_mixin import ResultMixin
-from threedigrid.numpy_utils import create_np_lookup_index_for
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +71,6 @@ class Model:
         """
 
         self._datasource = datasource
-        self._lookup = None
         self.slice_filters = slice_filters
         self.only_fields = only_fields
         self.reproject_to_epsg = reproject_to_epsg
@@ -119,32 +117,6 @@ class Model:
              str(self._datasource.getattr('revision_nr')),
              self._datasource.getattr('revision_hash')))
 
-
-    def _get_lookup_index(self, field_name):
-        """
-        creates a look up index array for the model fields which
-        can be used to align result arrays to the ordering of
-        grid admin arrays because it is not guaranteed  that their
-        ordering is identical
-
-        :return: numpy lookup index array
-            (see ``threedigrid.numpy_utils.create_np_lookup_index_for()``
-            for details) or None if the field does not have a the
-            ``_needs_lookup`` attribute or if the attribute is False
-        """
-        f = self._meta.get_field(field_name)
-        if not hasattr(f, '_needs_lookup') or not getattr(f, '_needs_lookup'):
-            return self._lookup
-
-        if self._lookup is None:
-            _id = self.get_field_value('id')
-            _mesh_id = self.get_field_value(
-                '_mesh_id',
-            )
-            self._lookup = create_np_lookup_index_for(_id[:], _mesh_id)
-
-        return self._lookup
-
     def _get_field(self, field_name):
         """
         Returns: the ArrayField with field_name on this instance.
@@ -175,14 +147,12 @@ class Model:
         :param field_name: name of the models field
         :return: numpy array containing the filtered fields values
         """
-        timeseries_filter = slice(None)
+        kwargs = {}
         if hasattr(self, 'get_timeseries_mask_filter'):
-            timeseries_filter = self.get_timeseries_mask_filter()
+            kwargs.update({'timeseries_filter': self.get_timeseries_mask_filter()})
 
-        kwargs = {
-            'lookup_index': self._get_lookup_index(field_name),
-            'timeseries_filter': timeseries_filter
-        }
+        if hasattr(self, 'lookup_fields'):
+            kwargs.update({'lookup_index': self._get_lookup_index(field_name)})
 
         value = self.get_field_value(field_name, **kwargs)
 

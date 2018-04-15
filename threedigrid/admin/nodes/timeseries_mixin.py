@@ -29,6 +29,8 @@ class NodeResultsMixin(ResultMixin):
             '_mesh_id': ['Mesh2DNode_id', 'Mesh1DNode_id'],  # private
         }
 
+        lookup_fields = ('id', '_mesh_id')
+
 
     def __init__(self, netcdf_keys, **kwargs):
         """Instantiate a node with netcdf results.

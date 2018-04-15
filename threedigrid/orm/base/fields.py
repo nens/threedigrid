@@ -75,7 +75,6 @@ class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
     """
 
     def __init__(self, needs_lookup=True, meta=None):
-        self._needs_lookup = needs_lookup
         self._meta = meta
 
     def get_value(self, datasource, name, **kwargs):
@@ -115,7 +114,7 @@ class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
         hs = np.hstack(values)
         del values
         # sort the stacked array by lookup
-        if self._needs_lookup and lookup_index is not None:
+        if lookup_index is not None:
             return hs[:, lookup_index]
         return hs
 
