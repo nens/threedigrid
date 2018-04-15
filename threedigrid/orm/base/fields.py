@@ -29,6 +29,9 @@ class ArrayField:
 
         return None
 
+    def __repr__(self):
+        return self.__class__.__name__
+
 
 class IndexArrayField(ArrayField):
     """
@@ -36,6 +39,9 @@ class IndexArrayField(ArrayField):
     """
     def __init__(self, to=None):
         self.to = to
+
+    def __repr__(self):
+        return self.__class__.__name__
 
 
 class TimeSeriesArrayField(ArrayField):
@@ -47,6 +53,9 @@ class TimeSeriesArrayField(ArrayField):
         if v.size > 0:
             return v
         return np.array([])
+
+    def __repr__(self):
+        return self.__class__.__name__
 
 
 class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
@@ -109,3 +118,7 @@ class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
         if self._needs_lookup and lookup_index is not None:
             return hs[:, lookup_index]
         return hs
+
+
+    def __repr__(self):
+        return self.__class__.__name__

@@ -16,6 +16,7 @@ from abc import abstractmethod
 
 from collections import OrderedDict
 
+from threedigrid.orm.base.options import Options
 from threedigrid.orm.base.exceptions import OperationNotSupportedError
 from threedigrid.orm.base.fields import ArrayField
 from threedigrid.orm.base.fields import IndexArrayField
@@ -118,11 +119,6 @@ class Model:
              str(self._datasource.getattr('revision_nr')),
              self._datasource.getattr('revision_hash')))
 
-    def get_field(self, field_name):
-        """
-        Returns: the ArrayField with field_name on this instance.
-        """
-        return super(Model, self).__getattribute__(field_name)
 
     def _get_lookup_index(self, field_name):
         """
@@ -136,7 +132,7 @@ class Model:
             for details) or None if the field does not have a the
             ``_needs_lookup`` attribute or if the attribute is False
         """
-        f = self.get_field(field_name)
+        f = self._meta.get_field(field_name)
         if not hasattr(f, '_needs_lookup') or not getattr(f, '_needs_lookup'):
             return self._lookup
 
@@ -148,6 +144,12 @@ class Model:
             self._lookup = create_np_lookup_index_for(_id[:], _mesh_id)
 
         return self._lookup
+
+    def _get_field(self, field_name):
+        """
+        Returns: the ArrayField with field_name on this instance.
+        """
+        return super(Model, self).__getattribute__(field_name)
 
     def get_field_value(self, field_name, **kwargs):
         """
@@ -162,7 +164,7 @@ class Model:
         }
 
         kwargs.update(update_dict)
-        return self.get_field(field_name).get_value(
+        return self._meta.get_field(field_name).get_value(
             self._datasource, field_name, **kwargs)
 
     def get_filtered_field_value(self, field_name):
@@ -196,7 +198,7 @@ class Model:
         # else:
         #     timeseries_filter = slice(None)
 
-        # if isinstance(self.get_field(field_name), TimeSeriesArrayField):
+        # if isinstance(self._meta.get_field(field_name), TimeSeriesArrayField):
         #     # _filter = [timeseries_filter, self.boolean_mask_filter]
         #     # Fast slicing by first using timeseries_filter and
         #     # and than slice based on boolean_mask_filter
@@ -255,13 +257,6 @@ class Model:
         # Default behaviour, return the attribute from superclass
         return attr
 
-    @property
-    def fields(self):
-        """
-        Returns: a list of ArrayFields names (excluding 'meta')
-        """
-        return [unicode(x) for x in self._field_names if x != 'meta']
-
     def __init_class(self, klass, **kwargs):
         """
         Returns: a new instance of 'klass' with new filters and
@@ -288,17 +283,17 @@ class Model:
 
         for key, value in kwargs.iteritems():
             splitted_key = key.split('__')
-            if splitted_key[0] not in self.fields:
+            if splitted_key[0] not in self._field_names:
                 raise ValueError(
                     "Field '{}' unknown. Choices are {}".format(
                         splitted_key[0],
-                        self.fields)
+                        self._field_names)
                 )
 
             new_slice_filters.append(
                 get_filter(
                     splitted_key,
-                    self.get_field(splitted_key[0]),
+                    self._meta.get_field(splitted_key[0]),
                     value,
                     filter_map=self._filter_map)
             )
@@ -431,7 +426,7 @@ class Model:
             raise Exception("Please provide at least one field name")
 
         for x in args:
-            if x not in self.fields:
+            if x not in self._field_names:
                 raise Exception("Unknown field name: {0}".format(x))
 
         new_class_kwargs = dict(self.class_kwargs)
@@ -453,7 +448,7 @@ class Model:
 
         selection = OrderedDict()
 
-        for n in self.fields:
+        for n in self._field_names:
             selection[n] = self.get_field_value(n)
 
         # Apply all filters sequential on the selection dict
@@ -512,7 +507,7 @@ class Model:
 
         selection = OrderedDict()
 
-        for n in self.fields:
+        for n in self._field_names:
             if not self.only_fields or n in self.only_fields:
                 selection[n] = self.get_filtered_field_value(n)
 
@@ -617,6 +612,21 @@ class Model:
         Returns: the (filtered) data a dictionairy
         """
         return self.to_dict()
+
+    @property
+    def _meta(self):
+        """
+        meta class that add meta data to a ResultMixin instance. The meta data includes
+        entries for the ``_meta_fields`` collection (if found).
+
+            >>> from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
+            >>> f = "/code/tests/test_files/results_3di.nc"
+            >>> ff = "/code/tests/test_files/gridadmin.h5"
+            >>> gr = GridH5ResultAdmin(ff, f)
+            >>> gr.nodes._meta.s1
+            >>> s1(units=u'm', long_name=u'waterlevel', standard_name=u'water_surface_height_above_reference_datum')
+        """
+        return Options(self)
 
     def __repr__(self):
         """human readable representation of the instance"""
