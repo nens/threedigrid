@@ -1,8 +1,8 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
 # -*- coding: utf-8 -*-
 """
-_meta API
-+++++++++
+Options
++++++++
 
 The model _meta API is inspired by the Django _meta API. It is accessible
 through the _meta attribute of a model instance, which in turn is an instance
@@ -12,6 +12,8 @@ Public methods primarily act on fields:
 
   - get all field instances of a model
   - get a single field instance of a model by name
+  - add a single field instance to a model
+  - add a field instances to a model
 
 """
 from __future__ import unicode_literals

@@ -234,7 +234,7 @@ It has properties we already know like ``has_breaches`` or ``has_1d``. It
 also holds the same fields from the ``GridH5Admin``. Those fields have been
 extended by a set of result fields, like s1 for nodes for example::
 
-    In [8]: gr.nodes.fields
+    In [8]: gr.nodes._meta.get_fields(only_names=True)
     Out[8]:
     [u'zoom_category',
      u'content_pk',

@@ -56,3 +56,10 @@ Fields
 
 .. automodule:: threedigrid.orm.base.fields
    :members:
+
+
+Model _meta API
+---------------
+
+.. automodule:: threedigrid.orm.base.objects
+   :members: get_field, get_fields, add_field, add_fields
