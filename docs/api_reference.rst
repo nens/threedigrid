@@ -60,10 +60,10 @@ result attributes for the given fields
 
 ``composite_fields``
 
-values of *_COMPOSITE_FIELDS are the variables names as known in
+values of \*_COMPOSITE_FIELDS are the variables names as known in
 the result netCDF file. They are split into 1D and 2D subsets.
 As threedigrid has its own subsection ecosystem they are merged
-into a single field (e.g. the keys of *_COMPOSITE_FIELDS).
+into a single field (e.g. the keys of \*_COMPOSITE_FIELDS).
 
 N.B. # fields starting with '_' are private and will not be added to
 fields property
@@ -91,5 +91,5 @@ Fields
 Model _meta API
 ---------------
 
-.. automodule:: threedigrid.orm.base.options
-   :members: get_field, get_fields, add_field, add_fields
+.. autoclass:: threedigrid.orm.base.options.Options
+   :members: get_field, get_fields

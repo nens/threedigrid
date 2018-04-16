@@ -51,11 +51,11 @@ class Options(object):
     def get_fields(self, only_names=False):
         """
         :param only_names: omit the field instances and return a list of
-        field names instead
+            field names instead
 
-        Returns: a dict of the models {field name: Field instance}. If the
-            only_names flag is given a list of the models field names
-            is returned
+        :returns: a dict of the models {field name: Field instance}. If
+            the only_names flag is given a list of the models field
+            names is returned
         """
         fields = {
             x: self.get_field(x)
@@ -67,7 +67,8 @@ class Options(object):
 
     def get_field(self, field_name):
         """
-        Returns: the ArrayField with field_name on this instance.
+        :returns: the ArrayField with field_name on this instance.
+
         """
         return self.inst._get_field(field_name)
 
