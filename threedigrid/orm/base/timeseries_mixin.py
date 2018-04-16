@@ -34,16 +34,12 @@ class ResultMixin(object):
         if not hasattr(self.Meta, 'composite_fields'):
             return
 
-        for var in self.Meta.composite_fields.keys():
-            setattr(
-                self, var, TimeSeriesCompositeArrayField(
-                    needs_lookup=True, meta=self.Meta)
-            )
-        self._meta.update_field_names(
-            self.Meta.composite_fields.keys(), exclude_private=True
-        )
+        fields = {
+            v: TimeSeriesCompositeArrayField(meta=self.Meta)
+            for v in self.Meta.composite_fields.keys()
+        }
+        self._meta.add_fields(fields, hide_private=True)
         self.done_composition = True
-
 
     def timeseries(self, start_time=None, end_time=None, indexes=None):
         """

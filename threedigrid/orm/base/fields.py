@@ -74,7 +74,7 @@ class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
 
     """
 
-    def __init__(self, needs_lookup=True, meta=None):
+    def __init__(self, meta=None):
         self._meta = meta
 
     def get_value(self, datasource, name, **kwargs):

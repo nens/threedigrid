@@ -6,21 +6,8 @@ from __future__ import absolute_import
 import os
 import pytest
 
-import unittest
-import tempfile
-import shutil
-
 import numpy as np
-import ogr
 
-from threedigrid.admin.gridadmin import GridH5Admin
-from threedigrid.admin.nodes.exporters import CellsOgrExporter
-from threedigrid.admin.nodes.exporters import NodesOgrExporter
-from threedigrid.admin.lines.exporters import LinesOgrExporter
-from threedigrid.admin.breaches.exporters import BreachesOgrExporter
-from threedigrid.admin.constants import SUBSET_1D_ALL
-from threedigrid.admin.constants import SUBSET_2D_OPEN_WATER
-from threedigrid.admin.constants import NO_DATA_VALUE
 
 from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
 
@@ -70,21 +57,6 @@ def test_nodes_timeseries_index_filter(gr):
 def test_nodes_timeseries_slice_filter(gr):
     qs_s1 = gr.nodes.timeseries(indexes=slice(1, 4)).s1
     assert qs_s1.shape[0] == 3
-
-
-def test_breach_result_fields(gr):
-    assert set(gr.breaches._meta.get_fields().keys()) == {
-        'levbr', 'Mesh1D_breach_width', 'levl', 'Mesh1D_breach_depth',
-        'coordinates', 'kcu', 'levmat', 'seq_ids', 'content_pk', 'id'
-    }
-
-
-def test_pump_result_fields(gr):
-
-    assert set(gr.pumps._meta.get_fields().keys()) == {
-        'zoom_category','bottom_level', 'display_name', 'lower_stop_level',
-        'node_coordinates', 'coordinates', 'start_level', 'Mesh1D_q_pump',
-        'capacity', 'id', 'node2_id', 'node1_id'}
 
 
 def test_pump_timeseries_slice_filter(gr):

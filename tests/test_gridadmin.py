@@ -170,7 +170,7 @@ class GridAdminNodeTest(unittest.TestCase):
 
     def test_fields(self):
         # Check fields
-        assert set(self.parser.nodes._meta.get_fields().keys()) == {
+        assert set(self.parser.nodes._meta.get_fields(only_names=True)) == {
             'cell_coords', 'content_pk', 'coordinates', 'id', 'node_type',
             'seq_id', 'zoom_category'
         }

@@ -21,6 +21,5 @@ class PumpResultsMixin(ResultMixin):
         possible_vars = combine_vars(PUMPS_VARIABLES, AGGREGATION_OPTIONS)
         possible_vars += PUMPS_VARIABLES
         variables = set(possible_vars).intersection(netcdf_keys)
-        for var in variables:
-            setattr(self, var, TimeSeriesArrayField())
-        self._meta.update_field_names(variables, exclude_private=True)
+        fields = {v: TimeSeriesArrayField() for v in variables}
+        self._meta.add_fields(fields, hide_private=True)

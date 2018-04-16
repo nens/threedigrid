@@ -147,6 +147,7 @@ class Model:
         :param field_name: name of the models field
         :return: numpy array containing the filtered fields values
         """
+
         kwargs = {}
         if hasattr(self, 'get_timeseries_mask_filter'):
             kwargs.update({'timeseries_filter': self.get_timeseries_mask_filter()})
@@ -168,16 +169,6 @@ class Model:
         # else:
         #     timeseries_filter = slice(None)
 
-        # if isinstance(self._meta.get_field(field_name), TimeSeriesArrayField):
-        #     # _filter = [timeseries_filter, self.boolean_mask_filter]
-        #     # Fast slicing by first using timeseries_filter and
-        #     # and than slice based on boolean_mask_filter
-        #     # Can use a lot more memory though....
-        #
-        #     # TODO: if the result is many timeseries, perform boolean_filter
-        #     # per batch
-        #     value = value[timeseries_filter, :][:, self.boolean_mask_filter]
-        # else:
         _filter = [slice(None)] * (
             len(value.shape) - 1) + [self.boolean_mask_filter]
 
