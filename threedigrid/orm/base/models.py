@@ -12,12 +12,18 @@ from itertools import chain
 from h5py._hl.dataset import Dataset
 
 from abc import ABCMeta
+from abc import abstractmethod
+
 from collections import OrderedDict
 
+from threedigrid.orm.base.options import Options
 from threedigrid.orm.base.exceptions import OperationNotSupportedError
 from threedigrid.orm.base.fields import ArrayField
 from threedigrid.orm.base.fields import IndexArrayField
 from threedigrid.orm.base.fields import TimeSeriesArrayField
+from threedigrid.orm.base.fields import TimeSeriesCompositeArrayField
+from threedigrid.orm import constants
+
 from threedigrid.orm.base.filters import get_filter
 from threedigrid.orm.base.filters import SliceFilter
 from threedigrid.orm.base.timeseries_mixin import ResultMixin
@@ -55,7 +61,7 @@ class Model:
 
     def __init__(self, datasource=None, slice_filters=[],
                  epsg_code=None, only_fields=[], reproject_to_epsg=None,
-                 has_1d=None, mixin=None, **kwargs):
+                 has_1d=None, mixin=None, timeseries_chunk_size=None, **kwargs):
         """
         Initialize a Model with a datasource, filters
         and a epsg_code.
@@ -63,17 +69,19 @@ class Model:
         The datasource is a wrapped h5py Group from a H5py file or
         an instance that implements the same interface.
         """
+
         self._datasource = datasource
-        self.starts_at = 0  # 0 or 1 based array
         self.slice_filters = slice_filters
         self.only_fields = only_fields
         self.reproject_to_epsg = reproject_to_epsg
+        self._kwargs = kwargs
 
         self.class_kwargs = {
             'slice_filters': slice_filters,
             'only_fields': only_fields,
             'reproject_to_epsg': reproject_to_epsg,
             'mixin': mixin,
+            'timeseries_chunk_size': timeseries_chunk_size
         }
 
         # Extend the class with the mixin, if set
@@ -96,9 +104,12 @@ class Model:
         self.epsg_code = epsg_code
 
         # Cache the field names
-        self._field_names = [
+
+        _field_names = [
             x for x in dir(self.__class__)
-            if isinstance(getattr(self.__class__, x), ArrayField)]
+            if isinstance(getattr(self.__class__, x), (ArrayField, TimeSeriesArrayField))]
+        self._field_names = set(self._field_names).union(set(_field_names))
+
         self.has_1d = has_1d
         self.model_name = '-'.join(
             (self._datasource.getattr('model_name'),
@@ -106,13 +117,13 @@ class Model:
              str(self._datasource.getattr('revision_nr')),
              self._datasource.getattr('revision_hash')))
 
-    def get_field(self, field_name):
+    def _get_field(self, field_name):
         """
         Returns: the ArrayField with field_name on this instance.
         """
         return super(Model, self).__getattribute__(field_name)
 
-    def get_field_value(self, field_name):
+    def get_field_value(self, field_name, **kwargs):
         """
         Returns: the value for the ArrayField with name field_name
         on the instance.
@@ -120,11 +131,31 @@ class Model:
         With this in place we can later override the ArrayField
         get_value method for field specific conversion, if needed.
         """
-        return self.get_field(field_name).get_value(
-            self._datasource, field_name)
+        update_dict = {
+            'model_name': self.__class__.__name__,
+        }
+
+        kwargs.update(update_dict)
+        return self._meta.get_field(field_name).get_value(
+            self._datasource, field_name, **kwargs)
 
     def get_filtered_field_value(self, field_name):
-        value = self.get_field_value(field_name)
+        """
+        Gets the values for the given field and applies the
+        defined filters
+
+        :param field_name: name of the models field
+        :return: numpy array containing the filtered fields values
+        """
+
+        kwargs = {}
+        if hasattr(self, 'get_timeseries_mask_filter'):
+            kwargs.update({'timeseries_filter': self.get_timeseries_mask_filter()})
+
+        if hasattr(self, 'lookup_fields'):
+            kwargs.update({'lookup_index': self._get_lookup_index(field_name)})
+
+        value = self.get_field_value(field_name, **kwargs)
 
         # Transform the base_filter by prepending slice(None) to
         # match the dimensionality of the nparray_dict[key].shape
@@ -133,32 +164,21 @@ class Model:
         #      shape(2, 100)  => _filter = [slice(None), base_filter]
         #
         #      Note: x[slice(None),[1,2,3]] == x[:,[1,2,3]]
+        # if hasattr(self, 'get_timeseries_mask_filter'):
+        #     timeseries_filter = self.get_timeseries_mask_filter()
+        # else:
+        #     timeseries_filter = slice(None)
 
-        if hasattr(self, 'get_timeseries_mask_filter'):
-            timeseries_filter = self.get_timeseries_mask_filter()
-        else:
-            timeseries_filter = slice(None)
+        _filter = [slice(None)] * (
+            len(value.shape) - 1) + [self.boolean_mask_filter]
 
-        if isinstance(self.get_field(field_name), TimeSeriesArrayField):
-            # _filter = [timeseries_filter, self.boolean_mask_filter]
-            # Fast slicing by first using timeseries_filter and
-            # and than slice based on boolean_mask_filter
-            # Can use a lot more memory though....
+        # By default load all data from H5,
+        # this is WAY much faster
+        if isinstance(value, Dataset):
+            value = value[:]
 
-            # TODO: if the result is many timeseries, perform boolean_filter
-            # per batch
-            value = value[timeseries_filter, :][:, self.boolean_mask_filter]
-        else:
-            _filter = [slice(None)] * (
-                len(value.shape) - 1) + [self.boolean_mask_filter]
-
-            # By default load all data from H5,
-            # this is WAY much faster
-            if isinstance(value, Dataset):
-                value = value[:]
-
-            # Perform slicing by applying the mask
-            value = value[_filter]
+        # Perform slicing by applying the mask
+        value = value[_filter]
 
         # Reproject any coordinates if a reproject_to_epsg is set and
         # there are coordinatefields in the selection
@@ -198,14 +218,6 @@ class Model:
         # Default behaviour, return the attribute from superclass
         return attr
 
-
-    @property
-    def fields(self):
-        """
-        Returns: a list of ArrayFields names (excluding 'meta')
-        """
-        return [x for x in self._field_names if x != 'meta']
-
     def __init_class(self, klass, **kwargs):
         """
         Returns: a new instance of 'klass' with new filters and
@@ -232,17 +244,17 @@ class Model:
 
         for key, value in kwargs.iteritems():
             splitted_key = key.split('__')
-            if splitted_key[0] not in self.fields:
+            if splitted_key[0] not in self._field_names:
                 raise ValueError(
                     "Field '{}' unknown. Choices are {}".format(
                         splitted_key[0],
-                        self.fields)
+                        self._field_names)
                 )
 
             new_slice_filters.append(
                 get_filter(
                     splitted_key,
-                    self.get_field(splitted_key[0]),
+                    self._meta.get_field(splitted_key[0]),
                     value,
                     filter_map=self._filter_map)
             )
@@ -375,7 +387,7 @@ class Model:
             raise Exception("Please provide at least one field name")
 
         for x in args:
-            if x not in self.fields:
+            if x not in self._field_names:
                 raise Exception("Unknown field name: {0}".format(x))
 
         new_class_kwargs = dict(self.class_kwargs)
@@ -397,7 +409,7 @@ class Model:
 
         selection = OrderedDict()
 
-        for n in self.fields:
+        for n in self._field_names:
             selection[n] = self.get_field_value(n)
 
         # Apply all filters sequential on the selection dict
@@ -456,7 +468,7 @@ class Model:
 
         selection = OrderedDict()
 
-        for n in self.fields:
+        for n in self._field_names:
             if not self.only_fields or n in self.only_fields:
                 selection[n] = self.get_filtered_field_value(n)
 
@@ -504,6 +516,7 @@ class Model:
         # Compute the boolean mask filter
         # that can be applied to all array's
         # based on the specified filters
+
         if self._boolean_mask_filter is None:
 
             # If no filters are defined
@@ -515,8 +528,17 @@ class Model:
             filter_field_names = [
                 x.get_field_name() for x in self.slice_filters]
 
+            timeseries_filter = slice(None)
+            if hasattr(self, 'get_timeseries_mask_filter'):
+                timeseries_filter = self.get_timeseries_mask_filter()
+            # kwargs = {
+            #     'lookup_index': self._lookup_index,
+            #     'timeseries_filter': timeseries_filter
+            # }
+
             for name in [x for x in filter_field_names if x]:
-                selection[name] = self.get_field_value(name)
+                selection[name] = self.get_field_value(
+                    name)
 
             boolean_mask_filter = None
             # Compute the the filter
@@ -551,6 +573,21 @@ class Model:
         Returns: the (filtered) data a dictionairy
         """
         return self.to_dict()
+
+    @property
+    def _meta(self):
+        """
+        meta class that add meta data to a ResultMixin instance. The meta data includes
+        entries for the ``_meta_fields`` collection (if found).
+
+            >>> from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
+            >>> f = "/code/tests/test_files/results_3di.nc"
+            >>> ff = "/code/tests/test_files/gridadmin.h5"
+            >>> gr = GridH5ResultAdmin(ff, f)
+            >>> gr.nodes._meta.s1
+            >>> s1(units=u'm', long_name=u'waterlevel', standard_name=u'water_surface_height_above_reference_datum')
+        """
+        return Options(self)
 
     def __repr__(self):
         """human readable representation of the instance"""
