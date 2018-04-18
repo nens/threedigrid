@@ -1,7 +1,7 @@
 from threedigrid.orm.base.timeseries_mixin import ResultMixin
 from threedigrid.orm.base.fields import TimeSeriesArrayField
-from threedigrid.admin.constants import AGGREGATION_OPTIONS
-from threedigrid.admin.constants import PUMP_VARIABLES
+from threedigrid.orm.constants import AGGREGATION_OPTIONS
+from threedigrid.orm.constants import PUMPS_VARIABLES
 from threedigrid.admin.utils import combine_vars
 
 
@@ -18,8 +18,8 @@ class PumpResultsMixin(ResultMixin):
         """
         super(PumpResultsMixin, self).__init__(**kwargs)
 
-        possible_vars = combine_vars(PUMP_VARIABLES, AGGREGATION_OPTIONS)
-        possible_vars += PUMP_VARIABLES
+        possible_vars = combine_vars(PUMPS_VARIABLES, AGGREGATION_OPTIONS)
+        possible_vars += PUMPS_VARIABLES
         variables = set(possible_vars).intersection(netcdf_keys)
-        for var in variables:
-            setattr(self, var, TimeSeriesArrayField())
+        fields = {v: TimeSeriesArrayField() for v in variables}
+        self._meta.add_fields(fields, hide_private=True)

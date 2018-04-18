@@ -140,7 +140,7 @@ class Weirs(Lines):
         raw_values = self._datasource['line_coords'].value[
             :, (content_type == 'v2_weir') & pk_mask]
 
-        return self.get_field('line_coords').get_angles_in_degrees(
+        return self._get_field('line_coords').get_angles_in_degrees(
             raw_values)
 
 

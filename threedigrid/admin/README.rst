@@ -152,6 +152,27 @@ Base geometry field, allows spatial filters.
 
 Used for representing point geometries. Implements the reproject method.
 
+**TimeSeriesArrayField(ArrayField)**
+
+Field to store time series arrays,
+
+**TimeSeriesCompositeArrayField(TimeSeriesArrayField)**
+
+A time series field can be composed of two or more fields in the source file.
+The threedicore result netCDF file for instance has split their node and line
+data into subsets for the 1D and 2D parts of the threedi model. A composite
+field can be used to combine those source fields into a single model field
+by specifying a composition dict. Example::
+
+        LINE_COMPOSITE_FIELDS = {
+            'au': ['Mesh1D_au', 'Mesh2D_au'],
+            'u1': ['Mesh1D_u1', 'Mesh2D_u1'],
+            'q': ['Mesh1D_q', 'Mesh2D_q']
+        }
+
+``au``, ``u1`` and ``q`` will thus be added to the lines model fields.
+
+
 Also see :ref:`fields-label`
 
 
@@ -190,3 +211,168 @@ Note: most models have shortcut methods for exporting their data for shape files
 
     # Geopackage file
     ga.lines.subset('2D_OPEN_WATER').reproject_to('4326').to_gpkg('/tmp/line.gpkg')
+
+
+Results
+-------
+
+The threedigrid admin can also be used to query results of the threedicore.
+Results are written to a netCDF file that contains data like water depth,
+flow velocity and such. This data is linked to the same entities we're already
+familiar with like calculation nodes and flow links.
+
+To query these results you can use ``GridH5ResultAdmin``, an object very
+similar to the ``GridH5Admin``. It takes both the gridadmin file and the
+results netcdf as input parameters::
+
+    >>> from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
+    >>> nc = "/code/tests/test_files/subgrid_map.nc"
+    >>> f = "/code/tests/test_files/gridadmin.h5"
+    >>> gr = GridH5ResultAdmin(f, nc)
+
+It has properties we already know like ``has_breaches`` or ``has_1d``. It
+also holds the same fields from the ``GridH5Admin``. Those fields have been
+extended by a set of result fields, like s1 for nodes for example::
+
+    In [8]: gr.nodes._meta.get_fields(only_names=True)
+    Out[8]:
+    [u'zoom_category',
+     u'content_pk',
+     u'vol',
+     u'seq_id',
+     u's1',
+     u'rain',
+     u'id',
+     u'node_type',
+     u'su',
+     u'q_lat',
+     u'coordinates',
+     u'cell_coords']
+
+
+A query that includes TimeSeriesArrayField fields or fields derived from this
+type by default will yield a time series chunk of 10. The default can be
+altered by calling::
+
+    >>> gr.set_timeseries_chunk_size(50)
+
+To see the current setting::
+
+    >>> gr.timeseries_chunk_size
+
+
+The most common use case however, will be defining custom queries using the
+timeseries* filter itself. There are two ways the time series filter can be
+applied, either using the ``start_time`` and ``end_time`` keywords or a custom
+index.
+
+Example usage for start_time and end_time filter::
+
+    >>> from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
+    >>> nc = "/code/tests/test_files/subgrid_map.nc"
+    >>> f = "/code/tests/test_files/gridadmin.h5"
+    >>> gr = GridH5ResultAdmin(f, nc)
+    >>> qs = gr.nodes.timeseries(start_time=0, end_time=40)  # lazy
+
+
+The filtering is lazy, to retrieve the query results call ``qs.data`` or if you
+are interested in a specific field like ``s1`` for instance, call ``qs.s1``.
+You can see how many timesteps are captured by calling qs.s1.shape::
+
+    >>> qs.s1.shape
+    >>> (2, 15604)
+
+Please note, querying large portions of the time dimension can consume lot's of
+memory so use with caution. See the :ref:`benchmarks-label` for more details.
+
+The result fields can only be filtered by chunks of time at this point and
+not by the logical operators like 'eq', 'gt' etc. To extract this kind of
+information you can make use of numpy and its tools. To get the maximum
+water depth of the first 4 time steps and their corresponding node ids::
+
+    >>> # get a timeserie
+    >>> t = gr.nodes.timeseries(indexes=[2,3,4,5])
+    >>> # limit the fields to whatever you are interested in
+    >>> s1_id = t.only('s1', 'id').data
+    >>> zip(s1_id['id'][np.argmax(s1_id['s1'], axis=1)], np.max(s1_id['s1'], axis=1))
+    >>>  [(13115, -0.40000000596046448),
+         (0, 5.0013032438928677),
+         (0, 5.0016998451768755),
+         (0, 5.0020966845033916)]
+
+
+.. _benchmarks-label:
+
+Benchmarks
+++++++++++
+
+
+Run on::
+
+     *-memory
+          description: System memory
+          size: 15GiB
+     *-cpu
+          product: Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz
+          vendor: Intel Corp.
+          size: 1109MHz
+          capacity: 3800MHz
+          width: 64 bits
+
+
+Getting all fields::
+
+
+    In [18]: %timeit %memit gr.nodes.timeseries(start_time=0, end_time=100).data
+    peak memory: 113.65 MiB, increment: 5.54 MiB
+    peak memory: 113.87 MiB, increment: 0.01 MiB
+    peak memory: 113.87 MiB, increment: 0.00 MiB
+    peak memory: 113.87 MiB, increment: 0.00 MiB
+    1 loop, best of 3: 198 ms per loop
+
+    In [19]: %timeit %memit gr.nodes.timeseries(start_time=0, end_time=1000).data
+    peak memory: 150.76 MiB, increment: 36.89 MiB
+    peak memory: 150.76 MiB, increment: 0.00 MiB
+    peak memory: 150.76 MiB, increment: 0.00 MiB
+    peak memory: 150.76 MiB, increment: 0.00 MiB
+    1 loop, best of 3: 215 ms per loop
+
+    In [20]: %timeit %memit gr.nodes.timeseries(start_time=0, end_time=10000).data
+    peak memory: 343.04 MiB, increment: 192.29 MiB
+    peak memory: 306.43 MiB, increment: 159.59 MiB
+    peak memory: 314.81 MiB, increment: 167.97 MiB
+    peak memory: 308.24 MiB, increment: 161.40 MiB
+    1 loop, best of 3: 511 ms per loop
+
+    In [21]: %timeit %memit gr.nodes.timeseries(start_time=0, end_time=100000).data
+    peak memory: 2520.57 MiB, increment: 2373.73 MiB
+    peak memory: 2524.54 MiB, increment: 2352.19 MiB
+    peak memory: 2512.11 MiB, increment: 2341.73 MiB
+    peak memory: 2522.84 MiB, increment: 2361.71 MiB
+    1 loop, best of 3: 6.15 s per loop
+
+
+
+Getting a single field::
+
+    In [23]: %timeit %memit gr.nodes.timeseries(start_time=0, end_time=1000).s1
+    peak memory: 155.47 MiB, increment: 9.55 MiB
+    peak memory: 155.47 MiB, increment: 0.00 MiB
+    peak memory: 155.47 MiB, increment: 0.00 MiB
+    peak memory: 155.47 MiB, increment: 0.00 MiB
+    1 loop, best of 3: 201 ms per loop
+
+    In [24]: %timeit %memit gr.nodes.timeseries(start_time=0, end_time=10000).s1
+    peak memory: 220.41 MiB, increment: 64.88 MiB
+    peak memory: 215.97 MiB, increment: 71.15 MiB
+    peak memory: 223.68 MiB, increment: 78.86 MiB
+    peak memory: 217.91 MiB, increment: 73.09 MiB
+    1 loop, best of 3: 330 ms per loop
+
+    In [25]: %timeit %memit gr.nodes.timeseries(start_time=0, end_time=100000).s1
+    peak memory: 918.97 MiB, increment: 774.10 MiB
+    peak memory: 908.92 MiB, increment: 756.00 MiB
+    peak memory: 917.43 MiB, increment: 764.51 MiB
+    peak memory: 922.58 MiB, increment: 769.66 MiB
+    1 loop, best of 3: 1.31 s per loop
+

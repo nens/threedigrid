@@ -20,8 +20,8 @@ class Model(BaseModel):
                  transformed to centroids
         """
         selection = self.__do_filter()
-        for field_name in self.fields:
-            field = self.get_field(field_name)
+        for field_name in self._field_names:
+            field = self._get_field(field_name)
             if isinstance(field, LineArrayField) and field_name in selection:
                 # Use the to_centroid function of the GeomArrayField
                 # to allow different geometry to be "centroided"
@@ -31,7 +31,7 @@ class Model(BaseModel):
         return selection
 
     def _is_coords(self, field_name):
-        return isinstance(self.get_field(field_name), GeomArrayField)
+        return isinstance(self._get_field(field_name), GeomArrayField)
 
     def _includes_coords(self, selection):
         """
@@ -39,8 +39,8 @@ class Model(BaseModel):
                  has coordinates.
         """
         found = False
-        for field_name in self.fields:
-            if isinstance(self.get_field(field_name), GeomArrayField):
+        for field_name in self._field_names:
+            if isinstance(self._get_field(field_name), GeomArrayField):
                 found = True
                 break
         return found
@@ -64,7 +64,7 @@ class Model(BaseModel):
             # Already done
             return value
 
-        field = self.get_field(field_name)
+        field = self._get_field(field_name)
 
         return field.reproject(
             value, self.epsg_code, target_epsg_code)
@@ -79,8 +79,8 @@ class Model(BaseModel):
             return selection
 
         # Reproject all GeomDataField's
-        for field_name in self.fields:
-            field = self.get_field(field_name)
+        for field_name in self._field_names:
+            field = self._get_field(field_name)
             if isinstance(field, GeomArrayField) and field_name in selection:
                 # Use the reproject function of the GeomDataField
                 # to allow different geometry to be reprojected

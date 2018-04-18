@@ -21,7 +21,7 @@ RUN add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable && apt update && apt 
 RUN pip install --upgrade pip
 WORKDIR /code
 COPY requirements_dev.txt /code/requirements_dev.txt
-RUN pip install --use-wheel -r requirements_dev.txt
+RUN pip install -r requirements_dev.txt
 COPY requirements.txt /code/requirements.txt
 COPY . /code
-RUN pip install --use-wheel --editable /code/.[geo,results]
+RUN pip install --editable /code/.[geo,results]
