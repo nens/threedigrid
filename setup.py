@@ -68,6 +68,6 @@ setup(
         'results': results_requirements,
     },
     url='https://github.com/nens/threedigrid',
-    version='0.1.5',
+    version='0.1.6.dev0',
     zip_safe=False,
 )
