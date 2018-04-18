@@ -39,6 +39,11 @@ def test_nodes_timeseries_start_end_time_kwargs(gr):
     assert qs_s1.shape[0] == 17
 
 
+def test_nodes_timeseries_with_subset(gr):
+    qs_s1 = gr.nodes.subset('1d_all').timeseries(start_time=0, end_time=500).s1
+    assert qs_s1.shape[0] == 17 and qs_s1.shape[1] > 0
+
+
 def test_nodes_timeseries_start_time_only_kwarg(gr):
     qs = gr.nodes.timeseries(start_time=450)
     assert qs.s1.shape[0] == 6
@@ -87,6 +92,9 @@ def test_lines_timeseries_slice_filter(gr):
     qs_u1 = gr.lines.timeseries(indexes=slice(1, 4)).u1
     assert qs_u1.shape[0] == 3
 
+def test_lines_timeseries_with_subset(gr):
+    qs_u1 = gr.lines.subset('1d_all').timeseries(indexes=slice(1, 4)).u1
+    assert qs_u1.shape[0] == 3 and qs_u1.shape[1] > 0
 
 def test_set_timeseries_chunk_size(gr):
     # default should be 10
@@ -99,6 +107,7 @@ def test_missing_kwargs_raises_key_error(gr):
     # default should be 10
     with pytest.raises(KeyError):
         gr.lines.timeseries().u1
+
 
 def test_index_key_raises_type_error(gr):
     # default should be 10
