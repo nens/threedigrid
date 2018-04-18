@@ -1,7 +1,7 @@
 History
 =======
 
-0.1.6 (unreleased)
+0.1.6 (2018-04-18)
 ------------------
 
 - New release using twine 1.11.
