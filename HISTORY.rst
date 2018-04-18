@@ -1,7 +1,7 @@
 History
 =======
 
-0.1.5 (unreleased)
+0.1.5 (2018-04-18)
 ------------------
 
 - Added support for composite fields which can be used to fetch data from
