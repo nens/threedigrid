@@ -109,9 +109,9 @@ class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
         if not values:
             return np.array([])
         # combine the two source to a single source
-        # if timeseries_filter is None and lookup_index is None:
-        #     return np.hstack([x[:,] for x in values])
-        hs = np.insert(np.hstack(values), 0, 0, axis=1)
+        hs = np.hstack(values)
+        axs = 1 if len(hs.shape) == 2 else 0
+        hs = np.insert(hs, 0, 0, axis=axs)
         del values
         # sort the stacked array by lookup
         if lookup_index is not None:

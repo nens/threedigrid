@@ -8,8 +8,6 @@ from __future__ import absolute_import
 import os
 import pytest
 
-import numpy as np
-
 from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
 from threedigrid.admin.nodes.models import Nodes
 from threedigrid.orm.base.fields import TimeSeriesCompositeArrayField
