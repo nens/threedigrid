@@ -77,10 +77,6 @@ def test_pump_options_get_fields_only_names(opt_pumps):
         'capacity', 'id', 'node2_id', 'node1_id'}
 
 
-def test_nodes_options_is_composite_field(opt_nodes):
-    assert opt_nodes._is_type_composite('s1') ==  True
-
-
 def test_nodes_options_get_composite_meta(opt_nodes):
     assert opt_nodes._get_composite_meta('s1', 'units') == 'm'
 

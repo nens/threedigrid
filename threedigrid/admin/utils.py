@@ -10,6 +10,7 @@ from itertools import tee
 
 import numpy as np
 
+
 logger = logging.getLogger(__name__)
 
 BBOX_LEFT = 0
@@ -236,3 +237,4 @@ def combine_vars(prod_a, prod_b, join_str='_'):
     """
     return map(lambda x: x[0] + join_str + x[1],
                product(prod_a, prod_b))
+

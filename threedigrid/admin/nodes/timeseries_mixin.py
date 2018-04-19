@@ -4,31 +4,23 @@ from __future__ import unicode_literals
 from __future__ import print_function
 
 from threedigrid.orm.base.timeseries_mixin import ResultMixin
-from threedigrid.admin.utils import combine_vars
+from threedigrid.orm.base.options import MetaMixin
 
 
-class MetaMixin(type):
-
-    def __new__(metacls, name, bases, namespace, **kwds):
-        result = type.__new__(metacls, name, bases, dict(namespace))
-        result.composite_fields = {}
-        aggr_vars = namespace.get('aggregation_vars')
-        parent = namespace.get('__super_meta__')
-        if not aggr_vars:
-            return result
-
-        for k, v in aggr_vars.iteritems():
-            c_field = parent.composite_fields.get(k)
-            for p in v:
-                new_key = k + '_' + p
-                agg_fields = combine_vars(c_field, {p})
-                result.composite_fields[new_key] = agg_fields
-        return result
+BASE_COMPOSITE_FIELDS = {
+    's1': ['Mesh2D_s1', 'Mesh1D_s1'],
+    'vol': ['Mesh2D_vol', 'Mesh1D_vol'],
+    'su': ['Mesh2D_su', 'Mesh1D_su'],
+    'rain': ['Mesh2D_rain', 'Mesh1D_rain'],
+    'q_lat': ['Mesh2D_q_lat', 'Mesh1D_q_lat'],
+    '_mesh_id': ['Mesh2DNode_id', 'Mesh1DNode_id'],  # private
+}
 
 
-class NodeResultsMixinTemp(ResultMixin):
+class NodesResultsMixin(ResultMixin):
 
     class Meta:
+        __metaclass__ = MetaMixin
 
         # attributes for the given fields
         field_attrs = ['units', 'long_name', 'standard_name']
@@ -40,17 +32,9 @@ class NodeResultsMixinTemp(ResultMixin):
 
         # N.B. # fields starting with '_' are private and will not be added to
         # fields property
-        composite_fields = {
-            's1': ['Mesh2D_s1', 'Mesh1D_s1'],
-            'vol': ['Mesh2D_vol', 'Mesh1D_vol'],
-            'su': ['Mesh2D_su', 'Mesh1D_su'],
-            'rain': ['Mesh2D_rain', 'Mesh1D_rain'],
-            'q_lat': ['Mesh2D_q_lat', 'Mesh1D_q_lat'],
-            '_mesh_id': ['Mesh2DNode_id', 'Mesh1DNode_id'],  # private
-        }
+        base_composition = BASE_COMPOSITE_FIELDS
 
         lookup_fields = ('id', '_mesh_id')
-
 
     def __init__(self, **kwargs):
         """Instantiate a node with netcdf results.
@@ -61,19 +45,20 @@ class NodeResultsMixinTemp(ResultMixin):
         :param netcdf_keys: list of netcdf variables
         :param kwargs:
         """
-        super(NodeResultsMixinTemp, self).__init__(**kwargs)
+        super(NodesResultsMixin, self).__init__(**kwargs)
 
 
-class NodeResultsMixin(NodeResultsMixinTemp):
+class NodesAggregateResultsMixin(ResultMixin):
 
     class Meta:
         __metaclass__ = MetaMixin
-        __super_meta__ = NodeResultsMixinTemp.Meta
+
+        base_composition = BASE_COMPOSITE_FIELDS
 
         # attributes for the given fields
-        field_attrs = ['units', 'long_name', 'standard_name']
+        field_attrs = ['units', 'long_name']
 
-        aggregation_vars = {
+        composition_vars = {
             's1': ['min', 'max'],
             'vol': ['max', 'cum'],
             'su': ['min'],
@@ -93,4 +78,4 @@ class NodeResultsMixin(NodeResultsMixinTemp):
         :param netcdf_keys: list of netcdf variables
         :param kwargs:
         """
-        super(NodeResultsMixin, self).__init__(**kwargs)
+        super(NodesAggregateResultsMixin, self).__init__(**kwargs)

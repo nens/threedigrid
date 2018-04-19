@@ -23,6 +23,7 @@ from collections import defaultdict
 from collections import namedtuple
 
 from threedigrid.numpy_utils import create_np_lookup_index_for
+from threedigrid.admin.utils import combine_vars
 from threedigrid.orm.base.fields import TimeSeriesCompositeArrayField
 
 
@@ -80,12 +81,20 @@ class Options(object):
         :param hide_private: fields starting with '_' will be added to the
             instance but excluded from the list of field names
         """
-        # remove private fields
+        if not self._source_exists(field_name):
+            return
         setattr(self.inst, field_name, field)
+        # remove private fields
         if hide_private and field_name.startswith('_'):
             return
         _union = set(self.inst._field_names).union({field_name})
         self.inst._field_names = _union
+
+    def _source_exists(self, field_name):
+        if self.inst.Meta.is_type_composite:
+            sources = self.inst.Meta.composite_fields.get(field_name)
+            return any([x in self.inst._datasource.keys() for x in sources])
+        return field_name in self.inst._datasource.keys()
 
     def add_fields(self, fields, hide_private=True):
         """
@@ -98,15 +107,6 @@ class Options(object):
 
         for field_name, field in fields.iteritems():
             self.add_field(field_name, field, hide_private)
-        #     setattr(self, field_name, field)
-        # self._meta.update_field_names(variables, exclude_private=True)
-        # # combine with existing fields
-        #
-        # fnames = [x for x in field_names if
-        #           exclude_private and not x.startswith('_')]
-        # updated_field_names = set(
-        #     fnames).union(set(self.inst._field_names))
-        # self.inst._field_names = updated_field_names
 
     def _get_meta_values(self, field_name):
         """
@@ -170,15 +170,6 @@ class Options(object):
 
         return self._lookup
 
-    def _is_type_composite(self, field_name):
-        """
-        checks if the field is a composite field,
-        like TimeSeriesCompositeArrayField
-
-        :param field_name: name of the field
-        """
-        field = self.get_field(field_name)
-        return isinstance(field, TimeSeriesCompositeArrayField)
 
     def _get_composite_meta(self, field_name, attr_name,
                             exclude_fields={'rain'}):
@@ -195,7 +186,6 @@ class Options(object):
             'Mesh2D_s1' and 'Mesh1D_s1' both datasets must have the value 'm'
             for the 'units' attribute
         """
-
         source_names = self.inst.Meta.composite_fields.get(field_name)
         meta_attrs = [self.inst._datasource.attr(source_name, attr_name)
                       for source_name in source_names]
@@ -207,3 +197,34 @@ class Options(object):
                 raise
             pass
         return meta_attrs[0]
+
+    def _is_type_composite(self, field_name):
+        """
+        checks if the field is a composite field,
+        like TimeSeriesCompositeArrayField
+        :param field_name: name of the field
+        """
+        field = self.get_field(field_name)
+        return isinstance(field, TimeSeriesCompositeArrayField)
+
+
+class MetaMixin(type):
+
+    def __new__(mcs, name, bases, namespace, **kwds):
+        result = type.__new__(mcs, name, bases, dict(namespace))
+        base_composition = namespace.get('base_composition')
+        result.is_type_composite = True if base_composition else False
+        composition_vars = namespace.get('composition_vars')
+        # simple results
+        if not composition_vars and base_composition:
+            result.composite_fields = base_composition
+            return result
+
+        result.composite_fields = {}
+        for k, v in composition_vars.iteritems():
+            c_field = base_composition.get(k)
+            for p in v:
+                new_key = k + '_' + p
+                agg_fields = combine_vars(c_field, {p})
+                result.composite_fields[new_key] = agg_fields
+        return result

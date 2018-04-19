@@ -10,21 +10,25 @@ from threedigrid.orm.constants import AGGREGATION_OPTIONS
 from threedigrid.orm.constants import BREACH_VARIABLES
 
 
-class BreachResultsMixin(ResultMixin):
+class BreachesResultsMixin(ResultMixin):
 
-    def __init__(self, netcdf_keys, **kwargs):
+    class Meta:
+
+        # attributes for the given fields
+        field_attrs = ['units', 'long_name', 'standard_name']
+
+        #lookup_fields = ('id', '_mesh_id')
+
+
+    def __init__(self, **kwargs):
         """Instantiate a breach with netcdf results.
 
         Variables stored in the netcdf and related to breaches are dynamically
         added as attributes as TimeSeriesArrayField.
 
-        :param netcdf_keys: list of netcdf variables
         :param kwargs:
         """
-        super(BreachResultsMixin, self).__init__(**kwargs)
-
-        possible_vars = combine_vars(BREACH_VARIABLES, AGGREGATION_OPTIONS)
-        possible_vars += BREACH_VARIABLES
-        variables = set(possible_vars).intersection(netcdf_keys)
-        fields = {v: TimeSeriesArrayField() for v in variables}
+        super(BreachesResultsMixin, self).__init__(**kwargs)
+        field_names = ['Mesh1D_breach_depth', 'Mesh1D_breach_width']
+        fields = {v: TimeSeriesArrayField() for v in field_names}
         self._meta.add_fields(fields, hide_private=True)

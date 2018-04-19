@@ -1,25 +1,30 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
 # -*- coding: utf-8 -*-
 from threedigrid.orm.base.timeseries_mixin import ResultMixin
+from threedigrid.orm.base.options import MetaMixin
 
 
-class LineResultsMixin(ResultMixin):
+BASE_COMPOSITE_FIELDS = {
+    'au': ['Mesh2D_au', 'Mesh1D_au'],
+    'u1': ['Mesh2D_u1', 'Mesh1D_u1'],
+    'q': ['Mesh2D_q', 'Mesh1D_q'],
+    '_mesh_id': ['Mesh2DLine_id', 'Mesh1DLine_id'],  # private
+}
+
+
+class LinesResultsMixin(ResultMixin):
 
     class Meta:
+        __metaclass__ = MetaMixin
 
         # attributes for the given fields
         field_attrs = ['units', 'long_name', 'standard_name']
 
-        composite_fields = {
-            'au': ['Mesh2D_au', 'Mesh1D_au'],
-            'u1': ['Mesh2D_u1', 'Mesh1D_u1'],
-            'q': ['Mesh2D_q', 'Mesh1D_q'],
-            '_mesh_id': ['Mesh2DLine_id', 'Mesh1DLine_id'],  # private
-        }
+        base_composition = BASE_COMPOSITE_FIELDS
 
         lookup_fields = ('id', '_mesh_id')
 
-    def __init__(self, netcdf_keys, **kwargs):
+    def __init__(self, **kwargs):
         """Instantiate a line with netcdf results.
 
         Variables stored in the netcdf and related to lines are dynamically
@@ -28,26 +33,29 @@ class LineResultsMixin(ResultMixin):
         :param netcdf_keys: list of netcdf variables
         :param kwargs:
         """
-        super(LineResultsMixin, self).__init__(**kwargs)
+        super(LinesResultsMixin, self).__init__(**kwargs)
 
 
-class LineResultsAggregationMixin(ResultMixin):
+class LinesAggregateResultsMixin(ResultMixin):
 
     class Meta:
+        __metaclass__ = MetaMixin
 
         # attributes for the given fields
-        field_attrs = ['units', 'long_name', 'standard_name']
+        field_attrs = ['units', 'long_name']
 
-        composite_fields = {
-            'au': ['Mesh2D_au', 'Mesh1D_au'],
-            'u1': ['Mesh2D_u1', 'Mesh1D_u1'],
-            'q': ['Mesh2D_q', 'Mesh1D_q'],
-            '_mesh_id': ['Mesh2DLine_id', 'Mesh1DLine_id'],  # private
+        base_composition = BASE_COMPOSITE_FIELDS
+
+        composition_vars = {
+            'au': ['avg'],
+            'u1': ['avg'],
+            'q': ['cum', 'cum_positive', 'cum_negative'],
         }
+
 
         lookup_fields = ('id', '_mesh_id')
 
-    def __init__(self, netcdf_keys, **kwargs):
+    def __init__(self, **kwargs):
         """Instantiate a line with netcdf results.
 
         Variables stored in the netcdf and related to lines are dynamically
@@ -56,4 +64,4 @@ class LineResultsAggregationMixin(ResultMixin):
         :param netcdf_keys: list of netcdf variables
         :param kwargs:
         """
-        super(LineResultsAggregationMixin, self).__init__(**kwargs)
+        super(LinesAggregateResultsMixin, self).__init__(**kwargs)

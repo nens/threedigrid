@@ -4,21 +4,42 @@ from __future__ import unicode_literals
 from __future__ import print_function
 
 import logging
+import os
 
 from netCDF4 import Dataset
 from threedigrid.admin.breaches.models import Breaches
-from threedigrid.admin.breaches.timeseries_mixin import BreachResultsMixin
 from threedigrid.admin.constants import DEFAULT_CHUNK_TIMESERIES
 from threedigrid.admin.h5py_datasource import H5pyResultGroup
 from threedigrid.admin.lines.models import Lines
-from threedigrid.admin.lines.timeseries_mixin import LineResultsMixin
-from threedigrid.admin.nodes.models import Nodes
-from threedigrid.admin.nodes.timeseries_mixin import NodeResultsMixin
 from threedigrid.admin.pumps.models import Pumps
-from threedigrid.admin.pumps.timeseries_mixin import PumpResultsMixin
+from threedigrid import admin
+from threedigrid.admin.nodes import timeseries_mixin
+from threedigrid.admin.lines import timeseries_mixin
+from threedigrid.admin.breaches import timeseries_mixin
+
+from threedigrid.admin.nodes.models import Nodes
 from threedigrid.admin.gridadmin import GridH5Admin
 
 logger = logging.getLogger(__name__)
+
+
+def get_result_mixin(model_name, result_type=''):
+    """
+
+    :param model_name:
+    :param result_type:
+    :return:
+    """
+    s = '{model_name} {result_type} Results Mixin'.format(
+        model_name=model_name,
+        result_type=result_type).title().replace(' ', '')
+
+    _model_module_ = getattr(admin, model_name)
+        _timeseries_mixin = getattr(_model_module_, 'timeseries_mixin')
+    try:
+        return getattr(_timeseries_mixin, s)
+    except AttributeError:
+    return None
 
 
 class GridH5ResultAdmin(GridH5Admin):
@@ -34,10 +55,15 @@ class GridH5ResultAdmin(GridH5Admin):
             called subgrid_map.nc)
         :param file_modus: modus in which to open the files
         """
+        self._netcdf_file_path = netcdf_file_path
         super(GridH5ResultAdmin, self).__init__(h5_file_path, file_modus)
         self.netcdf_file = Dataset(netcdf_file_path)
         self.set_timeseries_chunk_size(DEFAULT_CHUNK_TIMESERIES.stop)
         self._check_threedicore_version()
+
+    @property
+    def result_type(self):
+        return 'aggregate' if 'aggregate' in os.path.basename(self._netcdf_file_path) else ''
 
     def set_timeseries_chunk_size(self, new_chunk_size):
         """
@@ -68,27 +94,43 @@ class GridH5ResultAdmin(GridH5Admin):
 
     @property
     def lines(self):
+        model_name = 'lines'
+        mixin = get_result_mixin(
+            model_name=model_name, result_type=self.result_type
+        )
         return Lines(
-            H5pyResultGroup(self.h5py_file, 'lines', self.netcdf_file),
-            **dict(self._grid_kwargs, **{'mixin': LineResultsMixin}))
+            H5pyResultGroup(self.h5py_file, model_name, self.netcdf_file),
+            **dict(self._grid_kwargs, **{'mixin': mixin}))
 
     @property
     def nodes(self):
+        model_name = 'nodes'
+        mixin = get_result_mixin(
+            model_name=model_name, result_type=self.result_type
+        )
         return Nodes(
             H5pyResultGroup(self.h5py_file, 'nodes', self.netcdf_file),
-            **dict(self._grid_kwargs, **{'mixin': NodeResultsMixin}))
+            **dict(self._grid_kwargs, **{'mixin': mixin}))
 
     @property
     def breaches(self):
+        model_name = 'breaches'
+        mixin = get_result_mixin(
+            model_name=model_name, result_type=self.result_type
+        )
         return Breaches(
-            H5pyResultGroup(self.h5py_file, 'breaches', self.netcdf_file),
-            **dict(self._grid_kwargs, **{'mixin': BreachResultsMixin}))
+            H5pyResultGroup(self.h5py_file, model_name, self.netcdf_file),
+            **dict(self._grid_kwargs, **{'mixin': mixin}))
 
     @property
     def pumps(self):
+        model_name = 'pumps'
+        mixin = get_result_mixin(
+            model_name=model_name, result_type=self.result_type
+        )
         return Pumps(
-            H5pyResultGroup(self.h5py_file, 'pumps', self.netcdf_file),
-            **dict(self._grid_kwargs, **{'mixin': PumpResultsMixin}))
+            H5pyResultGroup(self.h5py_file, model_name, self.netcdf_file),
+            **dict(self._grid_kwargs, **{'mixin': mixin}))
 
     def _check_threedicore_version(self):
         try:
