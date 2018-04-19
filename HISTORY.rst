@@ -12,7 +12,7 @@ History
 
 - Added property ``dt_timestamps`` to the timeseries_mixin module.
 
-- The version number is added to the __init__ fiel dynamically using the
+- The version number is added to the ``__init__`` file dynamically using the
   ``pkg_resources`` API.
 
 
