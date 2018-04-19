@@ -141,6 +141,10 @@ def test_timestamps(gr):
     np.testing.assert_array_equal(n_qs.timestamps, l_qs.timestamps)
 
 
+def test_dt_timestamps(gr):
+    n_qs = gr.nodes.timeseries(start_time=0, end_time=500)
+    assert len(n_qs.dt_timestamps) == len(n_qs.timestamps)
+
 # commented for now until the new aggregate.nc is finished
 
 # def test_get_node_aggregate_netcdf_results(agg_gr):

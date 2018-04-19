@@ -4,7 +4,10 @@ History
 0.1.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Added property ``dt_timestamps`` to the timeseries_mixin module.
+
+- The version number is added to the __init__ fiel dynamically using the
+  ``pkg_resources`` API.
 
 
 0.1.6 (2018-04-18)

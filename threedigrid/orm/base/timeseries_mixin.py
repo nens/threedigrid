@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from __future__ import print_function
 
 import numpy as np
+from netCDF4 import num2date
 
 from threedigrid.orm.base.fields import TimeSeriesCompositeArrayField
 
@@ -134,3 +135,13 @@ class ResultMixin(object):
         if self.timeseries_mask is not None:
             value = value[self.timeseries_mask]
         return value
+
+    @property
+    def dt_timestamps(self):
+        return map(
+            lambda t: t.isoformat(),
+            num2date(
+                self.timestamps,
+                units=self._datasource.get('time').getncattr('units')
+            )
+        )
