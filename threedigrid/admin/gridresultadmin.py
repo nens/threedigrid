@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from __future__ import print_function
 
 import logging
+from collections import defaultdict
 
 from netCDF4 import Dataset
 from threedigrid.admin.breaches.models import Breaches
@@ -25,6 +26,7 @@ class GridH5ResultAdmin(GridH5Admin):
     """
     Admin interface for threedicore result queries.
     """
+    _field_model_dict = defaultdict(list)
 
     def __init__(self, h5_file_path, netcdf_file_path, file_modus='r'):
         """
@@ -106,3 +108,25 @@ class GridH5ResultAdmin(GridH5Admin):
                 'Version gridadmin file has been created with: %s',
                 threedicore_version, self.threedicore_version
             )
+
+    @property
+    def __field_model_map(self):
+        if self._field_model_dict:
+            return self._field_model_dict
+
+        model_names = {'lines', 'nodes', 'pumps', 'breaches'}
+        for model_name in model_names:
+            for x in getattr(self, model_name)._meta.get_fields(
+                    only_names=True):
+                self._field_model_dict[x].append(model_name)
+        return self._field_model_dict
+
+    def get_model_instance_by_field_name(self, field_name):
+        model_name = self.__field_model_map.get(field_name)
+        cnt = len(model_name)
+        if cnt != 1:
+            raise IndexError(
+                'Ambiguous result. Field name {} yields {} model(s)'.format(
+                    field_name, cnt)
+            )
+        return getattr(self, model_name[0])
