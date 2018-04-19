@@ -18,6 +18,7 @@ from threedigrid.admin.nodes.timeseries_mixin import NodeResultsMixin
 from threedigrid.admin.pumps.models import Pumps
 from threedigrid.admin.pumps.timeseries_mixin import PumpResultsMixin
 from threedigrid.admin.gridadmin import GridH5Admin
+from threedigrid.orm.models import Model
 
 logger = logging.getLogger(__name__)
 
@@ -111,10 +112,21 @@ class GridH5ResultAdmin(GridH5Admin):
 
     @property
     def __field_model_map(self):
+        """
+        :return: a dict of {<field name>: [model name, ...]}
+        """
         if self._field_model_dict:
             return self._field_model_dict
 
-        model_names = {'lines', 'nodes', 'pumps', 'breaches'}
+        model_names = set()
+        for attr_name in dir(self):
+            if attr_name.startswith('__') or attr_name.startswith('_'):
+                continue
+            attr = getattr(self, attr_name)
+            if not issubclass(type(attr), Model):
+                continue
+            model_names.add(attr_name)
+
         for model_name in model_names:
             for x in getattr(self, model_name)._meta.get_fields(
                     only_names=True):
