@@ -120,7 +120,9 @@ class GridH5ResultAdmin(GridH5Admin):
 
         model_names = set()
         for attr_name in dir(self):
-            if attr_name.startswith('__') or attr_name.startswith('_'):
+            # skip private attrs
+            if any([attr_name.startswith('__'),
+                    attr_name.startswith('_')]):
                 continue
             attr = getattr(self, attr_name)
             if not issubclass(type(attr), Model):
@@ -134,6 +136,11 @@ class GridH5ResultAdmin(GridH5Admin):
         return self._field_model_dict
 
     def get_model_instance_by_field_name(self, field_name):
+        """
+        :param field_name: name of a models field
+        :return: instance of the model the field belongs to
+        :raises IndexError if the field name is not unique across models
+        """
         model_name = self.__field_model_map.get(field_name)
         cnt = len(model_name)
         if cnt != 1:
