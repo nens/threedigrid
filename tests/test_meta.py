@@ -9,10 +9,6 @@ import os
 import pytest
 
 from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
-from threedigrid.admin.nodes.models import Nodes
-from threedigrid.orm.base.fields import TimeSeriesCompositeArrayField
-
-from threedigrid.orm.base.options import Options
 from threedigrid.orm.base.options import ModelMeta
 
 test_file_dir = os.path.join(

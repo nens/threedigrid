@@ -4,7 +4,7 @@ History
 0.1.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Introducing the ModelMeta class that
 
 
 0.1.6 (2018-04-18)
