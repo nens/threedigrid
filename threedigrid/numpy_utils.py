@@ -290,3 +290,15 @@ def create_np_lookup_index_for(search_array, index_array):
         index_array, search_array, sorter=sort_idx)]
 
     return lookup
+
+
+def get_smallest_uint_dtype(maxval):
+    """Returns smallest unsigned integer datatype for holding maxval."""
+    if maxval < 0:
+        raise ValueError("Value cannot be negative")
+    dtypes = [np.uint8, np.uint16, np.uint32, np.uint64]
+    for dt in dtypes:
+        if maxval <= np.iinfo(dt).max:
+            return dt
+    raise ValueError(
+        "Value of %s exceeds all possible maximum dtype values." % maxval)

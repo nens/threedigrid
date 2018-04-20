@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from __future__ import print_function
 
 from threedigrid.orm.base.timeseries_mixin import ResultMixin
-from threedigrid.orm.base.options import MetaMixin
+from threedigrid.orm.base.options import ModelMeta
 
 
 BASE_COMPOSITE_FIELDS = {
@@ -20,7 +20,6 @@ BASE_COMPOSITE_FIELDS = {
 class NodesResultsMixin(ResultMixin):
 
     class Meta:
-        __metaclass__ = MetaMixin
 
         # attributes for the given fields
         field_attrs = ['units', 'long_name', 'standard_name']
@@ -32,7 +31,7 @@ class NodesResultsMixin(ResultMixin):
 
         # N.B. # fields starting with '_' are private and will not be added to
         # fields property
-        base_composition = BASE_COMPOSITE_FIELDS
+        composite_fields = BASE_COMPOSITE_FIELDS
 
         lookup_fields = ('id', '_mesh_id')
 
@@ -51,13 +50,17 @@ class NodesResultsMixin(ResultMixin):
 class NodesAggregateResultsMixin(ResultMixin):
 
     class Meta:
-        __metaclass__ = MetaMixin
+        __metaclass__ = ModelMeta
 
         base_composition = BASE_COMPOSITE_FIELDS
 
         # attributes for the given fields
         field_attrs = ['units', 'long_name']
 
+        # extra vars that will be combined with the
+        # composite fields, e.g.
+        # s1 --> s1_min [Mesh2D_s1_min + Mesh1D_s1_min]
+        #    --> s1_max  [Mesh2D_s1_max + Mesh1D_s1_max]
         composition_vars = {
             's1': ['min', 'max'],
             'vol': ['max', 'cum'],

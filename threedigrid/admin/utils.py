@@ -210,31 +210,3 @@ def get_or_create_group(grid_file, group_name):
         gr = grid_file.create_group(group_name)
     return gr
 
-
-def get_smallest_uint_dtype(maxval):
-    """Returns smallest unsigned integer datatype for holding maxval."""
-    if maxval < 0:
-        raise ValueError("Value cannot be negative")
-    dtypes = [np.uint8, np.uint16, np.uint32, np.uint64]
-    for dt in dtypes:
-        if maxval <= np.iinfo(dt).max:
-            return dt
-    raise ValueError(
-        "Value of %s exceeds all possible maximum dtype values." % maxval)
-
-
-def combine_vars(prod_a, prod_b, join_str='_'):
-    """Return the cartesian product of prod_a with prod_b, combined together with
-    join_str.
-
-    >>> combine_vars({'a', 'b'}, {'c', 'd'})
-    ['a_c', 'a_d', 'b_c', 'b_d']
-
-    :param prod_a: (iterable)
-    :param prod_b: (iterable)
-    :param join_str: (string)
-    :return: (list) ∏ (set_a, set_b)
-    """
-    return map(lambda x: x[0] + join_str + x[1],
-               product(prod_a, prod_b))
-

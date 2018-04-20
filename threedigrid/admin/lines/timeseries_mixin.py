@@ -1,7 +1,7 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
 # -*- coding: utf-8 -*-
 from threedigrid.orm.base.timeseries_mixin import ResultMixin
-from threedigrid.orm.base.options import MetaMixin
+from threedigrid.orm.base.options import ModelMeta
 
 
 BASE_COMPOSITE_FIELDS = {
@@ -15,12 +15,11 @@ BASE_COMPOSITE_FIELDS = {
 class LinesResultsMixin(ResultMixin):
 
     class Meta:
-        __metaclass__ = MetaMixin
 
         # attributes for the given fields
         field_attrs = ['units', 'long_name', 'standard_name']
 
-        base_composition = BASE_COMPOSITE_FIELDS
+        composite_fields = BASE_COMPOSITE_FIELDS
 
         lookup_fields = ('id', '_mesh_id')
 
@@ -39,7 +38,7 @@ class LinesResultsMixin(ResultMixin):
 class LinesAggregateResultsMixin(ResultMixin):
 
     class Meta:
-        __metaclass__ = MetaMixin
+        __metaclass__ = ModelMeta
 
         # attributes for the given fields
         field_attrs = ['units', 'long_name']

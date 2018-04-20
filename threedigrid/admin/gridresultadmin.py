@@ -16,6 +16,7 @@ from threedigrid import admin
 from threedigrid.admin.nodes import timeseries_mixin
 from threedigrid.admin.lines import timeseries_mixin
 from threedigrid.admin.breaches import timeseries_mixin
+from threedigrid.admin.pumps import timeseries_mixin
 
 from threedigrid.admin.nodes.models import Nodes
 from threedigrid.admin.gridadmin import GridH5Admin
@@ -25,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 def get_result_mixin(model_name, result_type=''):
     """
-
+    get the timeseries module for a given model
     :param model_name:
     :param result_type:
     :return:
@@ -35,11 +36,11 @@ def get_result_mixin(model_name, result_type=''):
         result_type=result_type).title().replace(' ', '')
 
     _model_module_ = getattr(admin, model_name)
-        _timeseries_mixin = getattr(_model_module_, 'timeseries_mixin')
+    timeseries_mixin = getattr(_model_module_, 'timeseries_mixin')
     try:
-        return getattr(_timeseries_mixin, s)
+        return getattr(timeseries_mixin, s)
     except AttributeError:
-    return None
+        return None
 
 
 class GridH5ResultAdmin(GridH5Admin):
@@ -114,6 +115,9 @@ class GridH5ResultAdmin(GridH5Admin):
 
     @property
     def breaches(self):
+        if not self.has_breaches:
+            logger.info('Threedimodel has no breaches')
+            return
         model_name = 'breaches'
         mixin = get_result_mixin(
             model_name=model_name, result_type=self.result_type
@@ -124,6 +128,9 @@ class GridH5ResultAdmin(GridH5Admin):
 
     @property
     def pumps(self):
+        if not self.has_pumpstations:
+            logger.info('Threedimodel has no pumps')
+            return
         model_name = 'pumps'
         mixin = get_result_mixin(
             model_name=model_name, result_type=self.result_type
