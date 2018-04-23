@@ -4,8 +4,11 @@ History
 0.1.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- fixed return statement of method slice (in class Model). A new instance with
+  containing the sliced dataset is returned. Return statement took 2
+  exactly 2 arguments. Now it takes **new_class_kwargs
 
+- Nothing changed yet.
 
 0.1.6 (2018-04-18)
 ------------------
