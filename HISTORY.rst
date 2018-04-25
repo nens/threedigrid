@@ -6,6 +6,9 @@ History
 
 - Introducing the ModelMeta class that
 
+- Empty or missing datasets are now displayed as np.array(None) instead of
+  raising an error.
+
 
 0.1.6 (2018-04-18)
 ------------------

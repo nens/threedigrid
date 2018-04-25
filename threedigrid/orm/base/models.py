@@ -12,7 +12,6 @@ from itertools import chain
 from h5py._hl.dataset import Dataset
 
 from abc import ABCMeta
-from abc import abstractmethod
 
 from collections import OrderedDict
 
@@ -21,8 +20,6 @@ from threedigrid.orm.base.exceptions import OperationNotSupportedError
 from threedigrid.orm.base.fields import ArrayField
 from threedigrid.orm.base.fields import IndexArrayField
 from threedigrid.orm.base.fields import TimeSeriesArrayField
-from threedigrid.orm.base.fields import TimeSeriesCompositeArrayField
-from threedigrid.orm import constants
 
 from threedigrid.orm.base.filters import get_filter
 from threedigrid.orm.base.filters import SliceFilter
@@ -157,8 +154,6 @@ class Model:
             kwargs.update(
                 {'timeseries_filter': mask}
             )
-        import ipdb;
-        ipdb.set_trace()
 
         if hasattr(self, 'lookup_fields'):
             kwargs.update({'lookup_index': self._get_lookup_index(field_name)})
@@ -176,6 +171,11 @@ class Model:
         #     timeseries_filter = self.get_timeseries_mask_filter()
         # else:
         #     timeseries_filter = slice(None)
+
+        # Return a numpy array with None as only element when
+        # the value is None.
+        if value is None:
+            return np.array(None)
 
         _filter = [slice(None)] * (
             len(value.shape) - 1) + [self.boolean_mask_filter]
@@ -577,15 +577,15 @@ class Model:
     @property
     def _meta(self):
         """
-        meta class that add meta data to a ResultMixin instance. The meta data includes
-        entries for the ``_meta_fields`` collection (if found).
+        meta class that add meta data to a ResultMixin instance. The meta data
+        includes entries for the ``_meta_fields`` collection (if found).
 
             >>> from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
             >>> f = "/code/tests/test_files/results_3di.nc"
             >>> ff = "/code/tests/test_files/gridadmin.h5"
             >>> gr = GridH5ResultAdmin(ff, f)
             >>> gr.nodes._meta.s1
-            >>> s1(units=u'm', long_name=u'waterlevel', standard_name=u'water_surface_height_above_reference_datum')
+            >>> s1(units=u'm', long_name=u'waterlevel', standard_name=u'water_surface_height_above_reference_datum') # noqa
         """
         return Options(self)
 
