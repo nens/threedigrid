@@ -4,11 +4,14 @@ History
 0.1.7 (unreleased)
 ------------------
 
-- Introducing the ModelMeta class that
+- Introducing the ModelMeta class. Its main purpose at this moment is to compute all 
+  possible combinations of composite_fields and aggregation variables.
 
-- Empty or missing datasets are now displayed as np.array(None) instead of
+- Fixed return statement of method slice (in class Model) which now takes 
+  ``**new_class_kwargs``. 
+  
+- Empty or missing datasets are now displayed as ``np.array(None)`` instead of 
   raising an error.
-
 
 0.1.6 (2018-04-18)
 ------------------
