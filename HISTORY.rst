@@ -4,7 +4,8 @@ History
 0.1.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Empty or missing datasets are now displayed as np.array(None) instead of 
+  raising an error.
 
 
 0.1.6 (2018-04-18)
