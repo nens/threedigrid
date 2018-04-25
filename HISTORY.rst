@@ -4,7 +4,10 @@ History
 0.1.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Added additional exporters for:
+  - 2D_GROUNDWATER
+  - 2D_OPEN_WATER
+  - 2D_VERTICAL_INFILTRATION
 
 
 0.1.6 (2018-04-18)
