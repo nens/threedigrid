@@ -9,6 +9,11 @@ History
   - 2D_OPEN_WATER
   - 2D_VERTICAL_INFILTRATION
 
+- Fixed return statement of method slice (in class Model) which now takes 
+  ``**new_class_kwargs``. 
+  
+- Empty or missing datasets are now displayed as np.array(None) instead of 
+  raising an error.
 
 0.1.6 (2018-04-18)
 ------------------

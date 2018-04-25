@@ -12,7 +12,6 @@ from itertools import chain
 from h5py._hl.dataset import Dataset
 
 from abc import ABCMeta
-from abc import abstractmethod
 
 from collections import OrderedDict
 
@@ -21,8 +20,6 @@ from threedigrid.orm.base.exceptions import OperationNotSupportedError
 from threedigrid.orm.base.fields import ArrayField
 from threedigrid.orm.base.fields import IndexArrayField
 from threedigrid.orm.base.fields import TimeSeriesArrayField
-from threedigrid.orm.base.fields import TimeSeriesCompositeArrayField
-from threedigrid.orm import constants
 
 from threedigrid.orm.base.filters import get_filter
 from threedigrid.orm.base.filters import SliceFilter
@@ -61,7 +58,8 @@ class Model:
 
     def __init__(self, datasource=None, slice_filters=[],
                  epsg_code=None, only_fields=[], reproject_to_epsg=None,
-                 has_1d=None, mixin=None, timeseries_chunk_size=None, **kwargs):
+                 has_1d=None, mixin=None, timeseries_chunk_size=None,
+                 **kwargs):
         """
         Initialize a Model with a datasource, filters
         and a epsg_code.
@@ -107,7 +105,9 @@ class Model:
 
         _field_names = [
             x for x in dir(self.__class__)
-            if isinstance(getattr(self.__class__, x), (ArrayField, TimeSeriesArrayField))]
+            if isinstance(
+                getattr(self.__class__, x),
+                (ArrayField, TimeSeriesArrayField))]
         self._field_names = set(self._field_names).union(set(_field_names))
 
         self.has_1d = has_1d
@@ -150,7 +150,8 @@ class Model:
 
         kwargs = {}
         if hasattr(self, 'get_timeseries_mask_filter'):
-            kwargs.update({'timeseries_filter': self.get_timeseries_mask_filter()})
+            kwargs.update(
+                {'timeseries_filter': self.get_timeseries_mask_filter()})
 
         if hasattr(self, 'lookup_fields'):
             kwargs.update({'lookup_index': self._get_lookup_index(field_name)})
@@ -168,6 +169,11 @@ class Model:
         #     timeseries_filter = self.get_timeseries_mask_filter()
         # else:
         #     timeseries_filter = slice(None)
+
+        # Return a numpy array with None as only element when
+        # the value is None.
+        if value is None:
+            return np.array(None)
 
         _filter = [slice(None)] * (
             len(value.shape) - 1) + [self.boolean_mask_filter]
@@ -327,7 +333,7 @@ class Model:
              [SliceFilter(slice_filter)] + self.slice_filters})
 
         return self.__init_class(
-            self.__class__, new_class_kwargs)
+            self.__class__, **new_class_kwargs)
 
     @property
     def known_subset(self):
@@ -528,9 +534,9 @@ class Model:
             filter_field_names = [
                 x.get_field_name() for x in self.slice_filters]
 
-            timeseries_filter = slice(None)
-            if hasattr(self, 'get_timeseries_mask_filter'):
-                timeseries_filter = self.get_timeseries_mask_filter()
+            # timeseries_filter = slice(None)
+            # if hasattr(self, 'get_timeseries_mask_filter'):
+            #    timeseries_filter = self.get_timeseries_mask_filter()
             # kwargs = {
             #     'lookup_index': self._lookup_index,
             #     'timeseries_filter': timeseries_filter
@@ -577,15 +583,15 @@ class Model:
     @property
     def _meta(self):
         """
-        meta class that add meta data to a ResultMixin instance. The meta data includes
-        entries for the ``_meta_fields`` collection (if found).
+        meta class that add meta data to a ResultMixin instance. The meta data
+        includes entries for the ``_meta_fields`` collection (if found).
 
             >>> from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
             >>> f = "/code/tests/test_files/results_3di.nc"
             >>> ff = "/code/tests/test_files/gridadmin.h5"
             >>> gr = GridH5ResultAdmin(ff, f)
             >>> gr.nodes._meta.s1
-            >>> s1(units=u'm', long_name=u'waterlevel', standard_name=u'water_surface_height_above_reference_datum')
+            >>> s1(units=u'm', long_name=u'waterlevel', standard_name=u'water_surface_height_above_reference_datum') # noqa
         """
         return Options(self)
 
