@@ -97,6 +97,8 @@ class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
         Optional transforms can be done here.
         """
         timeseries_filter = kwargs.get('timeseries_filter', slice(None))
+        if not np.any(timeseries_filter):
+            return np.array([])
         # TODO: remove after tests
         # if hasattr(_timeseries_filter, 'mask'):
         #     import ipdb;ipdb.set_trace()
@@ -109,11 +111,7 @@ class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
         for source_name in source_names:
             if source_name not in datasource.keys():
                 continue
-            try:
-                values.append(datasource[source_name][timeseries_filter])
-            except IndexError:
-                import ipdb;
-                ipdb.set_trace()
+            values.append(datasource[source_name][timeseries_filter])
 
         if not values:
             return np.array([])

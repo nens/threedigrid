@@ -16,15 +16,7 @@ test_file_dir = os.path.join(
 
 # the testfile is a copy of the v2_bergermeer gridadmin file
 result_file = os.path.join(test_file_dir, "results_3di.nc")
-agg_result_file = os.path.join(test_file_dir, 'flow_aggregate.nc')
 grid_file = os.path.join(test_file_dir, "gridadmin.h5")
-
-
-@pytest.fixture()
-def agg_gr():
-    gr = GridH5ResultAdmin(grid_file, agg_result_file)
-    yield gr
-    gr.close()
 
 
 @pytest.fixture()
@@ -35,23 +27,27 @@ def gr():
 
 
 def test_nodes_timeseries_start_end_time_kwargs(gr):
-    qs_s1 = gr.nodes.timeseries(start_time=0, end_time=500).s1
-    assert qs_s1.shape[0] == 17
+    ts = gr.nodes.timestamps
+    qs_s1 = gr.nodes.timeseries(start_time=ts[0], end_time=ts[6]).s1
+    assert qs_s1.shape[0] == ts[0:6+1].size
 
 
 def test_nodes_timeseries_with_subset(gr):
+    ts = gr.nodes.timestamps
     qs_s1 = gr.nodes.subset('1d_all').timeseries(start_time=0, end_time=500).s1
-    assert qs_s1.shape[0] == 17 and qs_s1.shape[1] > 0
+    assert qs_s1.shape[0] == 18 and qs_s1.shape[1] > 0
 
 
 def test_nodes_timeseries_start_time_only_kwarg(gr):
-    qs = gr.nodes.timeseries(start_time=450)
-    assert qs.s1.shape[0] == 6
+    ts = gr.nodes.timestamps
+    qs = gr.nodes.timeseries(start_time=ts[6])
+    assert qs.s1.shape[0] == ts[6:].size
 
 
 def test_nodes_timeseries_end_time_only_kwarg(gr):
-    qs = gr.nodes.timeseries(end_time=500)
-    assert qs.s1.shape[0] == 17
+    ts = gr.nodes.timestamps
+    qs = gr.nodes.timeseries(end_time=ts[6])
+    assert qs.s1.shape[0] == ts[:6+1].size
 
 
 def test_nodes_timeseries_index_filter(gr):
@@ -65,22 +61,22 @@ def test_nodes_timeseries_slice_filter(gr):
 
 
 def test_pump_timeseries_slice_filter(gr):
-    qs = gr.pumps.timeseries(indexes=slice(1, 4)).Mesh1D_q_pump
+    qs = gr.pumps.timeseries(indexes=slice(1, 4)).q_pump
     assert qs.shape[0] == 3
 
 
 def test_pump_timeseries_index_filter(gr):
-    qs = gr.pumps.timeseries(indexes=[1, 2, 3]).Mesh1D_q_pump
+    qs = gr.pumps.timeseries(indexes=[1, 2, 3]).q_pump
     assert qs.shape[0] == 3
 
 
 def test_breach_timeseries_slice_filter(gr):
-    qs = gr.breaches.timeseries(indexes=slice(1, 4)).Mesh1D_breach_depth
+    qs = gr.breaches.timeseries(indexes=slice(1, 4)).depth
     assert qs.shape[0] == 3
 
 
 def test_breach_timeseries_index_filter(gr):
-    qs = gr.breaches.timeseries(indexes=[1, 2, 3]).Mesh1D_breach_width
+    qs = gr.breaches.timeseries(indexes=[1, 2, 3]).width
     assert qs.shape[0] == 3
 
 
@@ -139,38 +135,3 @@ def test_timestamps(gr):
     n_qs = gr.nodes.timeseries(start_time=0, end_time=500)
     l_qs = gr.lines.timeseries(start_time=0, end_time=500)
     np.testing.assert_array_equal(n_qs.timestamps, l_qs.timestamps)
-
-def test_get_timestamps(gr):
-    np.testing.assert_array_equal(gr.nodes.timestamps, gr.lines.timestamps)
-    n_qs = gr.nodes.timeseries(start_time=0, end_time=500)
-    l_qs = gr.lines.timeseries(start_time=0, end_time=500)
-    np.testing.assert_array_equal(n_qs.timestamps, l_qs.timestamps)
-
-
-# commented for now until the new aggregate.nc is finished
-
-# def test_get_node_aggregate_netcdf_results(agg_gr):
-#     assert 's1_max' in agg_gr.netcdf_file.variables.keys()
-#     assert 'vol_max' in agg_gr.netcdf_file.variables.keys()
-#     assert hasattr(agg_gr.nodes, 's1_max')
-#     assert hasattr(agg_gr.nodes, 'vol_max')
-#     assert agg_gr.nodes.s1_max.shape[0] > 0
-#     assert agg_gr.nodes.vol_max.shape[0] > 0
-#
-#
-# def test_get_line_aggregate_netcdf_results(agg_gr):
-#     assert 'q_max' in agg_gr.netcdf_file.variables.keys()
-#     assert 'u1_max' in agg_gr.netcdf_file.variables.keys()
-#     assert hasattr(agg_gr.lines, 'q_max')
-#     assert hasattr(agg_gr.lines, 'u1_max')
-#     assert agg_gr.lines.q_max.shape[0] > 0
-#     assert agg_gr.lines.u1_max.shape[0] > 0
-
-
-# def test_get_node_netcdf_results(gr):
-#     assert 's1' in gr.netcdf_file.variables.keys()
-#     assert 'vol' in gr.netcdf_file.variables.keys()
-#     assert hasattr(gr.nodes, 's1')
-#     assert hasattr(gr.nodes, 'vol')
-#     assert gr.nodes.s1.shape[0] > 0
-#     assert gr.nodes.vol.shape[0] > 0

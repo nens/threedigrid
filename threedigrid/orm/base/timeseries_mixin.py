@@ -187,13 +187,11 @@ class AggregateResultMixin(ResultMixin):
 
             timeseries_mask = timeseries_mask
         else:
-            if isinstance(indexes, list) or isinstance(indexes, tuple):
-                timeseries_mask = np.array(indexes)
-            elif isinstance(indexes, slice):
+            if isinstance(indexes, slice):
                 timeseries_mask = indexes
             else:
                 raise TypeError(
-                    "indexes should either be a list/tuple or a slice")
+                    "indexes should either be a slice")
 
         return timeseries_mask
 
@@ -225,12 +223,7 @@ class AggregateResultMixin(ResultMixin):
         time_key = 'time_' + field_name
 
         if time_key in self._datasource.keys():
-            arr = self._datasource[time_key][:]
-            # TODO: threedicore will implement this as an common array not an
-            # masked array soon, change accordingly
-            if hasattr(arr, 'data'):
-                return arr.data
-            return arr
+            return self._datasource[time_key][:]
         raise AttributeError('No timestamps found for {}'.format(field_name))
 
     def get_time_unit(self, field_name):

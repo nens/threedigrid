@@ -157,19 +157,8 @@ class GridH5AggregateResultAdmin(GridH5ResultAdmin):
             called subgrid_map.nc)
         :param file_modus: modus in which to open the files
         """
-        # self._netcdf_file_path = netcdf_file_path
-        super(GridH5AggregateResultAdmin, self).__init__(h5_file_path, netcdf_file_path, file_modus)
-        # self.netcdf_file = Dataset(netcdf_file_path)
-        # self.set_timeseries_chunk_size(DEFAULT_CHUNK_TIMESERIES.stop)
-        # self.version_check()
-
-    @property
-    def timeseries_chunk_size(self):
-        return self._timeseries_chunk_size.stop
-
-    @property
-    def time_units(self):
-        return self.netcdf_file.variables['time'].getncattr('units')
+        super(GridH5AggregateResultAdmin, self).__init__(
+            h5_file_path, netcdf_file_path, file_modus)
 
     @property
     def lines(self):

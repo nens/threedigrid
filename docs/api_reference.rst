@@ -126,7 +126,7 @@ The ``composition_vars``
         'q_lat': ['cum'],
     }
 
-define all possible combination with those field names. ``s1`` and ``vol``
+define all possible combinations with those field names. ``s1`` and ``vol``
 alone result in 10 field names.
 
     >>> Mesh2D_s1_min
