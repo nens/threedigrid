@@ -4,11 +4,11 @@ History
 0.1.7 (unreleased)
 ------------------
 
-- fixed return statement of method slice (in class Model). A new instance with
-  containing the sliced dataset is returned. Return statement took 2
-  exactly 2 arguments. Now it takes **new_class_kwargs
-
-- Nothing changed yet.
+- Fixed return statement of method slice (in class Model) which now takes 
+  **new_class_kwargs. 
+  
+- Empty or missing datasets are now displayed as np.array(None) instead of 
+  raising an error.
 
 0.1.6 (2018-04-18)
 ------------------
