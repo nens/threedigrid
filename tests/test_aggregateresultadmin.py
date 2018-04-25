@@ -86,24 +86,25 @@ def test_nodes_timeseries_slice_filter(agg_gr):
     qs_s1_min = agg_gr.nodes.timeseries(indexes=slice(0, 1)).s1_min
     assert qs_s1_min.shape[0] == 1
 
-
+# TODO once the threedicore has implemented aggregations for pumpstations
+# TODO and breaches also implement some tests
 # def test_pump_timeseries_slice_filter(agg_gr):
-#     qs = agg_gr.pumps.timeseries(indexes=slice(1, 4)).Mesh1D_q_pump
+#     qs = agg_gr.pumps.timeseries(indexes=slice(1, 4)).q_pump
 #     assert qs.shape[0] == 3
 #
 #
 # def test_pump_timeseries_index_filter(agg_gr):
-#     qs = agg_gr.pumps.timeseries(indexes=[1, 2, 3]).Mesh1D_q_pump
+#     qs = agg_gr.pumps.timeseries(indexes=[1, 2, 3]).q_pump
 #     assert qs.shape[0] == 3
 #
 #
 # def test_breach_timeseries_slice_filter(agg_gr):
-#     qs = agg_gr.breaches.timeseries(indexes=slice(1, 4)).Mesh1D_breach_depth
+#     qs = agg_gr.breaches.timeseries(indexes=slice(1, 4)).depth
 #     assert qs.shape[0] == 3
 #
 #
 # def test_breach_timeseries_index_filter(agg_gr):
-#     qs = agg_gr.breaches.timeseries(indexes=[1, 2, 3]).Mesh1D_breach_width
+#     qs = agg_gr.breaches.timeseries(indexes=[1, 2, 3]).width
 #     assert qs.shape[0] == 3
 #
 #
