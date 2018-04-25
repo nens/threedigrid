@@ -333,7 +333,7 @@ class Model:
              [SliceFilter(slice_filter)] + self.slice_filters})
 
         return self.__init_class(
-            self.__class__, new_class_kwargs)
+            self.__class__, **new_class_kwargs)
 
     @property
     def known_subset(self):
