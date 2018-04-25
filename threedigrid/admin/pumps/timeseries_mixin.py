@@ -39,10 +39,12 @@ class PumpsAggregateResultsMixin(AggregateResultMixin):
         __metaclass__ = ModelMeta
 
         # attributes for the given fields
-        field_attrs = ['units', 'long_name', 'time_units']
+        field_attrs = ['units', 'long_name']
 
         model_attr = 'timestamp'
 
+        # ModelMeta will combine base_composition and composition_vars
+        # to composite_fields attribute
         base_composition = {'q_pump': ['Mesh1D_q_pump']}
         composition_vars = {
             'q_pump': ['avg', 'min', 'max', 'cum'],

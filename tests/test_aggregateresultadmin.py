@@ -35,10 +35,20 @@ def test_get_timestamps_raises_attribute_error(agg_gr):
     with pytest.raises(AttributeError):
         agg_gr.nodes.get_timestamps('does_not_exist')
 
+def test_timestamps_prop_raises_attribute_error(agg_gr):
+    with pytest.raises(AttributeError):
+        agg_gr.nodes.timestamps
+
 def test_get_timestamps_lines(agg_gr):
     ts = agg_gr.nodes.get_timestamps('q_cum')
     assert isinstance(ts, np.ndarray)
     assert ts.size > 0
+
+
+def test_get_time_unit(agg_gr):
+    tu = agg_gr.nodes.get_time_unit('q_cum')
+    assert tu.startswith('seconds since ')
+
 
 #TODO
 # def test_get_timestamps_pumps(agg_gr):

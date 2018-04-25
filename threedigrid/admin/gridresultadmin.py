@@ -47,12 +47,6 @@ class GridH5ResultAdmin(GridH5Admin):
         self.set_timeseries_chunk_size(DEFAULT_CHUNK_TIMESERIES.stop)
         self.version_check()
 
-    @property
-    def result_type(self):
-        # will be available through the result fiel directly soon
-        return 'aggregate' if 'aggregate' in os.path.basename(
-            self._netcdf_file_path) else ''
-
     def set_timeseries_chunk_size(self, new_chunk_size):
         """
         overwrite the default chunk size for timeseries queries.
@@ -69,8 +63,7 @@ class GridH5ResultAdmin(GridH5Admin):
             new_chunk_size
         )
         self._grid_kwargs.update(
-            {'timeseries_chunk_size': self._timeseries_chunk_size,
-             'result_type': self.result_type}
+            {'timeseries_chunk_size': self._timeseries_chunk_size}
         )
 
     @property
@@ -83,14 +76,12 @@ class GridH5ResultAdmin(GridH5Admin):
 
     @property
     def lines(self):
-        model_name = 'lines'
         return Lines(
-            H5pyResultGroup(self.h5py_file, model_name, self.netcdf_file),
+            H5pyResultGroup(self.h5py_file, 'lines', self.netcdf_file),
             **dict(self._grid_kwargs, **{'mixin': LinesResultsMixin}))
 
     @property
     def nodes(self):
-        model_name = 'nodes'
         return Nodes(
             H5pyResultGroup(self.h5py_file, 'nodes', self.netcdf_file),
             **dict(self._grid_kwargs, **{'mixin': NodesResultsMixin}))
@@ -100,9 +91,8 @@ class GridH5ResultAdmin(GridH5Admin):
         if not self.has_breaches:
             logger.info('Threedimodel has no breaches')
             return
-        model_name = 'breaches'
         return Breaches(
-            H5pyResultGroup(self.h5py_file, model_name, self.netcdf_file),
+            H5pyResultGroup(self.h5py_file, 'breaches', self.netcdf_file),
             **dict(self._grid_kwargs, **{'mixin': BreachesResultsMixin}))
 
     @property
@@ -110,9 +100,8 @@ class GridH5ResultAdmin(GridH5Admin):
         if not self.has_pumpstations:
             logger.info('Threedimodel has no pumps')
             return
-        model_name = 'pumps'
         return Pumps(
-            H5pyResultGroup(self.h5py_file, model_name, self.netcdf_file),
+            H5pyResultGroup(self.h5py_file, 'pumps', self.netcdf_file),
             **dict(self._grid_kwargs, **{'mixin': PumpsResultsMixin}))
 
     def version_check(self):

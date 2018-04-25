@@ -146,13 +146,41 @@ class ResultMixin(object):
 class AggregateResultMixin(ResultMixin):
     """
     Subclass this mixin and add the result
-    fields as 'TimeSeriesArrayField'
+    fields as 'TimeSeriesArrayField' or TimeSeriesCompositeArrayField
     """
     def __init__(self, *args, **kwargs):
         super(AggregateResultMixin, self).__init__(*args, **kwargs)
 
     def timeseries(self, start_time=None, end_time=None, indexes=None):
         """
+        Allows filtering on timeseries.
+
+        :param start_time: start_time in seconds
+        :param end_time: end_time in seconds
+        :param indexes: a slice, e.g. slice(<start>, <stop>, <step>)
+
+        You can either filter by start_time and end_time or indexes. Indexes,
+        unlike the GridH5ResultAdmin timeseries filter, allows only for slices
+        when used with aggregated results.
+
+        Example usage for start_time and end_time filter::
+
+            >>> from threedigrid.admin.gridresultadmin import GridH5AggregateResultAdmin
+            >>> nc = "/code/tests/test_files/aggregate_results_3di.nc"
+            >>> f = "/code/tests/test_files/gridadmin.h5"
+            >>> gr = GridH5AggregateResultAdmin(f, nc)
+            >>> gr.nodes.timeseries(start_time=0, end_time=800).s1_max
+
+        Example usage for index filter::
+
+            >>> from threedigrid.admin.gridresultadmin import GridH5AggregateResultAdmin
+            >>> nc = "/code/tests/test_files/aggregate_results_3di.nc"
+            >>> f = "/code/tests/test_files/gridadmin.h5"
+            >>> gr = GridH5AggregateResultAdmin(f, nc)
+            >>> qs_s1 = gr.nodes.timeseries(indexes=slice(0,3)).s1
+            >>> qs_s1.shape[0]
+            >>> 3
+
         """
         self.timeseries_mask = {}
         field_names = self._meta.get_fields()
@@ -174,6 +202,14 @@ class AggregateResultMixin(ResultMixin):
             **new_class_kwargs)
 
     def _get_mask(self, start_time, end_time, indexes, timestamps):
+        """
+
+        :param start_time: start_time in seconds
+        :param end_time: end_time in seconds
+        :param indexes: a slice, e.g. slice(<start>, <stop>, <step>)
+        :param timestamps: array of timestamps in seconds
+        :return:
+        """
         if not any((start_time, end_time, indexes)):
             raise KeyError(
                 "Please provide either start_time, end_time or indexes")

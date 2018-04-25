@@ -148,11 +148,11 @@ class Model:
         kwargs = {}
         if hasattr(self, 'get_timeseries_mask_filter'):
             timeseries_filter = self.get_timeseries_mask_filter()
-            mask = timeseries_filter
+            ts_filter = timeseries_filter
             if isinstance(timeseries_filter, dict):
-                mask = timeseries_filter.get(field_name)
+                ts_filter = timeseries_filter.get(field_name)
             kwargs.update(
-                {'timeseries_filter': mask}
+                {'timeseries_filter': ts_filter}
             )
 
         if hasattr(self, 'lookup_fields'):
