@@ -93,6 +93,18 @@ class Options(object):
         _union = set(self.inst._field_names).union({field_name})
         self.inst._field_names = _union
 
+    def add_fields(self, fields, hide_private=True):
+        """
+        add fields to the models instance
+
+        :param fields: dict of field names and fields
+        :param hide_private: fields starting with '_' will be added to the
+            instance but excluded from the list of field names
+        """
+
+        for field_name, field in fields.iteritems():
+            self.add_field(field_name, field, hide_private)
+
     def _source_exists(self, field_name):
         """
         Checks whether field_name exists in the data source.
@@ -106,18 +118,6 @@ class Options(object):
 
         sources = self.inst.Meta.composite_fields.get(field_name)
         return any([x in self.inst._datasource.keys() for x in sources])
-
-    def add_fields(self, fields, hide_private=True):
-        """
-        add fields to the models instance
-
-        :param fields: dict of field names and fields
-        :param hide_private: fields starting with '_' will be added to the
-            instance but excluded from the list of field names
-        """
-
-        for field_name, field in fields.iteritems():
-            self.add_field(field_name, field, hide_private)
 
     def _get_meta_values(self, field_name):
         """
@@ -154,7 +154,7 @@ class Options(object):
         if not hasattr(self.inst.Meta, "field_attrs"):
             return
 
-        # add the meta information the instance. Uses the field name as
+        # add the meta information to the instance. Uses the field name as
         # name. ``s1`` will be accessible like so for
         # example: ``gr.nodes._meta.s1``
         for _field in self.inst._field_names:
@@ -180,7 +180,6 @@ class Options(object):
             self._lookup = create_np_lookup_index_for(*values)
 
         return self._lookup
-
 
     def _get_composite_meta(self, field_name, attr_name,
                             exclude_fields={'rain'}):
@@ -223,10 +222,12 @@ class ModelMeta(type):
     """
     Metaclass for defining model meta classes.
 
-    If you have a complexer setup you can make use of the ``ModelMeta`` meta class that provides some
-    field constructors behind the scenes. Aggregation files potentially contain a lot of different aggregation
-    variables resulting in a lot of different source fields. You don't manually have to define all those
-    combinations simply define a ``base_composition`` and a ``composition_vars`` dictionary. This computes
+    If you have a complexer setup you can make use of the ``ModelMeta``
+    meta class that provides some field constructors behind the scenes.
+    Aggregation files potentially contain a lot of different aggregation
+    variables resulting in a lot of different source fields. You don't
+    manually have to define all those combinations simply define a
+    ``base_composition`` and a ``composition_vars`` dictionary. This computes
     all necessary composite_fields automatically.
 
     """

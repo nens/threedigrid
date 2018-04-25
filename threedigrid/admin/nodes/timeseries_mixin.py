@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from __future__ import print_function
 
 from threedigrid.orm.base.timeseries_mixin import ResultMixin
+from threedigrid.orm.base.timeseries_mixin import AggregateResultMixin
 from threedigrid.orm.base.options import ModelMeta
 
 
@@ -47,7 +48,7 @@ class NodesResultsMixin(ResultMixin):
         super(NodesResultsMixin, self).__init__(**kwargs)
 
 
-class NodesAggregateResultsMixin(ResultMixin):
+class NodesAggregateResultsMixin(AggregateResultMixin):
 
     class Meta:
         __metaclass__ = ModelMeta

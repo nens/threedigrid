@@ -13,10 +13,15 @@ from threedigrid.admin.h5py_datasource import H5pyResultGroup
 from threedigrid.admin.lines.models import Lines
 from threedigrid.admin.pumps.models import Pumps
 from threedigrid import admin
-from threedigrid.admin.nodes import timeseries_mixin
-from threedigrid.admin.lines import timeseries_mixin
-from threedigrid.admin.breaches import timeseries_mixin
-from threedigrid.admin.pumps import timeseries_mixin
+
+from threedigrid.admin.nodes.timeseries_mixin import NodesAggregateResultsMixin
+from threedigrid.admin.nodes.timeseries_mixin import NodesResultsMixin
+from threedigrid.admin.lines.timeseries_mixin import LinesAggregateResultsMixin
+from threedigrid.admin.lines.timeseries_mixin import LinesResultsMixin
+from threedigrid.admin.breaches.timeseries_mixin import BreachesAggregateResultsMixin
+from threedigrid.admin.breaches.timeseries_mixin import BreachesResultsMixin
+from threedigrid.admin.pumps.timeseries_mixin import PumpsResultsMixin
+from threedigrid.admin.pumps.timeseries_mixin import PumpsAggregateResultsMixin
 
 from threedigrid.admin.nodes.models import Nodes
 from threedigrid.admin.gridadmin import GridH5Admin
@@ -24,30 +29,10 @@ from threedigrid.admin.gridadmin import GridH5Admin
 logger = logging.getLogger(__name__)
 
 
-def get_result_mixin(model_name, result_type=''):
-    """
-    get the timeseries module for a given model
-    :param model_name:
-    :param result_type:
-    :return:
-    """
-    s = '{model_name} {result_type} Results Mixin'.format(
-        model_name=model_name,
-        result_type=result_type).title().replace(' ', '')
-
-    _model_module_ = getattr(admin, model_name)
-    timeseries_mixin = getattr(_model_module_, 'timeseries_mixin')
-    try:
-        return getattr(timeseries_mixin, s)
-    except AttributeError:
-        return None
-
-
 class GridH5ResultAdmin(GridH5Admin):
     """
     Admin interface for threedicore result queries.
     """
-
     def __init__(self, h5_file_path, netcdf_file_path, file_modus='r'):
         """
 
@@ -60,11 +45,13 @@ class GridH5ResultAdmin(GridH5Admin):
         super(GridH5ResultAdmin, self).__init__(h5_file_path, file_modus)
         self.netcdf_file = Dataset(netcdf_file_path)
         self.set_timeseries_chunk_size(DEFAULT_CHUNK_TIMESERIES.stop)
-        self._check_threedicore_version()
+        self.version_check()
 
     @property
     def result_type(self):
-        return 'aggregate' if 'aggregate' in os.path.basename(self._netcdf_file_path) else ''
+        # will be available through the result fiel directly soon
+        return 'aggregate' if 'aggregate' in os.path.basename(
+            self._netcdf_file_path) else ''
 
     def set_timeseries_chunk_size(self, new_chunk_size):
         """
@@ -82,7 +69,8 @@ class GridH5ResultAdmin(GridH5Admin):
             new_chunk_size
         )
         self._grid_kwargs.update(
-            {'timeseries_chunk_size': self._timeseries_chunk_size}
+            {'timeseries_chunk_size': self._timeseries_chunk_size,
+             'result_type': self.result_type}
         )
 
     @property
@@ -96,22 +84,16 @@ class GridH5ResultAdmin(GridH5Admin):
     @property
     def lines(self):
         model_name = 'lines'
-        mixin = get_result_mixin(
-            model_name=model_name, result_type=self.result_type
-        )
         return Lines(
             H5pyResultGroup(self.h5py_file, model_name, self.netcdf_file),
-            **dict(self._grid_kwargs, **{'mixin': mixin}))
+            **dict(self._grid_kwargs, **{'mixin': LinesResultsMixin}))
 
     @property
     def nodes(self):
         model_name = 'nodes'
-        mixin = get_result_mixin(
-            model_name=model_name, result_type=self.result_type
-        )
         return Nodes(
             H5pyResultGroup(self.h5py_file, 'nodes', self.netcdf_file),
-            **dict(self._grid_kwargs, **{'mixin': mixin}))
+            **dict(self._grid_kwargs, **{'mixin': NodesResultsMixin}))
 
     @property
     def breaches(self):
@@ -119,12 +101,9 @@ class GridH5ResultAdmin(GridH5Admin):
             logger.info('Threedimodel has no breaches')
             return
         model_name = 'breaches'
-        mixin = get_result_mixin(
-            model_name=model_name, result_type=self.result_type
-        )
         return Breaches(
             H5pyResultGroup(self.h5py_file, model_name, self.netcdf_file),
-            **dict(self._grid_kwargs, **{'mixin': mixin}))
+            **dict(self._grid_kwargs, **{'mixin': BreachesResultsMixin}))
 
     @property
     def pumps(self):
@@ -132,26 +111,106 @@ class GridH5ResultAdmin(GridH5Admin):
             logger.info('Threedimodel has no pumps')
             return
         model_name = 'pumps'
-        mixin = get_result_mixin(
-            model_name=model_name, result_type=self.result_type
-        )
         return Pumps(
             H5pyResultGroup(self.h5py_file, model_name, self.netcdf_file),
-            **dict(self._grid_kwargs, **{'mixin': mixin}))
+            **dict(self._grid_kwargs, **{'mixin': PumpsResultsMixin}))
 
-    def _check_threedicore_version(self):
-        try:
-            threedicore_version = self.netcdf_file.getncattr(
-                'threedicore_version'
-            )
-        except AttributeError:
-            logger.error(
-                'Attribute threedicore_version could not be found in result file')  # noqa
-            return ''
-        if threedicore_version != self.threedicore_version:
+    def version_check(self):
+        """
+        compare versions of grid admin and grid results file.
+        Issues a warning if they differ
+        """
+
+        if self.threedicore_result_version != self.threedicore_version:
             logger.warning(
                 '[!] threedicore version differ! \n'
                 'Version result file has been created with: %s\n'
                 'Version gridadmin file has been created with: %s',
-                threedicore_version, self.threedicore_version
+                self.threedicore_result_version, self.threedicore_version
             )
+
+    @property
+    def threedicore_result_version(self):
+        """
+        :return: version of the grid result file (if found), an empty
+        string otherwise
+        """
+        try:
+            return self.netcdf_file.getncattr(
+            'threedicore_version'
+        )
+        except AttributeError:
+            logger.error(
+                'Attribute threedicore_version could not be found in result file')  # noqa
+        return ''
+
+
+class GridH5AggregateResultAdmin(GridH5ResultAdmin):
+    """
+    Admin interface for threedicore result queries.
+    """
+    def __init__(self, h5_file_path, netcdf_file_path, file_modus='r'):
+        """
+
+        :param h5_file_path: path to the hdf5 gridadmin file
+        :param netcdf_file_path: path to the netcdf result file (usually
+            called subgrid_map.nc)
+        :param file_modus: modus in which to open the files
+        """
+        # self._netcdf_file_path = netcdf_file_path
+        super(GridH5AggregateResultAdmin, self).__init__(h5_file_path, netcdf_file_path, file_modus)
+        # self.netcdf_file = Dataset(netcdf_file_path)
+        # self.set_timeseries_chunk_size(DEFAULT_CHUNK_TIMESERIES.stop)
+        # self.version_check()
+
+    @property
+    def timeseries_chunk_size(self):
+        return self._timeseries_chunk_size.stop
+
+    @property
+    def time_units(self):
+        return self.netcdf_file.variables['time'].getncattr('units')
+
+    @property
+    def lines(self):
+        model_name = 'lines'
+        return Lines(
+            H5pyResultGroup(self.h5py_file, model_name, self.netcdf_file),
+            **dict(self._grid_kwargs, **{'mixin': LinesAggregateResultsMixin})
+        )
+
+    @property
+    def nodes(self):
+        return Nodes(
+            H5pyResultGroup(self.h5py_file, 'nodes', self.netcdf_file),
+            **dict(self._grid_kwargs, **{'mixin': NodesAggregateResultsMixin}))
+
+    @property
+    def breaches(self):
+        if not self.has_breaches:
+            logger.info('Threedimodel has no breaches')
+            return
+        model_name = 'breaches'
+        return Breaches(
+            H5pyResultGroup(
+                self.h5py_file, model_name, self.netcdf_file),
+                **dict(
+                    self._grid_kwargs,
+                    **{'mixin': BreachesAggregateResultsMixin})
+        )
+
+    @property
+    def pumps(self):
+        if not self.has_pumpstations:
+            logger.info('Threedimodel has no pumps')
+            return
+        model_name = 'pumps'
+        return Pumps(
+            H5pyResultGroup(self.h5py_file, model_name, self.netcdf_file),
+            **dict(self._grid_kwargs, **{'mixin': PumpsAggregateResultsMixin}))
+
+    @property
+    def time_units(self):
+        logger.info(
+            'Time units are not defined globally for aggregated results')
+        return None

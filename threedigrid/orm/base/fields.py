@@ -97,14 +97,23 @@ class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
         Optional transforms can be done here.
         """
         timeseries_filter = kwargs.get('timeseries_filter', slice(None))
+        # TODO: remove after tests
+        # if hasattr(_timeseries_filter, 'mask'):
+        #     import ipdb;ipdb.set_trace()
+        #     timeseries_filter = _timeseries_filter.mask
+        # else:
+        #     timeseries_filter = _timeseries_filter
         lookup_index = kwargs.get('lookup_index')
-
         values = []
         source_names = self._meta.composite_fields.get(name)
         for source_name in source_names:
             if source_name not in datasource.keys():
                 continue
-            values.append(datasource[source_name][timeseries_filter])
+            try:
+                values.append(datasource[source_name][timeseries_filter])
+            except IndexError:
+                import ipdb;
+                ipdb.set_trace()
 
         if not values:
             return np.array([])

@@ -1,6 +1,10 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+from __future__ import print_function
+
 from threedigrid.orm.base.timeseries_mixin import ResultMixin
+from threedigrid.orm.base.timeseries_mixin import AggregateResultMixin
 from threedigrid.orm.base.options import ModelMeta
 
 
@@ -35,7 +39,7 @@ class LinesResultsMixin(ResultMixin):
         super(LinesResultsMixin, self).__init__(**kwargs)
 
 
-class LinesAggregateResultsMixin(ResultMixin):
+class LinesAggregateResultsMixin(AggregateResultMixin):
 
     class Meta:
         __metaclass__ = ModelMeta
