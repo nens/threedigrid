@@ -86,11 +86,7 @@ class Model:
         if mixin:
             extend_instance(self, mixin)
             # pass kwargs to mixin
-            if isinstance(mixin, ResultMixin.__class__):
-                netcdf_keys = self._datasource.netcdf_file.variables.keys()
-                super(Model, self).__init__(netcdf_keys, **kwargs)
-            else:
-                super(Model, self).__init__(**kwargs)
+            super(Model, self).__init__(**kwargs)
 
         # Cache the boolean filter mask for this instance
         # after it has been computed once
