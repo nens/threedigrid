@@ -26,18 +26,17 @@ def agg_gr():
     yield gr
     gr.close()
 
+
 def test_get_timestamps_nodes(agg_gr):
     ts = agg_gr.nodes.get_timestamps('rain_avg')
     assert isinstance(ts, np.ndarray)
     assert ts.size > 0
 
+
 def test_get_timestamps_raises_attribute_error(agg_gr):
     with pytest.raises(AttributeError):
         agg_gr.nodes.get_timestamps('does_not_exist')
 
-def test_timestamps_prop_raises_attribute_error(agg_gr):
-    with pytest.raises(AttributeError):
-        agg_gr.nodes.timestamps
 
 def test_get_timestamps_lines(agg_gr):
     ts = agg_gr.nodes.get_timestamps('q_cum')
@@ -50,7 +49,7 @@ def test_get_time_unit(agg_gr):
     assert tu.startswith('seconds since ')
 
 
-#TODO
+# TODO
 # def test_get_timestamps_pumps(agg_gr):
 #     ts = agg_gr.nodes.get_timestamps('q_cum')
 #     assert isinstance(ts, np.ndarray)
@@ -59,7 +58,8 @@ def test_get_time_unit(agg_gr):
 
 def test_nodes_timeseries_start_end_time_kwargs(agg_gr):
     ts = agg_gr.nodes.get_timestamps('s1_max')
-    qs_s1_max = agg_gr.nodes.timeseries(start_time=ts[0], end_time=ts[1]).s1_max
+    qs_s1_max = agg_gr.nodes.timeseries(
+        start_time=ts[0], end_time=ts[1]).s1_max
     assert qs_s1_max.shape[0] == 2
 
 

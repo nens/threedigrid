@@ -268,7 +268,8 @@ class AggregateResultMixin(ResultMixin):
             field_timestamps = self._datasource[time_key][:]
             # Mask the field_timestamps with the timeseries_mask of
             # that field when available
-            if hasattr(self, 'timeseries_mask'):
+            if ((hasattr(self, 'timeseries_mask') and
+                 self.timeseries_mask is not None)):
                 if field_name in self.timeseries_mask:
                     field_timestamps = field_timestamps[
                         self.timeseries_mask[field_name]]
