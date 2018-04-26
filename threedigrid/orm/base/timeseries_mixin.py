@@ -131,7 +131,7 @@ class ResultMixin(object):
         Get the list of timestamps for the results
         """
         time_key = 'time'
-        if not time_key in self._datasource.keys():
+        if time_key not in self._datasource.keys():
             raise AttributeError(
                 'Result {} has no attribute {}'.format(
                     self._datasource.netcdf_file.filepath(), time_key)
@@ -140,7 +140,6 @@ class ResultMixin(object):
         if self.timeseries_mask is not None:
             value = value[self.timeseries_mask]
         return value
-
 
 
 class AggregateResultMixin(ResultMixin):
@@ -165,7 +164,7 @@ class AggregateResultMixin(ResultMixin):
 
         Example usage for start_time and end_time filter::
 
-            >>> from threedigrid.admin.gridresultadmin import GridH5AggregateResultAdmin
+            >>> from threedigrid.admin.gridresultadmin import GridH5AggregateResultAdmin # noqa
             >>> nc = "/code/tests/test_files/aggregate_results_3di.nc"
             >>> f = "/code/tests/test_files/gridadmin.h5"
             >>> gr = GridH5AggregateResultAdmin(f, nc)
@@ -173,7 +172,7 @@ class AggregateResultMixin(ResultMixin):
 
         Example usage for index filter::
 
-            >>> from threedigrid.admin.gridresultadmin import GridH5AggregateResultAdmin
+            >>> from threedigrid.admin.gridresultadmin import GridH5AggregateResultAdmin # noqa
             >>> nc = "/code/tests/test_files/aggregate_results_3di.nc"
             >>> f = "/code/tests/test_files/gridadmin.h5"
             >>> gr = GridH5AggregateResultAdmin(f, nc)
@@ -242,10 +241,17 @@ class AggregateResultMixin(ResultMixin):
 
     @property
     def timestamps(self):
-        raise AttributeError(
-            'Aggregation results do not have a global "timestamps" attribute. '
-            'Use get_timestamp(<field_name>) instead'
-        )
+        timestamps_dict = {}
+
+        for field_name, field in self._meta.get_fields().items():
+            if isinstance(field, TimeSeriesArrayField):
+                try:
+                    timestamps_dict[field_name] = self.get_timestamps(
+                        field_name)
+                except AttributeError:
+                    timestamps_dict[field_name] = np.array([])
+
+        return timestamps_dict
 
     def get_timestamps(self, field_name):
         """
@@ -259,7 +265,14 @@ class AggregateResultMixin(ResultMixin):
         time_key = 'time_' + field_name
 
         if time_key in self._datasource.keys():
-            return self._datasource[time_key][:]
+            field_timestamps = self._datasource[time_key][:]
+            # Mask the field_timestamps with the timeseries_mask of
+            # that field when available
+            if hasattr(self, 'timeseries_mask'):
+                if field_name in self.timeseries_mask:
+                    field_timestamps = field_timestamps[
+                        self.timeseries_mask[field_name]]
+            return field_timestamps
         raise AttributeError('No timestamps found for {}'.format(field_name))
 
     def get_time_unit(self, field_name):
