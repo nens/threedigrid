@@ -5,9 +5,9 @@ History
 ------------------
 
 - Added additional exporters for:
-  - 2D_GROUNDWATER
-  - 2D_OPEN_WATER
-  - 2D_VERTICAL_INFILTRATION
+    - 2D_GROUNDWATER
+    - 2D_OPEN_WATER
+    - 2D_VERTICAL_INFILTRATION
 
 - Fixed return statement of method slice (in class Model) which now takes 
   ``**new_class_kwargs``. 
