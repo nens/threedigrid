@@ -9,7 +9,7 @@ try:
 except ImportError:
     pass
 
-from admin.gridadmin import GridH5Admin
+# from admin.gridadmin import GridH5Admin
 
 try:
     __version__ = pkg_resources.get_distribution("threedigrid").version
