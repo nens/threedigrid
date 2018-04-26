@@ -21,6 +21,7 @@ from __future__ import print_function
 
 from collections import defaultdict
 from collections import namedtuple
+from itertools import product
 
 from threedigrid.numpy_utils import create_np_lookup_index_for
 from threedigrid.orm.base.fields import TimeSeriesCompositeArrayField
@@ -37,6 +38,9 @@ class Options(object):
         >>> gr = GridH5ResultAdmin(ff, f)
         >>> gr.nodes._meta.s1
         >>> s1(units=u'm', long_name=u'waterlevel', standard_name=u'water_surface_height_above_reference_datum')
+
+    ``s1`` is a namedtuple so you can retrieve the units attribute by the the ``.`` notation ``gr.nodes._meta.s1.units``
+    or using the ``_as_dict`` method ``gr.nodes._meta.s1._asdict()['units']``
 
     """
     _lookup = None  # placeholder for lookup index array
@@ -80,8 +84,10 @@ class Options(object):
         :param hide_private: fields starting with '_' will be added to the
             instance but excluded from the list of field names
         """
-        # remove private fields
+        if not self._source_exists(field_name):
+            return
         setattr(self.inst, field_name, field)
+        # remove private fields
         if hide_private and field_name.startswith('_'):
             return
         _union = set(self.inst._field_names).union({field_name})
@@ -98,15 +104,20 @@ class Options(object):
 
         for field_name, field in fields.iteritems():
             self.add_field(field_name, field, hide_private)
-        #     setattr(self, field_name, field)
-        # self._meta.update_field_names(variables, exclude_private=True)
-        # # combine with existing fields
-        #
-        # fnames = [x for x in field_names if
-        #           exclude_private and not x.startswith('_')]
-        # updated_field_names = set(
-        #     fnames).union(set(self.inst._field_names))
-        # self.inst._field_names = updated_field_names
+
+    def _source_exists(self, field_name):
+        """
+        Checks whether field_name exists in the data source.
+        Also can check composite fields
+
+        :param field_name: name of the source field name
+        :return: True if it exists False otherwise
+        """
+        if not hasattr(self.inst.Meta, 'composite_fields'):
+            return field_name in self.inst._datasource.keys()
+
+        sources = self.inst.Meta.composite_fields.get(field_name)
+        return any([x in self.inst._datasource.keys() for x in sources])
 
     def _get_meta_values(self, field_name):
         """
@@ -124,7 +135,7 @@ class Options(object):
 
         meta_values = defaultdict(list)
         for attr_name in self.inst.Meta.field_attrs:
-            if self._is_type_composite(field_name):
+            if self._is_type_composite_field(field_name):
                 meta_values[field_name].append(
                     self._get_composite_meta(field_name, attr_name)
                 )
@@ -143,7 +154,7 @@ class Options(object):
         if not hasattr(self.inst.Meta, "field_attrs"):
             return
 
-        # add the meta information the instance. Uses the field name as
+        # add the meta information to the instance. Uses the field name as
         # name. ``s1`` will be accessible like so for
         # example: ``gr.nodes._meta.s1``
         for _field in self.inst._field_names:
@@ -170,16 +181,6 @@ class Options(object):
 
         return self._lookup
 
-    def _is_type_composite(self, field_name):
-        """
-        checks if the field is a composite field,
-        like TimeSeriesCompositeArrayField
-
-        :param field_name: name of the field
-        """
-        field = self.get_field(field_name)
-        return isinstance(field, TimeSeriesCompositeArrayField)
-
     def _get_composite_meta(self, field_name, attr_name,
                             exclude_fields={'rain'}):
         """
@@ -195,7 +196,6 @@ class Options(object):
             'Mesh2D_s1' and 'Mesh1D_s1' both datasets must have the value 'm'
             for the 'units' attribute
         """
-
         source_names = self.inst.Meta.composite_fields.get(field_name)
         meta_attrs = [self.inst._datasource.attr(source_name, attr_name)
                       for source_name in source_names]
@@ -207,3 +207,74 @@ class Options(object):
                 raise
             pass
         return meta_attrs[0]
+
+    def _is_type_composite_field(self, field_name):
+        """
+        checks if the field is a composite field,
+        like TimeSeriesCompositeArrayField
+        :param field_name: name of the field
+        """
+        field = self.get_field(field_name)
+        return isinstance(field, TimeSeriesCompositeArrayField)
+
+
+class ModelMeta(type):
+    """
+    Metaclass for defining model meta classes.
+
+    If you have a complexer setup you can make use of the ``ModelMeta``
+    meta class that provides some field constructors behind the scenes.
+    Aggregation files potentially contain a lot of different aggregation
+    variables resulting in a lot of different source fields. You don't
+    manually have to define all those combinations simply define a
+    ``base_composition`` and a ``composition_vars`` dictionary. This computes
+    all necessary composite_fields automatically.
+
+    """
+
+    def __new__(mcs, name, bases, namespace, **kwds):
+        new_mixin = type.__new__(mcs, name, bases, dict(namespace))
+        # composite_fields has been set directly, do not try to compose
+        composite_fields = namespace.get('composite_fields')
+        if composite_fields:
+            return new_mixin
+
+        # get base composition and vars to combine with
+        base_composition = namespace.get('base_composition')
+        composition_vars = namespace.get('composition_vars')
+
+        # simple results
+        if not composition_vars and base_composition:
+            new_mixin.composite_fields = base_composition
+            return new_mixin
+
+        if composition_vars and not base_composition:
+            raise AttributeError(
+                'Missing base_composition attribute for the composition_vars'
+            )
+        # produce all possible combinations and add composite_fields
+        # attribute the class
+        new_mixin.composite_fields = {}
+        for k, v in composition_vars.iteritems():
+            c_field = base_composition.get(k)
+            for p in v:
+                new_key = k + '_' + p
+                agg_fields = ModelMeta.combine_vars(c_field, {p})
+                new_mixin.composite_fields[new_key] = agg_fields
+        return new_mixin
+
+    @staticmethod
+    def combine_vars(prod_a, prod_b, join_str='_'):
+        """Return the cartesian product of prod_a with prod_b, combined together with
+        join_str.
+
+        >>> combine_vars({'a', 'b'}, {'c', 'd'})
+        ['a_c', 'a_d', 'b_c', 'b_d']
+
+        :param prod_a: (iterable)
+        :param prod_b: (iterable)
+        :param join_str: (string)
+        :return: (list) ∏ (set_a, set_b)
+        """
+        return map(lambda x: x[0] + join_str + x[1],
+                   product(prod_a, prod_b))

@@ -97,8 +97,12 @@ class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
         Optional transforms can be done here.
         """
         timeseries_filter = kwargs.get('timeseries_filter', slice(None))
-        lookup_index = kwargs.get('lookup_index')
 
+        # timeseries_filter contains only [False, False,...]
+        # (empty) slices pass the condition
+        if not np.any(timeseries_filter):
+            return np.array([])
+        lookup_index = kwargs.get('lookup_index')
         values = []
         source_names = self._meta.composite_fields.get(name)
         for source_name in source_names:

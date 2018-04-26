@@ -7,30 +7,10 @@ import numpy as np
 
 import pytest
 
-from threedigrid.admin.utils import combine_vars
 from threedigrid.admin.utils import PKMapper
-from threedigrid.admin.utils import get_smallest_uint_dtype
+from threedigrid.numpy_utils import get_smallest_uint_dtype
 from threedigrid import numpy_utils
 
-def test_combine_vars():
-    a = {'a', 'b'}
-    b = {'c', 'd'}
-    result = combine_vars(a, b, '_')
-    assert result == ['a_c', 'a_d', 'b_c', 'b_d']
-
-
-def test_combine_vars_empty_set():
-    a = {'a', 'b'}
-    b = {}
-    result = combine_vars(a, b, '_')
-    assert result == []
-
-
-def test_combine_vars_invalid_combinator():
-    a = {'a', 'b'}
-    b = {'c'}
-    with pytest.raises(TypeError):
-        combine_vars(a, b, 5)
 
 def test_create_np_lookup_index_for():
     a = np.arange(6)
