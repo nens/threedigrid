@@ -162,15 +162,14 @@ class GridH5ResultAdmin(GridH5Admin):
             )
         return getattr(self, model_name[0])
 
+    @property
     def threedicore_result_version(self):
         """
         :return: version of the grid result file (if found), an empty
         string otherwise
         """
         try:
-            return self.netcdf_file.getncattr(
-            'threedicore_version'
-        )
+            return self.netcdf_file.getncattr('threedicore_version')
         except AttributeError:
             logger.error(
                 'Attribute threedicore_version could not be found in result file')  # noqa
