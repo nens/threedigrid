@@ -64,7 +64,7 @@ def test_options_get_field(opt_lines):
 def test_breach_options_get_fields(opt_breaches):
     fields = opt_breaches.get_fields()
     assert set(fields.keys()) == {
-        'levbr', 'Mesh1D_breach_width', 'levl', 'Mesh1D_breach_depth',
+        'levbr', 'width', 'levl', 'depth',
         'coordinates', 'kcu', 'levmat', 'seq_ids', 'content_pk', 'id'}
 
 
@@ -73,12 +73,8 @@ def test_pump_options_get_fields_only_names(opt_pumps):
 
     assert set(fields) == {
         'zoom_category', 'bottom_level', 'display_name', 'lower_stop_level',
-        'node_coordinates', 'coordinates', 'start_level', 'Mesh1D_q_pump',
+        'node_coordinates', 'coordinates', 'start_level', 'q_pump',
         'capacity', 'id', 'node2_id', 'node1_id'}
-
-
-def test_nodes_options_is_composite_field(opt_nodes):
-    assert opt_nodes._is_type_composite('s1') ==  True
 
 
 def test_nodes_options_get_composite_meta(opt_nodes):

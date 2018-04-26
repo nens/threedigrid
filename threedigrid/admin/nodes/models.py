@@ -22,7 +22,7 @@ from threedigrid.orm.fields import ArrayField
 from threedigrid.orm.fields import PointArrayField
 from threedigrid.orm.fields import PolygonArrayField
 from threedigrid.geo_utils import transform_xys
-from threedigrid.admin.utils import get_smallest_uint_dtype
+from threedigrid.numpy_utils import get_smallest_uint_dtype
 from threedigrid.admin.nodes import exporters
 from threedigrid.admin.nodes import subsets
 
