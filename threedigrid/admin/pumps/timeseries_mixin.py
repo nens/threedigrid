@@ -1,25 +1,62 @@
+# (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
+# -*- coding: utf-8 -*-
+"""
+"""
+
+from __future__ import unicode_literals
+from __future__ import print_function
+
 from threedigrid.orm.base.timeseries_mixin import ResultMixin
-from threedigrid.orm.base.fields import TimeSeriesArrayField
-from threedigrid.orm.constants import AGGREGATION_OPTIONS
-from threedigrid.orm.constants import PUMPS_VARIABLES
-from threedigrid.admin.utils import combine_vars
+from threedigrid.orm.base.timeseries_mixin import AggregateResultMixin
+
+from threedigrid.orm.base.options import ModelMeta
 
 
-class PumpResultsMixin(ResultMixin):
+class PumpsResultsMixin(ResultMixin):
 
-    def __init__(self, netcdf_keys, **kwargs):
-        """Instantiate a pump with netcdf results.
+    class Meta:
+        __metaclass__ = ModelMeta
 
-        Variables stored in the netcdf and related to pumps are dynamically
+        # attributes for the given fields
+        field_attrs = ['units', 'long_name', 'standard_name']
+
+        composite_fields = {'q_pump': ['Mesh1D_q_pump']}
+
+    def __init__(self, **kwargs):
+        """Instantiate a breach with netcdf results.
+
+        Variables stored in the netcdf and related to breaches are dynamically
+        added as attributes as TimeSeriesArrayField.
+
+        :param kwargs:
+        """
+        super(PumpsResultsMixin, self).__init__(**kwargs)
+
+
+class PumpsAggregateResultsMixin(AggregateResultMixin):
+
+    class Meta:
+        __metaclass__ = ModelMeta
+
+        # attributes for the given fields
+        field_attrs = ['units', 'long_name']
+
+        model_attr = 'timestamp'
+
+        # ModelMeta will combine base_composition and composition_vars
+        # to composite_fields attribute
+        base_composition = {'q_pump': ['Mesh1D_q_pump']}
+        composition_vars = {
+            'q_pump': ['avg', 'min', 'max', 'cum'],
+        }
+
+    def __init__(self, **kwargs):
+        """Instantiate a line with netcdf results.
+
+        Variables stored in the netcdf and related to lines are dynamically
         added as attributes as TimeSeriesArrayField.
 
         :param netcdf_keys: list of netcdf variables
         :param kwargs:
         """
-        super(PumpResultsMixin, self).__init__(**kwargs)
-
-        possible_vars = combine_vars(PUMPS_VARIABLES, AGGREGATION_OPTIONS)
-        possible_vars += PUMPS_VARIABLES
-        variables = set(possible_vars).intersection(netcdf_keys)
-        fields = {v: TimeSeriesArrayField() for v in variables}
-        self._meta.add_fields(fields, hide_private=True)
+        super(PumpsAggregateResultsMixin, self).__init__(**kwargs)

@@ -72,7 +72,6 @@ class Model:
         self.slice_filters = slice_filters
         self.only_fields = only_fields
         self.reproject_to_epsg = reproject_to_epsg
-        self._kwargs = kwargs
 
         self.class_kwargs = {
             'slice_filters': slice_filters,
@@ -86,11 +85,7 @@ class Model:
         if mixin:
             extend_instance(self, mixin)
             # pass kwargs to mixin
-            if isinstance(mixin, ResultMixin.__class__):
-                netcdf_keys = self._datasource.netcdf_file.variables.keys()
-                super(Model, self).__init__(netcdf_keys, **kwargs)
-            else:
-                super(Model, self).__init__(**kwargs)
+            super(Model, self).__init__(**kwargs)
 
         # Cache the boolean filter mask for this instance
         # after it has been computed once
@@ -107,7 +102,9 @@ class Model:
             x for x in dir(self.__class__)
             if isinstance(
                 getattr(self.__class__, x),
-                (ArrayField, TimeSeriesArrayField))]
+                (ArrayField, TimeSeriesArrayField)
+            )
+        ]
         self._field_names = set(self._field_names).union(set(_field_names))
 
         self.has_1d = has_1d
@@ -150,8 +147,13 @@ class Model:
 
         kwargs = {}
         if hasattr(self, 'get_timeseries_mask_filter'):
+            timeseries_filter = self.get_timeseries_mask_filter()
+            ts_filter = timeseries_filter
+            if isinstance(timeseries_filter, dict):
+                ts_filter = timeseries_filter.get(field_name)
             kwargs.update(
-                {'timeseries_filter': self.get_timeseries_mask_filter()})
+                {'timeseries_filter': ts_filter}
+            )
 
         if hasattr(self, 'lookup_fields'):
             kwargs.update({'lookup_index': self._get_lookup_index(field_name)})
@@ -533,14 +535,6 @@ class Model:
             # Only load the fields that need to be filtered
             filter_field_names = [
                 x.get_field_name() for x in self.slice_filters]
-
-            # timeseries_filter = slice(None)
-            # if hasattr(self, 'get_timeseries_mask_filter'):
-            #    timeseries_filter = self.get_timeseries_mask_filter()
-            # kwargs = {
-            #     'lookup_index': self._lookup_index,
-            #     'timeseries_filter': timeseries_filter
-            # }
 
             for name in [x for x in filter_field_names if x]:
                 selection[name] = self.get_field_value(

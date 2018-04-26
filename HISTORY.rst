@@ -4,15 +4,23 @@ History
 0.1.7 (unreleased)
 ------------------
 
-- Added additional exporters for:
+- Added additional exporters for
+
     - 2D_GROUNDWATER
     - 2D_OPEN_WATER
     - 2D_VERTICAL_INFILTRATION
 
+- Timestamps of all timeseries fields are shown for aggregation results.
+
+- Timestamps in the aggregation results are filtered when retrieving subsets of timeseries.
+
+- Introducing the ModelMeta class. Its main purpose at this moment is to compute all 
+  possible combinations of composite_fields and aggregation variables.
+
 - Fixed return statement of method slice (in class Model) which now takes 
   ``**new_class_kwargs``. 
   
-- Empty or missing datasets are now displayed as np.array(None) instead of 
+- Empty or missing datasets are now displayed as ``np.array(None)`` instead of 
   raising an error.
 
 0.1.6 (2018-04-18)
