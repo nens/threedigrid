@@ -62,7 +62,7 @@ class LeveeOgrExporter(BaseOgrExporter):
 
         for field_name, field_type in fields.iteritems():
             layer.CreateField(ogr.FieldDefn(
-                    field_name, OGR_FIELD_TYPE_MAP[field_type])
+                    field_name, const.OGR_FIELD_TYPE_MAP[field_type])
             )
         _definition = layer.GetLayerDefn()
 

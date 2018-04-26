@@ -10,7 +10,9 @@ import shutil
 
 import ogr
 
+from threedigrid.admin import constants
 from threedigrid.admin.gridadmin import GridH5Admin
+from threedigrid.admin.prepare import GridAdminH5Export
 
 from threedigrid.admin.lines.exporters import LinesOgrExporter
 
@@ -64,3 +66,34 @@ class ExporterTestGpkg(unittest.TestCase):
         layer = s.GetLayer()
         self.assertEqual(
             layer.GetFeatureCount(), line_2d_open_water_wgs84.id.size)
+
+
+class GridadminH5ExportTest(unittest.TestCase):
+
+    def setUp(self):
+        self.d = tempfile.mkdtemp()
+        self.exporter = GridAdminH5Export(grid_admin_h5_file)
+        self.exporter._dest = self.d
+
+    def tearDown(self):
+        shutil.rmtree(self.d)
+
+    def test_export_2d_groundwater(self):
+        self.exporter.export_2d_groundwater_lines()
+        result = os.path.join(self.d, constants.GROUNDWATER_LINES_SHP)
+        self.assertTrue(os.path.exists(result))
+
+    def test_export_2d_openwater_lines(self):
+        self.exporter.export_2d_openwater_lines()
+        result = os.path.join(self.d, constants.OPEN_WATER_LINES_SHP)
+        self.assertTrue(os.path.exists(result))
+
+    def test_export_2d_vertical_infiltration_lines(self):
+        self.exporter.export_2d_vertical_infiltration_lines()
+        result = os.path.join(self.d, constants.VERTICAL_INFILTRATION_LINES_SHP)
+        self.assertTrue(os.path.exists(result))
+
+    def test_export_levees(self):
+        self.exporter.export_levees()
+        result = os.path.join(self.d, constants.LEVEES_SHP)
+        self.assertTrue(os.path.exists(result))

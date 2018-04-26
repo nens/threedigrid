@@ -4,6 +4,12 @@ History
 0.1.7 (unreleased)
 ------------------
 
+- Added additional exporters for
+
+    - 2D_GROUNDWATER
+    - 2D_OPEN_WATER
+    - 2D_VERTICAL_INFILTRATION
+
 - Added method ``get_model_instance_by_field_name``  to the
   ``GridH5ResultAdmin`` class. This makes it possible to do reverse lookups
   in situations where you have a field name but do not know which model it
