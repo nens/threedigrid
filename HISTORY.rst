@@ -1,8 +1,8 @@
 History
 =======
 
-0.1.7 (unreleased)
-------------------
+0.2 (2018-04-26)
+----------------
 
 - Added additional exporters for
 
