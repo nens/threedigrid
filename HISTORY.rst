@@ -4,6 +4,17 @@ History
 0.1.7 (unreleased)
 ------------------
 
+- Added method ``get_model_instance_by_field_name``  to the
+  ``GridH5ResultAdmin`` class. This makes it possible to do reverse lookups
+  in situations where you have a field name but do not know which model it
+  belongs to. N.B the field must be unique otherwise an ``IndexError`` will
+  be raised.
+
+- Added property ``dt_timestamps`` to the timeseries_mixin module.
+
+- The version number is added to the ``__init__`` file dynamically using the
+  ``pkg_resources`` API.
+
 - Timestamps of all timeseries fields are shown for aggregation results.
 
 - Timestamps in the aggregation results are filtered when retrieving subsets of timeseries.

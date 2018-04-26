@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from __future__ import print_function
 
 import logging
+from collections import defaultdict
 import os
 
 from netCDF4 import Dataset
@@ -25,6 +26,7 @@ from threedigrid.admin.pumps.timeseries_mixin import PumpsAggregateResultsMixin
 
 from threedigrid.admin.nodes.models import Nodes
 from threedigrid.admin.gridadmin import GridH5Admin
+from threedigrid.orm.models import Model
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +35,8 @@ class GridH5ResultAdmin(GridH5Admin):
     """
     Admin interface for threedicore result queries.
     """
+    _field_model_dict = defaultdict(list)
+
     def __init__(self, h5_file_path, netcdf_file_path, file_modus='r'):
         """
 
@@ -119,6 +123,45 @@ class GridH5ResultAdmin(GridH5Admin):
             )
 
     @property
+    def __field_model_map(self):
+        """
+        :return: a dict of {<field name>: [model name, ...]}
+        """
+        if self._field_model_dict:
+            return self._field_model_dict
+
+        model_names = set()
+        for attr_name in dir(self):
+            # skip private attrs
+            if any([attr_name.startswith('__'),
+                    attr_name.startswith('_')]):
+                continue
+            attr = getattr(self, attr_name)
+            if not issubclass(type(attr), Model):
+                continue
+            model_names.add(attr_name)
+
+        for model_name in model_names:
+            for x in getattr(self, model_name)._meta.get_fields(
+                    only_names=True):
+                self._field_model_dict[x].append(model_name)
+        return self._field_model_dict
+
+    def get_model_instance_by_field_name(self, field_name):
+        """
+        :param field_name: name of a models field
+        :return: instance of the model the field belongs to
+        :raises IndexError if the field name is not unique across models
+        """
+        model_name = self.__field_model_map.get(field_name)
+        cnt = len(model_name)
+        if cnt != 1:
+            raise IndexError(
+                'Ambiguous result. Field name {} yields {} model(s)'.format(
+                    field_name, cnt)
+            )
+        return getattr(self, model_name[0])
+
     def threedicore_result_version(self):
         """
         :return: version of the grid result file (if found), an empty

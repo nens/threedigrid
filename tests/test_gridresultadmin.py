@@ -10,6 +10,8 @@ import numpy as np
 
 
 from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
+from threedigrid.admin.nodes.models import Nodes
+
 
 test_file_dir = os.path.join(
     os.getcwd(), "tests/test_files")
@@ -135,3 +137,46 @@ def test_timestamps(gr):
     n_qs = gr.nodes.timeseries(start_time=0, end_time=500)
     l_qs = gr.lines.timeseries(start_time=0, end_time=500)
     np.testing.assert_array_equal(n_qs.timestamps, l_qs.timestamps)
+
+def test_dt_timestamps(gr):
+    n_qs = gr.nodes.timeseries(start_time=0, end_time=500)
+    assert len(n_qs.dt_timestamps) == len(n_qs.timestamps)
+
+
+def test_get_model_instance_by_field_name(gr):
+    inst = gr.get_model_instance_by_field_name('s1')
+    assert isinstance(inst, Nodes)
+
+
+def test_get_model_instance_by_field_name_raises_index_error(gr):
+    with pytest.raises(IndexError):
+        gr.get_model_instance_by_field_name('zoom_category')
+
+
+# commented for now until the new aggregate.nc is finished
+
+# def test_get_node_aggregate_netcdf_results(agg_gr):
+#     assert 's1_max' in agg_gr.netcdf_file.variables.keys()
+#     assert 'vol_max' in agg_gr.netcdf_file.variables.keys()
+#     assert hasattr(agg_gr.nodes, 's1_max')
+#     assert hasattr(agg_gr.nodes, 'vol_max')
+#     assert agg_gr.nodes.s1_max.shape[0] > 0
+#     assert agg_gr.nodes.vol_max.shape[0] > 0
+#
+#
+# def test_get_line_aggregate_netcdf_results(agg_gr):
+#     assert 'q_max' in agg_gr.netcdf_file.variables.keys()
+#     assert 'u1_max' in agg_gr.netcdf_file.variables.keys()
+#     assert hasattr(agg_gr.lines, 'q_max')
+#     assert hasattr(agg_gr.lines, 'u1_max')
+#     assert agg_gr.lines.q_max.shape[0] > 0
+#     assert agg_gr.lines.u1_max.shape[0] > 0
+
+
+# def test_get_node_netcdf_results(gr):
+#     assert 's1' in gr.netcdf_file.variables.keys()
+#     assert 'vol' in gr.netcdf_file.variables.keys()
+#     assert hasattr(gr.nodes, 's1')
+#     assert hasattr(gr.nodes, 'vol')
+#     assert gr.nodes.s1.shape[0] > 0
+#     assert gr.nodes.vol.shape[0] > 0
