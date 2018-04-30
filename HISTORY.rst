@@ -1,7 +1,7 @@
 History
 =======
 
-0.2.2 (unreleased)
+0.2.2 (2018-04-30)
 ------------------
 
 - ``_get_composite_meta()`` does not raise an AssertionError anymore if
