@@ -81,14 +81,10 @@ def test_nodes_options_get_composite_meta(opt_nodes):
     assert opt_nodes._get_composite_meta('s1', 'units') == 'm'
 
 
-def test_nodes_options_get_composite_meta_error(opt_nodes):
-    with pytest.raises(AssertionError):
-        opt_nodes._get_composite_meta('rain', 'long_name', exclude_fields={})
-
-
 def test_lines_options_get_meta_values(opt_lines):
     v = opt_lines._get_meta_values('q')
     assert set(v.get('q')) == {'m3 s-1', 'Discharge on flow line', ''}
+
 
 def test_smoke_looup_idx(opt_nodes):
     idx = opt_nodes._get_lookup_index()

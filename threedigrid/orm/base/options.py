@@ -22,9 +22,12 @@ from __future__ import print_function
 from collections import defaultdict
 from collections import namedtuple
 from itertools import product
+import logging
 
 from threedigrid.numpy_utils import create_np_lookup_index_for
 from threedigrid.orm.base.fields import TimeSeriesCompositeArrayField
+
+logger = logging.getLogger(__name__)
 
 
 class Options(object):
@@ -181,31 +184,29 @@ class Options(object):
 
         return self._lookup
 
-    def _get_composite_meta(self, field_name, attr_name,
-                            exclude_fields={'rain'}):
+    def _get_composite_meta(self, field_name, attr_name):
         """
         get the attr entry for a composite field from the datasource
 
         :param field_name: field name of the model
         :param attr_name: name of the attribute from the
             ``Meta.field_attrs`` list
-        :param exclude_fields: set of fields to exclude
-        :return: the attr entry from the datasource
-        :raises: AssertionError if the entries in datasource are not
-            identical for the composite fields. If s1 for example points to
-            'Mesh2D_s1' and 'Mesh1D_s1' both datasets must have the value 'm'
-            for the 'units' attribute
+        :return: the attr entry from the datasource or an empty string if the
+            entries in datasource are not identical for the composite fields.
+            If s1 for example points to 'Mesh2D_s1' and 'Mesh1D_s1' both
+            datasets must have the value 'm' for the 'units' attribute
         """
         source_names = self.inst.Meta.composite_fields.get(field_name)
         meta_attrs = [self.inst._datasource.attr(source_name, attr_name)
                       for source_name in source_names]
         try:
             assert all(x == meta_attrs[0] for x in meta_attrs) == True, \
-                'composite fields must have the same {}'.format(attr_name)
-        except AssertionError:
-            if field_name not in exclude_fields:
-                raise
-            pass
+                'composite fields must have the same {}. ' \
+                'Failed to get meta info for field_name {} '.format(
+                    attr_name, field_name)
+        except AssertionError, _err:
+            logger.warning(_err)
+            return ''
         return meta_attrs[0]
 
     def _is_type_composite_field(self, field_name):

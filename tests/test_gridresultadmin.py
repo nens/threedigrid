@@ -148,9 +148,15 @@ def test_get_model_instance_by_field_name(gr):
     assert isinstance(inst, Nodes)
 
 
-def test_get_model_instance_by_field_name_raises_index_error(gr):
+def test_get_model_instance_by_field_name_raises_index_error_unknown_field(gr):
     with pytest.raises(IndexError):
         gr.get_model_instance_by_field_name('unknown_field')
+
+
+def test_get_model_instance_by_field_name_raises_index_error(gr):
+    with pytest.raises(IndexError):
+        gr.get_model_instance_by_field_name('zoom_category')
+
 
 
 # commented for now until the new aggregate.nc is finished
