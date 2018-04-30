@@ -150,7 +150,7 @@ def test_get_model_instance_by_field_name(gr):
 
 def test_get_model_instance_by_field_name_raises_index_error(gr):
     with pytest.raises(IndexError):
-        gr.get_model_instance_by_field_name('zoom_category')
+        gr.get_model_instance_by_field_name('unknown_field')
 
 
 # commented for now until the new aggregate.nc is finished

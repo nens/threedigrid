@@ -122,15 +122,14 @@ class GridH5ResultAdmin(GridH5Admin):
                 self.threedicore_result_version, self.threedicore_version
             )
 
-    @property
-    def __field_model_map(self):
+    def get_model_instance_by_field_name(self, field_name):
         """
-        :return: a dict of {<field name>: [model name, ...]}
+        :param field_name: name of a models field
+        :return: instance of the model the field belongs to
+        :raises IndexError if the field name is not unique across models
         """
-        if self._field_model_dict:
-            return self._field_model_dict
-
-        model_names = set()
+        model_name = None
+        model_names = []
         for attr_name in dir(self):
             # skip private attrs
             if any([attr_name.startswith('__'),
@@ -139,28 +138,21 @@ class GridH5ResultAdmin(GridH5Admin):
             attr = getattr(self, attr_name)
             if not issubclass(type(attr), Model):
                 continue
-            model_names.add(attr_name)
+            model_names.append(attr_name)
 
-        for model_name in model_names:
-            for x in getattr(self, model_name)._meta.get_fields(
+        for name in model_names:
+            for x in getattr(self, name)._meta.get_fields(
                     only_names=True):
-                self._field_model_dict[x].append(model_name)
-        return self._field_model_dict
+                if x == field_name:
+                    model_name = name
+                    break
+            if model_name is not None:
+                break
 
-    def get_model_instance_by_field_name(self, field_name):
-        """
-        :param field_name: name of a models field
-        :return: instance of the model the field belongs to
-        :raises IndexError if the field name is not unique across models
-        """
-        model_name = self.__field_model_map.get(field_name)
-        cnt = len(model_name)
-        if cnt != 1:
+        if model_name is None:
             raise IndexError(
-                'Ambiguous result. Field name {} yields {} model(s)'.format(
-                    field_name, cnt)
-            )
-        return getattr(self, model_name[0])
+                'No model found for {0}'.format(field_name))
+        return getattr(self, model_name)
 
     @property
     def threedicore_result_version(self):
