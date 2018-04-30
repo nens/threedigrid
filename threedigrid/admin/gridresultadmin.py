@@ -142,8 +142,7 @@ class GridH5ResultAdmin(GridH5Admin):
             model_names.add(attr_name)
 
         for model_name in model_names:
-            for x in getattr(self, model_name)._meta.get_fields(
-                    only_names=True):
+            for x in getattr(self, model_name)._field_names:
                 self._field_model_dict[x].append(model_name)
         return self._field_model_dict
 
@@ -154,11 +153,10 @@ class GridH5ResultAdmin(GridH5Admin):
         :raises IndexError if the field name is not unique across models
         """
         model_name = self.__field_model_map.get(field_name)
-        cnt = len(model_name)
-        if cnt != 1:
+        if not model_name or len(model_name) != 1:
             raise IndexError(
                 'Ambiguous result. Field name {} yields {} model(s)'.format(
-                    field_name, cnt)
+                    field_name, len(model_name) if model_name else 0)
             )
         return getattr(self, model_name[0])
 

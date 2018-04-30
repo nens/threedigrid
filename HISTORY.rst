@@ -4,7 +4,8 @@ History
 0.2.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- ``_get_composite_meta()`` does not raise an AssertionError anymore if
+  composite field attributes differ. Instead a warning is issued.
 
 
 0.2.1 (2018-04-26)
