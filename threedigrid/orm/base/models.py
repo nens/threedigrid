@@ -108,11 +108,19 @@ class Model:
         self._field_names = set(self._field_names).union(set(_field_names))
 
         self.has_1d = has_1d
-        self.model_name = '-'.join(
-            (self._datasource.getattr('model_name'),
-             self._datasource.getattr('model_slug'),
-             str(self._datasource.getattr('revision_nr')),
-             self._datasource.getattr('revision_hash')))
+
+    @property
+    def model_name(self):
+        try:
+            model_name = '-'.join(
+                (self._datasource.getattr('model_name'),
+                 self._datasource.getattr('model_slug'),
+                 str(self._datasource.getattr('revision_nr')),
+                 self._datasource.getattr('revision_hash')))
+        except (AttributeError, KeyError):
+            model_name = 'unknown'
+            pass
+        return model_name
 
     def _get_field(self, field_name):
         """
