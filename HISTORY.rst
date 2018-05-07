@@ -4,7 +4,8 @@ History
 0.2.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Make model name property optional. That is, 'unknown' will be returned if the 
+  name cannot be derived.   
 
 
 0.2.2 (2018-04-30)
