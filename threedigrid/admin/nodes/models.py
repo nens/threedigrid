@@ -40,6 +40,7 @@ class Nodes(Model):
     cell_coords = PolygonArrayField()
     zoom_category = ArrayField()
     node_type = ArrayField()
+
     SUBSETS = NODE_SUBSETS
 
     @property
