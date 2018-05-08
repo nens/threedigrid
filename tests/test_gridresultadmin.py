@@ -73,12 +73,12 @@ def test_pump_timeseries_index_filter(gr):
 
 
 def test_breach_timeseries_slice_filter(gr):
-    qs = gr.breaches.timeseries(indexes=slice(1, 4)).depth
+    qs = gr.breaches.timeseries(indexes=slice(1, 4)).breach_depth
     assert qs.shape[0] == 3
 
 
 def test_breach_timeseries_index_filter(gr):
-    qs = gr.breaches.timeseries(indexes=[1, 2, 3]).width
+    qs = gr.breaches.timeseries(indexes=[1, 2, 3]).breach_width
     assert qs.shape[0] == 3
 
 

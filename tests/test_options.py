@@ -64,7 +64,7 @@ def test_options_get_field(opt_lines):
 def test_breach_options_get_fields(opt_breaches):
     fields = opt_breaches.get_fields()
     assert set(fields.keys()) == {
-        'levbr', 'width', 'levl', 'depth',
+        'levbr', 'breach_width', 'levl', 'breach_depth',
         'coordinates', 'kcu', 'levmat', 'seq_ids', 'content_pk', 'id'}
 
 
