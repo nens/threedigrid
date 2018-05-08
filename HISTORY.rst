@@ -4,9 +4,10 @@ History
 0.2.3 (unreleased)
 ------------------
 
-- Make model name property optional. That is, 'unknown' will be returned if the 
-  name cannot be derived.   
+- Make model name property optional. That is, 'unknown' will be returned if the
+  name cannot be derived.
 
+- Changed Depth/width fields on breach-timeseries to breach_depth and breach_width.
 
 0.2.2 (2018-04-30)
 ------------------
