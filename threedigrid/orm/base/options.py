@@ -198,7 +198,10 @@ class Options(object):
         """
         source_names = self.inst.Meta.composite_fields.get(field_name)
         meta_attrs = [self.inst._datasource.attr(source_name, attr_name)
-                      for source_name in source_names]
+                      for source_name in source_names if self.inst._datasource.attr(source_name, attr_name)]
+
+        if meta_attrs >= 2:
+            return ''
         try:
             assert all(x == meta_attrs[0] for x in meta_attrs) == True, \
                 'composite fields must have the same {}. ' \

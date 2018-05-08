@@ -12,6 +12,7 @@ BASE_COMPOSITE_FIELDS = {
     'au': ['Mesh2D_au', 'Mesh1D_au'],
     'u1': ['Mesh2D_u1', 'Mesh1D_u1'],
     'q': ['Mesh2D_q', 'Mesh1D_q'],
+    'qp': ['Mesh2D_qp', 'Mesh1D_qp'],
     '_mesh_id': ['Mesh2DLine_id', 'Mesh1DLine_id'],  # private
 }
 
