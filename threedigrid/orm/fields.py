@@ -87,6 +87,9 @@ class LineArrayField(GeomArrayField):
                     values[2], values[3],
                     source_epsg, target_epsg)))
 
+    def get_mask_by_point(self, pnt, values):
+        return get_bbox_by_point(pnt, values)
+
     def get_mask_by_bbox(self, bbox, values,
                          include_intersections=False):
         """
