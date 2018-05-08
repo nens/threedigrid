@@ -48,8 +48,8 @@ class BreachesAggregateResultsMixin(ResultMixin):
             'width': ['Mesh1D_breach_width']
         }
         composition_vars = {
-            'depth': ['avg', 'min', 'max', 'cum'],
-            'width': ['avg', 'min', 'max', 'cum'],
+            'depth': ['avg', 'min', 'max'],
+            'width': ['avg', 'min', 'max'],
         }
 
     def __init__(self, **kwargs):

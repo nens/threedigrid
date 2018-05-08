@@ -12,8 +12,10 @@ BASE_COMPOSITE_FIELDS = {
     'au': ['Mesh2D_au', 'Mesh1D_au'],
     'u1': ['Mesh2D_u1', 'Mesh1D_u1'],
     'q': ['Mesh2D_q', 'Mesh1D_q'],
-    'qp': ['Mesh2D_qp', 'Mesh1D_qp'],
+    'qp': ['Mesh2D_qp'],
+    'up1': ['Mesh2D_up1'],
     '_mesh_id': ['Mesh2DLine_id', 'Mesh1DLine_id'],  # private
+
 }
 
 
@@ -51,9 +53,11 @@ class LinesAggregateResultsMixin(AggregateResultMixin):
         base_composition = BASE_COMPOSITE_FIELDS
 
         composition_vars = {
-            'au': ['avg'],
-            'u1': ['avg'],
-            'q': ['cum', 'cum_positive', 'cum_negative'],
+            'au': ['min', 'max', 'avg'],
+            'u1': ['min', 'max', 'avg'],
+            'q': ['min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
+            'up1': ['min', 'max', 'avg'],
+            'qp': ['min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
         }
 
 

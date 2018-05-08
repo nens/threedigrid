@@ -47,7 +47,7 @@ class PumpsAggregateResultsMixin(AggregateResultMixin):
         # to composite_fields attribute
         base_composition = {'q_pump': ['Mesh1D_q_pump']}
         composition_vars = {
-            'q_pump': ['avg', 'min', 'max', 'cum'],
+            'q_pump': ['min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
         }
 
     def __init__(self, **kwargs):
