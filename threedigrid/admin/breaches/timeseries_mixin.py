@@ -17,9 +17,8 @@ class BreachesResultsMixin(ResultMixin):
 
         # customize field names
         composite_fields = {
-            'depth': ['Mesh1D_breach_depth'],
-            'width': ['Mesh1D_breach_width']}
-
+            'breach_depth': ['Mesh1D_breach_depth'],
+            'breach_width': ['Mesh1D_breach_width']}
 
     def __init__(self, **kwargs):
         """Instantiate a breach with netcdf results.
@@ -30,10 +29,6 @@ class BreachesResultsMixin(ResultMixin):
         :param kwargs:
         """
         super(BreachesResultsMixin, self).__init__(**kwargs)
-        # field_names = ['Mesh1D_breach_depth', 'Mesh1D_breach_width']
-        # fields = {v: TimeSeriesArrayField() for v in field_names}
-        # self._meta.add_fields(fields, hide_private=True)
-
 
 class BreachesAggregateResultsMixin(ResultMixin):
 
@@ -44,12 +39,12 @@ class BreachesAggregateResultsMixin(ResultMixin):
         field_attrs = ['units', 'long_name']
 
         base_composition = {
-            'depth': ['Mesh1D_breach_depth'],
-            'width': ['Mesh1D_breach_width']
+            'breach_depth': ['Mesh1D_breach_depth'],
+            'breach_width': ['Mesh1D_breach_width']
         }
         composition_vars = {
-            'depth': ['avg', 'min', 'max'],
-            'width': ['avg', 'min', 'max'],
+            'breach_depth': ['avg', 'min', 'max'],
+            'breach_width': ['avg', 'min', 'max'],
         }
 
     def __init__(self, **kwargs):
@@ -62,6 +57,3 @@ class BreachesAggregateResultsMixin(ResultMixin):
         :param kwargs:
         """
         super(BreachesAggregateResultsMixin, self).__init__(**kwargs)
-        # field_names = combine_vars(self.field_names, self.Meta.composition_vars.values())
-        # fields = {v: TimeSeriesArrayField() for v in field_names}
-        # self._meta.add_fields(fields, hide_private=True)
