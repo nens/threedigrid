@@ -198,10 +198,10 @@ class Options(object):
         """
         source_names = self.inst.Meta.composite_fields.get(field_name)
         meta_attrs = [self.inst._datasource.attr(source_name, attr_name)
-                      for source_name in source_names if self.inst._datasource.attr(source_name, attr_name)]
+                      for source_name in source_names]
 
-        if meta_attrs >= 2:
-            return ''
+        #if meta_attrs < 2:
+        #    return ''
         try:
             assert all(x == meta_attrs[0] for x in meta_attrs) == True, \
                 'composite fields must have the same {}. ' \
@@ -258,7 +258,7 @@ class ModelMeta(type):
             )
         # produce all possible combinations and add composite_fields
         # attribute the class
-        new_mixin.composite_fields = {}
+        new_mixin.composite_fields = {u'_mesh_id': [u'Mesh2DNode_id', u'Mesh1DNode_id']}
         for k, v in composition_vars.iteritems():
             c_field = base_composition.get(k)
             for p in v:

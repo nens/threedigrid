@@ -107,12 +107,11 @@ def test_meta_composite(mm_composite):
 
 
 def test_meta_base_composition(mm_base_composite):
-    assert set(mm_base_composite.Meta.composite_fields.keys()) == {
-        'q_cum', 'q_cum_positive', 'q_cum_negative'}
+    assert {'q_cum', 'q_cum_positive', 'q_cum_negative', '_mesh_id'} == set(mm_base_composite.Meta.composite_fields.keys())
     import itertools
     assert set(list(itertools.chain(
         *mm_base_composite.Meta.composite_fields.values()))) == {
         'Mesh2D_q_cum', 'Mesh1D_q_cum', 'Mesh2D_q_cum_positive',
         'Mesh1D_q_cum_positive', 'Mesh2D_q_cum_negative',
-        'Mesh1D_q_cum_negative'
-    }
+        'Mesh1D_q_cum_negative', 'Mesh2DNode_id', 'Mesh1DNode_id'
+    } #  _mesh_id': [u'Mesh2DNode_id'

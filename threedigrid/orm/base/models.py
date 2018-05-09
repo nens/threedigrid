@@ -163,7 +163,7 @@ class Model:
                 {'timeseries_filter': ts_filter}
             )
 
-        if hasattr(self.Meta, 'lookup_fields'):
+        if self._mixin and hasattr(self.Meta, 'lookup_fields'):
             kwargs.update({'lookup_index': self._meta._get_lookup_index()})
 
         value = self.get_field_value(field_name, **kwargs)
