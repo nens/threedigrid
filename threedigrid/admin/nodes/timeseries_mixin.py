@@ -37,7 +37,7 @@ class NodesResultsMixin(ResultMixin):
         # N.B. # fields starting with '_' are private and will not be added to
         # fields property
         composite_fields = BASE_COMPOSITE_FIELDS
-
+        
         lookup_fields = ('id', '_mesh_id')
 
     def __init__(self, **kwargs):
