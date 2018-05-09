@@ -14,10 +14,11 @@ BASE_COMPOSITE_FIELDS = {
     'q': ['Mesh2D_q', 'Mesh1D_q'],
     'qp': ['Mesh2D_qp'],
     'up1': ['Mesh2D_up1'],
-    '_mesh_id': ['Mesh2DLine_id', 'Mesh1DLine_id'],  # private
-
 }
 
+COMPOSITE_MESH_FIELD = {
+    '_mesh_id': ['Mesh2DLine_id', 'Mesh1DLine_id'],  # private
+}
 
 class LinesResultsMixin(ResultMixin):
 
@@ -27,6 +28,7 @@ class LinesResultsMixin(ResultMixin):
         field_attrs = ['units', 'long_name', 'standard_name']
 
         composite_fields = BASE_COMPOSITE_FIELDS
+        composite_fields.update(COMPOSITE_MESH_FIELD)
 
         lookup_fields = ('id', '_mesh_id')
 
@@ -51,6 +53,7 @@ class LinesAggregateResultsMixin(AggregateResultMixin):
         field_attrs = ['units', 'long_name']
 
         base_composition = BASE_COMPOSITE_FIELDS
+        mesh_composition = COMPOSITE_MESH_FIELD
 
         composition_vars = {
             'au': ['min', 'max', 'avg'],

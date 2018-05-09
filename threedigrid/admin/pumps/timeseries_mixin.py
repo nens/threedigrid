@@ -11,6 +11,9 @@ from threedigrid.orm.base.timeseries_mixin import AggregateResultMixin
 
 from threedigrid.orm.base.options import ModelMeta
 
+COMPOSITE_MESH_FIELD = {
+    '_mesh_id': 'Mesh1DPump_id'
+}
 
 class PumpsResultsMixin(ResultMixin):
 
@@ -21,6 +24,7 @@ class PumpsResultsMixin(ResultMixin):
         field_attrs = ['units', 'long_name', 'standard_name']
 
         composite_fields = {'q_pump': ['Mesh1D_q_pump']}
+        composite_fields.update(COMPOSITE_MESH_FIELD)
 
     def __init__(self, **kwargs):
         """Instantiate a breach with netcdf results.
@@ -46,6 +50,7 @@ class PumpsAggregateResultsMixin(AggregateResultMixin):
         # ModelMeta will combine base_composition and composition_vars
         # to composite_fields attribute
         base_composition = {'q_pump': ['Mesh1D_q_pump']}
+        mesh_composition = COMPOSITE_MESH_FIELD
         composition_vars = {
             'q_pump': ['min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
         }

@@ -246,6 +246,7 @@ class ModelMeta(type):
         # get base composition and vars to combine with
         base_composition = namespace.get('base_composition')
         composition_vars = namespace.get('composition_vars')
+        mesh_composition = namespace.get('mesh_composition')
 
         # simple results
         if not composition_vars and base_composition:
@@ -259,9 +260,9 @@ class ModelMeta(type):
         # produce all possible combinations and add composite_fields
         # attribute the class
         new_mixin.composite_fields = {}
-        if '_mesh_id' in base_composition.keys():
-            new_mixin.composite_fields['_mesh_id'] = base_composition.get('_mesh_id')
-    
+        if mesh_composition:
+            new_mixin.composite_fields = mesh_composition
+            
         for k, v in composition_vars.iteritems():
             c_field = base_composition.get(k)
             for p in v:
