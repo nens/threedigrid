@@ -29,7 +29,7 @@ class BboxFilter(GeomFilter):
 
     def filter(self, nparray_dict):
         return self.field.get_mask_by_bbox(
-            self.bbox, nparray_dict[self.key],
+            self.bbox, nparray_dict[self.key][:],
             self.include_intersections)
 
     def filter_dict(self, nparray_dict, model_instance):
@@ -58,7 +58,7 @@ class PointFilter(GeomFilter):
 
     def filter(self, nparray_dict):
         return self.field.get_mask_by_point(
-            (self.x, self.y), nparray_dict[self.key]
+            (self.x, self.y), nparray_dict[self.key][:]
         )
 
     def filter_dict(self, nparray_dict, model_instance):
@@ -92,7 +92,7 @@ class TileFilter(GeomFilter):
     def filter(self, nparray_dict, target_epsg_code):
         return self.field.get_mask_by_tile(
             (int(self.x), int(self.y), int(self.z)),
-            target_epsg_code, nparray_dict[self.key],
+            target_epsg_code, nparray_dict[self.key][:],
             self.include_intersections)
 
     def filter_dict(self, nparray_dict, model_instance):

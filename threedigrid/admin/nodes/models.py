@@ -20,7 +20,7 @@ import numpy as np
 from threedigrid.orm.models import Model
 from threedigrid.orm.fields import ArrayField
 from threedigrid.orm.fields import PointArrayField
-from threedigrid.orm.fields import PolygonArrayField
+from threedigrid.orm.fields import PolygonArrayField, BboxArrayField
 from threedigrid.geo_utils import transform_xys
 from threedigrid.numpy_utils import get_smallest_uint_dtype
 from threedigrid.admin.nodes import exporters
@@ -37,7 +37,7 @@ class Nodes(Model):
     content_pk = ArrayField()
     seq_id = ArrayField()
     coordinates = PointArrayField()
-    cell_coords = PolygonArrayField()
+    cell_coords = BboxArrayField()
     zoom_category = ArrayField()
     node_type = ArrayField()
 
