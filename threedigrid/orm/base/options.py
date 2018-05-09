@@ -258,7 +258,10 @@ class ModelMeta(type):
             )
         # produce all possible combinations and add composite_fields
         # attribute the class
-        new_mixin.composite_fields = {u'_mesh_id': [u'Mesh2DNode_id', u'Mesh1DNode_id']}
+        new_mixin.composite_fields = {}
+        if '_mesh_id' in base_composition.keys():
+            new_mixin.composite_fields['_mesh_id'] = base_composition.get('_mesh_id')
+    
         for k, v in composition_vars.iteritems():
             c_field = base_composition.get(k)
             for p in v:
