@@ -1,7 +1,7 @@
 History
 =======
 
-0.2.3 (unreleased)
+0.2.3 (2018-05-14)
 ------------------
 
 - Fix lookup_index functionality for composite fields. 
