@@ -288,7 +288,6 @@ def create_np_lookup_index_for(search_array, index_array):
     sort_idx = np.argsort(index_array)
     lookup = sort_idx[np.searchsorted(
         index_array, search_array, sorter=sort_idx)]
-
     return lookup
 
 

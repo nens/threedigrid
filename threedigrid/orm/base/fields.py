@@ -97,7 +97,6 @@ class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
         Optional transforms can be done here.
         """
         timeseries_filter = kwargs.get('timeseries_filter', slice(None))
-
         # timeseries_filter contains only [False, False,...]
         # (empty) slices pass the condition
         if not np.any(timeseries_filter):
