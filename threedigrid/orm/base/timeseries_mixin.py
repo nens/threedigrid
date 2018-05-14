@@ -7,6 +7,7 @@ import numpy as np
 from netCDF4 import num2date
 
 from threedigrid.orm.base.fields import TimeSeriesCompositeArrayField
+from threedigrid.orm.base.fields import TimeSeriesSubsetArrayField
 from threedigrid.orm.base.fields import TimeSeriesArrayField
 
 
@@ -26,6 +27,7 @@ class ResultMixin(object):
             'timeseries_mask': self.timeseries_mask})
         if not self._done_composition and hasattr(self, 'Meta'):
             self._set_composite_field_names()
+            self._set_subset_field_names()
 
     def _set_composite_field_names(self):
 
@@ -42,6 +44,27 @@ class ResultMixin(object):
         }
         self._meta.add_fields(fields, hide_private=True)
         self.done_composition = True
+
+    def _set_subset_field_names(self):
+        if not hasattr(self, 'Meta'):
+            return
+
+        if not hasattr(self.Meta, 'subset_fields'):
+            return
+
+        fields = {}
+
+        for v, k in self.Meta.subset_fields.iteritems():
+            _source_name = k.values()
+            if not _source_name:
+                continue
+            source_name = _source_name[0]
+
+            fields[v] = TimeSeriesSubsetArrayField(
+                source_name=source_name, size=self.count
+            )
+
+        self._meta.add_fields(fields, hide_private=True)
 
     def timeseries(self, start_time=None, end_time=None, indexes=None):
         """

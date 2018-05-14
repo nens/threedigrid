@@ -14,11 +14,18 @@ BASE_COMPOSITE_FIELDS = {
     'su': ['Mesh2D_su', 'Mesh1D_su'],
     'rain': ['Mesh2D_rain', 'Mesh1D_rain'],
     'q_lat': ['Mesh2D_q_lat', 'Mesh1D_q_lat'],
-    'infiltration_rate_simple': ['Mesh2D_infiltration_rate_simple'],
-    'ucx': ['Mesh2D_ucx'],
-    'ucy': ['Mesh2D_ucy'],
-    'leak': ['Mesh2D_leak'],
     '_mesh_id': ['Mesh2DNode_id', 'Mesh1DNode_id'],
+}
+
+SUBSET_FIELDS = {
+    'infiltration_rate_simple':
+        {'2d_all': 'Mesh2D_infiltration_rate_simple'},
+    'ucx':
+        {'2d_all':'Mesh2D_ucx'},
+    'ucy':
+        {'2d_all':'Mesh2D_ucy'},
+    'leak':
+        {'2d_all':'Mesh2D_leak'},
 }
 
 
@@ -37,6 +44,7 @@ class NodesResultsMixin(ResultMixin):
         # N.B. # fields starting with '_' are private and will not be added to
         # fields property
         composite_fields = BASE_COMPOSITE_FIELDS
+        subset_fields = SUBSET_FIELDS
 
         lookup_fields = ('id', '_mesh_id')
 
@@ -71,10 +79,10 @@ class NodesAggregateResultsMixin(AggregateResultMixin):
             'su': ['min', 'max', 'avg'],
             'rain': ['min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
             'q_lat': ['min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
-            'infiltration_rate_simple': ['min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
-            'ucx': ['min', 'max', 'avg'],
-            'ucy': ['min', 'max', 'avg'],
-            'leak': ['min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
+            # 'infiltration_rate_simple': ['min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
+            # 'ucx': ['min', 'max', 'avg'],
+            # 'ucy': ['min', 'max', 'avg'],
+            # 'leak': ['min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
         }
 
         lookup_fields = ('id', '_mesh_id')

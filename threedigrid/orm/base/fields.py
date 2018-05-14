@@ -121,6 +121,69 @@ class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
             return hs[:, lookup_index]
         return hs
 
+    def __repr__(self):
+        return self.__class__.__name__
+
+
+class TimeSeriesSubsetArrayField(TimeSeriesArrayField):
+    """
+    Field for composite arrays.
+
+    Result (netCDF) files split their data into subsets, e.g. 1D and 2D.
+    A composite field can be used to combine several data source fields
+    into a single model field by specifying a composition dict. Example::
+
+        LINE_COMPOSITE_FIELDS = {
+            'au': ['Mesh1D_au', 'Mesh2D_au'],
+            'u1': ['Mesh1D_u1', 'Mesh2D_u1'],
+            'q': ['Mesh1D_q', 'Mesh2D_q']
+        }
+
+    """
+
+    def __init__(self, source_name=None, size=None, subset_idx=None):
+        self._source_name = source_name
+        self._size = size
+
+    def get_value(self, datasource, name, **kwargs):
+        """
+        :param datasource: a datasource object that can return data on
+            __getitem__()
+        :param name: the name of the section to read, e.g a HF5
+            group or netCDF variable
+        :param kwargs:
+            timeseries_filter (optional): read only a slice of
+                the time dimension
+            model_name: name of the model the field belongs to.
+                Is used for a reverse lookup of the composite fields
+            lookup_index (optional): a numpy array that will be used
+                to sort the values by this lookup index
+
+        Returns: the data from the datasource
+                 or None if 'name' is not in the datasource
+
+        Optional transforms can be done here.
+        """
+        timeseries_filter = kwargs.get('timeseries_filter', slice(None))
+        import ipdb;ipdb.set_trace()
+        subset_index = kwargs.get('subset_index')
+        # timeseries_filter contains only [False, False,...]
+        # (empty) slices pass the condition
+        if not np.any(timeseries_filter):
+            return np.array([])
+
+        lookup_index = kwargs.get('lookup_index')
+        if self._source_name not in datasource.keys():
+            return np.array([])
+        source_data = datasource[self._source_name][timeseries_filter]
+        shp = (source_data.shape[0], self._size)
+        templ = np.zeros(shp, dtype=source_data.dtype)
+        templ[:, subset_index] = source_data
+
+        # sort the stacked array by lookup
+        if lookup_index is not None:
+            return templ[:, lookup_index]
+        return templ
 
     def __repr__(self):
         return self.__class__.__name__

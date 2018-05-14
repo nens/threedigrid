@@ -54,6 +54,7 @@ class Options(object):
         """
         self.inst = inst
         self._set_field_attrs()
+        # self._set_subset_field_names()
 
     def get_fields(self, only_names=False):
         """
@@ -116,11 +117,16 @@ class Options(object):
         :param field_name: name of the source field name
         :return: True if it exists False otherwise
         """
-        if not hasattr(self.inst.Meta, 'composite_fields'):
+        if not hasattr(self.inst.Meta, 'composite_fields') or not hasattr(self.inst.Meta, 'subset_fields'):
             return field_name in self.inst._datasource.keys()
 
+
         sources = self.inst.Meta.composite_fields.get(field_name)
-        return any([x in self.inst._datasource.keys() for x in sources])
+        if sources:
+            return any([x in self.inst._datasource.keys() for x in sources])
+        sources = self.inst.Meta.subset_fields.get(field_name)
+        if sources:
+            return any([x in self.inst._datasource.keys() for x in sources.values()])
 
     def _get_meta_values(self, field_name):
         """
@@ -184,6 +190,7 @@ class Options(object):
 
         return self._lookup
 
+
     def _get_composite_meta(self, field_name, attr_name):
         """
         get the attr entry for a composite field from the datasource
@@ -200,8 +207,8 @@ class Options(object):
         meta_attrs = [self.inst._datasource.attr(source_name, attr_name)
                       for source_name in source_names]
 
-        #if meta_attrs < 2:
-        #    return ''
+        if meta_attrs < 2:
+           return ''
         try:
             assert all(x == meta_attrs[0] for x in meta_attrs) == True, \
                 'composite fields must have the same {}. ' \

@@ -24,6 +24,8 @@ from threedigrid.orm.base.fields import TimeSeriesArrayField
 from threedigrid.orm.base.filters import get_filter
 from threedigrid.orm.base.filters import SliceFilter
 from threedigrid.orm.base.timeseries_mixin import ResultMixin
+from threedigrid.orm.base.fields import TimeSeriesSubsetArrayField
+
 
 logger = logging.getLogger(__name__)
 
@@ -55,6 +57,9 @@ class Model:
     _filter_map = None
 
     _datasource = None
+
+    _cnt_1d_all = None
+    _cnt_2d_all = None
 
     def __init__(self, datasource=None, slice_filters=[],
                  epsg_code=None, only_fields=[], reproject_to_epsg=None,
@@ -110,6 +115,10 @@ class Model:
         self.has_1d = has_1d
 
     @property
+    def count(self):
+        return self.get_field_value('id').size
+
+    @property
     def model_name(self):
         try:
             model_name = '-'.join(
@@ -144,6 +153,15 @@ class Model:
         return self._meta.get_field(field_name).get_value(
             self._datasource, field_name, **kwargs)
 
+    def _get_subset_idx(self, field_name):
+        subset_dict = self.Meta.subset_fields.get(field_name)
+        if not subset_dict:
+            return
+        _subset_name = subset_dict.keys()
+        if not _subset_name:
+            return
+        return self.subset(_subset_name[0]).id
+
     def get_filtered_field_value(self, field_name):
         """
         Gets the values for the given field and applies the
@@ -165,6 +183,8 @@ class Model:
 
         if self._mixin and hasattr(self.Meta, 'lookup_fields'):
             kwargs.update({'lookup_index': self._meta._get_lookup_index()})
+        if self._mixin and hasattr(self.Meta, 'subset_fields'):
+            kwargs.update({'subset_index': self._get_subset_idx(field_name)})
 
         value = self.get_field_value(field_name, **kwargs)
 
@@ -574,6 +594,20 @@ class Model:
         if len(selection.values()) > 1:
             return np.array(selection.values())
         return selection.values()[0]
+
+    @property
+    def count_1d(self):
+        if self._cnt_1d_all is not None:
+            return self._cnt_1d_all
+        self._cnt_1d_all = self.only('id').subset('1d_all').size
+        return self._cnt_1d_all
+
+    @property
+    def count_2d(self):
+        if self._cnt_2d_all is not None:
+            return self._cnt_2d_all
+        self._cnt_2d_all = self.only('id').subset('2d_all').size
+        return self._cnt_2d_all
 
     @property
     def data(self):
