@@ -113,7 +113,7 @@ class Model:
 
     @property
     def count(self):
-        """count of all nodes (including trash element)"""
+        """count of all elements (including trash element)"""
         return self.get_field_value('id').size
 
     @property

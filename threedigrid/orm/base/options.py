@@ -54,7 +54,6 @@ class Options(object):
         """
         self.inst = inst
         self._set_field_attrs()
-        # self._set_subset_field_names()
 
     def get_fields(self, only_names=False):
         """
