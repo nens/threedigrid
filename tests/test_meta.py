@@ -114,4 +114,4 @@ def test_meta_base_composition(mm_base_composite):
         'Mesh2D_q_cum', 'Mesh1D_q_cum', 'Mesh2D_q_cum_positive',
         'Mesh1D_q_cum_positive', 'Mesh2D_q_cum_negative',
         'Mesh1D_q_cum_negative'
-    } 
+    }

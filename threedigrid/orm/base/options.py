@@ -246,7 +246,7 @@ class ModelMeta(type):
         # get base composition and vars to combine with
         base_composition = namespace.get('base_composition')
         composition_vars = namespace.get('composition_vars')
-        mesh_composition = namespace.get('mesh_composition')
+        lookup_fields = namespace.get('lookup_fields')
 
         # simple results
         if not composition_vars and base_composition:
@@ -260,15 +260,19 @@ class ModelMeta(type):
         # produce all possible combinations and add composite_fields
         # attribute the class
         new_mixin.composite_fields = {}
-        if mesh_composition:
-            new_mixin.composite_fields = mesh_composition
-            
+
         for k, v in composition_vars.iteritems():
             c_field = base_composition.get(k)
             for p in v:
                 new_key = k + '_' + p
                 agg_fields = ModelMeta.combine_vars(c_field, {p})
                 new_mixin.composite_fields[new_key] = agg_fields
+        if not lookup_fields:
+            return new_mixin
+        lookup_field = lookup_fields[1]
+        v = base_composition.get(lookup_field)
+        if v:
+            new_mixin.composite_fields[lookup_field] = v
         return new_mixin
 
     @staticmethod

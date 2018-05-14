@@ -18,11 +18,9 @@ BASE_COMPOSITE_FIELDS = {
     'ucx': ['Mesh2D_ucx'],
     'ucy': ['Mesh2D_ucy'],
     'leak': ['Mesh2D_leak'],
+    '_mesh_id': ['Mesh2DNode_id', 'Mesh1DNode_id'],
 }
 
-COMPOSITE_MESH_FIELD = {
-    '_mesh_id': ['Mesh2DNode_id', 'Mesh1DNode_id'],  # private
-}
 
 class NodesResultsMixin(ResultMixin):
 
@@ -39,8 +37,7 @@ class NodesResultsMixin(ResultMixin):
         # N.B. # fields starting with '_' are private and will not be added to
         # fields property
         composite_fields = BASE_COMPOSITE_FIELDS
-        composite_fields.update(COMPOSITE_MESH_FIELD)
-        
+
         lookup_fields = ('id', '_mesh_id')
 
     def __init__(self, **kwargs):
@@ -61,7 +58,6 @@ class NodesAggregateResultsMixin(AggregateResultMixin):
         __metaclass__ = ModelMeta
 
         base_composition = BASE_COMPOSITE_FIELDS
-        mesh_composition = COMPOSITE_MESH_FIELD
         # attributes for the given fields
         field_attrs = ['units', 'long_name']
 
