@@ -58,9 +58,6 @@ class Model:
 
     _datasource = None
 
-    _cnt_1d_all = None
-    _cnt_2d_all = None
-
     def __init__(self, datasource=None, slice_filters=[],
                  epsg_code=None, only_fields=[], reproject_to_epsg=None,
                  has_1d=None, mixin=None, timeseries_chunk_size=None,
@@ -116,6 +113,7 @@ class Model:
 
     @property
     def count(self):
+        """count of all nodes (including trash element)"""
         return self.get_field_value('id').size
 
     @property
@@ -154,6 +152,11 @@ class Model:
             self._datasource, field_name, **kwargs)
 
     def _get_subset_idx(self, field_name):
+        """
+        get an array of indexes for the given subset
+
+        :param field_name: field name
+        """
         subset_dict = self.Meta.subset_fields.get(field_name)
         if not subset_dict:
             return
@@ -594,20 +597,6 @@ class Model:
         if len(selection.values()) > 1:
             return np.array(selection.values())
         return selection.values()[0]
-
-    @property
-    def count_1d(self):
-        if self._cnt_1d_all is not None:
-            return self._cnt_1d_all
-        self._cnt_1d_all = self.only('id').subset('1d_all').size
-        return self._cnt_1d_all
-
-    @property
-    def count_2d(self):
-        if self._cnt_2d_all is not None:
-            return self._cnt_2d_all
-        self._cnt_2d_all = self.only('id').subset('2d_all').size
-        return self._cnt_2d_all
 
     @property
     def data(self):

@@ -26,15 +26,14 @@ class ResultMixin(object):
         self.class_kwargs.update({
             'timeseries_mask': self.timeseries_mask})
         if not self._done_composition and hasattr(self, 'Meta'):
-            self._set_composite_field_names()
-            self._set_subset_field_names()
+            self._set_composite_fields()
+            self._set_subset_fields()
 
-    def _set_composite_field_names(self):
+    def _set_composite_fields(self):
+        """
+        add composite fields to the instance
+        """
 
-        # composite_field_name_dict = '{model_name}_COMPOSITE_FIELDS'.format(
-        #         model_name=self.__class__.__name__.upper())
-        # if not hasattr(constants, composite_field_name_dict):
-        #     return
         if not hasattr(self.Meta, 'composite_fields'):
             return
 
@@ -43,9 +42,12 @@ class ResultMixin(object):
             for v in self.Meta.composite_fields.keys()
         }
         self._meta.add_fields(fields, hide_private=True)
-        self.done_composition = True
+        self._done_composition = True
 
-    def _set_subset_field_names(self):
+    def _set_subset_fields(self):
+        """
+        add subset fields to the instance
+        """
         if not hasattr(self, 'Meta'):
             return
 

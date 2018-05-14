@@ -254,6 +254,7 @@ class ModelMeta(type):
         base_composition = namespace.get('base_composition')
         composition_vars = namespace.get('composition_vars')
         lookup_fields = namespace.get('lookup_fields')
+        base_subset_fields = namespace.get('base_subset_fields')
 
         # simple results
         if not composition_vars and base_composition:
@@ -265,15 +266,31 @@ class ModelMeta(type):
                 'Missing base_composition attribute for the composition_vars'
             )
         # produce all possible combinations and add composite_fields
-        # attribute the class
+        # attribute to the class
         new_mixin.composite_fields = {}
 
         for k, v in composition_vars.iteritems():
             c_field = base_composition.get(k)
+            if not c_field:
+                continue
             for p in v:
                 new_key = k + '_' + p
                 agg_fields = ModelMeta.combine_vars(c_field, {p})
                 new_mixin.composite_fields[new_key] = agg_fields
+
+        if base_subset_fields:
+            new_mixin.subset_fields = {}
+            for k, v in composition_vars.iteritems():
+                subset_dict = base_subset_fields.get(k)
+                if not subset_dict:
+                    continue
+                s_field = subset_dict.values()[0]
+                s_name = subset_dict.keys()[0]
+                for p in v:
+                    new_key = k + '_' + p
+                    agg_fields = ModelMeta.combine_vars({s_field}, {p})
+                    new_mixin.subset_fields[new_key] = {s_name: agg_fields}
+
         if not lookup_fields:
             return new_mixin
         lookup_field = lookup_fields[1]

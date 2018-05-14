@@ -165,8 +165,7 @@ class TimeSeriesSubsetArrayField(TimeSeriesArrayField):
         Optional transforms can be done here.
         """
         timeseries_filter = kwargs.get('timeseries_filter', slice(None))
-        import ipdb;ipdb.set_trace()
-        subset_index = kwargs.get('subset_index')
+        subset_index = kwargs['subset_index']
         # timeseries_filter contains only [False, False,...]
         # (empty) slices pass the condition
         if not np.any(timeseries_filter):
