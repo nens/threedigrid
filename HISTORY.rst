@@ -4,6 +4,8 @@ History
 0.2.3 (unreleased)
 ------------------
 
+- Fix lookup_index functionality for composite fields. 
+
 - Make model name property optional. That is, 'unknown' will be returned if the
   name cannot be derived.
 

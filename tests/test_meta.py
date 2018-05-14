@@ -107,8 +107,7 @@ def test_meta_composite(mm_composite):
 
 
 def test_meta_base_composition(mm_base_composite):
-    assert set(mm_base_composite.Meta.composite_fields.keys()) == {
-        'q_cum', 'q_cum_positive', 'q_cum_negative'}
+    assert {'q_cum', 'q_cum_positive', 'q_cum_negative'} == set(mm_base_composite.Meta.composite_fields.keys())
     import itertools
     assert set(list(itertools.chain(
         *mm_base_composite.Meta.composite_fields.values()))) == {

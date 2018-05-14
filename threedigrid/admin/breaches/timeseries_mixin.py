@@ -29,10 +29,6 @@ class BreachesResultsMixin(ResultMixin):
         :param kwargs:
         """
         super(BreachesResultsMixin, self).__init__(**kwargs)
-        # field_names = ['Mesh1D_breach_depth', 'Mesh1D_breach_width']
-        # fields = {v: TimeSeriesArrayField() for v in field_names}
-        # self._meta.add_fields(fields, hide_private=True)
-
 
 class BreachesAggregateResultsMixin(ResultMixin):
 
@@ -47,8 +43,8 @@ class BreachesAggregateResultsMixin(ResultMixin):
             'breach_width': ['Mesh1D_breach_width']
         }
         composition_vars = {
-            'breach_depth': ['avg', 'min', 'max', 'cum'],
-            'breach_width': ['avg', 'min', 'max', 'cum'],
+            'breach_depth': ['avg', 'min', 'max'],
+            'breach_width': ['avg', 'min', 'max'],
         }
 
     def __init__(self, **kwargs):
@@ -61,7 +57,3 @@ class BreachesAggregateResultsMixin(ResultMixin):
         :param kwargs:
         """
         super(BreachesAggregateResultsMixin, self).__init__(**kwargs)
-        # field_names = combine_vars(self.field_names,
-        #     self.Meta.composition_vars.values())
-        # fields = {v: TimeSeriesArrayField() for v in field_names}
-        # self._meta.add_fields(fields, hide_private=True)

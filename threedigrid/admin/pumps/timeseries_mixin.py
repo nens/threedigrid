@@ -20,7 +20,8 @@ class PumpsResultsMixin(ResultMixin):
         # attributes for the given fields
         field_attrs = ['units', 'long_name', 'standard_name']
 
-        composite_fields = {'q_pump': ['Mesh1D_q_pump']}
+        composite_fields = {'q_pump': ['Mesh1D_q_pump'],
+                            '_mesh_id': ['Mesh1DPump_id']}
 
     def __init__(self, **kwargs):
         """Instantiate a breach with netcdf results.
@@ -45,9 +46,11 @@ class PumpsAggregateResultsMixin(AggregateResultMixin):
 
         # ModelMeta will combine base_composition and composition_vars
         # to composite_fields attribute
-        base_composition = {'q_pump': ['Mesh1D_q_pump']}
+        base_composition = {'q_pump': ['Mesh1D_q_pump'],
+                            '_mesh_id': ['Mesh1DPump_id']}
         composition_vars = {
-            'q_pump': ['avg', 'min', 'max', 'cum'],
+            'q_pump':
+                ['min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
         }
 
     def __init__(self, **kwargs):
