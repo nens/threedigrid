@@ -117,9 +117,10 @@ class Options(object):
         :param field_name: name of the source field name
         :return: True if it exists False otherwise
         """
-        if not hasattr(self.inst.Meta, 'composite_fields') or not hasattr(self.inst.Meta, 'subset_fields'):
+        _has_comp = hasattr(self.inst.Meta, 'composite_fields')
+        _has_sub = hasattr(self.inst.Meta, 'subset_fields')
+        if not _has_comp and not _has_sub:
             return field_name in self.inst._datasource.keys()
-
 
         sources = self.inst.Meta.composite_fields.get(field_name)
         if sources:
@@ -208,14 +209,14 @@ class Options(object):
                       for source_name in source_names]
 
         if meta_attrs < 2:
-           return ''
+            return ''
+
         try:
             assert all(x == meta_attrs[0] for x in meta_attrs) == True, \
                 'composite fields must have the same {}. ' \
                 'Failed to get meta info for field_name {} '.format(
                     attr_name, field_name)
         except AssertionError, _err:
-            logger.warning(_err)
             return ''
         return meta_attrs[0]
 
