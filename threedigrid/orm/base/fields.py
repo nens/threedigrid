@@ -127,7 +127,7 @@ class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
 
 class TimeSeriesSubsetArrayField(TimeSeriesArrayField):
     """
-
+    Field for subset arrays (for example only spanning the 2d section)
     """
 
     def __init__(self, source_name=None, size=None):
@@ -147,8 +147,8 @@ class TimeSeriesSubsetArrayField(TimeSeriesArrayField):
             lookup_index (optional): a numpy array that will be used
                 to sort the values by this lookup index
 
-        Returns: the data from the datasource
-                 or None if 'name' is not in the datasource
+        Returns: the data from the datasource or None if 'name' is not
+            in the datasource
 
         Optional transforms can be done here.
         """
@@ -158,7 +158,6 @@ class TimeSeriesSubsetArrayField(TimeSeriesArrayField):
         # (empty) slices pass the condition
         if not np.any(timeseries_filter):
             return np.array([])
-        import ipdb;ipdb.set_trace()
 
         lookup_index = kwargs.get('lookup_index')
         if self._source_name not in datasource.keys():
