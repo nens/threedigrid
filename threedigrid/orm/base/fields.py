@@ -127,21 +127,10 @@ class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
 
 class TimeSeriesSubsetArrayField(TimeSeriesArrayField):
     """
-    Field for composite arrays.
-
-    Result (netCDF) files split their data into subsets, e.g. 1D and 2D.
-    A composite field can be used to combine several data source fields
-    into a single model field by specifying a composition dict. Example::
-
-        LINE_COMPOSITE_FIELDS = {
-            'au': ['Mesh1D_au', 'Mesh2D_au'],
-            'u1': ['Mesh1D_u1', 'Mesh2D_u1'],
-            'q': ['Mesh1D_q', 'Mesh2D_q']
-        }
 
     """
 
-    def __init__(self, source_name=None, size=None, subset_idx=None):
+    def __init__(self, source_name=None, size=None):
         self._source_name = source_name
         self._size = size
 
@@ -154,8 +143,7 @@ class TimeSeriesSubsetArrayField(TimeSeriesArrayField):
         :param kwargs:
             timeseries_filter (optional): read only a slice of
                 the time dimension
-            model_name: name of the model the field belongs to.
-                Is used for a reverse lookup of the composite fields
+            subset_index: index array where to store the subset values
             lookup_index (optional): a numpy array that will be used
                 to sort the values by this lookup index
 
@@ -170,6 +158,7 @@ class TimeSeriesSubsetArrayField(TimeSeriesArrayField):
         # (empty) slices pass the condition
         if not np.any(timeseries_filter):
             return np.array([])
+        import ipdb;ipdb.set_trace()
 
         lookup_index = kwargs.get('lookup_index')
         if self._source_name not in datasource.keys():

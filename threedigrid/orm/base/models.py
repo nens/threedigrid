@@ -157,13 +157,15 @@ class Model:
 
         :param field_name: field name
         """
-        subset_dict = self.Meta.subset_fields.get(field_name)
+        new_inst = self.__init_class(
+            self.__class__, **{})
+        subset_dict = new_inst.Meta.subset_fields.get(field_name)
         if not subset_dict:
             return
         _subset_name = subset_dict.keys()
         if not _subset_name:
             return
-        return self.subset(_subset_name[0]).id
+        return new_inst.subset(_subset_name[0]).id
 
     def get_filtered_field_value(self, field_name):
         """
@@ -311,6 +313,17 @@ class Model:
             {'slice_filters': slice_filters})
 
         return self.__init_class(klass, **new_class_kwargs)
+
+    # def _set_subsets(self):
+    #     if not hasattr(self, 'Meta'):
+    #         return
+    #     if not hasattr(self.Meta, 'subset_fields'):
+    #         return
+    #
+    #     _subsets = set(self.Meta.subset_fields.keys())
+    #     for sset in _subsets:
+    #         idx = self._get_subset_idx(sset)
+    #         setattr(self, sset, idx)
 
     def filter(self, **kwargs):
         """
