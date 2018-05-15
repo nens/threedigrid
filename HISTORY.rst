@@ -1,7 +1,7 @@
 History
 =======
 
-0.2.4 (unreleased)
+0.2.4 (2018-05-15)
 ------------------
 
 - Introducing subset fields that can be used to query results that are collected
