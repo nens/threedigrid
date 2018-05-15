@@ -116,11 +116,17 @@ class Options(object):
         :param field_name: name of the source field name
         :return: True if it exists False otherwise
         """
-        if not hasattr(self.inst.Meta, 'composite_fields'):
+        _has_comp = hasattr(self.inst.Meta, 'composite_fields')
+        _has_sub = hasattr(self.inst.Meta, 'subset_fields')
+        if not _has_comp and not _has_sub:
             return field_name in self.inst._datasource.keys()
 
         sources = self.inst.Meta.composite_fields.get(field_name)
-        return any([x in self.inst._datasource.keys() for x in sources])
+        if sources:
+            return any([x in self.inst._datasource.keys() for x in sources])
+        sources = self.inst.Meta.subset_fields.get(field_name)
+        if sources:
+            return any([x in self.inst._datasource.keys() for x in sources.values()])
 
     def _get_meta_values(self, field_name):
         """
@@ -184,6 +190,7 @@ class Options(object):
 
         return self._lookup
 
+
     def _get_composite_meta(self, field_name, attr_name):
         """
         get the attr entry for a composite field from the datasource
@@ -200,15 +207,15 @@ class Options(object):
         meta_attrs = [self.inst._datasource.attr(source_name, attr_name)
                       for source_name in source_names]
 
-        #if meta_attrs < 2:
-        #    return ''
+        if meta_attrs < 2:
+            return ''
+
         try:
             assert all(x == meta_attrs[0] for x in meta_attrs) == True, \
                 'composite fields must have the same {}. ' \
                 'Failed to get meta info for field_name {} '.format(
                     attr_name, field_name)
         except AssertionError, _err:
-            logger.warning(_err)
             return ''
         return meta_attrs[0]
 
@@ -247,6 +254,7 @@ class ModelMeta(type):
         base_composition = namespace.get('base_composition')
         composition_vars = namespace.get('composition_vars')
         lookup_fields = namespace.get('lookup_fields')
+        base_subset_fields = namespace.get('base_subset_fields')
 
         # simple results
         if not composition_vars and base_composition:
@@ -258,15 +266,31 @@ class ModelMeta(type):
                 'Missing base_composition attribute for the composition_vars'
             )
         # produce all possible combinations and add composite_fields
-        # attribute the class
+        # attribute to the class
         new_mixin.composite_fields = {}
 
         for k, v in composition_vars.iteritems():
             c_field = base_composition.get(k)
+            if not c_field:
+                continue
             for p in v:
                 new_key = k + '_' + p
                 agg_fields = ModelMeta.combine_vars(c_field, {p})
                 new_mixin.composite_fields[new_key] = agg_fields
+
+        if base_subset_fields:
+            new_mixin.subset_fields = {}
+            for k, v in composition_vars.iteritems():
+                subset_dict = base_subset_fields.get(k)
+                if not subset_dict:
+                    continue
+                s_field = subset_dict.values()[0]
+                s_name = subset_dict.keys()[0]
+                for p in v:
+                    new_key = k + '_' + p
+                    agg_fields = ModelMeta.combine_vars({s_field}, {p})
+                    new_mixin.subset_fields[new_key] = {s_name: agg_fields}
+
         if not lookup_fields:
             return new_mixin
         lookup_field = lookup_fields[1]

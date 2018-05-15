@@ -121,6 +121,57 @@ class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
             return hs[:, lookup_index]
         return hs
 
+    def __repr__(self):
+        return self.__class__.__name__
+
+
+class TimeSeriesSubsetArrayField(TimeSeriesArrayField):
+    """
+    Field for subset arrays (for example only spanning the 2d section)
+    """
+
+    def __init__(self, source_name=None, size=None):
+        self._source_name = source_name
+        self._size = size
+
+    def get_value(self, datasource, name, **kwargs):
+        """
+        :param datasource: a datasource object that can return data on
+            __getitem__()
+        :param name: the name of the section to read, e.g a HF5
+            group or netCDF variable
+        :param kwargs:
+            timeseries_filter (optional): read only a slice of
+                the time dimension
+            subset_index: index array where to store the subset
+                values
+            lookup_index (optional): a numpy array that will be used
+                to sort the values by this lookup index
+
+        Returns: the data from the datasource or None if 'name' is not
+            in the datasource
+
+        Optional transforms can be done here.
+        """
+        timeseries_filter = kwargs.get('timeseries_filter', slice(None))
+        subset_index = kwargs['subset_index']
+        # timeseries_filter contains only [False, False,...]
+        # (empty) slices pass the condition
+        if not np.any(timeseries_filter):
+            return np.array([])
+
+        lookup_index = kwargs.get('lookup_index')
+        if self._source_name not in datasource.keys():
+            return np.array([])
+        source_data = datasource[self._source_name][timeseries_filter]
+        shp = (source_data.shape[0], self._size)
+        templ = np.zeros(shp, dtype=source_data.dtype)
+        templ[:, subset_index] = source_data
+
+        # sort the stacked array by lookup
+        if lookup_index is not None:
+            return templ[:, lookup_index]
+        return templ
 
     def __repr__(self):
         return self.__class__.__name__

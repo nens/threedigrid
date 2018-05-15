@@ -24,6 +24,8 @@ from threedigrid.orm.base.fields import TimeSeriesArrayField
 from threedigrid.orm.base.filters import get_filter
 from threedigrid.orm.base.filters import SliceFilter
 from threedigrid.orm.base.timeseries_mixin import ResultMixin
+from threedigrid.orm.base.fields import TimeSeriesSubsetArrayField
+
 
 logger = logging.getLogger(__name__)
 
@@ -110,6 +112,11 @@ class Model:
         self.has_1d = has_1d
 
     @property
+    def count(self):
+        """count of all elements (including trash element)"""
+        return self.get_field_value('id').size
+
+    @property
     def model_name(self):
         try:
             model_name = '-'.join(
@@ -144,6 +151,22 @@ class Model:
         return self._meta.get_field(field_name).get_value(
             self._datasource, field_name, **kwargs)
 
+    def _get_subset_idx(self, field_name):
+        """
+        get an array of indexes for the given subset
+
+        :param field_name: field name
+        """
+        new_inst = self.__init_class(
+            self.__class__, **{})
+        subset_dict = new_inst.Meta.subset_fields.get(field_name)
+        if not subset_dict:
+            return
+        _subset_name = subset_dict.keys()
+        if not _subset_name:
+            return
+        return new_inst.subset(_subset_name[0]).id
+
     def get_filtered_field_value(self, field_name):
         """
         Gets the values for the given field and applies the
@@ -165,6 +188,8 @@ class Model:
 
         if self._mixin and hasattr(self.Meta, 'lookup_fields'):
             kwargs.update({'lookup_index': self._meta._get_lookup_index()})
+        if self._mixin and hasattr(self.Meta, 'subset_fields'):
+            kwargs.update({'subset_index': self._get_subset_idx(field_name)})
 
         value = self.get_field_value(field_name, **kwargs)
 
@@ -288,6 +313,17 @@ class Model:
             {'slice_filters': slice_filters})
 
         return self.__init_class(klass, **new_class_kwargs)
+
+    # def _set_subsets(self):
+    #     if not hasattr(self, 'Meta'):
+    #         return
+    #     if not hasattr(self.Meta, 'subset_fields'):
+    #         return
+    #
+    #     _subsets = set(self.Meta.subset_fields.keys())
+    #     for sset in _subsets:
+    #         idx = self._get_subset_idx(sset)
+    #         setattr(self, sset, idx)
 
     def filter(self, **kwargs):
         """

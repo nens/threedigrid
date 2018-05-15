@@ -4,13 +4,14 @@ History
 0.2.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Introducing subset fields that can be used to query results that are collected
+  only for subsets of the model, like the 2D section.
 
 
 0.2.3 (2018-05-14)
 ------------------
 
-- Fix lookup_index functionality for composite fields. 
+- Fix lookup_index functionality for composite fields.
 
 - Make model name property optional. That is, 'unknown' will be returned if the
   name cannot be derived.
