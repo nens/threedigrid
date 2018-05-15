@@ -143,7 +143,8 @@ class TimeSeriesSubsetArrayField(TimeSeriesArrayField):
         :param kwargs:
             timeseries_filter (optional): read only a slice of
                 the time dimension
-            subset_index: index array where to store the subset values
+            subset_index: index array where to store the subset
+                values
             lookup_index (optional): a numpy array that will be used
                 to sort the values by this lookup index
 
