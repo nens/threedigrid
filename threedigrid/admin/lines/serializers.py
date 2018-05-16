@@ -6,13 +6,14 @@ from __future__ import print_function
 import geojson
 import json
 import numpy as np
+
 from threedigrid.admin.lines.models import Channels
 from threedigrid.admin.lines.models import Culverts
 from threedigrid.admin.lines.models import Pipes
 from threedigrid.admin.lines.models import Orifices
 from threedigrid.admin.lines.models import Weirs
 from threedigrid.admin import constants
-
+from threedigrid.orm.base.encoder import NumpyEncoder
 
 FRICTION_CHEZY = 1
 FRICTION_MANNING = 2
@@ -134,7 +135,7 @@ class ChannelsGeoJsonSerializer():
         return json.dumps({
             'type': 'FeatureCollection',
             'features': geos,
-        }, indent=self._indent)
+        }, indent=self._indent, cls=NumpyEncoder)
 
 
 class PipesGeoJsonSerializer():
@@ -224,7 +225,7 @@ class PipesGeoJsonSerializer():
         return json.dumps({
             'type': 'FeatureCollection',
             'features': geos,
-        }, indent=self._indent)
+        }, indent=self._indent, cls=NumpyEncoder)
 
 
 class WeirsGeoJsonSerializer():
@@ -299,7 +300,7 @@ class WeirsGeoJsonSerializer():
         return json.dumps({
             'type': 'FeatureCollection',
             'features': geos,
-        }, indent=self._indent)
+        }, indent=self._indent, cls=NumpyEncoder)
 
 
 class CulvertsGeoJsonSerializer():
@@ -394,7 +395,7 @@ class CulvertsGeoJsonSerializer():
         return json.dumps({
             'type': 'FeatureCollection',
             'features': geos,
-        }, indent=self._indent)
+        }, indent=self._indent, cls=NumpyEncoder)
 
 
 class OrificesGeoJsonSerializer():
@@ -466,4 +467,4 @@ class OrificesGeoJsonSerializer():
         return json.dumps({
             'type': 'FeatureCollection',
             'features': geos,
-        }, indent=self._indent)
+        }, indent=self._indent, cls=NumpyEncoder)
