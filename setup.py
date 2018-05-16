@@ -88,6 +88,6 @@ setup(
         'results': results_requirements,
     },
     url='https://github.com/nens/threedigrid',
-    version=find_version("threedigrid", "threedigrid.__init__.py"),
+    version=find_version("threedigrid", "__init__.py"),
     zip_safe=False,
 )
