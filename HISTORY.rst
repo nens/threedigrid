@@ -4,8 +4,8 @@ History
 0.2.4 (unreleased)
 ------------------
 
-- get rid of pkg_resources (because trouble with qgis), and use zest_releaser
-  (refer in setup.cfg with python-file-with-version to threedigrid/init.py )
+- Do not use ``pkg_resources`` to determine the current version but use zest_releaser to update the 
+  version string in threedigrid/init.py 
 
 
 0.2.3 (2018-05-14)
