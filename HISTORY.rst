@@ -4,7 +4,8 @@ History
 0.2.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Use the custom ``NumpyEncoder`` to convert specific numpy types to native
+  python types when calling ``(geo-)json.dumps()``.
 
 
 0.2.4 (2018-05-15)
