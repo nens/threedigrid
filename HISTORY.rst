@@ -4,7 +4,8 @@ History
 0.2.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Do not use ``pkg_resources`` to determine the current version but use zest_releaser to update the 
+  version string in threedigrid/init.py 
 
 
 0.2.5 (2018-05-16)
