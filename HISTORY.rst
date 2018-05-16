@@ -1,7 +1,7 @@
 History
 =======
 
-0.2.5 (unreleased)
+0.2.5 (2018-05-16)
 ------------------
 
 - Use the custom ``NumpyEncoder`` to convert specific numpy types to native
