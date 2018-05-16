@@ -4,13 +4,14 @@ History
 0.2.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- get rid of pkg_resources (because trouble with qgis), and use zest_releaser
+  (refer in setup.cfg with python-file-with-version to threedigrid/init.py )
 
 
 0.2.3 (2018-05-14)
 ------------------
 
-- Fix lookup_index functionality for composite fields. 
+- Fix lookup_index functionality for composite fields.
 
 - Make model name property optional. That is, 'unknown' will be returned if the
   name cannot be derived.
