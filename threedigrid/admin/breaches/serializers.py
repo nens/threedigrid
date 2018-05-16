@@ -8,6 +8,7 @@ import geojson
 import json
 from threedigrid.admin.breaches.models import Breaches
 from threedigrid.admin import constants
+from threedigrid.orm.base.encoder import NumpyEncoder
 
 
 class BreachesGeoJsonSerializer():
@@ -60,4 +61,4 @@ class BreachesGeoJsonSerializer():
         return json.dumps({
             'type': 'FeatureCollection',
             'features': self.geos,
-        }, indent=self._indent)
+        }, indent=self._indent, cls=NumpyEncoder)

@@ -7,6 +7,7 @@ import json
 import geojson
 from threedigrid.admin.pumps.models import Pumps
 from threedigrid.admin import constants
+from threedigrid.orm.base.encoder import NumpyEncoder
 
 
 def format_to_str(value, empty_value='--', format_string='%0.2f'):
@@ -80,4 +81,4 @@ class PumpsGeoJsonSerializer():
         return json.dumps({
             'type': 'FeatureCollection',
             'features': geos,
-        }, indent=self._indent)
+        }, indent=self._indent, cls=NumpyEncoder)

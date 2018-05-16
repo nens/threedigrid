@@ -9,6 +9,7 @@ from threedigrid.admin.nodes.models import AddedCalculationNodes
 from threedigrid.admin.nodes.models import ConnectionNodes
 from threedigrid.admin.nodes.models import Manholes
 from threedigrid.admin import constants
+from threedigrid.orm.base.encoder import NumpyEncoder
 
 
 class ManholesGeoJsonSerializer():
@@ -71,7 +72,7 @@ class ManholesGeoJsonSerializer():
         return json.dumps({
             'type': 'FeatureCollection',
             'features': geos,
-        }, indent=self._indent)
+        }, indent=self._indent, cls=NumpyEncoder)
 
 
 class ConnectionNodesGeoJsonSerializer():
@@ -127,7 +128,7 @@ class ConnectionNodesGeoJsonSerializer():
         return json.dumps({
             'type': 'FeatureCollection',
             'features': geos,
-        }, indent=self._indent)
+        }, indent=self._indent, cls=NumpyEncoder)
 
 
 class AddedCalculationNodesGeoJsonSerializer():
@@ -181,4 +182,4 @@ class AddedCalculationNodesGeoJsonSerializer():
         return json.dumps({
             'type': 'FeatureCollection',
             'features': geos,
-        }, indent=self._indent)
+        }, indent=self._indent, cls=NumpyEncoder)
