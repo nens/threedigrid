@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import pkg_resources
+
 # Always try to import netCDF4.Dataset
 # before importing h5py to prevent netCDF4
 # HDF errors.
@@ -9,11 +9,6 @@ try:
 except ImportError:
     pass
 
-# from admin.gridadmin import GridH5Admin
-
-try:
-    __version__ = pkg_resources.get_distribution("threedigrid").version
-except pkg_resources.DistributionNotFound:
-    # for development environments
-    __version__ = pkg_resources.find_distributions(
-        '.', only=True).next().version
+# Threedigrid version number is automatic updated with zest.releaser
+# the version number in setup.py is updated using the find_version()
+__version__ = '0.2.6.dev0'
