@@ -1,7 +1,7 @@
 History
 =======
 
-0.2.6 (unreleased)
+0.2.6 (2018-05-17)
 ------------------
 
 - Do not use ``pkg_resources`` to determine the current version but use
