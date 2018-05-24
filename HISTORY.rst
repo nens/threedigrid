@@ -4,7 +4,7 @@ History
 0.2.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add export functions for 2D to the ``export_all()`` collection.
 
 
 0.2.6 (2018-05-17)
