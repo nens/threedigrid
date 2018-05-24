@@ -269,6 +269,9 @@ class GridAdminH5Export(object):
         self.export_lines()
         self.export_grid()
         self.export_levees()
+        self.export_2d_groundwater_lines()
+        self.export_2d_openwater_lines()
+        self.export_2d_vertical_infiltration_lines()
 
     def export_nodes(self):
         """
@@ -323,7 +326,8 @@ class GridAdminH5Export(object):
         if not (self.ga.has_groundwater and self.ga.has_2d):
             logger.info(
                 "[*] Model {} does not have 2d groundwater lines, "
-                "skipping export 2d groundwater lines...".format(self.ga.model_name)
+                "skipping export 2d groundwater lines...".format(
+                    self.ga.model_name)
             )
             return
         dest = os.path.join(self._dest, constants.GROUNDWATER_LINES_SHP)
@@ -350,9 +354,11 @@ class GridAdminH5Export(object):
                     self.ga.model_name)
             )
             return
-        dest = os.path.join(self._dest, constants.VERTICAL_INFILTRATION_LINES_SHP)
-        getattr(self.ga.lines.subset(constants.SUBSET_2D_VERTICAL_INFILTRATION),
-                self._export_method)(dest)
+        dest = os.path.join(
+            self._dest, constants.VERTICAL_INFILTRATION_LINES_SHP)
+        getattr(
+            self.ga.lines.subset(constants.SUBSET_2D_VERTICAL_INFILTRATION),
+            self._export_method)(dest)
 
     def _export_groundwater_grid(self):
         if not self.ga.has_groundwater:
