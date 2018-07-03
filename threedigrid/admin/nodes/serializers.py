@@ -6,6 +6,8 @@ from __future__ import print_function
 from __future__ import absolute_import
 import geojson
 import json
+import numpy as np
+
 from threedigrid.admin.nodes.models import AddedCalculationNodes
 from threedigrid.admin.nodes.models import ConnectionNodes
 from threedigrid.admin.nodes.models import Manholes
@@ -35,12 +37,13 @@ class ManholesGeoJsonSerializer():
                 [round(x, constants.LONLAT_DIGITS)
                  for x in selection['coordinates'][:, i]])
             area = '--'
-            try:
+            _area = selection['storage_area'][i]
+            if isinstance(_area, np.bytes_):
+                _area = _area.decode('UTF-8')
+            if _area:
                 _area = float(selection['storage_area'][i])
-            except ValueError:
-                _area = selection['storage_area'][i]
-            # if _area > 0.:
-            area = _area
+            if _area and _area > 0.:
+                area = _area
 
             cn_meta = [
                     ['object_type', constants.TYPE_V2_MANHOLE],

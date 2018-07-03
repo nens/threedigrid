@@ -139,7 +139,7 @@ class Weirs(Lines):
         line_content_pk = self._datasource['content_pk'].value
         pk_mask = np.isin(line_content_pk, self.content_pk)
         raw_values = self._datasource['line_coords'].value[
-            :, (content_type == 'v2_weir') & pk_mask]
+            :, (content_type == b'v2_weir') & pk_mask]
 
         return self._get_field('line_coords').get_angles_in_degrees(
             raw_values)
