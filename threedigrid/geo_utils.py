@@ -54,13 +54,10 @@ def transform_xys(x_array, y_array, source_epsg, target_epsg):
     #     raise ImportError('')
     projections = []
     for epsg_code in (source_epsg, target_epsg):
+        if isinstance(epsg_code, bytes):
+            epsg_code = epsg_code.decode('utf-8')
         epsg_str = u'epsg:{}'.format(epsg_code)
-        try:
-            print('------------- epsg_str', epsg_str.decode('utf8'))
-            projection = pyproj.Proj(init=epsg_str.decode('utf8'))
-        except AttributeError:
-            projection = pyproj.Proj(init=epsg_str)
-            pass
+        projection = pyproj.Proj(init=epsg_str)
         projections.append(projection)
 
     return np.array(pyproj.transform(

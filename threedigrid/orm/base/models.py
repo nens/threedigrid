@@ -286,6 +286,9 @@ class Model(six.with_metaclass(ABCMeta)):
         new_slice_filters = list(self.slice_filters)  # make copy
 
         for key, value in six.iteritems(kwargs):
+            # python2/3 combat
+            if isinstance(value, str):
+                value = str.encode(value)
             splitted_key = key.split('__')
             if splitted_key[0] not in self._field_names:
                 raise ValueError(

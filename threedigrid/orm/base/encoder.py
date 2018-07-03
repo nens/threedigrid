@@ -26,5 +26,7 @@ class NumpyEncoder(json.JSONEncoder):
             return float(obj)
         elif isinstance(obj, np.ndarray):
             return obj.tolist()
+        if isinstance(obj, bytes):
+            return obj.decode('utf-8')
         else:
             return super(NumpyEncoder, self).default(obj)

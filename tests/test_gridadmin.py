@@ -43,12 +43,12 @@ class GridAdminTest(unittest.TestCase):
         # should contain values
         self.assertTrue(np.any(extent_1D != NO_DATA_VALUE))
 
-    # def test_get_extent_subset_reproject(self):
-    #     extent_1D = self.parser.get_extent_subset(
-    #         subset_name=SUBSET_1D_ALL)
-    #     extent_1D_proj = self.parser.get_extent_subset(
-    #         subset_name=SUBSET_1D_ALL, target_epsg_code='4326')
-    #     self.assertTrue(np.all(extent_1D != extent_1D_proj))
+    def test_get_extent_subset_reproject(self):
+        extent_1D = self.parser.get_extent_subset(
+            subset_name=SUBSET_1D_ALL)
+        extent_1D_proj = self.parser.get_extent_subset(
+            subset_name=SUBSET_1D_ALL, target_epsg_code='4326')
+        self.assertTrue(np.all(extent_1D != extent_1D_proj))
 
     def test_get_extent_subset_twodee(self):
         extent_2D = self.parser.get_extent_subset(

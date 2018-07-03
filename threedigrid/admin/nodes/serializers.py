@@ -34,6 +34,14 @@ class ManholesGeoJsonSerializer():
             pt = geojson.Point(
                 [round(x, constants.LONLAT_DIGITS)
                  for x in selection['coordinates'][:, i]])
+            area = '--'
+            try:
+                _area = float(selection['storage_area'][i])
+            except ValueError:
+                _area = selection['storage_area'][i]
+            # if _area > 0.:
+            area = _area
+
             cn_meta = [
                     ['object_type', constants.TYPE_V2_MANHOLE],
                     ['display_name', selection['display_name'][i]],
@@ -42,9 +50,7 @@ class ManholesGeoJsonSerializer():
                     ['calculation_type', constants.CALCULATION_TYPES.get(
                         selection['calculation_type'][i])],
                     ['shape', selection['shape'][i]],
-                    ['area', "{0} [m2]".format(
-                        selection['storage_area'][i]
-                        if selection['storage_area'][i] > 0 else '--')],
+                    ['area', area],
                     ['bottom_level', "{0} [m MSL]".format(
                         selection['bottom_level'][i])],
                     ['width', "{0} [m]".format(selection['width'][i])],
