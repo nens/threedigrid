@@ -1,5 +1,7 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
+from __future__ import unicode_literals
 import numpy as np
 import logging
 
@@ -52,8 +54,13 @@ def transform_xys(x_array, y_array, source_epsg, target_epsg):
     #     raise ImportError('')
     projections = []
     for epsg_code in (source_epsg, target_epsg):
-        epsg_str = 'epsg:{}'.format(epsg_code)
-        projection = pyproj.Proj(init=epsg_str)
+        epsg_str = u'epsg:{}'.format(epsg_code)
+        try:
+            print('------------- epsg_str', epsg_str.decode('utf8'))
+            projection = pyproj.Proj(init=epsg_str.decode('utf8'))
+        except AttributeError:
+            projection = pyproj.Proj(init=epsg_str)
+            pass
         projections.append(projection)
 
     return np.array(pyproj.transform(

@@ -6,6 +6,7 @@ Base fields
 from __future__ import unicode_literals
 from __future__ import print_function
 
+from __future__ import absolute_import
 from threedigrid.orm import constants
 
 import numpy as np
@@ -24,7 +25,7 @@ class ArrayField:
 
         Optional transforms can be done here.
         """
-        if name in datasource.keys():
+        if name in list(datasource.keys()):
             return datasource[name]
 
         return None
@@ -105,7 +106,7 @@ class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
         values = []
         source_names = self._meta.composite_fields.get(name)
         for source_name in source_names:
-            if source_name not in datasource.keys():
+            if source_name not in list(datasource.keys()):
                 continue
             values.append(datasource[source_name][timeseries_filter])
 
@@ -161,7 +162,7 @@ class TimeSeriesSubsetArrayField(TimeSeriesArrayField):
             return np.array([])
 
         lookup_index = kwargs.get('lookup_index')
-        if self._source_name not in datasource.keys():
+        if self._source_name not in list(datasource.keys()):
             return np.array([])
         source_data = datasource[self._source_name][timeseries_filter]
         shp = (source_data.shape[0], self._size)

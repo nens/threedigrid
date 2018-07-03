@@ -3,9 +3,10 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
+from __future__ import absolute_import
 import numpy as np
 
-from base.fields import ArrayField
+from .base.fields import ArrayField
 from threedigrid.numpy_utils import angle_in_degrees
 from threedigrid.numpy_utils import get_bbox_by_point
 from threedigrid.numpy_utils import reshape_flat_array
@@ -14,6 +15,7 @@ from threedigrid.geo_utils import select_points_by_tile
 from threedigrid.geo_utils import select_lines_by_tile
 from threedigrid.geo_utils import select_points_by_bbox
 from threedigrid.geo_utils import transform_xys
+from six.moves import map
 
 
 class GeomArrayField(ArrayField):
@@ -144,11 +146,9 @@ class MultiLineArrayField(GeomArrayField):
             x2_array=values[2], y2_array=values[3]
         from source_epsg to target_epsg.
         """
-        reshaped_values = map(reshape_flat_array, values)
-        transform_values = map(
-            lambda x: transform_xys(
-                x[0], x[1], source_epsg, target_epsg).flatten(),
-            reshaped_values)
+        reshaped_values = list(map(reshape_flat_array, values))
+        transform_values = [transform_xys(
+                x[0], x[1], source_epsg, target_epsg).flatten() for x in reshaped_values]
 
         return np.array(transform_values)
 

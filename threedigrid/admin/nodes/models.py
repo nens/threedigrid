@@ -15,6 +15,7 @@ For examples how to query the ``Nodes`` model see :ref:`api-label`
 from __future__ import unicode_literals
 from __future__ import print_function
 
+from __future__ import absolute_import
 import numpy as np
 
 from threedigrid.orm.models import Model
@@ -25,6 +26,7 @@ from threedigrid.geo_utils import transform_xys
 from threedigrid.numpy_utils import get_smallest_uint_dtype
 from threedigrid.admin.nodes import exporters
 from threedigrid.admin.nodes import subsets
+from six.moves import zip
 
 
 NODE_SUBSETS = {
@@ -72,10 +74,10 @@ class Nodes(Model):
         # data['coordinates'][1] += y0
 
         # Return [[node_id, coordinate_x + x0, coordinate_y + y0]]
-        return zip(
+        return list(zip(
             data['id'].tolist(),
             data['coordinates'][0].tolist(),
-            data['coordinates'][1].tolist())
+            data['coordinates'][1].tolist()))
 
 
 class AddedCalculationNodes(Nodes):
@@ -209,10 +211,10 @@ class Grid(Model):
 
         n_slice_start = np.array(_n * _size, dtype='int')
         n_slice_end = np.array((_n * _size) + _size, dtype='int')
-        n_slice = zip(n_slice_start, n_slice_end)
+        n_slice = list(zip(n_slice_start, n_slice_end))
         m_slice_start = np.array(_m * _size, dtype='int')
         m_slice_end = np.array((_m * _size) + _size, dtype='int')
-        m_slice = zip(m_slice_start, m_slice_end)
+        m_slice = list(zip(m_slice_start, m_slice_end))
 
         for ns, ms, idx in zip(n_slice, m_slice, _ind):
             axis_x = slice(*ns)

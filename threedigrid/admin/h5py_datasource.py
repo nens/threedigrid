@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
+from __future__ import absolute_import
 import logging
 from threedigrid.orm.base.datasource import DataSource
 
@@ -19,7 +20,7 @@ class H5pyGroup(DataSource):
     _h5py_file = None
 
     def __init__(self, h5py_file, group_name, meta=None, required=False):
-        if group_name not in h5py_file.keys() and not required:
+        if group_name not in list(h5py_file.keys()) and not required:
             logger.info(
                 '[*] {0} not found in file {1}, not required...'.format(
                     group_name, h5py_file)
@@ -50,7 +51,7 @@ class H5pyGroup(DataSource):
         return self._h5py_file.attrs[name]
 
     def keys(self):
-        return self._source.keys()
+        return list(self._source.keys())
 
 
 class H5pyResultGroup(H5pyGroup):
@@ -61,8 +62,8 @@ class H5pyResultGroup(H5pyGroup):
         self.netcdf_file = netcdf_file
 
     def keys(self):
-        keys = super(H5pyResultGroup, self).keys()
-        keys += self.netcdf_file.variables.keys()
+        keys = list(super(H5pyResultGroup, self).keys())
+        keys += list(self.netcdf_file.variables.keys())
         return list(set(keys))
 
     def get(self, name):

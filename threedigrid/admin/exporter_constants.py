@@ -3,6 +3,7 @@
 # is an optional install the constants have been moved to a
 # module of their own
 
+from __future__ import absolute_import
 try:
     from osgeo import ogr
 except ImportError:

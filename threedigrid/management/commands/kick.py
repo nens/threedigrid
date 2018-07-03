@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Console scripts for threedigrid."""
 
+from __future__ import absolute_import
 import click
 from IPython.terminal.embed import InteractiveShellEmbed
 

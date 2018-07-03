@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
+from __future__ import absolute_import
 import logging
 import os
 
@@ -23,6 +24,7 @@ from threedigrid.admin.nodes.prepare import (
     PrepareNodes, PrepareManholes, PrepareConnectionNodes)
 from threedigrid.admin.pumps.prepare import PreparePumps
 from threedigrid.admin.levees.models import Levees
+import six
 
 logger = logging.getLogger(__name__)
 
@@ -57,8 +59,8 @@ class GridAdminH5Prepare(object):
         # model_name, revision_number, revision_hash
         # and possible other meta data..
         if extra_attrs:
-            for key, value in extra_attrs.iteritems():
-                if isinstance(value, basestring):
+            for key, value in six.iteritems(extra_attrs):
+                if isinstance(value, six.string_types):
                     value = np.string_(value)
                 h5py_file.attrs[key] = value
 

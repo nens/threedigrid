@@ -3,12 +3,14 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
+from __future__ import absolute_import
 import numpy as np
-import constants
+from . import constants
 import logging
 
 from threedigrid.admin.utils import get_or_create_group
 from threedigrid.admin.constants import TYPE_CODE_MAP
+import six
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +23,7 @@ def get_id_map(objs_for_id_map, breach_dict):
 
     class_map = {TYPE_CODE_MAP[arg[0].__tablename__]: arg
                  for arg in objs_for_id_map if arg}
-    for name, collection in class_map.iteritems():
+    for name, collection in six.iteritems(class_map):
         collection_map = {
             entry.pk: abs(entry.id) for entry in collection
         }
@@ -100,8 +102,8 @@ class IdMapper(object):
             threedi_datasource.breach_dict)
 
         def _get_id_mapping_entry():
-            for k, v in id_map.iteritems():
-                for pk, seq_id in v.iteritems():
+            for k, v in six.iteritems(id_map):
+                for pk, seq_id in six.iteritems(v):
                     yield k, pk, seq_id
 
         dtype_dict = {'formats': [
@@ -111,7 +113,7 @@ class IdMapper(object):
         id_mapping = np.fromiter(
             _get_id_mapping_entry(),
             dtype=dtype_dict,
-            count=sum(len(v) for v in id_map.itervalues())
+            count=sum(len(v) for v in six.itervalues(id_map))
         )
         try:
             gr = get_or_create_group(

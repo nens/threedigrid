@@ -1,9 +1,12 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
 import os
 import logging
 from collections import OrderedDict
+import six
+from six.moves import range
 
 try:
     from osgeo import ogr
@@ -60,13 +63,13 @@ class LeveeOgrExporter(BaseOgrExporter):
             ('mx_depth', 'float'),
         ])
 
-        for field_name, field_type in fields.iteritems():
+        for field_name, field_type in six.iteritems(fields):
             layer.CreateField(ogr.FieldDefn(
                     field_name, const.OGR_FIELD_TYPE_MAP[field_type])
             )
         _definition = layer.GetLayerDefn()
 
-        for i in xrange(len(self._levees.geoms)):
+        for i in range(len(self._levees.geoms)):
             line = ogr.Geometry(ogr.wkbLineString)
             feature = ogr.Feature(_definition)
             linepoints = reshape_flat_array(levee_data['coords'][i]).T

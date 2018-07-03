@@ -3,12 +3,15 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
+from __future__ import absolute_import
 import logging
-from itertools import izip
+from six.moves import range
+
 from itertools import product
 from itertools import tee
 
 import numpy as np
+from six.moves import zip
 
 
 logger = logging.getLogger(__name__)
@@ -136,8 +139,8 @@ class KCUDescriptor(dict):
 
     def __init__(self, *arg, **kw):
         super(KCUDescriptor, self).__init__(*arg, **kw)
-        self.bound_keys_groundwater = [x for x in xrange(600, 1000)]
-        self.bound_keys_2d = [x for x in xrange(200, 600)]
+        self.bound_keys_groundwater = [x for x in range(600, 1000)]
+        self.bound_keys_2d = [x for x in range(200, 600)]
 
         self._descr = {
             0: '1d embedded line',
@@ -168,12 +171,12 @@ class KCUDescriptor(dict):
         return self.__getitem__(item)
 
     def values(self):
-        v = self._descr.values()
+        v = list(self._descr.values())
         v.extend(['2d boundary', '2d groundwater boundary'])
         return v
 
     def keys(self):
-        k = self._descr.keys()
+        k = list(self._descr.keys())
         k += self.bound_keys_2d
         k += self.bound_keys_groundwater
         return k
@@ -195,7 +198,7 @@ def pairwise(iterable):
     "s -> (s0,s1), (s1,s2), (s2, s3), ..."
     a, b = tee(iterable)
     next(b, None)
-    return izip(a, b)
+    return zip(a, b)
 
 
 def get_or_create_group(grid_file, group_name):

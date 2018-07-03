@@ -12,6 +12,7 @@ For an overview of the kcu types see :ref:`kcu-label`.
 from __future__ import unicode_literals
 from __future__ import print_function
 
+from __future__ import absolute_import
 import numpy as np
 
 from threedigrid.admin.lines import exporters

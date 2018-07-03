@@ -3,12 +3,14 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
+from __future__ import absolute_import
 import numpy as np
 from netCDF4 import num2date
 
 from threedigrid.orm.base.fields import TimeSeriesCompositeArrayField
 from threedigrid.orm.base.fields import TimeSeriesSubsetArrayField
 from threedigrid.orm.base.fields import TimeSeriesArrayField
+import six
 
 
 class ResultMixin(object):
@@ -56,8 +58,8 @@ class ResultMixin(object):
 
         fields = {}
 
-        for v, k in self.Meta.subset_fields.iteritems():
-            _source_name = k.values()
+        for v, k in six.iteritems(self.Meta.subset_fields):
+            _source_name = list(k.values())
             if not _source_name:
                 continue
             source_name = _source_name[0]
@@ -157,7 +159,7 @@ class ResultMixin(object):
         Get the list of timestamps for the results
         """
         time_key = 'time'
-        if time_key not in self._datasource.keys():
+        if time_key not in list(self._datasource.keys()):
             raise AttributeError(
                 'Result {} has no attribute {}'.format(
                     self._datasource.netcdf_file.filepath(), time_key)
@@ -169,13 +171,10 @@ class ResultMixin(object):
 
     @property
     def dt_timestamps(self):
-        return map(
-            lambda t: t.isoformat(),
-            num2date(
+        return [t.isoformat() for t in num2date(
                 self.timestamps,
                 units=self._datasource.get('time').getncattr('units')
-            )
-        )
+            )]
 
 class AggregateResultMixin(ResultMixin):
     """
@@ -218,7 +217,7 @@ class AggregateResultMixin(ResultMixin):
         """
         self.timeseries_mask = {}
         field_names = self._meta.get_fields()
-        for field_name, field_inst in field_names.iteritems():
+        for field_name, field_inst in six.iteritems(field_names):
             if not isinstance(field_inst, TimeSeriesArrayField):
                 continue
             ts = self.get_timestamps(field_name)
@@ -299,7 +298,7 @@ class AggregateResultMixin(ResultMixin):
 
         time_key = 'time_' + field_name
 
-        if time_key in self._datasource.keys():
+        if time_key in list(self._datasource.keys()):
             field_timestamps = self._datasource[time_key][:]
             # Mask the field_timestamps with the timeseries_mask of
             # that field when available
@@ -321,7 +320,7 @@ class AggregateResultMixin(ResultMixin):
 
         time_key = 'time_' + field_name
 
-        if time_key in self._datasource.keys():
+        if time_key in list(self._datasource.keys()):
             arr = self._datasource[time_key]
             try:
                 return arr.getncattr('units')

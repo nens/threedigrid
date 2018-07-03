@@ -10,6 +10,7 @@ import pytest
 
 from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
 from threedigrid.orm.base.options import ModelMeta
+import six
 
 test_file_dir = os.path.join(
     os.getcwd(), "tests/test_files")
@@ -30,7 +31,7 @@ def test_combine_vars():
     a = {'a', 'b'}
     b = {'c', 'd'}
     result = ModelMeta.combine_vars(a, b, '_')
-    assert result == ['a_c', 'a_d', 'b_c', 'b_d']
+    assert set(result) == {'a_c', 'a_d', 'b_c', 'b_d'}
 
 
 def test_combine_vars_empty_set():
@@ -59,10 +60,7 @@ BASE_COMPOSITE_FIELDS = {
 def mm_composite():
     class TestMetaComposition(object):
 
-        class Meta:
-            __metaclass__ = ModelMeta
-
-            # taken from the lines timeseries mixin
+        class Meta(six.with_metaclass(ModelMeta)):
             composite_fields = {
                 'au': ['Mesh2D_au', 'Mesh1D_au'],
             }
@@ -75,10 +73,7 @@ def mm_composite():
 def mm_base_composite():
     class TestMetaBase(object):
 
-        class Meta:
-            __metaclass__ = ModelMeta
-
-            # taken from the lines timeseries mixin
+        class Meta(six.with_metaclass(ModelMeta)):
             base_composition = {
                 'q': ['Mesh2D_q', 'Mesh1D_q'],
             }
@@ -95,8 +90,8 @@ def test_meta_error():
     # must define a composite_fields dict
     with pytest.raises(AttributeError):
         class TestMetaComposition(object):
-            class Meta:
-                __metaclass__ = ModelMeta
+            class Meta(six.with_metaclass(ModelMeta)):
+                pass
 
         TestMetaComposition()
 
@@ -110,7 +105,7 @@ def test_meta_base_composition(mm_base_composite):
     assert {'q_cum', 'q_cum_positive', 'q_cum_negative'} == set(mm_base_composite.Meta.composite_fields.keys())
     import itertools
     assert set(list(itertools.chain(
-        *mm_base_composite.Meta.composite_fields.values()))) == {
+        *list(mm_base_composite.Meta.composite_fields.values())))) == {
         'Mesh2D_q_cum', 'Mesh1D_q_cum', 'Mesh2D_q_cum_positive',
         'Mesh1D_q_cum_positive', 'Mesh2D_q_cum_negative',
         'Mesh1D_q_cum_negative'

@@ -4,6 +4,7 @@
 # Always try to import netCDF4.Dataset
 # before importing h5py to prevent netCDF4
 # HDF errors.
+from __future__ import absolute_import
 try:
     from netCDF4 import Dataset
 except ImportError:

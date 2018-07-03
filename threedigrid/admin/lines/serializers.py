@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
+from __future__ import absolute_import
 import geojson
 import json
 import numpy as np
@@ -14,6 +15,7 @@ from threedigrid.admin.lines.models import Orifices
 from threedigrid.admin.lines.models import Weirs
 from threedigrid.admin import constants
 from threedigrid.orm.base.encoder import NumpyEncoder
+from six.moves import range
 
 FRICTION_CHEZY = 1
 FRICTION_MANNING = 2
@@ -89,7 +91,7 @@ class ChannelsGeoJsonSerializer():
                 "Can't return data as geojson "
                 "for selection without geometries")
 
-        for i in xrange(selection['id'].shape[-1]):
+        for i in range(selection['id'].shape[-1]):
             # Pack line_coords as [[x1, y1], [x2, y2]]
             # rounded with LONLAT_DIGITS
             lines = geojson.LineString(
@@ -159,7 +161,7 @@ class PipesGeoJsonSerializer():
                 "Can't return data as geojson "
                 "for selection without geometries")
 
-        for i in xrange(selection['id'].shape[-1]):
+        for i in range(selection['id'].shape[-1]):
             # Pack line_coords as [[x1, y1], [x2, y2]]
             # rounded with LONLAT_DIGITS
             lines = geojson.LineString(
@@ -249,7 +251,7 @@ class WeirsGeoJsonSerializer():
 
         geos = []
 
-        for i in xrange(selection['id'].shape[-1]):
+        for i in range(selection['id'].shape[-1]):
             # Pack line_coords as [[x1, y1], [x2, y2]]
             # rounded with LONLAT_DIGITS
             lines = geojson.Point(
@@ -325,7 +327,7 @@ class CulvertsGeoJsonSerializer():
                 "Can't return data as geojson "
                 "for selection without geometries")
 
-        for i in xrange(selection['id'].shape[-1]):
+        for i in range(selection['id'].shape[-1]):
             # Pack line_coords as [[x1, y1], [x2, y2]]
             # rounded with LONLAT_DIGITS
             lines = geojson.LineString(
@@ -415,7 +417,7 @@ class OrificesGeoJsonSerializer():
 
         geos = []
 
-        for i in xrange(selection['id'].shape[-1]):
+        for i in range(selection['id'].shape[-1]):
             # Pack line_coords as [[x1, y1], [x2, y2]]
             # rounded with LONLAT_DIGITS
             lines = geojson.LineString(

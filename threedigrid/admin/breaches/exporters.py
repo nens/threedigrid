@@ -23,9 +23,12 @@ For an overview of supported drivers call::
 from __future__ import unicode_literals
 from __future__ import print_function
 
+from __future__ import absolute_import
 import os
 import logging
 from collections import OrderedDict
+import six
+from six.moves import range
 
 try:
     from osgeo import ogr
@@ -80,7 +83,7 @@ class BreachesOgrExporter(BaseOgrExporter):
             ('kcu_descr', 'str'),
             ('cont_pk', 'int'),
         ])
-        for field_name, field_type in fields.iteritems():
+        for field_name, field_type in six.iteritems(fields):
             layer.CreateField(
                 ogr.FieldDefn(
                     str(field_name),
@@ -90,7 +93,7 @@ class BreachesOgrExporter(BaseOgrExporter):
         _definition = layer.GetLayerDefn()
         points = reshape_flat_array(selection['coordinates']).T
 
-        for i in xrange(selection['id'].size):
+        for i in range(selection['id'].size):
             feature = ogr.Feature(_definition)
             point = ogr.Geometry(ogr.wkbPoint)
             point.AddPoint(points[i][0], points[i][1])
