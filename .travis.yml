@@ -9,7 +9,7 @@ services:
   - docker
 
 before_install:
-  - docker build -t threedigrid/test Dockerfile_ci
+  - docker build -t threedigrid/test . -f Dockerfile_ci
 
 script:
   - docker run --rm threedigrid/test /bin/bash -c "source /usr/local/venvs/py36/bin/activate && pytest --cov=threedigrid"
