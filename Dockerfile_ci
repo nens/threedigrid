@@ -1,0 +1,39 @@
+FROM ubuntu:xenial
+
+MAINTAINER lars.claussen <lars.claussen@nelen-schuurmans.nl>
+
+# Change the date to force rebuilding the whole image
+ENV REFRESHED_AT 2018-03-02
+
+# system dependencies
+RUN apt-get update && \
+    apt-get install -y \
+    git \
+    python3-pip \
+    python3-gdal \
+    python-pip \
+    python-gdal \
+    libhdf5-serial-dev \
+    netcdf-bin \
+    libnetcdf-dev \
+    software-properties-common \
+&& rm -rf /var/lib/apt/lists/*
+
+RUN add-apt-repository -y ppa:deadsnakes/ppa && apt update && apt-get install -y python3.6 python3.6-dev
+RUN add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable && apt update && apt upgrade -y
+
+
+RUN pip install pipenv
+WORKDIR /code
+COPY . /code
+RUN virtualenv /usr/local/venvs/py36 --system-site-packages --python=python3.6 && \
+  /bin/bash -c "source /usr/local/venvs/py36/bin/activate && \
+  pip install -I -r requirements.txt && \
+  pip install -I -r requirements_dev.txt && \
+  pip install -I --editable /code/."
+RUN  virtualenv /usr/local/venvs/py27 --system-site-packages --python=python2.7 && \
+ /bin/bash -c "source /usr/local/venvs/py27/bin/activate && \
+ pip install -I -r requirements.txt && \
+ pip install -I -r requirements_dev.txt && \
+ pip install -I --editable /code/."
+

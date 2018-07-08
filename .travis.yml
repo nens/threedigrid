@@ -4,15 +4,16 @@ sudo: required
 language: python
 python:
   - 2.7
-#  - 3.5
-#  - 3.6
 
 services:
   - docker
 
 before_install:
-  - docker build -t threedigrid/test .
+  - docker build -t threedigrid/test Dockerfile_ci
 
 script:
-  - docker run --rm threedigrid/test pytest --cov=threedigrid
-  - docker run --rm threedigrid/test bash -c 'cd /code/docs && sphinx-build -nW -b html -d _build/doctrees . _build/html'
+  - docker run --rm threedigrid/test /bin/bash -c "source /usr/local/venvs/py36/bin/activate && pytest --cov=threedigrid"
+  - docker run --rm threedigrid/test bash -c 'source /usr/local/venvs/py36/bin/activate && cd /code/docs && sphinx-build -nW -b html -d _build/doctrees . _build/html'
+
+  - docker run --rm threedigrid/test /bin/bash -c "source /usr/local/venvs/py27/bin/activate && pytest --cov=threedigrid"
+  - docker run --rm threedigrid/test bash -c 'source /usr/local/venvs/py27/bin/activate && cd /code/docs && sphinx-build -nW -b html -d _build/doctrees . _build/html'
