@@ -114,7 +114,9 @@ class Model:
     @property
     def count(self):
         """count of all elements (including trash element)"""
-        return self.get_filtered_field_value('id').size
+        if self.class_kwargs.get('slice_filters'):
+            return self.get_filtered_field_value('id').size
+        return self.get_field_value('id').size
 
     @property
     def model_name(self):
@@ -175,7 +177,6 @@ class Model:
         :param field_name: name of the models field
         :return: numpy array containing the filtered fields values
         """
-
         kwargs = {}
         if hasattr(self, 'get_timeseries_mask_filter'):
             timeseries_filter = self.get_timeseries_mask_filter()
