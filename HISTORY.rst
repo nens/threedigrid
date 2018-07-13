@@ -4,7 +4,8 @@ History
 0.2.8 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Bug fix for issue #44: use the method ``get_filtered_field_value()`` instead
+  of ``get_field_value()`` for the count property.
 
 
 0.2.7 (2018-05-24)

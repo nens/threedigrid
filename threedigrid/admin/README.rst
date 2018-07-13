@@ -79,6 +79,17 @@ The filtering is lazy, that is, to retrieve data you have to call data explicitl
 
     ga.lines.filter(lik__eq=4).data  # will return an ordered dict
 
+**Non spatial filters**
+
+This is an overview of the different basic filters that are available:
+
+    - eq ("Equals")
+    - ne: ("Not equals")
+    - gt: ("Greater than")
+    - gte: ("Greater than equals")
+    - lt: ("Less than")
+    - lte': ("Less than equals")
+    - in: ("In collection")
 
 **Spatial filters**
 

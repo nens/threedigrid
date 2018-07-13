@@ -64,10 +64,6 @@ class Lines(Model):
         ]
 
     @property
-    def v2_channels(self):
-        return self.filter(content_type='v2_channel')
-
-    @property
     def pipes(self):
         return self._filter_as(Pipes, content_type='v2_pipe')
 

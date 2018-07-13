@@ -55,7 +55,7 @@ class ResultMixin(object):
             return
 
         fields = {}
-
+        count = self.get_field_value('id').size
         for v, k in self.Meta.subset_fields.iteritems():
             _source_name = k.values()
             if not _source_name:
@@ -63,7 +63,7 @@ class ResultMixin(object):
             source_name = _source_name[0]
 
             fields[v] = TimeSeriesSubsetArrayField(
-                source_name=source_name, size=self.count
+                source_name=source_name, size=count
             )
 
         self._meta.add_fields(fields, hide_private=True)
