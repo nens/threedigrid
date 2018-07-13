@@ -54,7 +54,7 @@ class GridH5ResultAdmin(GridH5Admin):
     def set_timeseries_chunk_size(self, new_chunk_size):
         """
         overwrite the default chunk size for timeseries queries.
-        :param new_chunk_size <int> or <slice>: new chunk size for
+        :param new_chunk_size <int>: new chunk size for
             timeseries queries
         :raises ValueError when the given value is less than 1
         """
