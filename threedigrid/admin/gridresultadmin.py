@@ -173,6 +173,10 @@ class GridH5ResultAdmin(GridH5Admin):
                 'Attribute threedicore_version could not be found in result file')  # noqa
         return ''
 
+    def close(self):
+        super(GridH5ResultAdmin, self).close()
+        self.netcdf_file.close()
+
 
 class GridH5AggregateResultAdmin(GridH5ResultAdmin):
     """
