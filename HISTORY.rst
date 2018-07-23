@@ -1,7 +1,7 @@
 History
 =======
 
-0.2.8 (unreleased)
+0.2.8 (2018-07-23)
 ------------------
 
 - Bug fix for issue #44: use the method ``get_filtered_field_value()`` instead
