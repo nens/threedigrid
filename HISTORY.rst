@@ -1,10 +1,19 @@
 History
 =======
 
-0.2.8 (unreleased)
+0.2.9 (unreleased)
 ------------------
 
 - Nothing changed yet.
+
+
+0.2.8 (2018-07-23)
+------------------
+
+- Bug fix for issue #44: use the method ``get_filtered_field_value()`` instead
+  of ``get_field_value()`` for the count property.
+
+- Properly closes netcdf-file in ``GridH5ResultAdmin``.
 
 
 0.2.7 (2018-05-24)
