@@ -74,4 +74,3 @@ class GridAdminSerializerTest(unittest.TestCase):
         self.assertEqual(len(feat), pumps.id.size)
         self.assertEqual(
             feat[0]['properties']['object_type'], 'v2_pumpstation')
-

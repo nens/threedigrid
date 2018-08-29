@@ -103,11 +103,12 @@ def test_meta_error():
 
 def test_meta_composite(mm_composite):
     assert mm_composite.Meta.composite_fields == {
-        'au': ['Mesh2D_au', 'Mesh1D_au'],}
+        'au': ['Mesh2D_au', 'Mesh1D_au']}
 
 
 def test_meta_base_composition(mm_base_composite):
-    assert {'q_cum', 'q_cum_positive', 'q_cum_negative'} == set(mm_base_composite.Meta.composite_fields.keys())
+    assert {'q_cum', 'q_cum_positive', 'q_cum_negative'} == set(
+        mm_base_composite.Meta.composite_fields.keys())
     import itertools
     assert set(list(itertools.chain(
         *mm_base_composite.Meta.composite_fields.values()))) == {

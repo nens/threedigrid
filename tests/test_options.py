@@ -28,6 +28,7 @@ def gr():
     yield gr
     gr.close()
 
+
 @pytest.fixture()
 def opt_nodes(gr):
     opt = Options(gr.nodes)
@@ -53,12 +54,12 @@ def opt_pumps(gr):
 
 
 def test_options_nodes(opt_nodes):
-    assert isinstance(opt_nodes.inst, Nodes) == True
+    assert isinstance(opt_nodes.inst, Nodes)
 
 
 def test_options_get_field(opt_lines):
     field = opt_lines.get_field('au')
-    assert isinstance(field, TimeSeriesCompositeArrayField) == True
+    assert isinstance(field, TimeSeriesCompositeArrayField)
 
 
 def test_breach_options_get_fields(opt_breaches):
