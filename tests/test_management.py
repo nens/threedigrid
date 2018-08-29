@@ -51,4 +51,4 @@ def test_command_export_to():
          ]
     )
     assert result.exit_code == 0
-    assert (os.path.exists(test_shp)) == True
+    assert (os.path.exists(test_shp))

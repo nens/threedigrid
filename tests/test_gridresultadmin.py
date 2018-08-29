@@ -35,7 +35,6 @@ def test_nodes_timeseries_start_end_time_kwargs(gr):
 
 
 def test_nodes_timeseries_with_subset(gr):
-    ts = gr.nodes.timestamps
     qs_s1 = gr.nodes.subset('1d_all').timeseries(start_time=0, end_time=500).s1
     assert qs_s1.shape[0] == 18 and qs_s1.shape[1] > 0
 
@@ -86,13 +85,16 @@ def test_lines_timeseries_index_filter(gr):
     qs_u1 = gr.lines.timeseries(indexes=[1, 2, 3, 4, 5]).u1
     assert qs_u1.shape[0] == 5
 
+
 def test_lines_timeseries_slice_filter(gr):
     qs_u1 = gr.lines.timeseries(indexes=slice(1, 4)).u1
     assert qs_u1.shape[0] == 3
 
+
 def test_lines_timeseries_with_subset(gr):
     qs_u1 = gr.lines.subset('1d_all').timeseries(indexes=slice(1, 4)).u1
     assert qs_u1.shape[0] == 3 and qs_u1.shape[1] > 0
+
 
 def test_set_timeseries_chunk_size(gr):
     # default should be 10
@@ -138,6 +140,7 @@ def test_timestamps(gr):
     l_qs = gr.lines.timeseries(start_time=0, end_time=500)
     np.testing.assert_array_equal(n_qs.timestamps, l_qs.timestamps)
 
+
 def test_dt_timestamps(gr):
     n_qs = gr.nodes.timeseries(start_time=0, end_time=500)
     assert len(n_qs.dt_timestamps) == len(n_qs.timestamps)
@@ -156,7 +159,6 @@ def test_get_model_instance_by_field_name_raises_index_error_unknown_field(gr):
 def test_get_model_instance_by_field_name_raises_index_error(gr):
     with pytest.raises(IndexError):
         gr.get_model_instance_by_field_name('zoom_category')
-
 
 
 # commented for now until the new aggregate.nc is finished
