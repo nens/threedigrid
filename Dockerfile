@@ -7,21 +7,24 @@ ENV REFRESHED_AT 2018-03-02
 
 # system dependencies
 RUN apt-get update && apt-get install -y \
-    git \
-    python-pip \
-    python-gdal \
-    libhdf5-serial-dev \
-    netcdf-bin \
-    libnetcdf-dev \
     software-properties-common \
+&& add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable \
+&& apt-get update && apt-get install -y \
+   curl \
+   git \
+   libhdf5-serial-dev \
+   libnetcdf-dev \
+   netcdf-bin \
+   python-dev \
+   python-gdal \
 && rm -rf /var/lib/apt/lists/*
 
-RUN add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable && apt update && apt upgrade -y
+# There are issues with upgrading python-pip managed by apt.
+RUN curl -s https://bootstrap.pypa.io/get-pip.py | python
 
-RUN pip install --upgrade pip
 WORKDIR /code
-COPY requirements_dev.txt /code/requirements_dev.txt
+COPY requirements* /code/
+RUN pip install -r requirements.txt
 RUN pip install -r requirements_dev.txt
-COPY requirements.txt /code/requirements.txt
-COPY . /code
-RUN pip install --editable /code/.[geo,results]
+COPY . /code/
+RUN pip install --editable .[geo,results]

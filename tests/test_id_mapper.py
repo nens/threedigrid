@@ -29,12 +29,12 @@ class TestIdMapperByCode(unittest.TestCase):
     def test_get_channels_by_code(self):
         tc = TYPE_CODE_MAP['v2_channel']
         qs = self.id_mapper.get_by_code(tc)
-        assert np.all(qs['obj_code'] == tc) == True
+        assert np.all(qs['obj_code'] == tc)
 
     def test_get_culvert_by_code(self):
         tc = TYPE_CODE_MAP['v2_culvert']
         qs = self.id_mapper.get_by_code(tc)
-        assert np.all(qs['obj_code'] == tc) == True
+        assert np.all(qs['obj_code'] == tc)
 
 
 class TestIdMapperByName(unittest.TestCase):
@@ -45,9 +45,9 @@ class TestIdMapperByName(unittest.TestCase):
     def test_get_channels_by_code(self):
         tc = TYPE_CODE_MAP['v2_channel']
         qs = self.id_mapper.get_by_name('v2_channel')
-        assert np.all(qs['obj_code'] == tc) == True
+        assert np.all(qs['obj_code'] == tc)
 
     def test_get_culvert_by_code(self):
         tc = TYPE_CODE_MAP['v2_culvert']
         qs = self.id_mapper.get_by_name('v2_culvert')
-        assert np.all(qs['obj_code'] == tc) == True
+        assert np.all(qs['obj_code'] == tc)
