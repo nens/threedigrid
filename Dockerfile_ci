@@ -5,6 +5,10 @@ MAINTAINER lars.claussen <lars.claussen@nelen-schuurmans.nl>
 # Change the date to force rebuilding the whole image.
 ENV REFRESHED_AT 2018-03-02
 
+# http://click.pocoo.org/5/python3/#python-3-surrogate-handling
+ENV LANG C.UTF-8
+ENV LC_ALL=C.UTF-8
+
 # Add deadsnakes PPA for additional Python versions.
 # Add ubuntugis PPA. A recent GDAL version is required by the GPKG driver.
 RUN apt-get update && apt-get install -y software-properties-common \
@@ -20,11 +24,13 @@ RUN apt-get update && apt-get install -y \
     netcdf-bin \
     python-dev \
     python-gdal \
+    python3-dev \
+    python3-gdal \
 && rm -rf /var/lib/apt/lists/*
 
 # Avoid issues with upgrading an apt-managed pip.
 RUN curl -s https://bootstrap.pypa.io/get-pip.py | python
- 
+
 RUN pip install virtualenv
 WORKDIR /code
 COPY . /code/
@@ -35,6 +41,12 @@ RUN virtualenv /usr/local/venvs/py27 --system-site-packages --python=python2.7 &
  pip install -I -r requirements_dev.txt && \
  pip install -I --editable /code/."
 
+RUN virtualenv /usr/local/venvs/py35 --system-site-packages --python=python3.5 && \
+  /bin/bash -c "source /usr/local/venvs/py35/bin/activate && \
+  pip install -I -r requirements.txt && \
+  pip install -I -r requirements_dev.txt && \
+  pip install -I --editable /code/."
+ 
 # RUN virtualenv /usr/local/venvs/py36 --system-site-packages --python=python3.6 && \
 #   /bin/bash -c "source /usr/local/venvs/py36/bin/activate && \
 #   pip install -I -r requirements.txt && \
