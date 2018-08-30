@@ -8,7 +8,7 @@ import unittest
 import tempfile
 import shutil
 
-import ogr
+from osgeo import ogr
 
 from threedigrid.admin import constants
 from threedigrid.admin.gridadmin import GridH5Admin

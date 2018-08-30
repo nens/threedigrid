@@ -17,7 +17,6 @@ RUN apt-get update && apt-get install -y \
     libnetcdf-dev \
     netcdf-bin \
     python-dev \
-    python-gdal \
 && rm -rf /var/lib/apt/lists/*
 
 # Avoid issues with upgrading an apt-managed pip.

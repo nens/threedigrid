@@ -12,8 +12,11 @@ before_install:
   - docker build -f Dockerfile_ci -t threedigrid:test .
 
 script:
-  - docker run --rm threedigrid:test /usr/local/venvs/py27/bin/pytest --cov=threedigrid --flake8
-  - docker run --rm threedigrid:test bash -c 'source /usr/local/venvs/py27/bin/activate && cd /code/docs && sphinx-build -nW -b html -d _build/doctrees . _build/html'
+  - docker run --rm threedigrid:test venvs/py27/bin/pytest --cov=threedigrid --flake8
+  - docker run --rm threedigrid:test bash -c 'source venvs/py27/bin/activate && cd /code/docs && sphinx-build -nW -b html -d _build/doctrees . _build/html'
 
-  - docker run --rm threedigrid:test /usr/local/venvs/py35/bin/pytest --cov=threedigrid --flake8
-  - docker run --rm threedigrid:test bash -c 'source /usr/local/venvs/py35/bin/activate && cd /code/docs && sphinx-build -nW -b html -d _build/doctrees . _build/html'
+  - docker run --rm threedigrid:test venvs/py35/bin/pytest --cov=threedigrid --flake8
+  - docker run --rm threedigrid:test bash -c 'source venvs/py35/bin/activate && cd /code/docs && sphinx-build -nW -b html -d _build/doctrees . _build/html'
+
+  - docker run --rm threedigrid:test venvs/py36/bin/pytest --cov=threedigrid --flake8
+  - docker run --rm threedigrid:test bash -c 'source venvs/py36/bin/activate && cd /code/docs && sphinx-build -nW -b html -d _build/doctrees . _build/html'

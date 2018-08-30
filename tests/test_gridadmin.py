@@ -9,7 +9,7 @@ import tempfile
 import shutil
 
 import numpy as np
-import ogr
+from osgeo import ogr
 
 from threedigrid.admin.gridadmin import GridH5Admin
 from threedigrid.admin.nodes.exporters import CellsOgrExporter

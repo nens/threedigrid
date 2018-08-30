@@ -11,7 +11,7 @@ except ImportError:
     pyproj = None
 
 try:
-    import osr
+    from osgeo import osr
 except ImportError:
     osr = None
 
