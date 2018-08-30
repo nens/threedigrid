@@ -2,38 +2,41 @@ FROM ubuntu:xenial
 
 MAINTAINER lars.claussen <lars.claussen@nelen-schuurmans.nl>
 
-# Change the date to force rebuilding the whole image
+# Change the date to force rebuilding the whole image.
 ENV REFRESHED_AT 2018-03-02
 
-# system dependencies
-RUN apt-get update && \
-    apt-get install -y \
-    git \
-    python3-pip \
-    python3-gdal \
-    python-pip \
-    python-gdal \
-    libhdf5-serial-dev \
-    netcdf-bin \
-    libnetcdf-dev \
-    software-properties-common \
+# Add deadsnakes PPA for additional Python versions.
+# Add ubuntugis PPA. A recent GDAL version is required by the GPKG driver.
+RUN apt-get update && apt-get install -y software-properties-common \
+&& add-apt-repository -y ppa:deadsnakes/ppa \
+&& add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable \
 && rm -rf /var/lib/apt/lists/*
 
-RUN add-apt-repository -y ppa:deadsnakes/ppa && apt update && apt-get install -y python3.6 python3.6-dev
-RUN add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable && apt update && apt upgrade -y
+# System dependencies.
+RUN apt-get update && apt-get install -y \
+    curl \
+    libhdf5-serial-dev \
+    libnetcdf-dev \
+    netcdf-bin \
+    python-dev \
+    python-gdal \
+&& rm -rf /var/lib/apt/lists/*
 
-
-RUN pip install pipenv
+# Avoid issues with upgrading an apt-managed pip.
+RUN curl -s https://bootstrap.pypa.io/get-pip.py | python
+ 
+RUN pip install virtualenv
 WORKDIR /code
-COPY . /code
-RUN virtualenv /usr/local/venvs/py36 --system-site-packages --python=python3.6 && \
-  /bin/bash -c "source /usr/local/venvs/py36/bin/activate && \
-  pip install -I -r requirements.txt && \
-  pip install -I -r requirements_dev.txt && \
-  pip install -I --editable /code/."
-RUN  virtualenv /usr/local/venvs/py27 --system-site-packages --python=python2.7 && \
+COPY . /code/
+
+RUN virtualenv /usr/local/venvs/py27 --system-site-packages --python=python2.7 && \
  /bin/bash -c "source /usr/local/venvs/py27/bin/activate && \
  pip install -I -r requirements.txt && \
  pip install -I -r requirements_dev.txt && \
  pip install -I --editable /code/."
 
+# RUN virtualenv /usr/local/venvs/py36 --system-site-packages --python=python3.6 && \
+#   /bin/bash -c "source /usr/local/venvs/py36/bin/activate && \
+#   pip install -I -r requirements.txt && \
+#   pip install -I -r requirements_dev.txt && \
+#   pip install -I --editable /code/."
