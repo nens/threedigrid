@@ -7,7 +7,7 @@ ENV REFRESHED_AT 2018-03-02
 
 # http://click.pocoo.org/5/python3/#python-3-surrogate-handling
 ENV LANG C.UTF-8
-ENV LC_ALL=C.UTF-8
+ENV LC_ALL C.UTF-8
 
 # Add deadsnakes PPA for additional Python versions (Python 3.6).
 # Add ubuntugis PPA. A recent GDAL version is required by the GPKG driver.
