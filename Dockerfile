@@ -2,24 +2,25 @@ FROM ubuntu:xenial
 
 MAINTAINER lars.claussen <lars.claussen@nelen-schuurmans.nl>
 
-# Change the date to force rebuilding the whole image
+# Change the date to force rebuilding the whole image.
 ENV REFRESHED_AT 2018-03-02
 
-# system dependencies
-RUN apt-get update && apt-get install -y \
-    software-properties-common \
-&& add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable \
-&& apt-get update && apt-get install -y \
-   curl \
-   git \
-   libhdf5-serial-dev \
-   libnetcdf-dev \
-   netcdf-bin \
-   python-dev \
-   python-gdal \
+# Add ubuntugis PPA. A recent GDAL version is required by the GPKG driver.
+RUN apt-get update && apt-get install -y software-properties-common \
+&& add-apt-repository -y ppa:ubuntugis/ppa \
 && rm -rf /var/lib/apt/lists/*
 
-# There are issues with upgrading python-pip managed by apt.
+# System dependencies.
+RUN apt-get update && apt-get install -y \
+    curl \
+    libhdf5-serial-dev \
+    libnetcdf-dev \
+    netcdf-bin \
+    python-dev \
+    python-gdal \
+&& rm -rf /var/lib/apt/lists/*
+
+# Avoid issues with upgrading an apt-managed pip.
 RUN curl -s https://bootstrap.pypa.io/get-pip.py | python
 
 WORKDIR /code
