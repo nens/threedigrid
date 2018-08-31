@@ -5,13 +5,14 @@ python:
 
 addons:
   apt:
-    sources:
-      - sourceline: ppa:ubuntugis/ppa
     packages:
       - libgdal-dev
       - libhdf5-serial-dev
       - libnetcdf-dev
       - netcdf-bin
+    sources:
+      - sourceline: ppa:ubuntugis/ppa
+    update: true
 
 install:
   - pip install -r requirements.txt
