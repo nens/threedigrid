@@ -9,7 +9,7 @@ cache: pip
 before_install:
   - sudo add-apt-repository -y ppa:ubuntugis/ppa
   - sudo apt-get update
-  - sudo apt-get install -y libgdal-dev libhdf5-serial-dev libnetcdf-dev netcdf-bin
+  - sudo apt-get install -y libgdal-dev libhdf5-serial-dev libnetcdf-dev
 
 install:
   - pip install -r requirements.txt -e .
