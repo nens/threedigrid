@@ -1,18 +1,20 @@
-# Config file for automatic testing at travis-ci.org
-sudo: required
+dist: xenial
+language: python
+python:
+  - "2.7"
 
-services:
-  - docker
+addons:
+  apt:
+    packages:
+      - libgdal-dev
+      - libhdf5-serial-dev
+      - libnetcdf-dev
+      - netcdf-bin
 
-before_install:
-  - docker build -f Dockerfile_ci -t threedigrid:test .
+install:
+  - pip install -r requirements.txt
+  - pip install -r requirements_dev.txt
+  - pip install -e .
 
 script:
-  - docker run --rm threedigrid:test venvs/py27/bin/pytest --cov=threedigrid --flake8
-  - docker run --rm threedigrid:test bash -c 'source venvs/py27/bin/activate && cd /code/docs && sphinx-build -nW -b html -d _build/doctrees . _build/html'
-
-  - docker run --rm threedigrid:test venvs/py35/bin/pytest --cov=threedigrid --flake8
-  - docker run --rm threedigrid:test bash -c 'source venvs/py35/bin/activate && cd /code/docs && sphinx-build -nW -b html -d _build/doctrees . _build/html'
-
-  - docker run --rm threedigrid:test venvs/py36/bin/pytest --cov=threedigrid --flake8
-  - docker run --rm threedigrid:test bash -c 'source venvs/py36/bin/activate && cd /code/docs && sphinx-build -nW -b html -d _build/doctrees . _build/html'
+  - pytest
