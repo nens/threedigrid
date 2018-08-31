@@ -23,13 +23,13 @@ RUN apt-get update && apt-get install -y \
     libhdf5-serial-dev \
     libnetcdf-dev \
     netcdf-bin \
-    python2.7-dev \
+    python-dev \
     python3.5-dev \
     python3.6-dev \
 && rm -rf /var/lib/apt/lists/*
 
 # Avoid issues with upgrading an apt-managed pip.
-RUN curl -s https://bootstrap.pypa.io/get-pip.py | python2.7
+RUN curl -s https://bootstrap.pypa.io/get-pip.py | python
 
 RUN pip install virtualenv
 WORKDIR /code
