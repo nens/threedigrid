@@ -42,10 +42,12 @@ class Options(object):
         >>> ff = "/code/tests/test_files/gridadmin.h5"
         >>> gr = GridH5ResultAdmin(ff, f)
         >>> gr.nodes._meta.s1
-        >>> s1(units=u'm', long_name=u'waterlevel', standard_name=u'water_surface_height_above_reference_datum')
+        >>> s1(units=u'm', long_name=u'waterlevel',
+        ...     standard_name=u'water_surface_height_above_reference_datum')
 
-    ``s1`` is a namedtuple so you can retrieve the units attribute by the the ``.`` notation ``gr.nodes._meta.s1.units``
-    or using the ``_as_dict`` method ``gr.nodes._meta.s1._asdict()['units']``
+    ``s1`` is a namedtuple so you can retrieve the units attribute by the ``.``
+    notation ``gr.nodes._meta.s1.units`` or using the ``_as_dict`` method
+    ``gr.nodes._meta.s1._asdict()['units']``
 
     """
     _lookup = None  # placeholder for lookup index array

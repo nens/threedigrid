@@ -118,7 +118,6 @@ class PrepareLines(object):
 
         return line_geometries
 
-
     @staticmethod
     def _cut_geometries(geom, start_x, start_y, end_x, end_y, kcu_array):
         """

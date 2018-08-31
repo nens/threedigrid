@@ -23,10 +23,10 @@ class GeomArrayField(ArrayField):
     Base geometry field
     """
     def reproject(self, values, source_epsg, target_epsg):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     def to_centroid(self, values):
-        raise NotImplemented()
+        raise NotImplementedError()
 
 
 class PointArrayField(GeomArrayField):
@@ -147,8 +147,10 @@ class MultiLineArrayField(GeomArrayField):
         from source_epsg to target_epsg.
         """
         reshaped_values = list(map(reshape_flat_array, values))
-        transform_values = [transform_xys(
-                x[0], x[1], source_epsg, target_epsg).flatten() for x in reshaped_values]
+        transform_values = [
+            transform_xys(x[0], x[1], source_epsg, target_epsg).flatten()
+            for x in reshaped_values
+        ]
 
         return np.array(transform_values)
 

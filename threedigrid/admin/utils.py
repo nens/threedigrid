@@ -1,18 +1,16 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-from __future__ import print_function
 
 from __future__ import absolute_import
-import logging
-from six.moves import range
+from __future__ import print_function
+from __future__ import unicode_literals
 
-from itertools import product
+import logging
 from itertools import tee
 
 import numpy as np
+from six.moves import range
 from six.moves import zip
-
 
 logger = logging.getLogger(__name__)
 
@@ -212,4 +210,3 @@ def get_or_create_group(grid_file, group_name):
     if not gr:
         gr = grid_file.create_group(group_name)
     return gr
-

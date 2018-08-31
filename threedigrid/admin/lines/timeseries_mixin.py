@@ -66,7 +66,6 @@ class LinesAggregateResultsMixin(AggregateResultMixin):
             'qp': ['min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
         }
 
-
         lookup_fields = ('id', '_mesh_id')
 
     def __init__(self, **kwargs):

@@ -19,4 +19,3 @@ if ogr is not None:
 
 SHP_DRIVER_NAME = 'ESRI Shapefile'
 GEO_PACKAGE_DRIVER_NAME = 'GPKG'
-

@@ -29,6 +29,7 @@ class BreachesResultsMixin(ResultMixin):
         """
         super(BreachesResultsMixin, self).__init__(**kwargs)
 
+
 class BreachesAggregateResultsMixin(ResultMixin):
 
     class Meta(six.with_metaclass(ModelMeta)):

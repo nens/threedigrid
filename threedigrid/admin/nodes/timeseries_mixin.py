@@ -79,16 +79,19 @@ class NodesAggregateResultsMixin(AggregateResultMixin):
             's1': ['min', 'max', 'avg'],
             'vol': ['min', 'max', 'avg', 'sum'],
             'su': ['min', 'max', 'avg'],
-            'rain': ['min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
-            'q_lat': ['min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
-            'infiltration_rate_simple': ['min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
+            'rain': [
+                'min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
+            'q_lat': [
+                'min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
+            'infiltration_rate_simple': [
+                'min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
             'ucx': ['min', 'max', 'avg'],
             'ucy': ['min', 'max', 'avg'],
-            'leak': ['min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
+            'leak': [
+                'min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
         }
 
         lookup_fields = ('id', '_mesh_id')
-
 
     def __init__(self, **kwargs):
         """Instantiate a line with netcdf results.

@@ -99,4 +99,3 @@ class H5pyResultGroup(H5pyGroup):
 
         if name in self.netcdf_file.variables:
             return self.netcdf_file.variables[name]
-

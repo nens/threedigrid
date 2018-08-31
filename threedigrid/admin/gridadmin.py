@@ -41,7 +41,8 @@ class GridH5Admin(object):
     def __init__(self, h5_file_path, file_modus='r'):
         """
         :param h5_file_path: path to the gridadmin file
-        :param file_modus: mode with which to open the file (defaults to r=READ)
+        :param file_modus: mode with which to open the file
+            (defaults to r=READ)
         """
 
         self.grid_file = h5_file_path

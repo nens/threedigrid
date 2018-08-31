@@ -3,8 +3,8 @@
 """
 Exporters
 ---------
-At this moment there is one exporter for breach data, called ``BreachesOgrExporter``.
-For an overview of supported drivers call::
+At this moment there is one exporter for breach data, called
+``BreachesOgrExporter``. For an overview of supported drivers call::
 
     >>> from threedigrid.admin.breaches.exporters import BreachesOgrExporter
     >>> from threedigrid.admin.gridadmin import GridH5Admin
@@ -34,7 +34,7 @@ try:
     from osgeo import ogr
 except ImportError:
     ogr = None
-    
+
 from threedigrid.numpy_utils import reshape_flat_array
 from threedigrid.geo_utils import get_spatial_reference
 from threedigrid.admin.utils import KCUDescriptor

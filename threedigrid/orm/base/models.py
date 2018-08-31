@@ -1,34 +1,28 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
 # -*- coding: utf-8 -*-
+
 from __future__ import unicode_literals
 from __future__ import print_function
-
 from __future__ import absolute_import
-import numpy as np
+
 import logging
-
-from itertools import tee
-from itertools import chain
-
-from h5py._hl.dataset import Dataset
-
 from abc import ABCMeta
-
 from collections import OrderedDict
+from itertools import chain
+from itertools import tee
 
-from threedigrid.orm.base.options import Options
+import numpy as np
+import six
+from h5py._hl.dataset import Dataset
+from six.moves import zip
+
 from threedigrid.orm.base.exceptions import OperationNotSupportedError
 from threedigrid.orm.base.fields import ArrayField
 from threedigrid.orm.base.fields import IndexArrayField
 from threedigrid.orm.base.fields import TimeSeriesArrayField
-
-from threedigrid.orm.base.filters import get_filter
 from threedigrid.orm.base.filters import SliceFilter
-from threedigrid.orm.base.timeseries_mixin import ResultMixin
-from threedigrid.orm.base.fields import TimeSeriesSubsetArrayField
-import six
-from six.moves import zip
-
+from threedigrid.orm.base.filters import get_filter
+from threedigrid.orm.base.options import Options
 
 logger = logging.getLogger(__name__)
 
