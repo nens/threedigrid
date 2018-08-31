@@ -81,7 +81,7 @@ Ready to contribute? Here's how to set up `threedigrid` for local development.
 
    $ cd <project_root>
    $ docker build -t threedigrid .
-   $ docker run --rm -v `pwd`:/code threedigrid pytest --cov=threedigrid --flake8
+   $ docker run --rm -v \`pwd\`:/code threedigrid pytest --cov=threedigrid --flake8
 
 
 6. Commit your changes and push your branch to GitHub::
