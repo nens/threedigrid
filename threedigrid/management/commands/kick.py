@@ -56,5 +56,6 @@ def export_to(grid_file, file_type, output_file, model, subset):
     getattr(m, export_func)(output_file)
     click.secho(success_msg, fg='green', bold=True)
 
+
 if __name__ == "__main__":
     kick_start()

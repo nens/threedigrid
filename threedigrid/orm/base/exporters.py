@@ -41,7 +41,7 @@ class BaseOgrExporter(BaseExporterObject):
             raise_import_exception('ogr')
         if gdal is None:
             raise_import_exception('gdal')
-            
+
     def set_driver(self, driver_name='', extension=''):
         assert any((driver_name, extension)), \
             'either driver_name or extension must be given'
