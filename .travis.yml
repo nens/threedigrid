@@ -5,6 +5,8 @@ python:
 
 addons:
   apt:
+    sources:
+      - sourceline: ppa:ubuntugis/ppa
     packages:
       - libgdal-dev
       - libhdf5-serial-dev
