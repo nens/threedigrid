@@ -15,6 +15,9 @@ install:
   # - pip install -r requirements_dev.txt
   - pip install -e .
 
+before_script:
+  - pip install flake8
+
 script:
   - pytest
   - flake8
