@@ -35,11 +35,11 @@ RUN pip install virtualenv
 WORKDIR /code
 COPY . /code/
 
-RUN virtualenv venvs/py27 --python=python2.7 && \
-  venvs/py27/bin/pip install -r requirements.txt -r requirements_dev.txt -e .
+RUN virtualenv venvs/py27 --python=python2.7 \
+&& venvs/py27/bin/pip install -r requirements.txt -r requirements_dev.txt -e .
 
-RUN virtualenv venvs/py35 --python=python3.5 && \
-  venvs/py35/bin/pip install -r requirements.txt -r requirements_dev.txt -e .
+RUN virtualenv venvs/py35 --python=python3.5 \
+&& venvs/py35/bin/pip install -r requirements.txt -r requirements_dev.txt -e .
 
-RUN virtualenv venvs/py36 --python=python3.6 && \
-  venvs/py36/bin/pip install -r requirements.txt -r requirements_dev.txt -e .
+RUN virtualenv venvs/py36 --python=python3.6 \
+&& venvs/py36/bin/pip install -r requirements.txt -r requirements_dev.txt -e .
