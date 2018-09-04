@@ -1,8 +1,8 @@
 History
 =======
 
-0.2.9 (unreleased)
-------------------
+1.0 (2018-09-04)
+----------------
 
 - Made threedigrid >= Python 3.5 compatible.
 
