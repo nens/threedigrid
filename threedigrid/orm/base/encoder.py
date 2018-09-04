@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
+from __future__ import absolute_import
 import json
 import numpy as np
 
@@ -25,5 +26,7 @@ class NumpyEncoder(json.JSONEncoder):
             return float(obj)
         elif isinstance(obj, np.ndarray):
             return obj.tolist()
+        if isinstance(obj, bytes):
+            return obj.decode('utf-8')
         else:
             return super(NumpyEncoder, self).default(obj)

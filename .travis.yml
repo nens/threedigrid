@@ -1,16 +1,23 @@
-# Config file for automatic testing at travis-ci.org
-sudo: required
-
+dist: xenial
 language: python
 python:
-  - 2.7
-
-services:
-  - docker
+  - "2.7"
+  - "3.5"
+  - "3.6"
+cache: pip
 
 before_install:
-  - docker build -t threedigrid/test .
+  - sudo add-apt-repository -y ppa:ubuntugis/ppa
+  - sudo apt-get update
+  - sudo apt-get install -y libgdal-dev libhdf5-serial-dev libnetcdf-dev
+
+install:
+  - pip install -r requirements.txt -e .
+
+before_script:
+  - pip install flake8 sphinx
 
 script:
-  - docker run --rm threedigrid/test pytest --cov=threedigrid
-  - docker run --rm threedigrid/test bash -c 'cd /code/docs && sphinx-build -nW -b html -d _build/doctrees . _build/html'
+  - pytest
+  - flake8
+  - sphinx-build -nW docs docs/_build/html

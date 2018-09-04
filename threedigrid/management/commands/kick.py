@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Console scripts for threedigrid."""
 
+from __future__ import absolute_import
 import click
 from IPython.terminal.embed import InteractiveShellEmbed
 
@@ -54,6 +55,7 @@ def export_to(grid_file, file_type, output_file, model, subset):
         return
     getattr(m, export_func)(output_file)
     click.secho(success_msg, fg='green', bold=True)
+
 
 if __name__ == "__main__":
     kick_start()

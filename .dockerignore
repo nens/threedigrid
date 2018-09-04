@@ -1,1 +1,6 @@
-.git
+# Keep the build context small by ignoring everything:
+**
+
+# Except the following files:
+!requirements.txt
+!requirements_dev.txt

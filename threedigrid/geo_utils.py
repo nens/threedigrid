@@ -1,5 +1,7 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
+from __future__ import unicode_literals
 import numpy as np
 import logging
 
@@ -9,7 +11,7 @@ except ImportError:
     pyproj = None
 
 try:
-    import osr
+    from osgeo import osr
 except ImportError:
     osr = None
 
@@ -52,7 +54,9 @@ def transform_xys(x_array, y_array, source_epsg, target_epsg):
     #     raise ImportError('')
     projections = []
     for epsg_code in (source_epsg, target_epsg):
-        epsg_str = 'epsg:{}'.format(epsg_code)
+        if isinstance(epsg_code, bytes):
+            epsg_code = epsg_code.decode('utf-8')
+        epsg_str = u'epsg:{}'.format(epsg_code)
         projection = pyproj.Proj(init=epsg_str)
         projections.append(projection)
 
