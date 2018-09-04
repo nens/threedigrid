@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from __future__ import print_function
 
 
+from __future__ import absolute_import
 from threedigrid.orm.base.filters import BaseFilter
 from threedigrid.orm.base.filters import FILTER_MAP as BASE_FILTER_MAP
 

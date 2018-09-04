@@ -6,6 +6,7 @@ Main entry point for threedigrid applications.
 from __future__ import unicode_literals
 from __future__ import print_function
 
+from __future__ import absolute_import
 import logging
 
 import h5py
@@ -21,7 +22,8 @@ from threedigrid.admin.breaches.models import Breaches
 from threedigrid.admin.pumps.models import Pumps
 from threedigrid.admin.levees.models import Levees
 from threedigrid.admin.h5py_datasource import H5pyGroup
-import constants
+from . import constants
+import six
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +41,8 @@ class GridH5Admin(object):
     def __init__(self, h5_file_path, file_modus='r'):
         """
         :param h5_file_path: path to the gridadmin file
-        :param file_modus: mode with which to open the file (defaults to r=READ)
+        :param file_modus: mode with which to open the file
+            (defaults to r=READ)
         """
 
         self.grid_file = h5_file_path
@@ -177,7 +180,7 @@ class GridH5Admin(object):
         return self.h5py_file.attrs['model_slug']
 
     def _set_props(self):
-        for prop, value in self.h5py_file.attrs.iteritems():
+        for prop, value in six.iteritems(self.h5py_file.attrs):
             if prop and prop.startswith('has_'):
                 try:
                     setattr(self, prop, bool(value))
@@ -202,7 +205,7 @@ class GridH5Admin(object):
         return self.h5py_file.attrs['threedi_version']
 
     def get_from_meta(self, prop_name):
-        if prop_name not in self.h5py_file['meta'].keys():
+        if prop_name not in list(self.h5py_file['meta'].keys()):
             return None
 
         return self.h5py_file['meta'][prop_name].value

@@ -1,7 +1,9 @@
+from __future__ import absolute_import
 from abc import ABCMeta
 from abc import abstractmethod
 import os
 import logging
+import six
 
 try:
     from osgeo import ogr
@@ -20,9 +22,7 @@ from threedigrid.geo_utils import raise_import_exception
 logger = logging.getLogger(__name__)
 
 
-class BaseExporterObject:
-
-    __metaclass__ = ABCMeta
+class BaseExporterObject(six.with_metaclass(ABCMeta)):
 
     @abstractmethod
     def save(self):
@@ -41,7 +41,7 @@ class BaseOgrExporter(BaseExporterObject):
             raise_import_exception('ogr')
         if gdal is None:
             raise_import_exception('gdal')
-            
+
     def set_driver(self, driver_name='', extension=''):
         assert any((driver_name, extension)), \
             'either driver_name or extension must be given'

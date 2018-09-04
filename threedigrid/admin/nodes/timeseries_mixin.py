@@ -3,9 +3,11 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
+from __future__ import absolute_import
 from threedigrid.orm.base.timeseries_mixin import ResultMixin
 from threedigrid.orm.base.timeseries_mixin import AggregateResultMixin
 from threedigrid.orm.base.options import ModelMeta
+import six
 
 
 BASE_COMPOSITE_FIELDS = {
@@ -62,9 +64,7 @@ class NodesResultsMixin(ResultMixin):
 
 class NodesAggregateResultsMixin(AggregateResultMixin):
 
-    class Meta:
-        __metaclass__ = ModelMeta
-
+    class Meta(six.with_metaclass(ModelMeta)):
         base_composition = BASE_COMPOSITE_FIELDS
         base_subset_fields = BASE_SUBSET_FIELDS
 
@@ -79,16 +79,19 @@ class NodesAggregateResultsMixin(AggregateResultMixin):
             's1': ['min', 'max', 'avg'],
             'vol': ['min', 'max', 'avg', 'sum'],
             'su': ['min', 'max', 'avg'],
-            'rain': ['min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
-            'q_lat': ['min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
-            'infiltration_rate_simple': ['min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
+            'rain': [
+                'min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
+            'q_lat': [
+                'min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
+            'infiltration_rate_simple': [
+                'min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
             'ucx': ['min', 'max', 'avg'],
             'ucy': ['min', 'max', 'avg'],
-            'leak': ['min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
+            'leak': [
+                'min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
         }
 
         lookup_fields = ('id', '_mesh_id')
-
 
     def __init__(self, **kwargs):
         """Instantiate a line with netcdf results.

@@ -3,12 +3,14 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
+from __future__ import absolute_import
 import numpy as np
 import geojson
 import json
 from threedigrid.admin.breaches.models import Breaches
 from threedigrid.admin import constants
 from threedigrid.orm.base.encoder import NumpyEncoder
+from six.moves import range
 
 
 class BreachesGeoJsonSerializer():
@@ -31,7 +33,7 @@ class BreachesGeoJsonSerializer():
             raise ValueError(
                 "Can't return data as geojson "
                 "for selection without geometries")
-        for i in xrange(selection['id'].shape[-1]):
+        for i in range(selection['id'].shape[-1]):
             pt = geojson.Point(
                     np.round(
                         selection['coordinates'][:, i],

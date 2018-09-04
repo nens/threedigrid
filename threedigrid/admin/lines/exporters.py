@@ -7,8 +7,11 @@ Exporters
 from __future__ import unicode_literals
 from __future__ import print_function
 
+from __future__ import absolute_import
 import os
 import logging
+import six
+from six.moves import range
 
 try:
     from osgeo import ogr
@@ -85,7 +88,7 @@ class LinesOgrExporter(BaseOgrExporter):
         fields = LINE_BASE_FIELDS
         if self._lines.has_1d:
             fields.update(LINE_1D_FIELDS)
-        for field_name, field_type in fields.iteritems():
+        for field_name, field_type in six.iteritems(fields):
             layer.CreateField(ogr.FieldDefn(
                     str(field_name),
                     const.OGR_FIELD_TYPE_MAP[field_type])
@@ -94,7 +97,7 @@ class LinesOgrExporter(BaseOgrExporter):
 
         node_a = line_data['line'][0]
         node_b = line_data['line'][1]
-        for i in xrange(node_a.size):
+        for i in range(node_a.size):
             if geom_source == 'from_threedicore':
                 line = ogr.Geometry(ogr.wkbLineString)
                 line.AddPoint(line_data['line_coords'][0][i],
@@ -108,7 +111,7 @@ class LinesOgrExporter(BaseOgrExporter):
 
             feature = ogr.Feature(_definition)
             feature.SetGeometry(line)
-            for field_name, field_type in fields.iteritems():
+            for field_name, field_type in six.iteritems(fields):
                 fname = LINE_FIELD_NAME_MAP[field_name]
                 if field_name == 'kcu_descr':
                     value = ''

@@ -1,31 +1,28 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
 # -*- coding: utf-8 -*-
+
 from __future__ import unicode_literals
 from __future__ import print_function
+from __future__ import absolute_import
+
+import logging
+from abc import ABCMeta
+from collections import OrderedDict
+from itertools import chain
+from itertools import tee
 
 import numpy as np
-import logging
-from itertools import izip
-from itertools import tee
-from itertools import chain
-
+import six
 from h5py._hl.dataset import Dataset
+from six.moves import zip
 
-from abc import ABCMeta
-
-from collections import OrderedDict
-
-from threedigrid.orm.base.options import Options
 from threedigrid.orm.base.exceptions import OperationNotSupportedError
 from threedigrid.orm.base.fields import ArrayField
 from threedigrid.orm.base.fields import IndexArrayField
 from threedigrid.orm.base.fields import TimeSeriesArrayField
-
-from threedigrid.orm.base.filters import get_filter
 from threedigrid.orm.base.filters import SliceFilter
-from threedigrid.orm.base.timeseries_mixin import ResultMixin
-from threedigrid.orm.base.fields import TimeSeriesSubsetArrayField
-
+from threedigrid.orm.base.filters import get_filter
+from threedigrid.orm.base.options import Options
 
 logger = logging.getLogger(__name__)
 
@@ -43,11 +40,10 @@ def pairwise(iterable):
     "s -> (s0,s1), (s1,s2), (s2, s3), ..."
     a, b = tee(iterable)
     next(b, None)
-    return izip(a, b)
+    return zip(a, b)
 
 
-class Model:
-    __metaclass__ = ABCMeta
+class Model(six.with_metaclass(ABCMeta)):
     id = IndexArrayField()
 
     _field_names = []
@@ -164,7 +160,7 @@ class Model:
         subset_dict = new_inst.Meta.subset_fields.get(field_name)
         if not subset_dict:
             return
-        _subset_name = subset_dict.keys()
+        _subset_name = list(subset_dict.keys())
         if not _subset_name:
             return
         return new_inst.subset(_subset_name[0]).id
@@ -284,7 +280,10 @@ class Model:
         """
         new_slice_filters = list(self.slice_filters)  # make copy
 
-        for key, value in kwargs.iteritems():
+        for key, value in six.iteritems(kwargs):
+            # python2/3 combat
+            if isinstance(value, str):
+                value = str.encode(value)
             splitted_key = key.split('__')
             if splitted_key[0] not in self._field_names:
                 raise ValueError(
@@ -387,7 +386,7 @@ class Model:
         if not hasattr(self, 'SUBSETS'):
             return "has no subsets defined"
         return list(
-            chain(*[v.keys() for v in self.SUBSETS.itervalues()])
+            chain(*[list(v.keys()) for v in six.itervalues(self.SUBSETS)])
         )
 
     def subset(self, name):
@@ -408,7 +407,7 @@ class Model:
         if not hasattr(self, 'SUBSETS'):
             raise TypeError("SUBSETS not defined for this type of model")
 
-        if isinstance(name, basestring):
+        if isinstance(name, six.string_types):
             field_filter = [key for key in self.SUBSETS if
                             name.upper() in self.SUBSETS[key]]
 
@@ -505,7 +504,7 @@ class Model:
         """
 
         _tmp = OrderedDict()
-        for k, v in selection.iteritems():
+        for k, v in six.iteritems(selection):
             try:
                 _tmp[k] = v[:]
             except TypeError:
@@ -535,10 +534,10 @@ class Model:
         # Filter results and transform the result to
         # and np.ndarray
         selection = self.to_dict()
-        if len(selection.values()) > 1:
-            array = np.array(selection.values())
+        if len(list(selection.values())) > 1:
+            array = np.array(list(selection.values()))
         else:
-            array = selection.values()[0]
+            array = list(selection.values())[0]
 
         def optional_zip(array_to_zip):
             """
@@ -560,7 +559,7 @@ class Model:
         # Create a list of dictionairies of the data by
         # zipping the selection.keys() (= field_names) for all items
         # in data
-        return [dict(zip(selection.keys(), x)) for x in data]
+        return [dict(zip(list(selection.keys()), x)) for x in data]
 
     @property
     def boolean_mask_filter(self):
@@ -608,9 +607,9 @@ class Model:
         Returns: the filtered values as a numpy array
         """
         selection = self.to_dict()
-        if len(selection.values()) > 1:
-            return np.array(selection.values())
-        return selection.values()[0]
+        if len(list(selection.values())) > 1:
+            return np.array(list(selection.values()))
+        return list(selection.values())[0]
 
     @property
     def data(self):

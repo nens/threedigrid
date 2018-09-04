@@ -1,31 +1,30 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
+from __future__ import absolute_import
 from __future__ import print_function
+from __future__ import unicode_literals
 
 import logging
 from collections import defaultdict
-import os
 
 from netCDF4 import Dataset
+
 from threedigrid.admin.breaches.models import Breaches
+from threedigrid.admin.breaches.timeseries_mixin import (
+    BreachesAggregateResultsMixin, BreachesResultsMixin)
 from threedigrid.admin.constants import DEFAULT_CHUNK_TIMESERIES
+from threedigrid.admin.gridadmin import GridH5Admin
 from threedigrid.admin.h5py_datasource import H5pyResultGroup
 from threedigrid.admin.lines.models import Lines
-from threedigrid.admin.pumps.models import Pumps
-from threedigrid import admin
-
-from threedigrid.admin.nodes.timeseries_mixin import NodesAggregateResultsMixin
-from threedigrid.admin.nodes.timeseries_mixin import NodesResultsMixin
 from threedigrid.admin.lines.timeseries_mixin import LinesAggregateResultsMixin
 from threedigrid.admin.lines.timeseries_mixin import LinesResultsMixin
-from threedigrid.admin.breaches.timeseries_mixin import BreachesAggregateResultsMixin
-from threedigrid.admin.breaches.timeseries_mixin import BreachesResultsMixin
-from threedigrid.admin.pumps.timeseries_mixin import PumpsResultsMixin
-from threedigrid.admin.pumps.timeseries_mixin import PumpsAggregateResultsMixin
-
 from threedigrid.admin.nodes.models import Nodes
-from threedigrid.admin.gridadmin import GridH5Admin
+from threedigrid.admin.nodes.timeseries_mixin import NodesAggregateResultsMixin
+from threedigrid.admin.nodes.timeseries_mixin import NodesResultsMixin
+from threedigrid.admin.pumps.models import Pumps
+from threedigrid.admin.pumps.timeseries_mixin import PumpsAggregateResultsMixin
+from threedigrid.admin.pumps.timeseries_mixin import PumpsResultsMixin
 from threedigrid.orm.models import Model
 
 logger = logging.getLogger(__name__)
@@ -214,11 +213,9 @@ class GridH5AggregateResultAdmin(GridH5ResultAdmin):
             return
         model_name = 'breaches'
         return Breaches(
-            H5pyResultGroup(
-                self.h5py_file, model_name, self.netcdf_file),
-                **dict(
-                    self._grid_kwargs,
-                    **{'mixin': BreachesAggregateResultsMixin})
+            H5pyResultGroup(self.h5py_file, model_name, self.netcdf_file),
+            **dict(self._grid_kwargs,
+                   **{'mixin': BreachesAggregateResultsMixin})
         )
 
     @property

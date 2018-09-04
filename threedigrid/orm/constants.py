@@ -31,7 +31,7 @@ AGGREGATION_OPTIONS = {
 
 
 # pumpstations
-PUMPS_VARIABLES = ['Mesh1D_q_pump',]
+PUMPS_VARIABLES = ['Mesh1D_q_pump']
 
 # breaches
 BREACH_VARIABLES = ['Mesh1D_breach_depth', 'Mesh1D_breach_width']

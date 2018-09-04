@@ -3,8 +3,10 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
+from __future__ import absolute_import
 import numpy as np
 from .utils import PKMapper
+import six
 
 
 FIELD_NULL_VALUES = {
@@ -36,7 +38,7 @@ def db_objects_to_numpy_array_dict(db_objects, field_names):
                 value = np.fromstring(str(value.wkb), dtype='uint8')
 
             # Convert unicode to str
-            if isinstance(value, unicode):
+            if isinstance(value, six.text_type):
                 value = value.encode('utf8')
             if value is not None:
                 numpy_array_dict[field_name][index] = value
@@ -72,7 +74,7 @@ def add_or_update_datasets(h5py_group, numpy_array_dict, field_names,
         else:
             dataset_name = field_name
 
-        if dataset_name not in h5py_group.keys():
+        if dataset_name not in list(h5py_group.keys()):
             h5py_group.create_dataset(
                 dataset_name, data=data)
         else:

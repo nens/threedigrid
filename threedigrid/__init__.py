@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
 
-# Always try to import netCDF4.Dataset
-# before importing h5py to prevent netCDF4
-# HDF errors.
+# Always try to import netCDF4.Dataset before importing
+# h5py to prevent netCDF4 HDF errors.
 try:
-    from netCDF4 import Dataset
+    from netCDF4 import Dataset  # noqa
 except ImportError:
     pass
 

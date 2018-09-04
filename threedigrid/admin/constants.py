@@ -3,7 +3,9 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
+from __future__ import absolute_import
 from collections import OrderedDict
+from six.moves import range
 
 LONLAT_DIGITS = 7  # 7 decimals is about 11mm accuracy
 
@@ -101,11 +103,11 @@ CALCULATION_TYPES = {
 
 
 ZOOM_LEVELS = {
-    'pipe': range(16, 21),
-    'nod': range(16, 21),
-    'nod_1d': range(16, 21),
-    'line': range(16, 21),
-    'pump': range(16, 21),
+    'pipe': list(range(16, 21)),
+    'nod': list(range(16, 21)),
+    'nod_1d': list(range(16, 21)),
+    'line': list(range(16, 21)),
+    'pump': list(range(16, 21)),
 }
 
 
@@ -210,9 +212,10 @@ NODES_SHP = _NODES_BASE + SUBSET_1D_ALL + ".shp"
 # lines
 _LINES_BASE = 'lines_'
 LINES_SHP = _LINES_BASE + SUBSET_1D_ALL + ".shp"
-GROUNDWATER_LINES_SHP =  _LINES_BASE + SUBSET_2D_GROUNDWATER + ".shp"
+GROUNDWATER_LINES_SHP = _LINES_BASE + SUBSET_2D_GROUNDWATER + ".shp"
 OPEN_WATER_LINES_SHP = _LINES_BASE + SUBSET_2D_OPEN_WATER + ".shp"
-VERTICAL_INFILTRATION_LINES_SHP = _LINES_BASE + SUBSET_2D_VERTICAL_INFILTRATION + ".shp"
+VERTICAL_INFILTRATION_LINES_SHP = (
+    _LINES_BASE + SUBSET_2D_VERTICAL_INFILTRATION + ".shp")
 
 # levees
 LEVEES_SHP = "levees.shp"

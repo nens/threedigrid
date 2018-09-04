@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
+from __future__ import absolute_import
 import numpy as np
 from threedigrid.admin.utils import PKMapper
 from threedigrid.admin.prepare_utils import db_objects_to_numpy_array_dict
@@ -60,22 +61,22 @@ class PreparePumps:
             connection_nodes_content_pks,
             datasource['connection_node_end_pk'])
 
-        if 'node1_id' not in datasource.keys():
+        if 'node1_id' not in list(datasource.keys()):
             node1_id = cn1_mapper.apply_on(
                 connection_nodes_content_id, -9999)
             datasource.set('node1_id', node1_id)
 
-        if 'node2_id' not in datasource.keys():
+        if 'node2_id' not in list(datasource.keys()):
             node2_id = cn2_mapper.apply_on(
                 connection_nodes_content_id, -9999)
             datasource.set('node2_id', node2_id)
 
-        if 'bottom_level' not in datasource.keys():
+        if 'bottom_level' not in list(datasource.keys()):
             bottom_level = cn1_mapper.apply_on(
                 connection_nodes_initial_waterlevel, 0)
             datasource.set('bottom_level', bottom_level)
 
-        if 'node_coordinates' not in datasource.keys():
+        if 'node_coordinates' not in list(datasource.keys()):
             node1_coordinates = cn1_mapper.apply_on(
                 connection_nodes_content_coordinates, -9999)
             node2_coordinates = cn2_mapper.apply_on(
@@ -85,7 +86,7 @@ class PreparePumps:
                 'node_coordinates',
                 np.vstack((node1_coordinates, node2_coordinates)))
 
-        if 'coordinates' not in datasource.keys():
+        if 'coordinates' not in list(datasource.keys()):
             # Set the coordinates based on the centroid of node_coordinates
             # if both set and else the one that is set.
             node_coordinates = datasource['node_coordinates'].value

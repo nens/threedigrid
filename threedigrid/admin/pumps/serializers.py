@@ -3,11 +3,13 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
+from __future__ import absolute_import
 import json
 import geojson
 from threedigrid.admin.pumps.models import Pumps
 from threedigrid.admin import constants
 from threedigrid.orm.base.encoder import NumpyEncoder
+from six.moves import range
 
 
 def format_to_str(value, empty_value='--', format_string='%0.2f'):
@@ -41,7 +43,7 @@ class PumpsGeoJsonSerializer():
                 "Can't return data as geojson "
                 "for selection without geometries")
 
-        for i in xrange(selection['id'].shape[-1]):
+        for i in range(selection['id'].shape[-1]):
             pt = geojson.Point(
                 [round(x, constants.LONLAT_DIGITS)
                  for x in selection['coordinates'][:, i]])

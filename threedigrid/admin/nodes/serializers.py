@@ -3,13 +3,17 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
+from __future__ import absolute_import
 import geojson
 import json
+import numpy as np
+
 from threedigrid.admin.nodes.models import AddedCalculationNodes
 from threedigrid.admin.nodes.models import ConnectionNodes
 from threedigrid.admin.nodes.models import Manholes
 from threedigrid.admin import constants
 from threedigrid.orm.base.encoder import NumpyEncoder
+from six.moves import range
 
 
 class ManholesGeoJsonSerializer():
@@ -28,10 +32,19 @@ class ManholesGeoJsonSerializer():
                 "Can't return data as geojson "
                 "for selection without geometries")
 
-        for i in xrange(selection['id'].shape[-1]):
+        for i in range(selection['id'].shape[-1]):
             pt = geojson.Point(
                 [round(x, constants.LONLAT_DIGITS)
                  for x in selection['coordinates'][:, i]])
+            area = '--'
+            _area = selection['storage_area'][i]
+            if isinstance(_area, np.bytes_):
+                _area = _area.decode('UTF-8')
+            if _area:
+                _area = float(selection['storage_area'][i])
+            if _area and _area > 0.:
+                area = _area
+
             cn_meta = [
                     ['object_type', constants.TYPE_V2_MANHOLE],
                     ['display_name', selection['display_name'][i]],
@@ -40,9 +53,7 @@ class ManholesGeoJsonSerializer():
                     ['calculation_type', constants.CALCULATION_TYPES.get(
                         selection['calculation_type'][i])],
                     ['shape', selection['shape'][i]],
-                    ['area', "{0} [m2]".format(
-                        selection['storage_area'][i]
-                        if selection['storage_area'][i] > 0 else '--')],
+                    ['area', area],
                     ['bottom_level', "{0} [m MSL]".format(
                         selection['bottom_level'][i])],
                     ['width', "{0} [m]".format(selection['width'][i])],
@@ -96,7 +107,7 @@ class ConnectionNodesGeoJsonSerializer():
                 "Can't return data as geojson "
                 "for selection without geometries")
 
-        for i in xrange(selection['id'].shape[-1]):
+        for i in range(selection['id'].shape[-1]):
             pt = geojson.Point(
                 [round(x, constants.LONLAT_DIGITS)
                  for x in selection['coordinates'][:, i]])
@@ -152,7 +163,7 @@ class AddedCalculationNodesGeoJsonSerializer():
                 "Can't return data as geojson "
                 "for selection without geometries")
 
-        for i in xrange(selection['id'].shape[-1]):
+        for i in range(selection['id'].shape[-1]):
             pt = geojson.Point(
                 [round(x, constants.LONLAT_DIGITS)
                  for x in selection['coordinates'][:, i]])

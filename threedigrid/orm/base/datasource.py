@@ -18,7 +18,7 @@ class DataSource(object):
         self._source = source
 
     def keys(self):
-        keys = self._source.keys()
+        keys = list(self._source.keys())
         # Append meta to keys if not present
         if 'meta' not in keys:
             keys.append('meta')

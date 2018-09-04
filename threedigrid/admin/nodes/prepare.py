@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
+from __future__ import absolute_import
 import numpy as np
 from threedigrid.admin import constants
 from threedigrid.admin.prepare_utils import (
@@ -40,18 +41,18 @@ class PrepareNodes:
 
     @classmethod
     def prepare_datasource(cls, datasource, mapping1d, id_mapper, has_1d):
-        if 'id' not in datasource.keys():
+        if 'id' not in list(datasource.keys()):
             datasource.set(
                 'id', np.arange(0, datasource['x_coordinate'].size))
 
-        if 'content_pk' not in datasource.keys() and has_1d:
+        if 'content_pk' not in list(datasource.keys()) and has_1d:
             datasource.set(
                 'content_pk', cls.get_node_pks(mapping1d, id_mapper))
 
-        if 'seq_id' not in datasource.keys() and has_1d:
+        if 'seq_id' not in list(datasource.keys()) and has_1d:
             datasource.set('seq_id', mapping1d['nend1d'].value)
 
-        if 'coordinates' not in datasource.keys():
+        if 'coordinates' not in list(datasource.keys()):
             datasource.set(
                 'coordinates', np.array(
                     [as_numpy_array(datasource['x_coordinate']),

@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
+from __future__ import absolute_import
 import h5py
 import numpy as np
 from shapely import wkt
@@ -10,6 +11,8 @@ from shapely.geometry import MultiPoint, Point
 from threedigrid.admin import constants
 from threedigrid.admin.prepare_utils import (
         db_objects_to_numpy_array_dict, add_or_update_datasets)
+from six.moves import range
+from six.moves import zip
 
 
 DT_VARIABLE = h5py.special_dtype(vlen=np.dtype('float64'))
@@ -88,7 +91,7 @@ class PrepareLines(object):
             constants.TYPE_V2_CHANNEL, constants.TYPE_V2_CULVERT
         ]
 
-        line_db_dict = dict(zip(LINE_TYPES, DB_OBJECTS))
+        line_db_dict = dict(list(zip(LINE_TYPES, DB_OBJECTS)))
 
         size_array = as_numpy_array(datasource['lik']).shape[0]
         line_geometries = np.full(size_array, 0, dtype=DT_VARIABLE)
@@ -97,7 +100,7 @@ class PrepareLines(object):
         end_x = datasource['line_coords'][2][:]
         end_y = datasource['line_coords'][3][:]
         kcu = datasource['kcu'][:]
-        xys = np.array(zip(start_x.T, end_x.T, start_y.T, end_y.T))
+        xys = np.array(list(zip(start_x.T, end_x.T, start_y.T, end_y.T)))
         for i in range(len(line_geometries)):
             line_geometries[i] = np.array(xys[i])
 
@@ -114,7 +117,6 @@ class PrepareLines(object):
                     kcu[line_idx])
 
         return line_geometries
-
 
     @staticmethod
     def _cut_geometries(geom, start_x, start_y, end_x, end_y, kcu_array):
@@ -139,8 +141,8 @@ class PrepareLines(object):
         """
 
         cut_geometries = np.zeros((len(start_x),), dtype=DT_VARIABLE)
-        start_points = MultiPoint(zip(start_x, start_y))
-        end_points = MultiPoint(zip(end_x, end_y))
+        start_points = MultiPoint(list(zip(start_x, start_y)))
+        end_points = MultiPoint(list(zip(end_x, end_y)))
 
         for piece in range(len(cut_geometries)):
             kcu = kcu_array[piece]
@@ -201,28 +203,28 @@ class PrepareLines(object):
     @classmethod
     def prepare_datasource(cls, datasource, id_mapper, threedi_datasource,
                            node_coordinates, has_1d):
-        if 'id' not in datasource.keys():
+        if 'id' not in list(datasource.keys()):
             datasource.set(
                 'id', np.arange(0, datasource['kcu'].size))
 
-        if has_1d and ('content_pk' not in datasource.keys() or
-           'content_type' not in datasource.keys()):
+        if has_1d and ('content_pk' not in list(datasource.keys()) or
+           'content_type' not in list(datasource.keys())):
             content_pk, content_type =\
                 cls.get_1d_object_info(datasource, id_mapper)
 
-            if 'content_pk' not in datasource.keys():
+            if 'content_pk' not in list(datasource.keys()):
                 datasource.set('content_pk', content_pk)
-            if 'content_type' not in datasource.keys():
+            if 'content_type' not in list(datasource.keys()):
                 datasource.set('content_type', [str(x) for x in content_type])
 
-        if 'line_coords' not in datasource.keys():
+        if 'line_coords' not in list(datasource.keys()):
             line = as_numpy_array(datasource['line'])
             x, y = as_numpy_array(node_coordinates[0]),\
                 as_numpy_array(node_coordinates[1])
             datasource.set('line_coords', np.array(
                 [x[line[0]], y[line[0]], x[line[1]], y[line[1]]]))
 
-        if has_1d and 'line_geometries' not in datasource.keys():
+        if has_1d and 'line_geometries' not in list(datasource.keys()):
             line_geometries = cls.make_line_geometries(datasource,
                                                        threedi_datasource)
             datasource.set('line_geometries', np.array(line_geometries))
