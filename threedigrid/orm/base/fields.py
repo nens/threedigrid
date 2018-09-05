@@ -49,7 +49,8 @@ class TimeSeriesArrayField(ArrayField):
     @staticmethod
     def get_value(datasource, name, **kwargs):
         timeseries_filter = kwargs.get('timeseries_filter', slice(None))
-        if isinstance(timeseries_filter, np.ndarray) and len(datasource[name].shape) > 1:
+        if ((isinstance(timeseries_filter, np.ndarray) and
+             len(datasource[name].shape) > 1)):
             v = datasource[name][timeseries_filter, :]
         else:
             v = datasource[name][timeseries_filter]
@@ -111,7 +112,8 @@ class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
             if source_name not in list(datasource.keys()):
                 continue
 
-            if isinstance(timeseries_filter, np.ndarray) and len(datasource[source_name].shape) > 1:
+            if ((isinstance(timeseries_filter, np.ndarray)
+                 and len(datasource[source_name].shape) > 1)):
                 values.append(datasource[source_name][timeseries_filter, :])
             else:
                 values.append(datasource[source_name][timeseries_filter])
