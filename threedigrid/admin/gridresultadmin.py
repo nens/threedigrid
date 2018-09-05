@@ -8,7 +8,7 @@ from __future__ import unicode_literals
 import logging
 from collections import defaultdict
 
-from netCDF4 import Dataset
+import h5py
 
 from threedigrid.admin.breaches.models import Breaches
 from threedigrid.admin.breaches.timeseries_mixin import (
@@ -46,7 +46,7 @@ class GridH5ResultAdmin(GridH5Admin):
         """
         self._netcdf_file_path = netcdf_file_path
         super(GridH5ResultAdmin, self).__init__(h5_file_path, file_modus)
-        self.netcdf_file = Dataset(netcdf_file_path)
+        self.netcdf_file = h5py.File(netcdf_file_path, file_modus)
         self.set_timeseries_chunk_size(DEFAULT_CHUNK_TIMESERIES.stop)
         self.version_check()
 
@@ -75,7 +75,7 @@ class GridH5ResultAdmin(GridH5Admin):
 
     @property
     def time_units(self):
-        return self.netcdf_file.variables['time'].getncattr('units')
+        return self.netcdf_file['time'].attrs.get('units')
 
     @property
     def lines(self):
@@ -166,7 +166,7 @@ class GridH5ResultAdmin(GridH5Admin):
         string otherwise
         """
         try:
-            return self.netcdf_file.getncattr('threedicore_version')
+            return self.netcdf_file.attrs.get('threedicore_version')
         except AttributeError:
             logger.error(
                 'Attribute threedicore_version could not be found in result file')  # noqa

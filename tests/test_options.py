@@ -79,12 +79,12 @@ def test_pump_options_get_fields_only_names(opt_pumps):
 
 
 def test_nodes_options_get_composite_meta(opt_nodes):
-    assert opt_nodes._get_composite_meta('s1', 'units') == 'm'
+    assert opt_nodes._get_composite_meta('s1', 'units') == b'm'
 
 
 def test_lines_options_get_meta_values(opt_lines):
     v = opt_lines._get_meta_values('q')
-    assert set(v.get('q')) == {'m3 s-1', 'Discharge on flow line', ''}
+    assert set(v.get('q')) == {None, b'Discharge on flow line', b'm3 s-1'}
 
 
 def test_smoke_looup_idx(opt_nodes):

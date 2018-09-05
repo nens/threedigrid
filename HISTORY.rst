@@ -4,7 +4,9 @@ History
 1.1 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Dropped NetCDF library and replaced opening NetCDF files with h5py
+
+- Bumped h5py to 2.8.0
 
 
 1.0 (2018-09-04)

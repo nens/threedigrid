@@ -21,8 +21,6 @@ RUN apt-get update && apt-get install -y \
     curl \
     libgdal-dev \
     libhdf5-serial-dev \
-    libnetcdf-dev \
-    netcdf-bin \
     python3-dev \
 && rm -rf /var/lib/apt/lists/*
 
