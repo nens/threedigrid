@@ -16,6 +16,20 @@ from threedigrid.orm.base.encoder import NumpyEncoder
 from six.moves import range
 
 
+def get_storage_area(storage_area):
+
+    default_null= '--'
+    # case python string type
+    try:
+        a = float(storage_area)
+        if a > 0.:
+            return a
+    except ValueError:
+        pass
+
+    return default_null
+
+
 class ManholesGeoJsonSerializer():
     def __init__(self, manholes, indent=None):
         assert isinstance(manholes, Manholes)
@@ -36,13 +50,8 @@ class ManholesGeoJsonSerializer():
             pt = geojson.Point(
                 [round(x, constants.LONLAT_DIGITS)
                  for x in selection['coordinates'][:, i]])
-            area = '--'
-            _area = selection['storage_area'][i] or 0.
-            if isinstance(_area, np.bytes_):
-                _area = _area.decode('UTF-8')
-            _area = float(selection['storage_area'][i])
-            if _area and _area > 0.:
-                area = _area
+
+            area = get_storage_area(selection['storage_area'][i])
 
             cn_meta = [
                     ['object_type', constants.TYPE_V2_MANHOLE],
@@ -110,13 +119,7 @@ class ConnectionNodesGeoJsonSerializer():
             pt = geojson.Point(
                 [round(x, constants.LONLAT_DIGITS)
                  for x in selection['coordinates'][:, i]])
-            area = '--'
-            _area = selection['storage_area'][i] or 0.
-            if isinstance(_area, np.bytes_):
-                _area = _area.decode('UTF-8')
-            _area = float(selection['storage_area'][i])
-            if _area and _area > 0.:
-                area = _area
+            area = get_storage_area(selection['storage_area'][i])
 
             cn_meta = [
                     ['object_type', constants.TYPE_V2_CONNECTION_NODES],
