@@ -4,6 +4,8 @@ History
 1.1 (unreleased)
 ----------------
 
+- Patch for converting numpy strings/bytes to float for both python2/3.
+
 - Dropped NetCDF library and replaced opening NetCDF files with h5py
 
 - Bumped h5py to 2.8.0

@@ -6,8 +6,8 @@ from __future__ import print_function
 from __future__ import absolute_import
 import geojson
 import json
-import numpy as np
 
+from threedigrid.admin.utils import _get_storage_area
 from threedigrid.admin.nodes.models import AddedCalculationNodes
 from threedigrid.admin.nodes.models import ConnectionNodes
 from threedigrid.admin.nodes.models import Manholes
@@ -36,14 +36,8 @@ class ManholesGeoJsonSerializer():
             pt = geojson.Point(
                 [round(x, constants.LONLAT_DIGITS)
                  for x in selection['coordinates'][:, i]])
-            area = '--'
-            _area = selection['storage_area'][i]
-            if isinstance(_area, np.bytes_):
-                _area = _area.decode('UTF-8')
-            if _area:
-                _area = float(selection['storage_area'][i])
-            if _area and _area > 0.:
-                area = _area
+
+            area = _get_storage_area(selection['storage_area'][i])
 
             cn_meta = [
                     ['object_type', constants.TYPE_V2_MANHOLE],
@@ -111,11 +105,11 @@ class ConnectionNodesGeoJsonSerializer():
             pt = geojson.Point(
                 [round(x, constants.LONLAT_DIGITS)
                  for x in selection['coordinates'][:, i]])
+            area = _get_storage_area(selection['storage_area'][i])
+
             cn_meta = [
                     ['object_type', constants.TYPE_V2_CONNECTION_NODES],
-                    ['storage area', "{0} [m2]".format(
-                        selection['storage_area'][i]
-                        if selection['storage_area'][i] > 0 else '--')],
+                    ['storage area', area],
                     ['initial_waterlevel', "{0} [m MSL]".format(
                         selection['initial_waterlevel'][i])],
                     ['nod idx', int(selection['id'][i])],

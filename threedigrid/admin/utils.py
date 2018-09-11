@@ -210,3 +210,28 @@ def get_or_create_group(grid_file, group_name):
     if not gr:
         gr = grid_file.create_group(group_name)
     return gr
+
+
+def _get_storage_area(storage_area):
+    """
+
+    :param storage_area: storage area entry in nodes collection.
+        Either a numpy string or a bytes type
+    :returns default '--' if the input is an empty string or 0., or the
+        given input will be converted to a float representation
+    """
+
+    default_null = '--'
+    # case python string type
+    try:
+        a = float(storage_area)
+        if a > 0.:
+            return a
+    except ValueError:
+        pass
+    except TypeError:
+        if storage_area is None:
+            return default_null
+        return _get_storage_area(np.asscalar(storage_area))
+
+    return default_null
