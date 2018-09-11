@@ -3,11 +3,14 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
 
+import sys
+
 import numpy as np
 
 import pytest
 
 from threedigrid.admin.utils import PKMapper
+from threedigrid.admin.utils import _get_storage_area
 from threedigrid.numpy_utils import get_smallest_uint_dtype
 from threedigrid import numpy_utils
 
@@ -47,3 +50,46 @@ def test_get_smallest_uint_dtype_raises_value_error_neg_input():
 def test_get_smallest_uint_dtype_raises_value_error_exceeding_input():
     with pytest.raises(ValueError):
         get_smallest_uint_dtype(400000000000000000000000)
+
+
+@pytest.mark.skipif(
+    sys.version_info < (3, 0), reason="requires Python3")
+def test_get_storage_area_bytes_to_float():
+    a = np.array(['2.2'], np.bytes_)
+    sa_a = _get_storage_area(a)
+    assert sa_a == 2.2
+
+
+@pytest.mark.skipif(
+    sys.version_info < (3, 0), reason="requires Python3")
+def test_get_storage_area_bytes_to_string():
+    b = np.array([''], np.bytes_)
+    sa_b = _get_storage_area(b)
+    assert sa_b == '--'  # default response
+    b = np.array(['0'], np.bytes_)
+    sa_b = _get_storage_area(b)
+    assert sa_b == '--'  # default response
+
+
+@pytest.mark.skipif(
+    sys.version_info > (3, 0), reason="requires Python2")
+def test_get_storage_area_string_input():
+    b = np.array([''], np.string_)
+    sa_b = _get_storage_area(b)
+    assert sa_b == '--'  # default response
+    b = np.array(['0'], np.string_)
+    sa_b = _get_storage_area(b)
+    assert sa_b == '--'  # default response
+
+
+@pytest.mark.skipif(
+    sys.version_info > (3, 0), reason="requires Python2")
+def test_get_storage_area_string_input():
+    b = np.array(['0.5'], np.string_)
+    sa_b = _get_storage_area(b)
+    assert sa_b == 0.5
+
+
+def test_get_storage_area_none_input():
+    sa_c = _get_storage_area(None)
+    assert sa_c == '--'
