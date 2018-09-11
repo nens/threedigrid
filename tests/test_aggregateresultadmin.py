@@ -46,7 +46,7 @@ def test_get_timestamps_lines(agg_gr):
 
 def test_get_time_unit(agg_gr):
     tu = agg_gr.nodes.get_time_unit('q_cum')
-    assert tu.startswith('seconds since ')
+    assert tu.startswith(b'seconds since ')
 
 
 # TODO
