@@ -84,7 +84,7 @@ def test_get_storage_area_string_input():
 
 @pytest.mark.skipif(
     sys.version_info > (3, 0), reason="requires Python2")
-def test_get_storage_area_string_input():
+def test_get_storage_area_string_to_float():
     b = np.array(['0.5'], np.string_)
     sa_b = _get_storage_area(b)
     assert sa_b == 0.5
