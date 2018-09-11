@@ -6,6 +6,10 @@ History
 
 - Patch for converting numpy strings/bytes to float for both python2/3.
 
+- Dropped NetCDF library and replaced opening NetCDF files with h5py
+
+- Bumped h5py to 2.8.0
+
 
 1.0 (2018-09-04)
 ----------------

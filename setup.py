@@ -39,7 +39,7 @@ lightweight_requirements = [
 ]
 
 results_requirements = [
-    'netCDF4>=1.3.1',
+    'cftime>=1.0.1'
 ]
 
 # for extra 'geo'
