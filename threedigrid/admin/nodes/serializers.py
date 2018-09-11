@@ -37,11 +37,10 @@ class ManholesGeoJsonSerializer():
                 [round(x, constants.LONLAT_DIGITS)
                  for x in selection['coordinates'][:, i]])
             area = '--'
-            _area = selection['storage_area'][i]
+            _area = selection['storage_area'][i] or 0.
             if isinstance(_area, np.bytes_):
                 _area = _area.decode('UTF-8')
-            if _area:
-                _area = float(selection['storage_area'][i])
+            _area = float(selection['storage_area'][i])
             if _area and _area > 0.:
                 area = _area
 
@@ -111,11 +110,17 @@ class ConnectionNodesGeoJsonSerializer():
             pt = geojson.Point(
                 [round(x, constants.LONLAT_DIGITS)
                  for x in selection['coordinates'][:, i]])
+            area = '--'
+            _area = selection['storage_area'][i] or 0.
+            if isinstance(_area, np.bytes_):
+                _area = _area.decode('UTF-8')
+            _area = float(selection['storage_area'][i])
+            if _area and _area > 0.:
+                area = _area
+
             cn_meta = [
                     ['object_type', constants.TYPE_V2_CONNECTION_NODES],
-                    ['storage area', "{0} [m2]".format(
-                        selection['storage_area'][i]
-                        if selection['storage_area'][i] > 0 else '--')],
+                    ['storage area', area],
                     ['initial_waterlevel', "{0} [m MSL]".format(
                         selection['initial_waterlevel'][i])],
                     ['nod idx', int(selection['id'][i])],
