@@ -88,9 +88,14 @@ class PrepareManholes:
                 'pk', 'surface_level', 'display_name', 'bottom_level',
                 'calculation_type', 'shape', 'drain_level', 'width',
                 'manhole_indicator', 'zoom_category'])
+
+        # extra field to distinguish manholes from connection nodes.
+        is_manhole = np.ones(len(threedi_datasource.v2_manholes), np.int64)
+        manhole_numpy_array_dict['is_manhole'] = is_manhole
+
         add_or_update_datasets(
             node_group, manhole_numpy_array_dict,
             ['surface_level', 'display_name', 'bottom_level',
              'calculation_type', 'shape', 'drain_level', 'width',
-             'manhole_indicator', 'zoom_category'],
+             'manhole_indicator', 'zoom_category', 'is_manhole'],
             manhole_numpy_array_dict['pk'], content_pk)
