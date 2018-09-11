@@ -4,7 +4,7 @@ History
 1.1 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Patch for converting numpy strings/bytes to float for both python2/3.
 
 
 1.0 (2018-09-04)
