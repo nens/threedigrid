@@ -5,7 +5,7 @@ from __future__ import print_function
 
 from __future__ import absolute_import
 import numpy as np
-from netCDF4 import num2date
+from cftime import num2date
 
 from threedigrid.orm.base.fields import TimeSeriesCompositeArrayField
 from threedigrid.orm.base.fields import TimeSeriesSubsetArrayField
@@ -174,7 +174,8 @@ class ResultMixin(object):
         return [
             t.isoformat() for t in num2date(
                 self.timestamps,
-                units=self._datasource.get('time').getncattr('units'))
+                units=self._datasource['time'].attrs.get(
+                    'units').decode('utf-8'))
         ]
 
 
@@ -325,7 +326,7 @@ class AggregateResultMixin(ResultMixin):
         if time_key in list(self._datasource.keys()):
             arr = self._datasource[time_key]
             try:
-                return arr.getncattr('units')
+                return arr.attrs.get('units')
             except AttributeError:
                 raise AttributeError(
                     'No time unit found for field {}'.format(field_name)

@@ -63,7 +63,7 @@ class H5pyResultGroup(H5pyGroup):
 
     def keys(self):
         keys = list(super(H5pyResultGroup, self).keys())
-        keys += list(self.netcdf_file.variables.keys())
+        keys += list(self.netcdf_file.keys())
         return list(set(keys))
 
     def get(self, name):
@@ -74,17 +74,17 @@ class H5pyResultGroup(H5pyGroup):
         if name in self._source:
             return self._source.get(name)
 
-        if name in self.netcdf_file.variables:
-            return self.netcdf_file.variables.get(name)
+        if name in self.netcdf_file.keys():
+            return self.netcdf_file.get(name)
 
         return None
 
     def attr(self, var_name, attr_name):
         v = self.get(var_name)
-        if v is None or not hasattr(v, 'getncattr'):
+        if v is None:
             return ''
         try:
-            return v.getncattr(attr_name)
+            return v.attrs.get(attr_name)
         except AttributeError:
             pass
         return ''
@@ -97,5 +97,5 @@ class H5pyResultGroup(H5pyGroup):
         if name in self._source:
             return self._source[name]
 
-        if name in self.netcdf_file.variables:
-            return self.netcdf_file.variables[name]
+        if name in self.netcdf_file.keys():
+            return self.netcdf_file[name]
