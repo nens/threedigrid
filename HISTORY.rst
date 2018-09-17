@@ -4,13 +4,13 @@ History
 1.0.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Do not throw exception on cftime ``ImportError``
 
 
 1.0.2 (2018-09-17)
 ------------------
 
-- Add boolean filter for manholes. 
+- Add boolean filter for manholes.
 
 
 1.0.1 (2018-09-11)
