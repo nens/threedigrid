@@ -5,7 +5,11 @@ from __future__ import print_function
 
 from __future__ import absolute_import
 import numpy as np
-from cftime import num2date
+# optional install results
+try:
+    from cftime import num2date
+except ImportError:
+    pass
 
 from threedigrid.orm.base.fields import TimeSeriesCompositeArrayField
 from threedigrid.orm.base.fields import TimeSeriesSubsetArrayField
