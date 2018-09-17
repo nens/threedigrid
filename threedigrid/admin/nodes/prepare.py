@@ -90,7 +90,7 @@ class PrepareManholes:
                 'manhole_indicator', 'zoom_category'])
 
         # extra field to distinguish manholes from connection nodes.
-        is_manhole = np.ones(len(threedi_datasource.v2_manholes), np.int64)
+        is_manhole = np.full(len(threedi_datasource.v2_manholes), True)
         manhole_numpy_array_dict['is_manhole'] = is_manhole
 
         add_or_update_datasets(
