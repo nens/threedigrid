@@ -1,7 +1,7 @@
 History
 =======
 
-1.0.2 (unreleased)
+1.0.2 (2018-09-17)
 ------------------
 
 - Add boolean filter for manholes. 
