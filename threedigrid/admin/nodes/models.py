@@ -52,7 +52,7 @@ class Nodes(Model):
 
     @property
     def manholes(self):
-        return self._filter_as(Manholes, is_manhole=1)
+        return self._filter_as(Manholes, is_manhole=True)
 
     @property
     def added_calculationnodes(self):
