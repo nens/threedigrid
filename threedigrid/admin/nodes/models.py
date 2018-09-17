@@ -42,6 +42,7 @@ class Nodes(Model):
     cell_coords = BboxArrayField()
     zoom_category = ArrayField()
     node_type = ArrayField()
+    is_manhole = ArrayField()
 
     SUBSETS = NODE_SUBSETS
 
@@ -51,7 +52,7 @@ class Nodes(Model):
 
     @property
     def manholes(self):
-        return self._filter_as(Manholes, content_pk__ne=0)
+        return self._filter_as(Manholes, is_manhole=True)
 
     @property
     def added_calculationnodes(self):
