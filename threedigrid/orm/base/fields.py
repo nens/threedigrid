@@ -39,7 +39,8 @@ class BooleanArrayField(ArrayField):
     """
     Generic array field for boolean values.
 
-    No data fields are interpreted as False.
+    Because HDF5 does not support boolean datatype. No data fields are
+    interpreted as False.
     """
     @staticmethod
     def get_value(datasource, name, **kwargs):

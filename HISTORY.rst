@@ -5,7 +5,7 @@ History
 ------------------
 
 - Added BooleanArrayField for boolean values and use it for `is_manhole` filter.
- NO_DATA_VALUE is interpreted as False.
+  NO_DATA_VALUE is interpreted as False.
 
 
 1.0.3 (2018-09-17)
