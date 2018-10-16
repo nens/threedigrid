@@ -52,7 +52,7 @@ class BooleanArrayField(ArrayField):
         """
         if name in list(datasource.keys()):
             data = datasource[name][:]
-            data[data==NO_DATA_VALUE] = 0
+            data[data == NO_DATA_VALUE] = 0
             return data
 
         return None
