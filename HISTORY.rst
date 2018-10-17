@@ -1,7 +1,7 @@
 History
 =======
 
-1.0.4 (unreleased)
+1.0.4 (2018-10-17)
 ------------------
 
 - Added BooleanArrayField for boolean values and use it for `is_manhole` filter.
