@@ -4,7 +4,8 @@ History
 1.0.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Split requirements file to allow for finer grained builds (for instance to
+  generate the documentation).
 
 
 1.0.4 (2018-10-17)

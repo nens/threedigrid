@@ -29,4 +29,4 @@ RUN curl -s https://bootstrap.pypa.io/get-pip.py | python3
 
 WORKDIR /code
 COPY requirements* /code/
-RUN pip install --no-cache-dir -r requirements.txt -r requirements_dev.txt
+RUN pip install --no-cache-dir -r requirements_dev.txt
