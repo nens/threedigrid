@@ -10,6 +10,8 @@ from __future__ import absolute_import
 
 import numpy as np
 
+from threedigrid.admin.constants import NO_DATA_VALUE
+
 
 class ArrayField:
     """
@@ -26,6 +28,32 @@ class ArrayField:
         """
         if name in list(datasource.keys()):
             return datasource[name]
+
+        return None
+
+    def __repr__(self):
+        return self.__class__.__name__
+
+
+class BooleanArrayField(ArrayField):
+    """
+    Generic array field for boolean values.
+
+    Because HDF5 does not support boolean datatype. No data fields are
+    interpreted as False.
+    """
+    @staticmethod
+    def get_value(datasource, name, **kwargs):
+        """
+        Returns: the data from the datasource
+                 or None if 'name' is not in the datasource
+
+        Optional transforms can be done here.
+        """
+        if name in list(datasource.keys()):
+            data = datasource[name][:]
+            data[data == NO_DATA_VALUE] = 0
+            return data
 
         return None
 
