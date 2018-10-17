@@ -20,6 +20,7 @@ import numpy as np
 
 from threedigrid.orm.models import Model
 from threedigrid.orm.fields import ArrayField
+from threedigrid.orm.base.fields import BooleanArrayField
 from threedigrid.orm.fields import PointArrayField
 from threedigrid.orm.fields import BboxArrayField
 from threedigrid.geo_utils import transform_xys
@@ -42,7 +43,7 @@ class Nodes(Model):
     cell_coords = BboxArrayField()
     zoom_category = ArrayField()
     node_type = ArrayField()
-    is_manhole = ArrayField()
+    is_manhole = BooleanArrayField()
 
     SUBSETS = NODE_SUBSETS
 

@@ -400,6 +400,45 @@ class NodeFilterTests(unittest.TestCase):
             .data['coordinates']
         self.assertTrue((filtered == expected).all())
 
+    def test_manhole_filter(self):
+        non_manholes1 = self.parser.nodes.filter(
+            is_manhole=False).count
+        non_manholes2 = self.parser.nodes.filter(
+            is_manhole=0).count
+        non_manholes3 = self.parser.nodes.filter(
+            is_manhole__eq=0).count
+        non_manholes4 = self.parser.nodes.filter(
+            is_manhole__eq=False).count
+        non_manholes5 = self.parser.nodes.filter(
+            is_manhole__ne=1).count
+        non_manholes6 = self.parser.nodes.filter(
+            is_manhole__ne=True).count
+        self.assertEqual(non_manholes1, non_manholes2)
+        self.assertEqual(non_manholes2, non_manholes3)
+        self.assertEqual(non_manholes3, non_manholes4)
+        self.assertEqual(non_manholes4, non_manholes5)
+        self.assertEqual(non_manholes5, non_manholes6)
+
+        manholes1 = self.parser.nodes.filter(
+            is_manhole=True).count
+        manholes2 = self.parser.nodes.filter(
+            is_manhole=1).count
+        manholes3 = self.parser.nodes.filter(
+            is_manhole__eq=1).count
+        manholes4 = self.parser.nodes.filter(
+            is_manhole__eq=True).count
+        manholes5 = self.parser.nodes.filter(
+            is_manhole__ne=0).count
+        manholes6 = self.parser.nodes.filter(
+            is_manhole__ne=False).count
+        self.assertEqual(manholes1, manholes2)
+        self.assertEqual(manholes2, manholes3)
+        self.assertEqual(manholes3, manholes4)
+        self.assertEqual(manholes4, manholes5)
+        self.assertEqual(manholes5, manholes6)
+
+        self.assertEqual(manholes1 + non_manholes2, self.parser.nodes.count)
+
 
 class LineFilterTests(unittest.TestCase):
     def setUp(self):
