@@ -7,6 +7,8 @@ History
 - Split requirements file to allow for finer grained builds (for instance to
   generate the documentation).
 
+- Add 'intercepted_volume' to NodesAggregateResultsMixin.
+
 
 1.0.4 (2018-10-17)
 ------------------
