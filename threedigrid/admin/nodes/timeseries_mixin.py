@@ -28,6 +28,8 @@ BASE_SUBSET_FIELDS = {
         {'2d_all': 'Mesh2D_ucy'},
     'leak':
         {'2d_all': 'Mesh2D_leak'},
+    'intercepted_volume':
+        {'2d_all': 'Mesh2D_intercepted_volume'},
 }
 
 
@@ -88,6 +90,8 @@ class NodesAggregateResultsMixin(AggregateResultMixin):
             'ucx': ['min', 'max', 'avg'],
             'ucy': ['min', 'max', 'avg'],
             'leak': [
+                'min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
+            'intercepted_volume': [
                 'min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
         }
 

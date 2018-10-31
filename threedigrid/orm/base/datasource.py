@@ -25,7 +25,7 @@ class DataSource(object):
         return keys
 
     def set(self, name, value):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     def get(self, name):
         # meta is special
