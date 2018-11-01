@@ -4,10 +4,13 @@ History
 1.0.5 (unreleased)
 ------------------
 
-- Split requirements file to allow for finer grained builds (for instance to
-  generate the documentation).
+- Using a non-tuple sequence for multidimensional indexing is deprecated; use
+  `arr[tuple(seq)]` instead of `arr[seq]`.
 
 - Add 'intercepted_volume' to NodesAggregateResultsMixin.
+
+- Split requirements file to allow for finer grained builds (for instance to
+  generate the documentation).
 
 
 1.0.4 (2018-10-17)
