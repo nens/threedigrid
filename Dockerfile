@@ -1,6 +1,7 @@
 FROM ubuntu:xenial
 
-MAINTAINER lars.claussen <lars.claussen@nelen-schuurmans.nl>
+LABEL maintainer='lars.claussen <lars.claussen@nelen-schuurmans.nl>'
+LABEL py_version='3.x'
 
 # Change the date to force rebuilding the whole image.
 ENV REFRESHED_AT 2018-03-02
@@ -28,5 +29,5 @@ RUN apt-get update && apt-get install -y \
 RUN curl -s https://bootstrap.pypa.io/get-pip.py | python3
 
 WORKDIR /code
-COPY requirements* /code/
+COPY requirements_dev.txt requirements_geo.txt requirements_base.txt /code/
 RUN pip install --no-cache-dir -r requirements_dev.txt

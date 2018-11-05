@@ -21,6 +21,7 @@ class H5pyGroup(DataSource):
 
     def __init__(self, h5py_file, group_name, meta=None, required=False):
         if group_name not in list(h5py_file.keys()) and not required:
+            print('aaaaaaaaaaaaaaha!')
             logger.info(
                 '[*] {0} not found in file {1}, not required...'.format(
                     group_name, h5py_file)
@@ -30,6 +31,7 @@ class H5pyGroup(DataSource):
         self.group_name = group_name
 
         self._h5py_file = h5py_file
+        print('** self._h5py_file ', self._h5py_file)
         try:
             self._source = h5py_file.require_group(group_name)
         except TypeError:
@@ -48,7 +50,10 @@ class H5pyGroup(DataSource):
             self._source.create_dataset(name, data=values)
 
     def getattr(self, name):
-        return self._h5py_file.attrs[name]
+        attr = self._h5py_file.attrs[name]
+        if isinstance(attr, bytes):
+            attr = attr.decode('utf-8')
+        return attr
 
     def keys(self):
         return list(self._source.keys())
