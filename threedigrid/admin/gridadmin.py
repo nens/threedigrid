@@ -89,7 +89,6 @@ class GridH5Admin(object):
         return Breaches(
             H5pyGroup(self.h5py_file, 'breaches'), **self._grid_kwargs)
 
-
     @property
     def cells(self):
         # treated as nodes
