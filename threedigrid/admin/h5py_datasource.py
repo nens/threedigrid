@@ -30,7 +30,6 @@ class H5pyGroup(DataSource):
         self.group_name = group_name
 
         self._h5py_file = h5py_file
-        print('** self._h5py_file ', self._h5py_file)
         try:
             self._source = h5py_file.require_group(group_name)
         except TypeError:
