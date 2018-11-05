@@ -36,7 +36,6 @@ def is_prepared(h5py_file, group_name, attr_name):
 
 
 def skip_prepare(h5py_file, group_name, attr_name, overwrite):
-    if
     if overwrite:
         return False
     return is_prepared(h5py_file, group_name, attr_name)
