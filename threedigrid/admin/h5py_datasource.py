@@ -21,7 +21,6 @@ class H5pyGroup(DataSource):
 
     def __init__(self, h5py_file, group_name, meta=None, required=False):
         if group_name not in list(h5py_file.keys()) and not required:
-            print('aaaaaaaaaaaaaaha!')
             logger.info(
                 '[*] {0} not found in file {1}, not required...'.format(
                     group_name, h5py_file)
