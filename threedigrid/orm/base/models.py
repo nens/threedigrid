@@ -90,7 +90,6 @@ class Model(six.with_metaclass(ABCMeta)):
         self._boolean_mask_filter = None
         self._mixin = mixin
 
-        print('==========  EPSG ', epsg_code, self._datasource)
         if not epsg_code:
             epsg_code = self._datasource.getattr('epsg_code')
         self.epsg_code = epsg_code
