@@ -79,8 +79,6 @@ class GridH5Admin(object):
 
     @property
     def pumps(self):
-        # if not self.has_pumpstations:
-        #     return None
         return Pumps(
             H5pyGroup(self.h5py_file, 'pumps'), **self._grid_kwargs)
 
