@@ -20,6 +20,7 @@ from threedigrid.admin.constants import SUBSET_1D_ALL
 from threedigrid.admin.constants import SUBSET_2D_OPEN_WATER
 from threedigrid.admin.constants import NO_DATA_VALUE
 from six.moves import range
+from six import string_types
 
 test_file_dir = os.path.join(
     os.getcwd(), "tests/test_files")
@@ -195,6 +196,10 @@ class GridAdminNodeTest(unittest.TestCase):
         s = ogr.Open(self.f)
         lyr = s.GetLayer()
         self.assertEqual(lyr.GetFeatureCount(), self.parser.nodes.id.size)
+
+    def test_repr(self):
+        name = self.parser.nodes.__repr__()
+        self.assertTrue(isinstance(name, string_types))
 
 
 class GridAdminBreachTest(unittest.TestCase):

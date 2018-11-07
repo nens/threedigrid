@@ -117,11 +117,12 @@ class Model(six.with_metaclass(ABCMeta)):
     @property
     def model_name(self):
         try:
-            model_name = '-'.join(
-                (self._datasource.getattr('model_name'),
-                 self._datasource.getattr('model_slug'),
-                 str(self._datasource.getattr('revision_nr')),
-                 self._datasource.getattr('revision_hash')))
+            model_name_args = (self._datasource.getattr('model_name'),
+                               self._datasource.getattr('model_slug'),
+                               self._datasource.getattr('revision_nr'),
+                               self._datasource.getattr('revision_hash'))
+            model_name_args = map(lambda x: x.decode('utf-8'), model_name_args)
+            model_name = '-'.join(model_name_args)
         except (AttributeError, KeyError):
             model_name = 'unknown'
             pass
