@@ -4,6 +4,8 @@ History
 1.0.5 (unreleased)
 ------------------
 
+- Fixed __repr__ of base models for python3.
+
 - Split requirements file to allow for finer grained builds (for instance to
   generate the documentation).
 
