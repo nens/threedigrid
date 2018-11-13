@@ -27,6 +27,41 @@ def gr():
     yield gr
     gr.close()
 
+def test_fieldnames_nodes(gr):
+    assert set(gr.nodes._field_names) == {
+        'cell_coords', 'content_pk', 'coordinates', 'id',
+        u'intercepted_volume', 'is_manhole', u'leak', 'node_type', u'q_lat',
+        u'rain', u's1', 'seq_id', u'su', u'ucx', u'ucy', u'vol',
+        'zoom_category',
+    }
+
+def test_fieldnames_lines(gr):
+    assert set(gr.lines._field_names) == {
+        u'au', 'content_pk', 'content_type', 'id', 'kcu', 'lik', 'line',
+        'line_coords', 'line_geometries', u'q', u'u1', 'zoom_category',
+    }
+
+def test_fieldnames_pumps(gr):
+    assert set(gr.pumps._field_names) == {
+        'bottom_level', 'capacity', 'coordinates', 'display_name', 'id',
+        'lower_stop_level', 'node1_id', 'node2_id', 'node_coordinates',
+        u'q_pump', 'start_level', 'zoom_category',
+    }
+
+def test_composite_fields_nodes(gr):
+    assert set(gr.nodes.Meta.composite_fields.keys()) == {
+        u'_mesh_id', u'q_lat', u'rain', u's1', u'su', u'vol'
+    }
+
+def test_composite_fields_lines(gr):
+    assert set(gr.lines.Meta.composite_fields.keys()) == {
+        u'_mesh_id', u'au', u'q', u'qp', u'u1', u'up1',
+    }
+
+def test_composite_fields_pumps(gr):
+    assert set(gr.pumps.Meta.composite_fields.keys()) == {
+        u'_mesh_id', u'q_pump',
+    }
 
 def test_nodes_timeseries_start_end_time_kwargs(gr):
     ts = gr.nodes.timestamps

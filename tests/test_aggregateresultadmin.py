@@ -26,6 +26,52 @@ def agg_gr():
     yield gr
     gr.close()
 
+# TODO check for intercepted_volume
+def test_fieldnames_nodes(agg_gr):
+    assert set(agg_gr.nodes._field_names) == {
+        'cell_coords', 'content_pk', 'coordinates', 'id', 'is_manhole',
+        'node_type', u'q_lat_cum', u'rain_avg', u'rain_cum', u's1_max',
+        u's1_min', 'seq_id', u'su_min', u'vol_max', 'zoom_category',
+    }
+
+def test_fieldnames_lines(agg_gr):
+    assert set(agg_gr.lines._field_names) == {
+        'content_pk', 'content_type', 'id', 'kcu', 'lik', 'line',
+        'line_coords', 'line_geometries', u'q_cum', u'q_cum_negative',
+        u'q_cum_positive', u'u1_avg', 'zoom_category',
+    }
+
+def test_fieldnames_pumps(agg_gr):
+    assert set(agg_gr.pumps._field_names) == {
+        'bottom_level', 'capacity', 'coordinates', 'display_name', 'id',
+        'lower_stop_level', 'node1_id', 'node2_id', 'node_coordinates',
+        u'q_pump_cum', 'start_level', 'zoom_category'
+    }
+
+# TODO check for intercepted_volume
+def test_composite_fields_nodes(agg_gr):
+    assert set(agg_gr.nodes.Meta.composite_fields.keys()) == {
+        u'_mesh_id', u'q_lat_avg', u'q_lat_cum', u'q_lat_cum_negative',
+        u'q_lat_cum_positive', u'q_lat_max', u'q_lat_min', u'rain_avg',
+        u'rain_cum', u'rain_cum_negative', u'rain_cum_positive', u'rain_max',
+        u'rain_min', u's1_avg', u's1_max', u's1_min', u'su_avg', u'su_max',
+        u'su_min', u'vol_avg', u'vol_max', u'vol_min', u'vol_sum',
+    }
+
+def test_composite_fields_lines(agg_gr):
+    assert set(agg_gr.lines.Meta.composite_fields.keys()) == {
+        u'_mesh_id', u'au_avg', u'au_max', u'au_min', u'q_avg', u'q_cum',
+        u'q_cum_negative', u'q_cum_positive', u'q_max', u'q_min', u'qp_avg',
+        u'qp_cum', u'qp_cum_negative', u'qp_cum_positive', u'qp_max',
+        u'qp_min', u'u1_avg', u'u1_max', u'u1_min', u'up1_avg', u'up1_max',
+        u'up1_min',
+    }
+
+def test_composite_fields_pumps(agg_gr):
+    assert set(agg_gr.pumps.Meta.composite_fields.keys()) == {
+        u'q_pump_avg', u'q_pump_cum', u'q_pump_cum_negative',
+        u'q_pump_cum_positive', u'q_pump_max', u'q_pump_min',
+    }
 
 def test_get_timestamps_nodes(agg_gr):
     ts = agg_gr.nodes.get_timestamps('rain_avg')
