@@ -6,9 +6,6 @@ import os
 import tempfile
 
 from click.testing import CliRunner
-
-from threedigrid.management import help_texts
-from threedigrid.management.commands.kick import kick_start
 from threedigrid.management.commands.kick import export_to
 
 
@@ -22,6 +19,7 @@ grid_admin_h5_file = os.path.join(test_file_dir, "gridadmin.h5")
 # TODO: fix this (jira ticket: THREEDI-578)
 # commented for now until this KeyError (Cannont locate attribute: 'threedi_
 # version') has been fixed")
+# from threedigrid.management import help_texts
 # def test_model_overview():
 #     # smoke test
 #     txt = help_texts.model_overview(grid_admin_h5_file)
@@ -31,6 +29,7 @@ grid_admin_h5_file = os.path.join(test_file_dir, "gridadmin.h5")
 # TODO: fix this (jira ticket: THREEDI-578)
 # commented for now until this KeyError (Cannont locate attribute: 'threedi_
 # version') has been fixed")
+# from threedigrid.management.commands.kick import kick_start
 # def test_command_kick_start():
 #     # smoke test
 #     runner = CliRunner()
