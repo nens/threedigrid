@@ -209,7 +209,7 @@ class GridAdminBreachTest(unittest.TestCase):
 
     # TODO: fix this (Add breach to new testdata)
     @unittest.skip("test succeeded with previous testdata, but skip for now, "
-                   "because of new testdata")
+                   "because of new testdata (with breaches")
     def test_fields(self):
         # Check fields
         assert set(self.parser.breaches._meta.get_fields().keys()) == {
@@ -219,7 +219,7 @@ class GridAdminBreachTest(unittest.TestCase):
 
     # TODO: fix this (Add breach to new testdata)
     @unittest.skip("test succeeded with previous testdata, but skip for now, "
-                   "because of new testdata")
+                   "because of new testdata (with breaches")
     def test_exporters(self):
         self.assertEqual(len(self.parser.breaches._exporters), 1)
         self.assertIsInstance(

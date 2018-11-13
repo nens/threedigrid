@@ -119,7 +119,7 @@ def test_nodes_timeseries_with_subset(agg_gr):
 def test_nodes_timeseries_start_time_only_kwarg(agg_gr):
     ts = agg_gr.nodes.get_timestamps('s1_max')
     qs_s1_max = agg_gr.nodes.timeseries(start_time=ts[1]).s1_max
-    assert qs_s1_max.shape[0] == 2
+    assert qs_s1_max.shape[0] == 6
 
 
 def test_nodes_timeseries_end_time_only_kwarg(agg_gr):
@@ -131,6 +131,25 @@ def test_nodes_timeseries_end_time_only_kwarg(agg_gr):
 def test_nodes_timeseries_slice_filter(agg_gr):
     qs_s1_min = agg_gr.nodes.timeseries(indexes=slice(0, 1)).s1_min
     assert qs_s1_min.shape[0] == 1
+
+@pytest.mark.skip("skip for now until the new aggregate.nc is finished")
+def test_get_node_aggregate_netcdf_results(agg_gr):
+    assert 's1_max' in agg_gr.netcdf_file.variables.keys()
+    assert 'vol_max' in agg_gr.netcdf_file.variables.keys()
+    assert hasattr(agg_gr.nodes, 's1_max')
+    assert hasattr(agg_gr.nodes, 'vol_max')
+    assert agg_gr.nodes.s1_max.shape[0] > 0
+    assert agg_gr.nodes.vol_max.shape[0] > 0
+
+@pytest.mark.skip("skip for now until the new aggregate.nc is finished")
+def test_get_line_aggregate_netcdf_results(agg_gr):
+    assert 'q_max' in agg_gr.netcdf_file.variables.keys()
+    assert 'u1_max' in agg_gr.netcdf_file.variables.keys()
+    assert hasattr(agg_gr.lines, 'q_max')
+    assert hasattr(agg_gr.lines, 'u1_max')
+    assert agg_gr.lines.q_max.shape[0] > 0
+    assert agg_gr.lines.u1_max.shape[0] > 0
+
 
 # TODO once the threedicore has implemented aggregations for pumpstations
 # TODO and breaches also implement some tests
