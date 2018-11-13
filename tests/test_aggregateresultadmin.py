@@ -62,6 +62,7 @@ def test_composite_fields_nodes(agg_gr):
         u'su_min', u'vol_avg', u'vol_max', u'vol_min', u'vol_sum',
     }
 
+
 def test_composite_fields_lines(agg_gr):
     assert set(agg_gr.lines.Meta.composite_fields.keys()) == {
         u'_mesh_id', u'au_avg', u'au_max', u'au_min', u'q_avg', u'q_cum',
