@@ -26,6 +26,7 @@ def agg_gr():
     yield gr
     gr.close()
 
+
 # TODO check for intercepted_volume
 def test_fieldnames_nodes(agg_gr):
     assert set(agg_gr.nodes._field_names) == {
@@ -34,6 +35,7 @@ def test_fieldnames_nodes(agg_gr):
         u's1_min', 'seq_id', u'su_min', u'vol_max', 'zoom_category',
     }
 
+
 def test_fieldnames_lines(agg_gr):
     assert set(agg_gr.lines._field_names) == {
         'content_pk', 'content_type', 'id', 'kcu', 'lik', 'line',
@@ -41,12 +43,14 @@ def test_fieldnames_lines(agg_gr):
         u'q_cum_positive', u'u1_avg', 'zoom_category',
     }
 
+
 def test_fieldnames_pumps(agg_gr):
     assert set(agg_gr.pumps._field_names) == {
         'bottom_level', 'capacity', 'coordinates', 'display_name', 'id',
         'lower_stop_level', 'node1_id', 'node2_id', 'node_coordinates',
         u'q_pump_cum', 'start_level', 'zoom_category'
     }
+
 
 # TODO check for intercepted_volume
 def test_composite_fields_nodes(agg_gr):
@@ -67,11 +71,13 @@ def test_composite_fields_lines(agg_gr):
         u'up1_min',
     }
 
+
 def test_composite_fields_pumps(agg_gr):
     assert set(agg_gr.pumps.Meta.composite_fields.keys()) == {
         u'q_pump_avg', u'q_pump_cum', u'q_pump_cum_negative',
         u'q_pump_cum_positive', u'q_pump_max', u'q_pump_min',
     }
+
 
 def test_get_timestamps_nodes(agg_gr):
     ts = agg_gr.nodes.get_timestamps('rain_avg')
@@ -132,6 +138,7 @@ def test_nodes_timeseries_slice_filter(agg_gr):
     qs_s1_min = agg_gr.nodes.timeseries(indexes=slice(0, 1)).s1_min
     assert qs_s1_min.shape[0] == 1
 
+
 @pytest.mark.skip("skip for now until the new aggregate.nc is finished")
 def test_get_node_aggregate_netcdf_results(agg_gr):
     assert 's1_max' in agg_gr.netcdf_file.variables.keys()
@@ -140,6 +147,7 @@ def test_get_node_aggregate_netcdf_results(agg_gr):
     assert hasattr(agg_gr.nodes, 'vol_max')
     assert agg_gr.nodes.s1_max.shape[0] > 0
     assert agg_gr.nodes.vol_max.shape[0] > 0
+
 
 @pytest.mark.skip("skip for now until the new aggregate.nc is finished")
 def test_get_line_aggregate_netcdf_results(agg_gr):

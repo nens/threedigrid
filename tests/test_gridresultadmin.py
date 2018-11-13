@@ -27,6 +27,7 @@ def gr():
     yield gr
     gr.close()
 
+
 def test_fieldnames_nodes(gr):
     assert set(gr.nodes._field_names) == {
         'cell_coords', 'content_pk', 'coordinates', 'id',
@@ -35,11 +36,13 @@ def test_fieldnames_nodes(gr):
         'zoom_category',
     }
 
+
 def test_fieldnames_lines(gr):
     assert set(gr.lines._field_names) == {
         u'au', 'content_pk', 'content_type', 'id', 'kcu', 'lik', 'line',
         'line_coords', 'line_geometries', u'q', u'u1', 'zoom_category',
     }
+
 
 def test_fieldnames_pumps(gr):
     assert set(gr.pumps._field_names) == {
@@ -48,25 +51,30 @@ def test_fieldnames_pumps(gr):
         u'q_pump', 'start_level', 'zoom_category',
     }
 
+
 def test_composite_fields_nodes(gr):
     assert set(gr.nodes.Meta.composite_fields.keys()) == {
         u'_mesh_id', u'q_lat', u'rain', u's1', u'su', u'vol'
     }
+
 
 def test_composite_fields_lines(gr):
     assert set(gr.lines.Meta.composite_fields.keys()) == {
         u'_mesh_id', u'au', u'q', u'qp', u'u1', u'up1',
     }
 
+
 def test_composite_fields_pumps(gr):
     assert set(gr.pumps.Meta.composite_fields.keys()) == {
         u'_mesh_id', u'q_pump',
     }
 
+
 def test_nodes_timeseries_start_end_time_kwargs(gr):
     ts = gr.nodes.timestamps
     qs_s1 = gr.nodes.timeseries(start_time=ts[0], end_time=ts[6]).s1
     assert qs_s1.shape[0] == ts[0:6+1].size
+
 
 def test_nodes_timeseries_with_subset(gr):
     qs_s1 = gr.nodes.subset('1d_all').timeseries(start_time=0, end_time=500).s1
@@ -107,7 +115,7 @@ def test_pump_timeseries_index_filter(gr):
 
 # TODO: fix this (Add breach to new testdata)
 @pytest.mark.skip("test succeeded with previous testdata, but skip for now, "
-               "because of new testdata (with breaches")
+                  "because of new testdata (without breaches)")
 def test_breach_timeseries_slice_filter(gr):
     qs = gr.breaches.timeseries(indexes=slice(1, 4)).breach_depth
     assert qs.shape[0] == 3
@@ -115,7 +123,7 @@ def test_breach_timeseries_slice_filter(gr):
 
 # TODO: fix this (Add breach to new testdata)
 @pytest.mark.skip("test succeeded with previous testdata, but skip for now, "
-               "because of new testdata (with breaches")
+                  "because of new testdata (without breaches)")
 def test_breach_timeseries_index_filter(gr):
     qs = gr.breaches.timeseries(indexes=[1, 2, 3]).breach_width
     assert qs.shape[0] == 3
@@ -188,8 +196,7 @@ def test_dt_timestamps(gr):
 
 # TODO: fix this (jira ticket: THREEDI-578)
 @pytest.mark.skip("skipped for now until this KeyError (Cant open attribute "
-                  "cant locate attribute: 'threedi_version') "
-                  "has been fixed")
+                  "cant locate attribute: 'threedi_version') has been fixed")
 def test_get_model_instance_by_field_name(gr):
     inst = gr.get_model_instance_by_field_name('s1')
     assert isinstance(inst, Nodes)
@@ -197,8 +204,7 @@ def test_get_model_instance_by_field_name(gr):
 
 # TODO: fix this (jira ticket: THREEDI-578)
 @pytest.mark.skip("skipped for now until this KeyError (Cant open attribute "
-                  "cant locate attribute: 'threedi_version') "
-                  "has been fixed")
+                  "cant locate attribute: 'threedi_version') has been fixed")
 def test_get_model_instance_by_field_name_raises_index_error_unknown_field(gr):
     with pytest.raises(IndexError):
         gr.get_model_instance_by_field_name('unknown_field')
@@ -206,8 +212,7 @@ def test_get_model_instance_by_field_name_raises_index_error_unknown_field(gr):
 
 # TODO: fix this (jira ticket: THREEDI-578)
 @pytest.mark.skip("skipped for now until this KeyError (Cant open attribute "
-                  "cant locate attribute: 'threedi_version') "
-                  "has been fixed")
+                  "cant locate attribute: 'threedi_version') has been fixed")
 def test_get_model_instance_by_field_name_raises_index_error(gr):
     with pytest.raises(IndexError):
         gr.get_model_instance_by_field_name('zoom_category')

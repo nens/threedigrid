@@ -61,6 +61,7 @@ def test_options_get_field(opt_lines):
     field = opt_lines.get_field('au')
     assert isinstance(field, TimeSeriesCompositeArrayField)
 
+
 @pytest.mark.skip()
 def test_breach_options_get_fields(opt_breaches):
     fields = opt_breaches.get_fields()
