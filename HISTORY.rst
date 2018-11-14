@@ -3,6 +3,7 @@ History
 
 1.0.5 (unreleased)
 ------------------
+- Add aggregation option 'current' to volume and intercepted_volume.
 
 - Split requirements file to allow for finer grained builds (for instance to
   generate the documentation).
