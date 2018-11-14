@@ -63,7 +63,8 @@ class ResultMixin(object):
         fields = {}
         count = self.get_field_value('id').size
         for v, k in six.iteritems(self.Meta.subset_fields):
-            _source_name = list(k.values())
+            import itertools
+            _source_name = list(itertools.chain(*k.values()))
             if not _source_name:
                 continue
             source_name = _source_name[0]
