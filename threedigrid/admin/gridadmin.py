@@ -96,21 +96,39 @@ class GridH5Admin(object):
     @property
     def revision_hash(self):
         """mercurial revision hash of the model"""
-        return self.h5py_file.attrs['revision_hash']
+        return self._to_str(self.h5py_file.attrs['revision_hash'])
 
     @property
     def revision_nr(self):
         """mercurial revision nr or id of the model"""
-        return self.h5py_file.attrs['revision_nr']
+        return self._to_str(self.h5py_file.attrs['revision_nr'])
 
     @property
     def model_name(self):
         """name of the model the gridadmin file belongs to"""
-        return self.h5py_file.attrs['model_name']
+        return self._to_str(self.h5py_file.attrs['model_name'])
 
     @property
     def epsg_code(self):
-        return self.h5py_file.attrs['epsg_code']
+        return self._to_str(self.h5py_file.attrs['epsg_code'])
+
+    @property
+    def model_slug(self):
+        return self._to_str(self.h5py_file.attrs['model_slug'])
+
+    @property
+    def threedicore_version(self):
+        return self._to_str(self.h5py_file.attrs['threedicore_version'])
+
+    @property
+    def threedi_version(self):
+        return self._to_str(self.h5py_file.attrs['threedi_version'])
+
+    @property
+    def has_levees(self):
+        if not hasattr(self, "levees"):
+            return False
+        return bool(self.levees.id.size)
 
     def get_extent_subset(self, subset_name, target_epsg_code=''):
         """
@@ -175,10 +193,6 @@ class GridH5Admin(object):
 
         return np.array([np.min(x), np.min(y), np.max(x), np.max(y)])
 
-    @property
-    def model_slug(self):
-        return self.h5py_file.attrs['model_slug']
-
     def _set_props(self):
         for prop, value in six.iteritems(self.h5py_file.attrs):
             if prop and prop.startswith('has_'):
@@ -190,25 +204,18 @@ class GridH5Admin(object):
                     )
                     pass
 
-    @property
-    def has_levees(self):
-        if not hasattr(self, "levees"):
-            return False
-        return bool(self.levees.id.size)
-
-    @property
-    def threedicore_version(self):
-        return self.h5py_file.attrs['threedicore_version']
-
-    @property
-    def threedi_version(self):
-        return self.h5py_file.attrs['threedi_version']
-
     def get_from_meta(self, prop_name):
         if prop_name not in list(self.h5py_file['meta'].keys()):
             return None
 
         return self.h5py_file['meta'][prop_name].value
+
+    @staticmethod
+    def _to_str(x):
+        try:
+            return x.decode('utf-8')
+        except AttributeError:
+            return x
 
     def __enter__(self):
         return self.h5py_file
