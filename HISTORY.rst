@@ -1,7 +1,7 @@
 History
 =======
 
-1.0.6 (unreleased)
+1.0.6 (2018-11-14)
 ------------------
 
 - New release due to failing uploads.
