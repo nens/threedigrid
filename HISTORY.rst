@@ -4,6 +4,8 @@ History
 1.0.5 (unreleased)
 ------------------
 
+- Add aggregation option 'current' to volume and intercepted_volume.
+
 - Using a non-tuple sequence for multidimensional indexing is deprecated; use
   `arr[tuple(seq)]` instead of `arr[seq]`.
   
