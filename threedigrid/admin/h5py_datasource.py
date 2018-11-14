@@ -48,7 +48,10 @@ class H5pyGroup(DataSource):
             self._source.create_dataset(name, data=values)
 
     def getattr(self, name):
-        return self._h5py_file.attrs[name]
+        attr = self._h5py_file.attrs[name]
+        if isinstance(attr, bytes):
+            attr = attr.decode('utf-8')
+        return attr
 
     def keys(self):
         return list(self._source.keys())
