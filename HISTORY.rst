@@ -4,6 +4,9 @@ History
 1.0.5 (unreleased)
 ------------------
 
+- Using a non-tuple sequence for multidimensional indexing is deprecated; use
+  `arr[tuple(seq)]` instead of `arr[seq]`.
+  
 - Properties should be strings so we can use string methods on them.
 
 - Do not prepare levees if there aren't any.
@@ -12,6 +15,9 @@ History
   generate the documentation).
 
 - Add 'intercepted_volume' to NodesAggregateResultsMixin.
+
+- Split requirements file to allow for finer grained builds (for instance to
+  generate the documentation).
 
 
 1.0.4 (2018-10-17)
