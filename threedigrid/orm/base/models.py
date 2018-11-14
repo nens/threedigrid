@@ -216,7 +216,7 @@ class Model(six.with_metaclass(ABCMeta)):
             value = value[:]
 
         # Perform slicing by applying the mask
-        value = value[_filter]
+        value = value[tuple(_filter)]
 
         # Reproject any coordinates if a reproject_to_epsg is set and
         # there are coordinatefields in the selection
