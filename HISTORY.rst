@@ -4,7 +4,7 @@ History
 1.0.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- New release due to failing uploads.
 
 
 1.0.5 (2018-11-14)
@@ -14,7 +14,7 @@ History
 
 - Using a non-tuple sequence for multidimensional indexing is deprecated; use
   `arr[tuple(seq)]` instead of `arr[seq]`.
-  
+
 - Properties should be strings so we can use string methods on them.
 
 - Do not prepare levees if there aren't any.
