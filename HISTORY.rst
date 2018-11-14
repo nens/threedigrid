@@ -1,7 +1,7 @@
 History
 =======
 
-1.0.5 (unreleased)
+1.0.5 (2018-11-14)
 ------------------
 
 - Add aggregation option 'current' to volume and intercepted_volume.
