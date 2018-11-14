@@ -85,6 +85,9 @@ class GridAdminH5Prepare(object):
 
     @staticmethod
     def prepare_levees(h5py_file, threedi_datasource, overwrite=False):
+        if not threedi_datasource.levees:
+            return
+
         if skip_prepare(h5py_file, 'levees', 'prepared', overwrite):
             return
 
