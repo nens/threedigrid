@@ -15,6 +15,7 @@ from threedigrid.numpy_utils import get_smallest_uint_dtype
 from threedigrid import numpy_utils
 from threedigrid.orm.base.utils import _flatten_dict_values
 
+
 def test_create_np_lookup_index_for():
     a = np.arange(6)
     b = np.array([3, 4, 1, 2, 5, 0])
