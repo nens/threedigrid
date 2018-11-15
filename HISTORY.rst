@@ -4,7 +4,8 @@ History
 1.0.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Bug fix: dict.values() and dict.keys() in python 3 are causing some
+  unintended behaviour.
 
 
 1.0.6 (2018-11-14)
