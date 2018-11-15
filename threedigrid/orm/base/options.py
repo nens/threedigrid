@@ -120,7 +120,6 @@ class Options(object):
         :param field_name: name of the source field name
         :return: True if it exists False otherwise
         """
-
         _has_comp = hasattr(self.inst.Meta, 'composite_fields')
         _has_sub = hasattr(self.inst.Meta, 'subset_fields')
         if not _has_comp and not _has_sub:
@@ -132,9 +131,16 @@ class Options(object):
                        for x in sources)
         sources = self.inst.Meta.subset_fields.get(field_name)
         if sources:
+            source_values = sources.values()
             import itertools
-            return any(x in list(self.inst._datasource.keys())
-                       for x in itertools.chain(*sources.values()))
+            if any(isinstance(i, list) for i in source_values):
+                _sources = set(itertools.chain(*source_values))
+            else:
+                _sources = set(source_values)
+
+            ans = any(x in set(self.inst._datasource.keys())
+                       for x in _sources)
+            return ans
 
     def _get_meta_values(self, field_name):
         """
