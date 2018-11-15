@@ -110,10 +110,10 @@ def test_flatten_nested_dict_values_as_set():
 def test_flatten_dict_values_as_list():
     d = {'a': 1}
     v = _flatten_dict_values(d, as_set=False)
-    assert v == {1}
+    assert v == [1]
 
 
 def test_flatten_nested_dict_values_as_list():
     d = {'a': [1]}
     v = _flatten_dict_values(d, as_set=False)
-    assert v == {1}
+    assert v == [1]
