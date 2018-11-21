@@ -252,7 +252,7 @@ class GridAdminCellsTest(unittest.TestCase):
         x = self.parser.cells.coordinates[0][1] + 0.5
         y = self.parser.cells.coordinates[1][1] + 0.5
         self.assertListEqual(
-            self.parser.cells.get_id_from_xy(x, y), [1, 6537])
+            self.parser.cells.get_id_from_xy(x, y), [1, 5375])
 
     def test_get_id_from_xy_2d_open_water(self):
 
@@ -278,7 +278,7 @@ class GridAdminCellsTest(unittest.TestCase):
         self.assertEqual(
             self.parser.cells.get_id_from_xy(
                 x, y, subset_name='groundwater_all'
-            ), [6537]
+            ), [5375]
         )
 
     def test_exporters(self):

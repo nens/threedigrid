@@ -27,6 +27,38 @@ def agg_gr():
     gr.close()
 
 
+def test_get_meta_composite_fields_nodes(agg_gr):
+    assert set(agg_gr.nodes.Meta.composite_fields.keys()) == {
+        '_mesh_id', 'q_lat_avg', 'q_lat_cum', 'q_lat_cum_negative',
+        'q_lat_cum_positive', 'q_lat_max', 'q_lat_min', 'rain_avg', 'rain_cum',
+        'rain_cum_negative', 'rain_cum_positive', 'rain_max', 'rain_min',
+        's1_avg', 's1_max', 's1_min', 'su_avg', 'su_max', 'su_min', 'vol_avg',
+        'vol_current', 'vol_max', 'vol_min', 'vol_sum'}
+
+
+def test_get_meta_subset_fields_nodes(agg_gr):
+    assert set(agg_gr.nodes.Meta.subset_fields.keys()) == {
+        'infiltration_rate_simple_avg', 'infiltration_rate_simple_cum',
+        'infiltration_rate_simple_cum_negative',
+        'infiltration_rate_simple_cum_positive',
+        'infiltration_rate_simple_max', 'infiltration_rate_simple_min',
+        'intercepted_volume_avg', 'intercepted_volume_current',
+        'intercepted_volume_max', 'intercepted_volume_min',
+        'intercepted_volume_sum', 'leak_avg', 'leak_cum', 'leak_cum_negative',
+        'leak_cum_positive',  'leak_max', 'leak_min', 'ucx_avg', 'ucx_max',
+        'ucx_min', u'ucy_avg', 'ucy_max', 'ucy_min',
+    }
+
+def test_get_meta_fields_nodes(agg_gr):
+    assert set(agg_gr.nodes._meta.get_fields(only_names=True)) == {
+        'cell_coords', 'content_pk', 'coordinates', 'id',
+        'infiltration_rate_simple_cum', 'intercepted_volume_cum', 'is_manhole',
+        'leak_cum', 'node_type', 'q_lat_cum', 'rain_avg', 'rain_cum', 's1_max',
+        's1_min', 'seq_id', 'su_min', 'vol_current', 'vol_max', 'vol_min',
+        'zoom_category',
+    }
+
+
 def test_get_timestamps_nodes(agg_gr):
     ts = agg_gr.nodes.get_timestamps('rain_avg')
     assert isinstance(ts, np.ndarray)
@@ -49,11 +81,10 @@ def test_get_time_unit(agg_gr):
     assert tu.startswith(b'seconds since ')
 
 
-# TODO
-# def test_get_timestamps_pumps(agg_gr):
-#     ts = agg_gr.nodes.get_timestamps('q_cum')
-#     assert isinstance(ts, np.ndarray)
-#     assert ts.size > 0
+def test_get_timestamps_pumps(agg_gr):
+    ts = agg_gr.nodes.get_timestamps('q_cum')
+    assert isinstance(ts, np.ndarray)
+    assert ts.size > 0
 
 
 def test_nodes_timeseries_start_end_time_kwargs(agg_gr):
@@ -73,7 +104,7 @@ def test_nodes_timeseries_with_subset(agg_gr):
 def test_nodes_timeseries_start_time_only_kwarg(agg_gr):
     ts = agg_gr.nodes.get_timestamps('s1_max')
     qs_s1_max = agg_gr.nodes.timeseries(start_time=ts[1]).s1_max
-    assert qs_s1_max.shape[0] == 2
+    assert qs_s1_max.shape[0] == 6
 
 
 def test_nodes_timeseries_end_time_only_kwarg(agg_gr):
