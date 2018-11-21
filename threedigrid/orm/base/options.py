@@ -23,10 +23,13 @@ from __future__ import absolute_import
 from collections import defaultdict
 from collections import namedtuple
 from itertools import product
+
+
 import logging
 
 from threedigrid.numpy_utils import create_np_lookup_index_for
 from threedigrid.orm.base.fields import TimeSeriesCompositeArrayField
+from threedigrid.orm.base.utils import _flatten_dict_values
 import six
 
 logger = logging.getLogger(__name__)
@@ -131,8 +134,9 @@ class Options(object):
                        for x in sources)
         sources = self.inst.Meta.subset_fields.get(field_name)
         if sources:
-            return any(x in list(self.inst._datasource.keys())
-                       for x in sources.values())
+            _sources = _flatten_dict_values(sources, as_set=True)
+            return any(x in set(self.inst._datasource.keys())
+                       for x in _sources)
 
     def _get_meta_values(self, field_name):
         """

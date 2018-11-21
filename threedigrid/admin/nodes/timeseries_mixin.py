@@ -91,7 +91,7 @@ class NodesAggregateResultsMixin(AggregateResultMixin):
             'ucy': ['min', 'max', 'avg'],
             'leak': [
                 'min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
-            'intercepted_volume': ['min', 'max', 'avg', 'sum', 'current'],
+            'intercepted_volume': ['min', 'max', 'avg', 'cum', 'current'],
         }
 
         lookup_fields = ('id', '_mesh_id')

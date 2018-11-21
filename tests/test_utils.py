@@ -13,6 +13,7 @@ from threedigrid.admin.utils import PKMapper
 from threedigrid.admin.utils import _get_storage_area
 from threedigrid.numpy_utils import get_smallest_uint_dtype
 from threedigrid import numpy_utils
+from threedigrid.orm.base.utils import _flatten_dict_values
 
 
 def test_create_np_lookup_index_for():
@@ -93,3 +94,27 @@ def test_get_storage_area_string_to_float():
 def test_get_storage_area_none_input():
     sa_c = _get_storage_area(None)
     assert sa_c == '--'
+
+
+def test_flatten_dict_values_as_set():
+    d = {'a': 1}
+    v = _flatten_dict_values(d, as_set=True)
+    assert v == {1}
+
+
+def test_flatten_nested_dict_values_as_set():
+    d = {'a': [1]}
+    v = _flatten_dict_values(d, as_set=True)
+    assert v == {1}
+
+
+def test_flatten_dict_values_as_list():
+    d = {'a': 1}
+    v = _flatten_dict_values(d, as_set=False)
+    assert v == [1]
+
+
+def test_flatten_nested_dict_values_as_list():
+    d = {'a': [1]}
+    v = _flatten_dict_values(d, as_set=False)
+    assert v == [1]

@@ -14,6 +14,8 @@ except ImportError:
 from threedigrid.orm.base.fields import TimeSeriesCompositeArrayField
 from threedigrid.orm.base.fields import TimeSeriesSubsetArrayField
 from threedigrid.orm.base.fields import TimeSeriesArrayField
+from threedigrid.orm.base.utils import _flatten_dict_values
+
 import six
 
 
@@ -63,7 +65,7 @@ class ResultMixin(object):
         fields = {}
         count = self.get_field_value('id').size
         for v, k in six.iteritems(self.Meta.subset_fields):
-            _source_name = list(k.values())
+            _source_name = _flatten_dict_values(k)
             if not _source_name:
                 continue
             source_name = _source_name[0]
