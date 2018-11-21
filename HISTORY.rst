@@ -1,7 +1,7 @@
 History
 =======
 
-1.0.7 (unreleased)
+1.0.7 (2018-11-21)
 ------------------
 
 - Bug fix: dict.values() and dict.keys() in python 3 are causing some
