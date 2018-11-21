@@ -44,7 +44,7 @@ def test_get_meta_subset_fields_nodes(agg_gr):
         'infiltration_rate_simple_max', 'infiltration_rate_simple_min',
         'intercepted_volume_avg', 'intercepted_volume_current',
         'intercepted_volume_max', 'intercepted_volume_min',
-        'intercepted_volume_sum', 'leak_avg', 'leak_cum', 'leak_cum_negative',
+        'intercepted_volume_cum', 'leak_avg', 'leak_cum', 'leak_cum_negative',
         'leak_cum_positive',  'leak_max', 'leak_min', 'ucx_avg', 'ucx_max',
         'ucx_min', u'ucy_avg', 'ucy_max', 'ucy_min',
     }
