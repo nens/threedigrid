@@ -49,6 +49,7 @@ def test_get_meta_subset_fields_nodes(agg_gr):
         'ucx_min', u'ucy_avg', 'ucy_max', 'ucy_min',
     }
 
+
 def test_get_meta_fields_nodes(agg_gr):
     assert set(agg_gr.nodes._meta.get_fields(only_names=True)) == {
         'cell_coords', 'content_pk', 'coordinates', 'id',
