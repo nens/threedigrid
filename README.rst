@@ -35,7 +35,7 @@ The standard threedigrid distribution is pretty lightweight, installing as littl
 as possible. If you want to make use of all capabilities threedigrid has to ofter (e.g. spatial
 operations and command line tools) install like this::
 
-    $ pip install threedigrid[geo]
+    $ pip install threedigrid[geo,results]
 
 
 Console scripts

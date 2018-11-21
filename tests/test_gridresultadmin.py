@@ -36,7 +36,7 @@ def test_nodes_timeseries_start_end_time_kwargs(gr):
 
 def test_nodes_timeseries_with_subset(gr):
     qs_s1 = gr.nodes.subset('1d_all').timeseries(start_time=0, end_time=500).s1
-    assert qs_s1.shape[0] == 18 and qs_s1.shape[1] > 0
+    assert qs_s1.shape[0] == 9 and qs_s1.shape[1] > 0
 
 
 def test_nodes_timeseries_start_time_only_kwarg(gr):
