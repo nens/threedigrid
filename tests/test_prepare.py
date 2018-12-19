@@ -4,10 +4,10 @@ import sys
 
 import pytest
 import h5py
-if sys.version_info >= (3, 3):
-    from unittest import mock  # noqa
+if sys.version_info >= (3, 3):  # noqa
+    from unittest import mock
 else:
-    import mock  # noqa
+    import mock
 
 import six
 from threedigrid.admin.idmapper import IdMapper
