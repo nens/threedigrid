@@ -21,9 +21,9 @@ spatialite_file = os.path.join(test_file_dir, 'gridadmin.sqlite')
 
 
 @pytest.fixture
-def h5py_file(tmp_path):
+def h5py_file(tmpdir):
     """Create a copy and open an unprepared h5py file"""
-    tmp_file = str(tmp_path.joinpath('gridadmin.h5'))
+    tmp_file = str(tmpdir.join('gridadmin.h5'))
     shutil.copyfile(grid_bck, tmp_file)
     with h5py.File(tmp_file, 'r+') as h5py_file:
         yield h5py_file
@@ -48,4 +48,3 @@ def test_prepare_lines(h5py_file, threedi_datasource):
     IdMapper.prepare_mapper(h5py_file, threedi_datasource)
     GridAdminH5Prepare.prepare_lines(h5py_file, threedi_datasource)
     assert is_prepared(h5py_file, 'lines', 'lines_prepared')
-
