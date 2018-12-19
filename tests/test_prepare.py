@@ -1,16 +1,18 @@
 import os
 import shutil
+import sys
 
 import pytest
 import h5py
-import mock
+if sys.version_info >= (3, 3):
+    from unittest import mock  # noqa
+else:
+    import mock  # noqa
 
+import six
 from threedigrid.admin.idmapper import IdMapper
 from threedigrid.admin.prepare import GridAdminH5Prepare
 from threedigrid.admin.prepare import is_prepared
-
-from threedigrid.admin import constants
-from threedigrid.admin.constants import TYPE_CODE_MAP
 
 
 test_file_dir = os.path.join(
@@ -23,7 +25,7 @@ spatialite_file = os.path.join(test_file_dir, 'gridadmin.sqlite')
 @pytest.fixture
 def h5py_file(tmpdir):
     """Create a copy and open an unprepared h5py file"""
-    tmp_file = str(tmpdir.join('gridadmin.h5'))
+    tmp_file = six.text_type(tmpdir.join('gridadmin.h5'))
     shutil.copyfile(grid_bck, tmp_file)
     with h5py.File(tmp_file, 'r+') as h5py_file:
         yield h5py_file

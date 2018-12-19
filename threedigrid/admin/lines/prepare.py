@@ -215,7 +215,8 @@ class PrepareLines(object):
             if 'content_pk' not in list(datasource.keys()):
                 datasource.set('content_pk', content_pk)
             if 'content_type' not in list(datasource.keys()):
-                datasource.set('content_type', [str(x) for x in content_type])
+                datasource.set('content_type',
+                               [x.encode('ascii') for x in content_type])
 
         if 'line_coords' not in list(datasource.keys()):
             line = as_numpy_array(datasource['line'])
