@@ -75,8 +75,8 @@ def test_init_IdMapper(m_id_map, h5py_file, threedi_datasource, id_mapper):
 def test_prepare_onedee_lines(h5py_file, threedi_datasource):
     IdMapper.prepare_mapper(h5py_file, threedi_datasource)
     GridAdminH5Prepare.prepare_onedee_lines(h5py_file, threedi_datasource)
-    assert h5py_file['lines']['code'].dtype == 'S100'
-    assert h5py_file['lines']['display_name'].dtype == 'S255'
+    assert h5py_file['lines']['code'].dtype == 'S32'
+    assert h5py_file['lines']['display_name'].dtype == 'S64'
     assert is_prepared(h5py_file, 'lines', 'lines_prepared')
 
 
@@ -91,7 +91,6 @@ def test_prepare(m_id_map, h5py_file, threedi_datasource, id_mapper):
     # breaches fix
     id_mapper[13] = {0: 1}
     m_id_map.return_value = id_mapper
-    IdMapper.prepare_mapper(h5py_file, threedi_datasource)
     GridAdminH5Prepare.prepare(h5py_file, threedi_datasource)
     assert is_prepared(h5py_file, 'lines', 'lines_prepared')
     assert is_prepared(h5py_file, 'nodes', 'prepared')
