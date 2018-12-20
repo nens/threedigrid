@@ -78,9 +78,9 @@ def add_or_update_datasets(h5py_group, numpy_array_dict, field_names,
             dt = None
             if data.dtype.type is np.string_:
                 if dataset_name == 'code':
-                    dt = 'S100'
+                    dt = 'S32'
                 elif dataset_name == 'display_name':
-                    dt = 'S255'
+                    dt = 'S64'
                 elif dataset_name == 'shape':
                     dt = 'S4'
 
