@@ -4,7 +4,8 @@ History
 1.0.8 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Set fixed type to the fields `code`, `display_name` and `shape`. These fields
+  now have a fixed lenght of 32, 64 and 4 characters respectively.
 
 
 1.0.7 (2018-11-21)
