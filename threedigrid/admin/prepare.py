@@ -8,6 +8,7 @@ import logging
 import os
 
 import numpy as np
+import six
 
 from threedigrid.admin.h5py_datasource import H5pyGroup
 from threedigrid.admin.idmapper import IdMapper
@@ -24,7 +25,6 @@ from threedigrid.admin.nodes.prepare import (
     PrepareNodes, PrepareManholes, PrepareConnectionNodes)
 from threedigrid.admin.pumps.prepare import PreparePumps
 from threedigrid.admin.levees.models import Levees
-import six
 
 logger = logging.getLogger(__name__)
 
@@ -203,7 +203,7 @@ class GridAdminH5Prepare(object):
         if not has_1d:
             return
 
-        if not is_prepared(h5py_file, 'lines', 'line_prepared'):
+        if not is_prepared(h5py_file, 'lines', 'lines_prepared'):
             # Line data is missing, prepare line data first.
             GridAdminH5Prepare.prepare_lines(h5py_file, threedi_datasource)
 
