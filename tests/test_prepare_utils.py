@@ -6,7 +6,7 @@ from threedigrid.admin.prepare_utils import add_or_update_datasets
 
 
 @pytest.fixture(params=[[b''], [b'foo', b'bar'], [1, 2, 3], [-1.3, 0.0, 3.4],
-                        ['a_very_long_string_'*100]])
+                        [b'a_very_long_string_'*100]])
 def np_array_dict(request):
     data = np.array(request.param)
     pk = range(len(data))
@@ -16,7 +16,7 @@ def np_array_dict(request):
     }
 
     # set the DEFAULT_NULL_VALUE based on the type of params.
-    if type(request.param[0]) == str:
+    if type(request.param[0]) == bytes:
         prepare_utils.DEFAULT_NULL_VALUE = b''
     else:
         prepare_utils.DEFAULT_NULL_VALUE = -9999

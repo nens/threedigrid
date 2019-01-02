@@ -1,9 +1,13 @@
 from itertools import count
 import os
 import shutil
+import sys
 
 import h5py
-import mock
+if sys.version_info >= (3, 3):  # noqa
+    from unittest import mock
+else:
+    import mock
 import pytest
 import six
 
