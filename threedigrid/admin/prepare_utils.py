@@ -75,8 +75,17 @@ def add_or_update_datasets(h5py_group, numpy_array_dict, field_names,
             dataset_name = field_name
 
         if dataset_name not in list(h5py_group.keys()):
+            dt = None
+            if data.dtype.type is np.string_:
+                if dataset_name == 'code':
+                    dt = 'S32'
+                elif dataset_name == 'display_name':
+                    dt = 'S64'
+                elif dataset_name == 'shape':
+                    dt = 'S4'
+
             h5py_group.create_dataset(
-                dataset_name, data=data)
+                dataset_name, data=data, dtype=dt)
         else:
             values = h5py_group[dataset_name].value
             mask = data != null_value
