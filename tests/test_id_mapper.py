@@ -17,8 +17,7 @@ import numpy as np
 from threedigrid.admin.idmapper import IdMapper
 from threedigrid.admin.h5py_datasource import H5pyGroup
 from threedigrid.admin.constants import TYPE_CODE_MAP
-from .test_prepare import h5py_file, threedi_datasource, simple_id_map, \
-    NODE_LENGTH
+from .conftest import simple_id_map, NODE_LENGTH
 
 test_file_dir = os.path.join(
     os.path.dirname(__file__), "test_files")
