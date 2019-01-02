@@ -3,7 +3,6 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
 
-from itertools import count
 import os
 import sys
 import unittest
@@ -18,9 +17,11 @@ import numpy as np
 from threedigrid.admin.idmapper import IdMapper
 from threedigrid.admin.h5py_datasource import H5pyGroup
 from threedigrid.admin.constants import TYPE_CODE_MAP
+from .test_prepare import h5py_file, threedi_datasource, simple_id_map, \
+    NODE_LENGTH
 
 test_file_dir = os.path.join(
-    os.getcwd(), "tests/test_files")
+    os.path.dirname(__file__), "test_files")
 
 # the testfile is a copy of the v2_bergermeer gridadmin file
 grid_file = os.path.join(test_file_dir, "gridadmin.h5")
@@ -57,22 +58,6 @@ class TestIdMapperByName(unittest.TestCase):
         tc = TYPE_CODE_MAP['v2_culvert']
         qs = self.id_mapper.get_by_name('v2_culvert')
         assert np.all(qs['obj_code'] == tc)
-
-
-NODE_LENGTH = 10
-
-
-def simple_id_map(node_length=NODE_LENGTH):
-    """Return a simple mapping
-
-    NODE_LENGTH nodes are created for each TYPE_CODE, each mapping to an ever
-    increasing sequence number"""
-    sequence_id_generator = count(start=1, step=1)
-    id_map = {}
-    for code in TYPE_CODE_MAP.values():
-        pk_generator = range(1, 1+node_length)
-        id_map[code] = dict(zip(pk_generator, sequence_id_generator))
-    return id_map
 
 
 @mock.patch('threedigrid.admin.idmapper.get_id_map')

@@ -26,6 +26,19 @@ grid_bck = os.path.join(test_file_dir, "gridadmin.bck")
 NODE_LENGTH = 10
 
 
+def simple_id_map(node_length=NODE_LENGTH):
+    """Return a simple mapping
+
+    NODE_LENGTH nodes are created for each TYPE_CODE, each mapping to an ever
+    increasing sequence number"""
+    sequence_id_generator = count(start=1, step=1)
+    id_map = {}
+    for code in TYPE_CODE_MAP.values():
+        pk_generator = range(1, 1+node_length)
+        id_map[code] = dict(zip(pk_generator, sequence_id_generator))
+    return id_map
+
+
 @pytest.fixture
 def h5py_file(tmpdir):
     """Copy and open an unprepared h5py file"""
@@ -43,38 +56,19 @@ def threedi_datasource():
 
 
 @pytest.fixture
-def id_mapper(node_length=NODE_LENGTH):
-    """Return a simple mapping"""
-    sequence_id_generator = count(start=1, step=1)
-    id_map = {}
-    for code in TYPE_CODE_MAP.values():
-        pk_generator = range(1, 1+node_length)
-        id_map[code] = dict(zip(pk_generator, sequence_id_generator))
-    return id_map
-
-
 @mock.patch('threedigrid.admin.idmapper.get_id_map')
-def test_prepare_mapper(m_id_map, h5py_file, threedi_datasource, id_mapper):
-    m_id_map.return_value = id_mapper
+def h5py_file_mapper(mocked_id_map, h5py_file, threedi_datasource):
+    """Unprepared h5py file with a prepared id_mapper"""
+    id_map = simple_id_map()
+    mocked_id_map.return_value = id_map
     IdMapper.prepare_mapper(h5py_file, threedi_datasource)
-    mapping = h5py_file['mappings']['id_map']
-    assert mapping
-    assert mapping.dtype.names == ('obj_code', 'pk', 'seq_id')
-    assert mapping[:].size == len(TYPE_CODE_MAP.values()) * NODE_LENGTH
-
-
-@mock.patch('threedigrid.admin.idmapper.get_id_map')
-def test_init_IdMapper(m_id_map, h5py_file, threedi_datasource, id_mapper):
-    m_id_map.return_value = id_mapper
-    IdMapper.prepare_mapper(h5py_file, threedi_datasource)
-    mapper = IdMapper(h5py_file['mappings']['id_map'])
-    assert mapper.get_by_code(2).size == NODE_LENGTH
-    assert mapper.get_by_name('v2_channel').size == NODE_LENGTH
+    return h5py_file, threedi_datasource
 
 
 def test_prepare_onedee_lines(h5py_file, threedi_datasource):
     IdMapper.prepare_mapper(h5py_file, threedi_datasource)
     GridAdminH5Prepare.prepare_onedee_lines(h5py_file, threedi_datasource)
+    # check some special fixed types
     assert h5py_file['lines']['code'].dtype == 'S32'
     assert h5py_file['lines']['display_name'].dtype == 'S64'
     assert is_prepared(h5py_file, 'lines', 'lines_prepared')
@@ -86,11 +80,65 @@ def test_prepare_lines(h5py_file, threedi_datasource):
     assert is_prepared(h5py_file, 'lines', 'lines_prepared')
 
 
+def test_prepare_onedee_nodes(h5py_file_mapper):
+    h5py_file, threedi_datasource = h5py_file_mapper
+    GridAdminH5Prepare.prepare_onedee_nodes(h5py_file, threedi_datasource)
+    assert is_prepared(h5py_file, 'nodes', 'connectionnodes_prepared')
+    assert is_prepared(h5py_file, 'nodes', 'manholes_prepared')
+    connection_nodes_field_names = {'initial_waterlevel', 'storage_area'}
+    assert connection_nodes_field_names.issubset(h5py_file['nodes'].keys())
+
+
+def test_prepare_nodes(h5py_file_mapper):
+    h5py_file, threedi_datasource = h5py_file_mapper
+    GridAdminH5Prepare.prepare_nodes(h5py_file, threedi_datasource)
+    assert is_prepared(h5py_file, 'nodes', 'prepared')
+    assert {'id', 'content_pk', 'seq_id', 'coordinates'}.issubset(
+        h5py_file['nodes'].keys())
+
+
+def test_prepare_pumps(h5py_file_mapper):
+    h5py_file, threedi_datasource = h5py_file_mapper
+    # need to prepare onedee_nodes before we can prepare pumps
+    GridAdminH5Prepare.prepare_onedee_nodes(h5py_file, threedi_datasource)
+    GridAdminH5Prepare.prepare_pumps(h5py_file, threedi_datasource)
+    assert is_prepared(h5py_file, 'pumps', 'prepared')
+    pumpstations_field_names = {'display_name', 'start_level',
+                                'lower_stop_level', 'capacity',
+                                'connection_node_start_pk',
+                                'connection_node_end_pk',
+                                'zoom_category'
+                                }
+    assert pumpstations_field_names.issubset(h5py_file['pumps'].keys())
+
+
+def test_prepare_levees(h5py_file_mapper):
+    h5py_file, threedi_datasource = h5py_file_mapper
+    GridAdminH5Prepare.prepare_levees(h5py_file, threedi_datasource)
+    assert is_prepared(h5py_file, 'levees', 'prepared')
+    levees_field_names = {'coords', 'crest_level', 'max_breach_depth', 'id'}
+    assert levees_field_names.issubset(h5py_file['levees'].keys())
+
+
 @mock.patch('threedigrid.admin.idmapper.get_id_map')
-def test_prepare(m_id_map, h5py_file, threedi_datasource, id_mapper):
+def test_prepare_breaches(mocked_id_map, h5py_file, threedi_datasource):
+    id_map = simple_id_map()
+    id_map[13] = {0: 1, 1: 1, 2: 1}
+    mocked_id_map.return_value = id_map
+    IdMapper.prepare_mapper(h5py_file, threedi_datasource)
+    GridAdminH5Prepare.prepare_breaches(h5py_file, threedi_datasource)
+    assert is_prepared(h5py_file, 'breaches', 'prepared')
+    breaches_field_names = {'id', 'seq_ids', 'content_pk', 'kcu',
+                            'coordinates'}
+    assert breaches_field_names.issubset(h5py_file['breaches'].keys())
+
+
+@mock.patch('threedigrid.admin.idmapper.get_id_map')
+def test_prepare(mocked_id_map, h5py_file, threedi_datasource):
     # breaches fix
-    id_mapper[13] = {0: 1}
-    m_id_map.return_value = id_mapper
+    id_map = simple_id_map()
+    id_map[13] = {0: 1}
+    mocked_id_map.return_value = id_map
     GridAdminH5Prepare.prepare(h5py_file, threedi_datasource)
     assert is_prepared(h5py_file, 'lines', 'lines_prepared')
     assert is_prepared(h5py_file, 'nodes', 'prepared')
