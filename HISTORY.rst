@@ -1,7 +1,7 @@
 History
 =======
 
-1.0.8 (unreleased)
+1.0.8 (2019-01-03)
 ------------------
 
 - Set fixed type to the fields `code`, `display_name` and `shape`. These fields
