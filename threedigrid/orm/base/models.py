@@ -526,6 +526,22 @@ class Model(six.with_metaclass(ABCMeta)):
 
         return selection
 
+    def to_structured_array(self):
+        """
+        :return: the filtered values as a
+        structured (named) array
+        """
+        selection = self.to_dict()
+
+        # Convert the dictionary to structured array
+        dtypes = []
+        for key, value in selection.items():
+            dtypes.append((key, value.dtype.name, value.shape))
+
+        return np.array(
+            [tuple([selection[x[0]] for x in dtypes])],
+            dtype=dtypes)[0]
+
     def to_list(self):
         """
         :return: list of dicts with key's and values
