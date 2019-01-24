@@ -30,6 +30,8 @@ BASE_SUBSET_FIELDS = {
         {'2d_all': 'Mesh2D_leak'},
     'intercepted_volume':
         {'2d_all': 'Mesh2D_intercepted_volume'},
+    'qsss':
+        {'2d_all': 'Mesh2D_q_sss'}
 }
 
 
