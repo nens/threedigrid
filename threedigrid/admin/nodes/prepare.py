@@ -87,7 +87,7 @@ class PrepareManholes:
             threedi_datasource.v2_manholes, [
                 'pk', 'surface_level', 'display_name', 'bottom_level',
                 'calculation_type', 'shape', 'drain_level', 'width',
-                'manhole_indicator', 'zoom_category'])
+                'manhole_indicator', 'zoom_category', 'connection_node_pk'])
 
         # extra field to distinguish manholes from connection nodes.
         is_manhole = np.full(len(threedi_datasource.v2_manholes), True)
@@ -98,4 +98,4 @@ class PrepareManholes:
             ['surface_level', 'display_name', 'bottom_level',
              'calculation_type', 'shape', 'drain_level', 'width',
              'manhole_indicator', 'zoom_category', 'is_manhole'],
-            manhole_numpy_array_dict['pk'], content_pk)
+            manhole_numpy_array_dict['connection_node_pk'], content_pk)
