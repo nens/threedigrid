@@ -48,6 +48,9 @@ class H5pyGroup(DataSource):
             self._source.create_dataset(name, data=values)
 
     def getattr(self, name):
+        # import sys; sys.path[0:0] = ['/pycharm-helpers/pycharm-debug.egg', ]; import pydevd; pydevd.settrace('10.90.20.36', port=4444, stdoutToServer=True, stderrToServer=True, suspend=True)
+
+
         attr = self._h5py_file.attrs[name]
         if isinstance(attr, bytes):
             attr = attr.decode('utf-8')
