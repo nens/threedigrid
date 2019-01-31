@@ -30,6 +30,8 @@ BASE_SUBSET_FIELDS = {
         {'2d_all': 'Mesh2D_leak'},
     'intercepted_volume':
         {'2d_all': 'Mesh2D_intercepted_volume'},
+    'q_sss':
+        {'2d_all': 'Mesh2D_q_sss'}
 }
 
 
@@ -92,6 +94,8 @@ class NodesAggregateResultsMixin(AggregateResultMixin):
             'leak': [
                 'min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
             'intercepted_volume': ['min', 'max', 'avg', 'cum', 'current'],
+            'q_sss': ['min', 'max', 'avg', 'cum', 'cum_positive',
+                      'cum_negative']
         }
 
         lookup_fields = ('id', '_mesh_id')
