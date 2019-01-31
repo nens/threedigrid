@@ -1,7 +1,7 @@
 History
 =======
 
-1.0.9 (unreleased)
+1.0.9 (2019-01-31)
 ------------------
 
 - Manholes preparation fixed mapping in ``connection_node_pk``.
