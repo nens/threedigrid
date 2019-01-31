@@ -1,7 +1,7 @@
 History
 =======
 
-1.0.10 (unreleased)
+1.0.10 (2019-01-31)
 -------------------
 
 - Added sources and sinks (q_sss) to threedigrid.
