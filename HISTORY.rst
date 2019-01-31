@@ -1,10 +1,18 @@
 History
 =======
 
-1.0.9 (unreleased)
+1.0.10 (unreleased)
+-------------------
+
+- Nothing changed yet.
+
+
+1.0.9 (2019-01-31)
 ------------------
 
 - Added sources and sinks (q_sss) to threedigrid.
+
+- Manholes preparation fixed mapping in ``connection_node_pk``.
 
 - Added `to_structured_array` method for retrieving (filtered) results
   as Numpy structured array instead of an OrderedDict
