@@ -4,6 +4,7 @@ History
 1.0.9 (unreleased)
 ------------------
 
+- Manholes preparation fixed mapping in ``connection_node_pk``.
 - Added `to_structured_array` method for retrieving (filtered) results
   as Numpy structured array instead of an OrderedDict
 
