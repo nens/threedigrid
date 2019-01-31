@@ -6,6 +6,9 @@ History
 
 - Added sources and sinks (q_sss) to threedigrid.
 
+- Added `to_structured_array` method for retrieving (filtered) results
+  as Numpy structured array instead of an OrderedDict
+
 
 1.0.8 (2019-01-03)
 ------------------
