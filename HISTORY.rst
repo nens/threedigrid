@@ -4,13 +4,11 @@ History
 1.0.10 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Added sources and sinks (q_sss) to threedigrid.
 
 
 1.0.9 (2019-01-31)
 ------------------
-
-- Added sources and sinks (q_sss) to threedigrid.
 
 - Manholes preparation fixed mapping in ``connection_node_pk``.
 
