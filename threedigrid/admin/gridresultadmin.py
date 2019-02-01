@@ -122,7 +122,7 @@ class GridH5ResultAdmin(GridH5Admin):
             )
 
     @property
-    def __field_model_map(self):
+    def _field_model_map(self):
         """
         :return: a dict of {<field name>: [model name, ...]}
         """
@@ -135,7 +135,12 @@ class GridH5ResultAdmin(GridH5Admin):
             if any([attr_name.startswith('__'),
                     attr_name.startswith('_')]):
                 continue
-            attr = getattr(self, attr_name)
+            try:
+                attr = getattr(self, attr_name)
+            except AttributeError:
+                logger.warning("Attribute: '{}' does not "
+                               "exist in h5py_file.".format(attr_name))
+                continue
             if not issubclass(type(attr), Model):
                 continue
             model_names.add(attr_name)
@@ -151,7 +156,7 @@ class GridH5ResultAdmin(GridH5Admin):
         :return: instance of the model the field belongs to
         :raises IndexError if the field name is not unique across models
         """
-        model_name = self.__field_model_map.get(field_name)
+        model_name = self._field_model_map.get(field_name)
         if not model_name or len(model_name) != 1:
             raise IndexError(
                 'Ambiguous result. Field name {} yields {} model(s)'.format(
