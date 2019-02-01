@@ -1,7 +1,7 @@
 History
 =======
 
-1.0.11 (unreleased)
+1.0.11 (2019-02-01)
 -------------------
 
 - Bug fix in `h5py_file` method mapping.
