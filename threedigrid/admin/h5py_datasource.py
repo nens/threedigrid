@@ -36,7 +36,7 @@ class H5pyGroup(DataSource):
             self._source = h5py_file[group_name]
 
         self.meta = dict(
-            [(y, [x.value]) for y, x in self._h5py_file.get('meta').items()])
+            [(y, [x[()]]) for y, x in self._h5py_file.get('meta').items()])
         self.meta['trash'] = [1]
 
     def set(self, name, values):
