@@ -57,7 +57,7 @@ def test_get_meta_fields_nodes(agg_gr):
         'infiltration_rate_simple_cum', 'intercepted_volume_cum', 'is_manhole',
         'leak_cum', 'node_type', 'q_lat_cum', 'rain_avg', 'rain_cum', 's1_max',
         's1_min', 'seq_id', 'su_min', 'vol_current', 'vol_max', 'vol_min',
-        'zoom_category',
+        'zoom_category', 'sumax'
     }
 
 
