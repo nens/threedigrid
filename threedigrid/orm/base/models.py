@@ -557,6 +557,8 @@ class Model(six.with_metaclass(ABCMeta)):
 
                 if has_subsets:
                     subset_index = self._get_subset_idx(n)
+                else:
+                    subset_index = None
 
                 selection[n] = self.get_filtered_field_value(
                     n, ts_filter=ts_filter, lookup_index=lookup_index,
