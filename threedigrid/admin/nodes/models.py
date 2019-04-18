@@ -44,6 +44,7 @@ class Nodes(Model):
     zoom_category = ArrayField()
     node_type = ArrayField()
     is_manhole = BooleanArrayField()
+    sumax = ArrayField()
 
     SUBSETS = NODE_SUBSETS
 

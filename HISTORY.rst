@@ -4,7 +4,7 @@ History
 1.0.12 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Added sumax to nodes
 
 
 1.0.11 (2019-02-01)
