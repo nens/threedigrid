@@ -173,7 +173,7 @@ class GridAdminNodeTest(unittest.TestCase):
         # Check fields
         assert set(self.parser.nodes._meta.get_fields(only_names=True)) == {
             'cell_coords', 'content_pk', 'coordinates', 'id', 'node_type',
-            'seq_id', 'zoom_category', 'is_manhole'
+            'seq_id', 'zoom_category', 'is_manhole', 'sumax'
         }
 
     def test_locations_2d(self):
@@ -242,7 +242,7 @@ class GridAdminCellsTest(unittest.TestCase):
         # should have also z_coordinate
         assert set(self.parser.cells._meta.get_fields().keys()) == {
             'cell_coords', 'content_pk', 'coordinates', 'id', 'node_type',
-            'seq_id', 'z_coordinate', 'zoom_category', 'is_manhole'
+            'seq_id', 'z_coordinate', 'zoom_category', 'is_manhole', 'sumax'
         }
 
     def test_get_id_from_xy(self):
