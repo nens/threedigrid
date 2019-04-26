@@ -1,10 +1,37 @@
 History
 =======
 
-1.0.9 (unreleased)
-------------------
+1.0.13 (unreleased)
+-------------------
 
 - Nothing changed yet.
+
+
+1.0.12 (2019-04-18)
+-------------------
+
+- Added sumax to nodes
+
+
+1.0.11 (2019-02-01)
+-------------------
+
+- Bug fix in `h5py_file` method mapping.
+
+
+1.0.10 (2019-01-31)
+-------------------
+
+- Added sources and sinks (q_sss) to threedigrid.
+
+
+1.0.9 (2019-01-31)
+------------------
+
+- Manholes preparation fixed mapping in ``connection_node_pk``.
+
+- Added `to_structured_array` method for retrieving (filtered) results
+  as Numpy structured array instead of an OrderedDict
 
 
 1.0.8 (2019-01-03)
