@@ -12,7 +12,7 @@ import numpy as np
 from threedigrid.admin.gridresultadmin import GridH5AggregateResultAdmin
 
 test_file_dir = os.path.join(
-    os.getcwd(), "tests/test_files")
+    os.path.dirname(os.path.abspath(__file__)), "test_files")
 
 # the testfile is a copy of the v2_bergermeer gridadmin file
 result_file = os.path.join(test_file_dir, "results_3di.nc")
