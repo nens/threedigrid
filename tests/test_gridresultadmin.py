@@ -17,7 +17,7 @@ from tests.test_aggregateresultadmin import agg_gr
 
 
 test_file_dir = os.path.join(
-    os.getcwd(), "tests/test_files")
+    os.path.dirname(os.path.abspath(__file__)), "test_files")
 
 # the testfile is a copy of the v2_bergermeer gridadmin file
 result_file = os.path.join(test_file_dir, "results_3di.nc")
@@ -167,6 +167,13 @@ def test_get_model_instance_by_field_name_raises_index_error(gr):
 def test_get_model_instance_by_agg_field_name(agg_gr):
     inst = agg_gr.get_model_instance_by_field_name('rain_avg')
     assert isinstance(inst, Nodes)
+
+
+def test_reading_grid_result_and_grid_aggregate_result(gr, agg_gr):
+    assert hasattr(gr.nodes, 's1')
+    assert not hasattr(gr.nodes, 'rain_avg')
+    assert hasattr(agg_gr.nodes, 'rain_avg')
+    assert not hasattr(agg_gr.nodes, 's1')
 
 
 def test_get_model_instance_by_agg_field_name_lines(agg_gr):
