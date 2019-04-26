@@ -11,6 +11,9 @@ import numpy as np
 
 from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
 from threedigrid.admin.nodes.models import Nodes
+from threedigrid.admin.lines.models import Lines
+
+from tests.test_aggregateresultadmin import agg_gr
 
 
 test_file_dir = os.path.join(
@@ -160,6 +163,15 @@ def test_get_model_instance_by_field_name_raises_index_error(gr):
     with pytest.raises(IndexError):
         gr.get_model_instance_by_field_name('zoom_category')
 
+
+def test_get_model_instance_by_agg_field_name(agg_gr):
+    inst = agg_gr.get_model_instance_by_field_name('rain_avg')
+    assert isinstance(inst, Nodes)
+
+
+def test_get_model_instance_by_agg_field_name_lines(agg_gr):
+    inst = agg_gr.get_model_instance_by_field_name('q_cum_positive')
+    assert isinstance(inst, Lines)
 
 # commented for now until the new aggregate.nc is finished
 
