@@ -46,7 +46,8 @@ def test_get_meta_subset_fields_nodes(agg_gr):
         'intercepted_volume_max', 'intercepted_volume_min',
         'intercepted_volume_cum', 'leak_avg', 'leak_cum', 'leak_cum_negative',
         'leak_cum_positive',  'leak_max', 'leak_min', 'ucx_avg', 'ucx_max',
-        'ucx_min', u'ucy_avg', 'ucy_max', 'ucy_min',
+        'ucx_min', u'ucy_avg', 'ucy_max', 'ucy_min', 'q_sss_avg', 'q_sss_cum',
+        'q_sss_cum_negative', 'q_sss_cum_positive', 'q_sss_max', 'q_sss_min',
     }
 
 
@@ -56,7 +57,7 @@ def test_get_meta_fields_nodes(agg_gr):
         'infiltration_rate_simple_cum', 'intercepted_volume_cum', 'is_manhole',
         'leak_cum', 'node_type', 'q_lat_cum', 'rain_avg', 'rain_cum', 's1_max',
         's1_min', 'seq_id', 'su_min', 'vol_current', 'vol_max', 'vol_min',
-        'zoom_category',
+        'zoom_category', 'sumax'
     }
 
 
