@@ -3,32 +3,10 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
 
-import os
 import pytest
-
 import numpy as np
 
-
-from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
 from threedigrid.admin.nodes.models import Nodes
-from threedigrid.admin.lines.models import Lines
-
-from tests.test_aggregateresultadmin import agg_gr
-
-
-test_file_dir = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "test_files")
-
-# the testfile is a copy of the v2_bergermeer gridadmin file
-result_file = os.path.join(test_file_dir, "results_3di.nc")
-grid_file = os.path.join(test_file_dir, "gridadmin.h5")
-
-
-@pytest.fixture()
-def gr():
-    gr = GridH5ResultAdmin(grid_file, result_file)
-    yield gr
-    gr.close()
 
 
 def test_nodes_timeseries_start_end_time_kwargs(gr):
@@ -163,22 +141,6 @@ def test_get_model_instance_by_field_name_raises_index_error(gr):
     with pytest.raises(IndexError):
         gr.get_model_instance_by_field_name('zoom_category')
 
-
-def test_get_model_instance_by_agg_field_name(agg_gr):
-    inst = agg_gr.get_model_instance_by_field_name('rain_avg')
-    assert isinstance(inst, Nodes)
-
-
-def test_reading_grid_result_and_grid_aggregate_result(gr, agg_gr):
-    assert hasattr(gr.nodes, 's1')
-    assert not hasattr(gr.nodes, 'rain_avg')
-    assert hasattr(agg_gr.nodes, 'rain_avg')
-    assert not hasattr(agg_gr.nodes, 's1')
-
-
-def test_get_model_instance_by_agg_field_name_lines(agg_gr):
-    inst = agg_gr.get_model_instance_by_field_name('q_cum_positive')
-    assert isinstance(inst, Lines)
 
 # commented for now until the new aggregate.nc is finished
 

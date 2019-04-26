@@ -12,6 +12,7 @@ import pytest
 import six
 
 from threedigrid.admin.constants import TYPE_CODE_MAP
+from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
 from threedigrid.admin.idmapper import IdMapper
 
 
@@ -20,8 +21,19 @@ test_file_dir = os.path.join(
 
 grid_bck = os.path.join(test_file_dir, "gridadmin.bck")
 
+# the testfile is a copy of the v2_bergermeer gridadmin file
+result_file = os.path.join(test_file_dir, "results_3di.nc")
+grid_file = os.path.join(test_file_dir, "gridadmin.h5")
+
 
 NODE_LENGTH = 10
+
+
+@pytest.fixture()
+def gr():
+    gr = GridH5ResultAdmin(grid_file, result_file)
+    yield gr
+    gr.close()
 
 
 def simple_id_map(node_length=NODE_LENGTH):
