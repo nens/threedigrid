@@ -34,7 +34,6 @@ class GridH5ResultAdmin(GridH5Admin):
     """
     Admin interface for threedicore result queries.
     """
-    _field_model_dict = defaultdict(list)
 
     def __init__(self, h5_file_path, netcdf_file_path, file_modus='r'):
         """
@@ -44,6 +43,7 @@ class GridH5ResultAdmin(GridH5Admin):
             called subgrid_map.nc)
         :param file_modus: modus in which to open the files
         """
+        self._field_model_dict = defaultdict(list)
         self._netcdf_file_path = netcdf_file_path
         super(GridH5ResultAdmin, self).__init__(h5_file_path, file_modus)
         self.netcdf_file = h5py.File(netcdf_file_path, file_modus)
