@@ -10,9 +10,12 @@ import numpy as np
 
 
 from threedigrid.admin.gridresultadmin import GridH5AggregateResultAdmin
+from threedigrid.admin.lines.models import Lines
+from threedigrid.admin.nodes.models import Nodes
+
 
 test_file_dir = os.path.join(
-    os.getcwd(), "tests/test_files")
+    os.path.dirname(os.path.abspath(__file__)), "test_files")
 
 # the testfile is a copy of the v2_bergermeer gridadmin file
 result_file = os.path.join(test_file_dir, "results_3di.nc")
@@ -118,6 +121,24 @@ def test_nodes_timeseries_end_time_only_kwarg(agg_gr):
 def test_nodes_timeseries_slice_filter(agg_gr):
     qs_s1_min = agg_gr.nodes.timeseries(indexes=slice(0, 1)).s1_min
     assert qs_s1_min.shape[0] == 1
+
+
+def test_get_model_instance_by_agg_field_name(agg_gr):
+    inst = agg_gr.get_model_instance_by_field_name('rain_avg')
+    assert isinstance(inst, Nodes)
+
+
+def test_get_model_instance_by_agg_field_name_lines(agg_gr):
+    inst = agg_gr.get_model_instance_by_field_name('q_cum_positive')
+    assert isinstance(inst, Lines)
+
+
+def test_reading_grid_result_and_grid_aggregate_result(gr, agg_gr):
+    assert hasattr(gr.nodes, 's1')
+    assert not hasattr(gr.nodes, 'rain_avg')
+    assert hasattr(agg_gr.nodes, 'rain_avg')
+    assert not hasattr(agg_gr.nodes, 's1')
+
 
 # TODO once the threedicore has implemented aggregations for pumpstations
 # TODO and breaches also implement some tests

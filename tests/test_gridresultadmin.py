@@ -3,29 +3,10 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
 
-import os
 import pytest
-
 import numpy as np
 
-
-from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
 from threedigrid.admin.nodes.models import Nodes
-
-
-test_file_dir = os.path.join(
-    os.getcwd(), "tests/test_files")
-
-# the testfile is a copy of the v2_bergermeer gridadmin file
-result_file = os.path.join(test_file_dir, "results_3di.nc")
-grid_file = os.path.join(test_file_dir, "gridadmin.h5")
-
-
-@pytest.fixture()
-def gr():
-    gr = GridH5ResultAdmin(grid_file, result_file)
-    yield gr
-    gr.close()
 
 
 def test_nodes_timeseries_start_end_time_kwargs(gr):
