@@ -1,7 +1,7 @@
 History
 =======
 
-1.0.13 (unreleased)
+1.0.13 (2019-05-01)
 -------------------
 
 - Fixed `_field_model_dict` being a class variable.
