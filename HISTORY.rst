@@ -1,7 +1,7 @@
 History
 =======
 
-1.0.14 (unreleased)
+1.0.14 (2019-06-19)
 -------------------
 
 - Do not use ``0`` has a default when converting database objects to numpy
