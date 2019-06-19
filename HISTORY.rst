@@ -4,7 +4,8 @@ History
 1.0.14 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Do not use ``0`` has a default when converting database objects to numpy
+  arrays in the prepare phase.
 
 
 1.0.13 (2019-05-01)
