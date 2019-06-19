@@ -8,20 +8,19 @@ import numpy as np
 from .utils import PKMapper
 import six
 
+DEFAULT_NULL_VALUE = -9999
 
 FIELD_NULL_VALUES = {
     'display_name':  b'',
     'code': b'',
 }
 
-DEFAULT_NULL_VALUE = -9999
-
 
 def db_objects_to_numpy_array_dict(db_objects, field_names):
     numpy_array_dict = {}
 
     for field_name in field_names:
-        numpy_array_dict[field_name] = [0] * len(db_objects)
+        numpy_array_dict[field_name] = [DEFAULT_NULL_VALUE] * len(db_objects)
 
     for index, db_object in enumerate(db_objects):
         for field_name in field_names:
@@ -87,9 +86,6 @@ def add_or_update_datasets(h5py_group, numpy_array_dict, field_names,
             h5py_group.create_dataset(
                 dataset_name, data=data, dtype=dt)
         else:
-            values = h5py_group[dataset_name].value
-            mask = data != null_value
-            values[mask] = data[mask]
-            h5py_group[dataset_name][:] = values
+            h5py_group[dataset_name][:] = data
 
     del data
