@@ -1,7 +1,7 @@
 History
 =======
 
-1.0.15 (unreleased)
+1.0.15 (2019-07-05)
 -------------------
 
 - Fixed group update for default null values.
