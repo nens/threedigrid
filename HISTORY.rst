@@ -4,7 +4,7 @@ History
 1.0.15 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fixed group update for default null values.
 
 
 1.0.14 (2019-06-19)
