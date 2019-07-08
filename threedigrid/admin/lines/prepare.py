@@ -329,7 +329,7 @@ class PrepareOrifices(object):
         content_type = line_group['content_type'].value
 
         orifices_field_names = [
-            'pk', 'display_name', 'sewerage', 'max_capacity',
+            'pk', 'display_name', 'sewerage',
             'friction_type', 'friction_value',
             'discharge_coefficient_negative',
             'discharge_coefficient_positive',
