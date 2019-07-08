@@ -4,7 +4,7 @@ History
 1.0.16 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Removed max capacity from Orifice model/serializer.
 
 
 1.0.15 (2019-07-05)
