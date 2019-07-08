@@ -428,9 +428,6 @@ class OrificesGeoJsonSerializer():
                 ['object type', constants.TYPE_V2_ORIFICE],
                 ['display name', selection['display_name'][i]],
                 ['sewerage', str(selection['sewerage'][i] == 1)],
-                ['max capacity', '%s [m3/s]' % str(
-                    selection['max_capacity'][i] if
-                    selection['max_capacity'][i] else '--')],
                 ['discharge coeff. pos.',
                     "%0.1f" % selection['discharge_coefficient_positive'][i]
                     or '--'],
