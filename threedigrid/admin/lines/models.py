@@ -162,7 +162,6 @@ class Culverts(Lines):
 class Orifices(Lines):
     display_name = ArrayField()
     sewerage = ArrayField()
-    max_capacity = ArrayField()
     friction_type = ArrayField()
     friction_value = ArrayField()
     crest_type = ArrayField()
