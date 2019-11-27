@@ -4,7 +4,9 @@ History
 1.0.17 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Bumped package versions
+
+- Reduced reprojection overhead of line_geometries.
 
 
 1.0.16 (2019-07-08)
