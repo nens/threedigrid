@@ -4,7 +4,7 @@ History
 1.0.17 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Added `content_pk` to the pumps model.
 
 
 1.0.16 (2019-07-08)

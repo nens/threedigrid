@@ -40,7 +40,6 @@ class PreparePumps:
                 dataset_name = 'content_pk'
                 ids = np.arange(1, data.size + 1)
 
-                logger.info('pk ==================    ')
             # insert trash element
             data = np.insert(data.copy(), 0, 0, axis=len(data.shape) - 2)
 
