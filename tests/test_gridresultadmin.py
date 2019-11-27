@@ -12,11 +12,11 @@ from threedigrid.admin.nodes.models import Nodes
 def test_nodes_timeseries_start_end_time_kwargs(gr):
     ts = gr.nodes.timestamps
     qs_s1 = gr.nodes.timeseries(start_time=ts[0], end_time=ts[6]).s1
-    assert qs_s1.shape[0] == ts[0:6+1].size
+    assert qs_s1.shape[0] == ts[0 : 6 + 1].size
 
 
 def test_nodes_timeseries_with_subset(gr):
-    qs_s1 = gr.nodes.subset('1d_all').timeseries(start_time=0, end_time=500).s1
+    qs_s1 = gr.nodes.subset("1d_all").timeseries(start_time=0, end_time=500).s1
     assert qs_s1.shape[0] == 9 and qs_s1.shape[1] > 0
 
 
@@ -29,7 +29,7 @@ def test_nodes_timeseries_start_time_only_kwarg(gr):
 def test_nodes_timeseries_end_time_only_kwarg(gr):
     ts = gr.nodes.timestamps
     qs = gr.nodes.timeseries(end_time=ts[6])
-    assert qs.s1.shape[0] == ts[:6+1].size
+    assert qs.s1.shape[0] == ts[: 6 + 1].size
 
 
 def test_nodes_timeseries_index_filter(gr):
@@ -73,7 +73,7 @@ def test_lines_timeseries_slice_filter(gr):
 
 
 def test_lines_timeseries_with_subset(gr):
-    qs_u1 = gr.lines.subset('1d_all').timeseries(indexes=slice(1, 4)).u1
+    qs_u1 = gr.lines.subset("1d_all").timeseries(indexes=slice(1, 4)).u1
     assert qs_u1.shape[0] == 3 and qs_u1.shape[1] > 0
 
 
@@ -93,7 +93,7 @@ def test_missing_kwargs_raises_key_error(gr):
 def test_index_key_raises_type_error(gr):
     # default should be 10
     with pytest.raises(TypeError):
-        gr.lines.timeseries(indexes='wrong').u1
+        gr.lines.timeseries(indexes="wrong").u1
 
 
 def test_set_timeseries_chunk_size_raises_value_error(gr):
@@ -105,7 +105,7 @@ def test_set_timeseries_chunk_size_raises_value_error(gr):
         gr.set_timeseries_chunk_size(-5)
 
     with pytest.raises(ValueError):
-        gr.set_timeseries_chunk_size('20.5')
+        gr.set_timeseries_chunk_size("20.5")
 
 
 def test_get_timeseries_mask_filter(gr):
@@ -128,18 +128,18 @@ def test_dt_timestamps(gr):
 
 
 def test_get_model_instance_by_field_name(gr):
-    inst = gr.get_model_instance_by_field_name('s1')
+    inst = gr.get_model_instance_by_field_name("s1")
     assert isinstance(inst, Nodes)
 
 
 def test_get_model_instance_by_field_name_raises_index_error_unknown_field(gr):
     with pytest.raises(IndexError):
-        gr.get_model_instance_by_field_name('unknown_field')
+        gr.get_model_instance_by_field_name("unknown_field")
 
 
 def test_get_model_instance_by_field_name_raises_index_error(gr):
     with pytest.raises(IndexError):
-        gr.get_model_instance_by_field_name('zoom_category')
+        gr.get_model_instance_by_field_name("zoom_category")
 
 
 # commented for now until the new aggregate.nc is finished
