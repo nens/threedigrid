@@ -6,6 +6,10 @@ History
 
 - Added `content_pk` to the pumps model.
 
+- Bumped package versions
+
+- Reduced reprojection overhead of line_geometries.
+
 
 1.0.16 (2019-07-08)
 -------------------

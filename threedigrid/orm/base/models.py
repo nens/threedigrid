@@ -165,7 +165,9 @@ class Model(six.with_metaclass(ABCMeta)):
             return
         return new_inst.subset(_subset_name[0]).id
 
-    def get_filtered_field_value(self, field_name):
+    def get_filtered_field_value(
+            self, field_name, ts_filter=None, lookup_index=None,
+            subset_index=None):
         """
         Gets the values for the given field and applies the
         defined filters
@@ -174,18 +176,30 @@ class Model(six.with_metaclass(ABCMeta)):
         :return: numpy array containing the filtered fields values
         """
         kwargs = {}
-        if hasattr(self, 'get_timeseries_mask_filter'):
-            timeseries_filter = self.get_timeseries_mask_filter()
-            ts_filter = timeseries_filter
-            if isinstance(timeseries_filter, dict):
-                ts_filter = timeseries_filter.get(field_name)
+        if ts_filter is None:
+            if hasattr(self, 'get_timeseries_mask_filter'):
+                timeseries_filter = self.get_timeseries_mask_filter()
+                ts_filter = timeseries_filter
+                if isinstance(timeseries_filter, dict):
+                    ts_filter = timeseries_filter.get(field_name)
+
+        if ts_filter is not None:
             kwargs.update(
                 {'timeseries_filter': ts_filter}
             )
 
-        if self._mixin and hasattr(self.Meta, 'lookup_fields'):
-            kwargs.update({'lookup_index': self._meta._get_lookup_index()})
-        if self._mixin and hasattr(self.Meta, 'subset_fields'):
+        if lookup_index is None:
+            if self._mixin and hasattr(self.Meta, 'lookup_fields'):
+                lookup_index = self._meta._get_lookup_index()
+
+        if lookup_index is not None:
+            kwargs.update({'lookup_index': lookup_index})
+
+        if subset_index is None:
+            if self._mixin and hasattr(self.Meta, 'subset_fields'):
+                subset_index = self._get_subset_idx(field_name)
+
+        if subset_index is not None:
             kwargs.update({'subset_index': self._get_subset_idx(field_name)})
 
         value = self.get_field_value(field_name, **kwargs)
@@ -520,9 +534,35 @@ class Model(six.with_metaclass(ABCMeta)):
 
         selection = OrderedDict()
 
+        ts_filter = None
+        timeseries_filter = None
+        lookup_index = None
+        has_subsets = False
+
+        if hasattr(self, 'get_timeseries_mask_filter'):
+            timeseries_filter = self.get_timeseries_mask_filter()
+
+        if self._mixin and hasattr(self.Meta, 'lookup_fields'):
+            lookup_index = self._meta._get_lookup_index()
+
+        if self._mixin and hasattr(self.Meta, 'subset_fields'):
+            has_subsets = True
+
         for n in self._field_names:
             if not self.only_fields or n in self.only_fields:
-                selection[n] = self.get_filtered_field_value(n)
+                if isinstance(timeseries_filter, dict):
+                    ts_filter = timeseries_filter.get(n)
+                else:
+                    ts_filter = timeseries_filter
+
+                if has_subsets:
+                    subset_index = self._get_subset_idx(n)
+                else:
+                    subset_index = None
+
+                selection[n] = self.get_filtered_field_value(
+                    n, ts_filter=ts_filter, lookup_index=lookup_index,
+                    subset_index=subset_index)
 
         return selection
 

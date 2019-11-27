@@ -16,6 +16,7 @@ from threedigrid.geo_utils import select_lines_by_tile
 from threedigrid.geo_utils import select_points_by_bbox
 from threedigrid.geo_utils import transform_xys
 from six.moves import map
+from pyproj import Transformer
 
 
 class GeomArrayField(ArrayField):
@@ -147,8 +148,16 @@ class MultiLineArrayField(GeomArrayField):
         from source_epsg to target_epsg.
         """
         reshaped_values = list(map(reshape_flat_array, values))
+
+        # Pyproj has (a lot) more overhead
+        # from 2.0.1 for reprojecting.
+        # so created the Transform once
+        # and reuse it.
+        transformer = Transformer.from_proj(
+            int(source_epsg), int(target_epsg))
+
         transform_values = [
-            transform_xys(x[0], x[1], source_epsg, target_epsg).flatten()
+            np.array(transformer.transform(x[0], x[1])).flatten()
             for x in reshaped_values
         ]
 
