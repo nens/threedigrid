@@ -73,7 +73,7 @@ def test_pump_options_get_fields_only_names(opt_pumps):
     fields = opt_pumps.get_fields(only_names=True)
 
     assert set(fields) == {
-        'zoom_category', 'bottom_level', 'display_name', 'lower_stop_level',
+        'zoom_category', 'content_pk', 'bottom_level', 'display_name', 'lower_stop_level',
         'node_coordinates', 'coordinates', 'start_level', 'q_pump',
         'capacity', 'id', 'node2_id', 'node1_id'}
 
