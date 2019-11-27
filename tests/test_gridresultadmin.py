@@ -12,7 +12,7 @@ from threedigrid.admin.nodes.models import Nodes
 def test_nodes_timeseries_start_end_time_kwargs(gr):
     ts = gr.nodes.timestamps
     qs_s1 = gr.nodes.timeseries(start_time=ts[0], end_time=ts[6]).s1
-    assert qs_s1.shape[0] == ts[0 : 6 + 1].size
+    assert qs_s1.shape[0] == ts[0: 6 + 1].size
 
 
 def test_nodes_timeseries_with_subset(gr):
