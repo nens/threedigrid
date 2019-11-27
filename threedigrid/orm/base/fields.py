@@ -131,8 +131,10 @@ class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
         timeseries_filter = kwargs.get('timeseries_filter', slice(None))
         # timeseries_filter contains only [False, False,...]
         # (empty) slices pass the condition
-        if not np.any(timeseries_filter):
-            return np.array([])
+        if isinstance(timeseries_filter, np.ndarray):
+            if timeseries_filter.dtype == np.dtype(bool) and not np.any(
+                 timeseries_filter):
+                return np.array([])
         lookup_index = kwargs.get('lookup_index')
         values = []
         source_names = self._meta.composite_fields.get(name)
@@ -194,13 +196,15 @@ class TimeSeriesSubsetArrayField(TimeSeriesArrayField):
         subset_index = kwargs['subset_index']
         # timeseries_filter contains only [False, False,...]
         # (empty) slices pass the condition
-        if not np.any(timeseries_filter):
-            return np.array([])
+        if isinstance(timeseries_filter, np.ndarray):
+            if timeseries_filter.dtype == np.dtype(bool) and not np.any(
+                 timeseries_filter):
+                return np.array([])
 
         lookup_index = kwargs.get('lookup_index')
         if self._source_name not in list(datasource.keys()):
             return np.array([])
-        source_data = datasource[self._source_name][timeseries_filter]
+        source_data = datasource[self._source_name][timeseries_filter, :]
         shp = (source_data.shape[0], self._size)
         templ = np.zeros(shp, dtype=source_data.dtype)
         templ[:, subset_index] = source_data
