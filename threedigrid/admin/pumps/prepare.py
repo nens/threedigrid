@@ -2,11 +2,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from __future__ import print_function
-
 from __future__ import absolute_import
+
+import logging
+
 import numpy as np
 from threedigrid.admin.utils import PKMapper
 from threedigrid.admin.prepare_utils import db_objects_to_numpy_array_dict
+
+logger = logging.getLogger(__name__)
 
 
 class PreparePumps:
@@ -27,18 +31,24 @@ class PreparePumps:
         pumpstations_numpy_array_dict = db_objects_to_numpy_array_dict(
             threedi_datasource.v2_pumpstations, pumpstations_field_names)
 
+        ids = np.array([False])
         for field_name in pumpstations_field_names:
             data = pumpstations_numpy_array_dict[field_name]
-            dataset_name = field_name if field_name != 'pk' else 'id'
+            dataset_name = field_name
 
-            if dataset_name == 'id':
-                # Replace data with 1-xx
-                data = np.arange(1, data.size + 1)
+            if dataset_name == 'pk':
+                dataset_name = 'content_pk'
+                ids = np.arange(1, data.size + 1)
 
+                logger.info('pk ==================    ')
             # insert trash element
             data = np.insert(data.copy(), 0, 0, axis=len(data.shape) - 2)
 
             datasource.set(dataset_name, data)
+
+        if np.any(ids):
+            data = np.insert(ids.copy(), 0, 0, axis=len(data.shape) - 2)
+            datasource.set('id', data)
 
         # Step 2: Postprocessing data
 
