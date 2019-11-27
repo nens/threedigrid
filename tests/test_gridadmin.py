@@ -48,20 +48,25 @@ class GridAdminTest(unittest.TestCase):
         self.assertTrue(np.all(extent_1D != extent_1D_proj))
 
     def test_get_extent_subset_twodee(self):
-        extent_2D = self.parser.get_extent_subset(subset_name=SUBSET_2D_OPEN_WATER)
+        extent_2D = self.parser.get_extent_subset(
+            subset_name=SUBSET_2D_OPEN_WATER
+        )
         # should contain values
         self.assertTrue(np.any(extent_2D != NO_DATA_VALUE))
 
     def test_get_extent_subset_combi(self):
         extent_1D = self.parser.get_extent_subset(subset_name=SUBSET_1D_ALL)
-        extent_2D = self.parser.get_extent_subset(subset_name=SUBSET_2D_OPEN_WATER)
+        extent_2D = self.parser.get_extent_subset(
+            subset_name=SUBSET_2D_OPEN_WATER
+        )
         # should be different
         self.assertTrue(np.any(np.not_equal(extent_1D, extent_2D)))
 
     def test_get_model_extent(self):
         model_extent = self.parser.get_model_extent()
         np.testing.assert_almost_equal(
-            model_extent, np.array([105427.6, 511727.0515702, 115887.0, 523463.3268483])
+            model_extent,
+            np.array([105427.6, 511727.0515702, 115887.0, 523463.3268483]),
         )
 
     def test_get_model_extent_extra_extent(self):
@@ -119,7 +124,9 @@ class GridAdminLinesTest(unittest.TestCase):
 
     def test_exporters(self):
         self.assertEqual(len(self.parser.lines._exporters), 1)
-        self.assertIsInstance(self.parser.lines._exporters[0], LinesOgrExporter)
+        self.assertIsInstance(
+            self.parser.lines._exporters[0], LinesOgrExporter
+        )
 
     def test_export_to_shape(self):
         self.parser.lines.to_shape(self.f)
@@ -177,7 +184,9 @@ class GridAdminNodeTest(unittest.TestCase):
 
     def test_exporters(self):
         self.assertEqual(len(self.parser.nodes._exporters), 1)
-        self.assertIsInstance(self.parser.nodes._exporters[0], NodesOgrExporter)
+        self.assertIsInstance(
+            self.parser.nodes._exporters[0], NodesOgrExporter
+        )
 
     def test_export_to_shape(self):
         self.parser.nodes.to_shape(self.f)
@@ -211,7 +220,9 @@ class GridAdminBreachTest(unittest.TestCase):
 
     def test_exporters(self):
         self.assertEqual(len(self.parser.breaches._exporters), 1)
-        self.assertIsInstance(self.parser.breaches._exporters[0], BreachesOgrExporter)
+        self.assertIsInstance(
+            self.parser.breaches._exporters[0], BreachesOgrExporter
+        )
 
     def test_export_to_shape(self):
         self.parser.breaches.to_shape(self.f)
@@ -256,32 +267,44 @@ class GridAdminCellsTest(unittest.TestCase):
     def test_get_id_from_xy_2d_open_water(self):
 
         self.assertListEqual(
-            self.parser.cells.get_id_from_xy(1.0, 2.0, subset_name="2d_open_water"), []
-        )
-        # first coordinate pair + some offset
-        x = self.parser.cells.coordinates[0][1] + 0.5
-        y = self.parser.cells.coordinates[1][1] + 0.5
-        self.assertEqual(
-            self.parser.cells.get_id_from_xy(x, y, subset_name="2d_open_water"), [1]
-        )
-
-    def test_get_id_from_xy_groundwater(self):
-
-        self.assertListEqual(
-            self.parser.cells.get_id_from_xy(1.0, 2.0, subset_name="groundwater_all"),
+            self.parser.cells.get_id_from_xy(
+                1.0, 2.0, subset_name="2d_open_water"
+            ),
             [],
         )
         # first coordinate pair + some offset
         x = self.parser.cells.coordinates[0][1] + 0.5
         y = self.parser.cells.coordinates[1][1] + 0.5
         self.assertEqual(
-            self.parser.cells.get_id_from_xy(x, y, subset_name="groundwater_all"),
+            self.parser.cells.get_id_from_xy(
+                x, y, subset_name="2d_open_water"
+            ),
+            [1],
+        )
+
+    def test_get_id_from_xy_groundwater(self):
+
+        self.assertListEqual(
+            self.parser.cells.get_id_from_xy(
+                1.0, 2.0, subset_name="groundwater_all"
+            ),
+            [],
+        )
+        # first coordinate pair + some offset
+        x = self.parser.cells.coordinates[0][1] + 0.5
+        y = self.parser.cells.coordinates[1][1] + 0.5
+        self.assertEqual(
+            self.parser.cells.get_id_from_xy(
+                x, y, subset_name="groundwater_all"
+            ),
             [5375],
         )
 
     def test_exporters(self):
         self.assertEqual(len(self.parser.cells._exporters), 1)
-        self.assertIsInstance(self.parser.cells._exporters[0], CellsOgrExporter)
+        self.assertIsInstance(
+            self.parser.cells._exporters[0], CellsOgrExporter
+        )
 
     def test_export_to_shape(self):
         self.parser.cells.to_shape(self.f)
@@ -334,7 +357,8 @@ class NodeFilterTests(unittest.TestCase):
             "coordinates"
         ]
         trues, = np.where(
-            (self.parser.nodes.data["id"] >= 3) & (self.parser.nodes.data["id"] < 7)
+            (self.parser.nodes.data["id"] >= 3)
+            & (self.parser.nodes.data["id"] < 7)
         )
         expected = self.parser.nodes.data["coordinates"][:, trues]
         self.assertTrue((filtered == expected).all())
@@ -346,7 +370,9 @@ class NodeFilterTests(unittest.TestCase):
     )
     def test_nodes_filter_id_in_tile(self):
         # at z=0 we have a single base tile
-        filtered = self.parser.nodes.filter(coordinates__in_tile=[0, 0, 0]).data["id"]
+        filtered = self.parser.nodes.filter(
+            coordinates__in_tile=[0, 0, 0]
+        ).data["id"]
         expected = self.parser.nodes.data["id"]
         self.assertTrue(len(filtered) != 0)
         self.assertTrue((filtered == expected).all())
@@ -355,7 +381,9 @@ class NodeFilterTests(unittest.TestCase):
 
     def test_nodes_filter_id_eq_chained(self):
         """Eq filter can be chained."""
-        filtered = self.parser.nodes.filter(id=3).filter(id=3).data["coordinates"]
+        filtered = (
+            self.parser.nodes.filter(id=3).filter(id=3).data["coordinates"]
+        )
         trues, = np.where(self.parser.nodes.data["id"] == 3)
         expected = self.parser.nodes.data["coordinates"][:, trues]
         self.assertTrue((filtered == expected).all())
@@ -439,7 +467,8 @@ class LineFilterTests(unittest.TestCase):
             "line_coords"
         ]
         trues, = np.where(
-            (self.parser.lines.data["id"] >= 3) & (self.parser.lines.data["id"] < 7)
+            (self.parser.lines.data["id"] >= 3)
+            & (self.parser.lines.data["id"] < 7)
         )
         expected = self.parser.lines.data["line_coords"][:, trues]
         self.assertTrue((filtered == expected).all())

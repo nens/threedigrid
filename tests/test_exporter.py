@@ -41,7 +41,9 @@ class ExporterTestShp(unittest.TestCase):
         self.assertTrue(os.path.exists(self.f_shp))
         s = ogr.Open(self.f_shp)
         layer = s.GetLayer()
-        self.assertEqual(layer.GetFeatureCount(), line_2d_open_water_wgs84.id.size)
+        self.assertEqual(
+            layer.GetFeatureCount(), line_2d_open_water_wgs84.id.size
+        )
 
 
 class ExporterTestGpkg(unittest.TestCase):
@@ -62,7 +64,9 @@ class ExporterTestGpkg(unittest.TestCase):
         self.assertTrue(os.path.exists(self.f_gpkg))
         s = ogr.Open(self.f_gpkg)
         layer = s.GetLayer()
-        self.assertEqual(layer.GetFeatureCount(), line_2d_open_water_wgs84.id.size)
+        self.assertEqual(
+            layer.GetFeatureCount(), line_2d_open_water_wgs84.id.size
+        )
 
 
 class GridadminH5ExportTest(unittest.TestCase):
@@ -86,7 +90,9 @@ class GridadminH5ExportTest(unittest.TestCase):
 
     def test_export_2d_vertical_infiltration_lines(self):
         self.exporter.export_2d_vertical_infiltration_lines()
-        result = os.path.join(self.d, constants.VERTICAL_INFILTRATION_LINES_SHP)
+        result = os.path.join(
+            self.d, constants.VERTICAL_INFILTRATION_LINES_SHP
+        )
         self.assertTrue(os.path.exists(result))
 
     def test_export_levees(self):

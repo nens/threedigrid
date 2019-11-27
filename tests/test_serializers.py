@@ -25,9 +25,9 @@ class GridAdminSerializerTest(unittest.TestCase):
         self.parser = GridH5Admin(grid_admin_h5_file)
 
     def test_channel_serializer(self):
-        channels_wgs84 = self.parser.lines.channels.subset("1D_ALL").reproject_to(
-            "4326"
-        )
+        channels_wgs84 = self.parser.lines.channels.subset(
+            "1D_ALL"
+        ).reproject_to("4326")
         channels_wgs84_geojson = ChannelsGeoJsonSerializer(channels_wgs84).data
         j = json.loads(channels_wgs84_geojson)
         feat = j["features"]
@@ -54,13 +54,17 @@ class GridAdminSerializerTest(unittest.TestCase):
         self.assertEqual(feat[0]["properties"]["object_type"], "v2_breach")
 
     def test_manhole_serializer(self):
-        manholes = self.parser.nodes.manholes.subset("1D_ALL").reproject_to("4326")
+        manholes = self.parser.nodes.manholes.subset("1D_ALL").reproject_to(
+            "4326"
+        )
         mjson = ManholesGeoJsonSerializer(manholes).data
         j = json.loads(mjson)
         feat = j["features"]
         self.assertGreater(manholes.id.size, 0)
         self.assertEqual(len(feat), manholes.id.size)
-        self.assertEqual(feat[0]["properties"]["object_type"], "v2_connection_nodes")
+        self.assertEqual(
+            feat[0]["properties"]["object_type"], "v2_connection_nodes"
+        )
 
     def test_pump_serializer(self):
         pumps = self.parser.pumps.reproject_to("4326")
@@ -69,4 +73,6 @@ class GridAdminSerializerTest(unittest.TestCase):
         feat = j["features"]
         self.assertGreater(pumps.id.size, 0)
         self.assertEqual(len(feat), pumps.id.size)
-        self.assertEqual(feat[0]["properties"]["object_type"], "v2_pumpstation")
+        self.assertEqual(
+            feat[0]["properties"]["object_type"], "v2_pumpstation"
+        )

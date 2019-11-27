@@ -32,7 +32,9 @@ def test_add_or_update_datasets_new_data(empty_hdf5_file, np_array_dict):
     h5py_group = empty_hdf5_file.create_group("mygroup")
     field_names = np_array_dict.keys()
     content_pk = pk = np_array_dict["pk"]
-    add_or_update_datasets(h5py_group, np_array_dict, field_names, pk, content_pk)
+    add_or_update_datasets(
+        h5py_group, np_array_dict, field_names, pk, content_pk
+    )
     assert list(h5py_group.keys()) == ["mydataset"]
     assert h5py_group["mydataset"].dtype == np_array_dict["mydataset"].dtype
     assert all(h5py_group["mydataset"][:] == np_array_dict["mydataset"])
@@ -41,10 +43,14 @@ def test_add_or_update_datasets_new_data(empty_hdf5_file, np_array_dict):
 def test_add_or_update_datasets_existing_data(empty_hdf5_file, np_array_dict):
     """Update existing data"""
     h5py_group = empty_hdf5_file.create_group("mygroup")
-    h5py_group.create_dataset(name="mydataset", data=np_array_dict["mydataset"])
+    h5py_group.create_dataset(
+        name="mydataset", data=np_array_dict["mydataset"]
+    )
     field_names = np_array_dict.keys()
     content_pk = pk = np_array_dict["pk"]
-    add_or_update_datasets(h5py_group, np_array_dict, field_names, pk, content_pk)
+    add_or_update_datasets(
+        h5py_group, np_array_dict, field_names, pk, content_pk
+    )
     assert list(h5py_group.keys()) == ["mydataset"]
     assert h5py_group["mydataset"].dtype == np_array_dict["mydataset"].dtype
     assert all(h5py_group["mydataset"][:] == np_array_dict["mydataset"])

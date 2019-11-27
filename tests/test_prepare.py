@@ -84,7 +84,13 @@ def test_prepare_breaches(mocked_id_map, h5py_file, threedi_datasource):
     IdMapper.prepare_mapper(h5py_file, threedi_datasource)
     GridAdminH5Prepare.prepare_breaches(h5py_file, threedi_datasource)
     assert is_prepared(h5py_file, "breaches", "prepared")
-    breaches_field_names = {"id", "seq_ids", "content_pk", "kcu", "coordinates"}
+    breaches_field_names = {
+        "id",
+        "seq_ids",
+        "content_pk",
+        "kcu",
+        "coordinates",
+    }
     assert breaches_field_names.issubset(h5py_file["breaches"].keys())
 
 

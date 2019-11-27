@@ -68,7 +68,10 @@ class PointFilterTests(unittest.TestCase):
 
     def test_get_point_filter(self):
         f = get_filter(
-            ["cell_coords", "contains_point"], self.field, [1, 5], filter_map=FILTER_MAP
+            ["cell_coords", "contains_point"],
+            self.field,
+            [1, 5],
+            filter_map=FILTER_MAP,
         )
         self.assertIsInstance(f, PointFilter)
 

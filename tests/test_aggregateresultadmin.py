@@ -14,7 +14,9 @@ from threedigrid.admin.lines.models import Lines
 from threedigrid.admin.nodes.models import Nodes
 
 
-test_file_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_files")
+test_file_dir = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "test_files"
+)
 
 # the testfile is a copy of the v2_bergermeer gridadmin file
 result_file = os.path.join(test_file_dir, "results_3di.nc")
@@ -148,7 +150,9 @@ def test_get_timestamps_pumps(agg_gr):
 
 def test_nodes_timeseries_start_end_time_kwargs(agg_gr):
     ts = agg_gr.nodes.get_timestamps("s1_max")
-    qs_s1_max = agg_gr.nodes.timeseries(start_time=ts[0], end_time=ts[1]).s1_max
+    qs_s1_max = agg_gr.nodes.timeseries(
+        start_time=ts[0], end_time=ts[1]
+    ).s1_max
     assert qs_s1_max.shape[0] == 2
 
 
