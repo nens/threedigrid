@@ -49,7 +49,7 @@ class BaseFilter(object):
 
                 # try both with tuple and list
                 # This solves h5py datasets indexing errors
-                nparray_dict[key] = nparray_dict[key][:][_filter]
+                nparray_dict[key] = nparray_dict[key][:][tuple(_filter)]
 
     def filter_dict(self, nparray_dict, model):
         """
