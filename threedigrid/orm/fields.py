@@ -16,7 +16,11 @@ from threedigrid.geo_utils import select_lines_by_tile
 from threedigrid.geo_utils import select_points_by_bbox
 from threedigrid.geo_utils import transform_xys
 from six.moves import map
-from pyproj import Transformer
+
+try:
+    from pyproj import Transformer
+except ImportError:
+    Transformer = None
 
 
 class GeomArrayField(ArrayField):
@@ -153,13 +157,22 @@ class MultiLineArrayField(GeomArrayField):
         # from 2.0.1 for reprojecting.
         # so created the Transform once
         # and reuse it.
-        transformer = Transformer.from_proj(
-            int(source_epsg), int(target_epsg))
+        if Transformer is not None:
+            # Only use the Transformer if it is present
+            # in Python 3 it works well, however in Python 2.7
+            # it seams to break
+            transformer = Transformer.from_proj(
+                int(source_epsg), int(target_epsg))
 
-        transform_values = [
-            np.array(transformer.transform(x[0], x[1])).flatten()
-            for x in reshaped_values
-        ]
+            transform_values = [
+                np.array(transformer.transform(x[0], x[1])).flatten()
+                for x in reshaped_values
+            ]
+        else:
+            transform_values = [
+                transform_xys(x[0], x[1], source_epsg, target_epsg).flatten()
+                for x in reshaped_values
+            ]
 
         return np.array(transform_values)
 
