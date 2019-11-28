@@ -4,7 +4,8 @@ History
 1.0.18 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Only use pyproj Transformer if it is present
+  else revert to old transform method
 
 
 1.0.17 (2019-11-28)
