@@ -1,7 +1,7 @@
 History
 =======
 
-1.0.18 (unreleased)
+1.0.18 (2019-11-28)
 -------------------
 
 - Only use pyproj Transformer if it is present
