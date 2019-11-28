@@ -11,6 +11,7 @@ from threedigrid.orm.fields import (
 
 class Pumps(Model):
     display_name = ArrayField()
+    content_pk = ArrayField()
     node1_id = ArrayField()
     node2_id = ArrayField()
     bottom_level = ArrayField()

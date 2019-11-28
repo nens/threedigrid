@@ -53,68 +53,64 @@ def test_get_smallest_uint_dtype_raises_value_error_exceeding_input():
         get_smallest_uint_dtype(400000000000000000000000)
 
 
-@pytest.mark.skipif(
-    sys.version_info < (3, 0), reason="requires Python3")
+@pytest.mark.skipif(sys.version_info < (3, 0), reason="requires Python3")
 def test_get_storage_area_bytes_to_float():
-    a = np.array(['2.2'], np.bytes_)
+    a = np.array(["2.2"], np.bytes_)
     sa_a = _get_storage_area(a)
     assert sa_a == 2.2
 
 
-@pytest.mark.skipif(
-    sys.version_info < (3, 0), reason="requires Python3")
+@pytest.mark.skipif(sys.version_info < (3, 0), reason="requires Python3")
 def test_get_storage_area_bytes_to_string():
-    b = np.array([''], np.bytes_)
+    b = np.array([""], np.bytes_)
     sa_b = _get_storage_area(b)
-    assert sa_b == '--'  # default response
-    b = np.array(['0'], np.bytes_)
+    assert sa_b == "--"  # default response
+    b = np.array(["0"], np.bytes_)
     sa_b = _get_storage_area(b)
-    assert sa_b == '--'  # default response
+    assert sa_b == "--"  # default response
 
 
-@pytest.mark.skipif(
-    sys.version_info > (3, 0), reason="requires Python2")
+@pytest.mark.skipif(sys.version_info > (3, 0), reason="requires Python2")
 def test_get_storage_area_string_input():
-    b = np.array([''], np.string_)
+    b = np.array([""], np.string_)
     sa_b = _get_storage_area(b)
-    assert sa_b == '--'  # default response
-    b = np.array(['0'], np.string_)
+    assert sa_b == "--"  # default response
+    b = np.array(["0"], np.string_)
     sa_b = _get_storage_area(b)
-    assert sa_b == '--'  # default response
+    assert sa_b == "--"  # default response
 
 
-@pytest.mark.skipif(
-    sys.version_info > (3, 0), reason="requires Python2")
+@pytest.mark.skipif(sys.version_info > (3, 0), reason="requires Python2")
 def test_get_storage_area_string_to_float():
-    b = np.array(['0.5'], np.string_)
+    b = np.array(["0.5"], np.string_)
     sa_b = _get_storage_area(b)
     assert sa_b == 0.5
 
 
 def test_get_storage_area_none_input():
     sa_c = _get_storage_area(None)
-    assert sa_c == '--'
+    assert sa_c == "--"
 
 
 def test_flatten_dict_values_as_set():
-    d = {'a': 1}
+    d = {"a": 1}
     v = _flatten_dict_values(d, as_set=True)
     assert v == {1}
 
 
 def test_flatten_nested_dict_values_as_set():
-    d = {'a': [1]}
+    d = {"a": [1]}
     v = _flatten_dict_values(d, as_set=True)
     assert v == {1}
 
 
 def test_flatten_dict_values_as_list():
-    d = {'a': 1}
+    d = {"a": 1}
     v = _flatten_dict_values(d, as_set=False)
     assert v == [1]
 
 
 def test_flatten_nested_dict_values_as_list():
-    d = {'a': [1]}
+    d = {"a": [1]}
     v = _flatten_dict_values(d, as_set=False)
     assert v == [1]
