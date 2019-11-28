@@ -17,15 +17,13 @@ from threedigrid.admin.prepare import GridAdminH5Export
 from threedigrid.admin.lines.exporters import LinesOgrExporter
 
 
-test_file_dir = os.path.join(
-    os.getcwd(), "tests/test_files")
+test_file_dir = os.path.join(os.getcwd(), "tests/test_files")
 
 # the testfile is a copy of the v2_bergermeer gridadmin file
 grid_admin_h5_file = os.path.join(test_file_dir, "gridadmin.h5")
 
 
 class ExporterTestShp(unittest.TestCase):
-
     def setUp(self):
         self.parser = GridH5Admin(grid_admin_h5_file)
         d = tempfile.mkdtemp()
@@ -36,18 +34,19 @@ class ExporterTestShp(unittest.TestCase):
 
     def test_export_by_extension(self):
         line_2d_open_water_wgs84 = self.parser.lines.subset(
-            '2D_OPEN_WATER').reproject_to('4326')
+            "2D_OPEN_WATER"
+        ).reproject_to("4326")
         exporter = LinesOgrExporter(line_2d_open_water_wgs84)
-        exporter.save(self.f_shp, line_2d_open_water_wgs84.data, '4326')
+        exporter.save(self.f_shp, line_2d_open_water_wgs84.data, "4326")
         self.assertTrue(os.path.exists(self.f_shp))
         s = ogr.Open(self.f_shp)
         layer = s.GetLayer()
         self.assertEqual(
-            layer.GetFeatureCount(), line_2d_open_water_wgs84.id.size)
+            layer.GetFeatureCount(), line_2d_open_water_wgs84.id.size
+        )
 
 
 class ExporterTestGpkg(unittest.TestCase):
-
     def setUp(self):
         self.parser = GridH5Admin(grid_admin_h5_file)
         d = tempfile.mkdtemp()
@@ -58,18 +57,19 @@ class ExporterTestGpkg(unittest.TestCase):
 
     def test_export_by_extension(self):
         line_2d_open_water_wgs84 = self.parser.lines.subset(
-            '2D_OPEN_WATER').reproject_to('4326')
+            "2D_OPEN_WATER"
+        ).reproject_to("4326")
         exporter = LinesOgrExporter(line_2d_open_water_wgs84)
-        exporter.save(self.f_gpkg, line_2d_open_water_wgs84.data, '4326')
+        exporter.save(self.f_gpkg, line_2d_open_water_wgs84.data, "4326")
         self.assertTrue(os.path.exists(self.f_gpkg))
         s = ogr.Open(self.f_gpkg)
         layer = s.GetLayer()
         self.assertEqual(
-            layer.GetFeatureCount(), line_2d_open_water_wgs84.id.size)
+            layer.GetFeatureCount(), line_2d_open_water_wgs84.id.size
+        )
 
 
 class GridadminH5ExportTest(unittest.TestCase):
-
     def setUp(self):
         self.d = tempfile.mkdtemp()
         self.exporter = GridAdminH5Export(grid_admin_h5_file)
@@ -91,7 +91,8 @@ class GridadminH5ExportTest(unittest.TestCase):
     def test_export_2d_vertical_infiltration_lines(self):
         self.exporter.export_2d_vertical_infiltration_lines()
         result = os.path.join(
-            self.d, constants.VERTICAL_INFILTRATION_LINES_SHP)
+            self.d, constants.VERTICAL_INFILTRATION_LINES_SHP
+        )
         self.assertTrue(os.path.exists(result))
 
     def test_export_levees(self):

@@ -65,6 +65,7 @@ setup(
         'Natural Language :: English',
         "Programming Language :: Python :: 2",
         'Programming Language :: Python :: 2.7',
+        "Programming Language :: Python :: 3",
         'Topic :: Scientific/Engineering',
     ],
     description="Python package for the threedigrid administration",

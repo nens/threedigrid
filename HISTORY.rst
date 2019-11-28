@@ -4,6 +4,8 @@ History
 1.0.17 (unreleased)
 -------------------
 
+- Added `content_pk` to the pumps model.
+
 - Bumped package versions
 
 - Reduced reprojection overhead of line_geometries.
