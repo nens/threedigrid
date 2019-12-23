@@ -35,7 +35,8 @@ class GridH5ResultAdmin(GridH5Admin):
     Admin interface for threedicore result queries.
     """
 
-    def __init__(self, h5_file_path, netcdf_file_path, file_modus='r'):
+    def __init__(
+            self, h5_file_path, netcdf_file_path, file_modus='r', swmr=False):
         """
 
         :param h5_file_path: path to the hdf5 gridadmin file
@@ -46,7 +47,7 @@ class GridH5ResultAdmin(GridH5Admin):
         self._field_model_dict = defaultdict(list)
         self._netcdf_file_path = netcdf_file_path
         super(GridH5ResultAdmin, self).__init__(h5_file_path, file_modus)
-        self.netcdf_file = h5py.File(netcdf_file_path, file_modus)
+        self.netcdf_file = h5py.File(netcdf_file_path, file_modus, swmr=swmr)
         self.set_timeseries_chunk_size(DEFAULT_CHUNK_TIMESERIES.stop)
         self.version_check()
 

@@ -13,7 +13,6 @@ from itertools import tee
 
 import numpy as np
 import six
-from h5py._hl.dataset import Dataset
 from six.moves import zip
 
 from threedigrid.orm.base.exceptions import OperationNotSupportedError
@@ -90,12 +89,9 @@ class Model(six.with_metaclass(ABCMeta)):
         self._boolean_mask_filter = None
         self._mixin = mixin
 
-        if not epsg_code:
-            epsg_code = self._datasource.getattr('epsg_code')
-        self.epsg_code = epsg_code
+        self._epsg_code = epsg_code
 
         # Cache the field names
-
         _field_names = [
             x for x in dir(self.__class__)
             if isinstance(
@@ -106,6 +102,12 @@ class Model(six.with_metaclass(ABCMeta)):
         self._field_names = set(self._field_names).union(set(_field_names))
 
         self.has_1d = has_1d
+
+    @property
+    def epsg_code(self):
+        if not self._epsg_code:
+            self._epsg_code = self._datasource.getattr('epsg_code')
+        return self._epsg_code
 
     @property
     def count(self):
@@ -122,7 +124,7 @@ class Model(six.with_metaclass(ABCMeta)):
                  self._datasource.getattr('model_slug'),
                  str(self._datasource.getattr('revision_nr')),
                  self._datasource.getattr('revision_hash')))
-        except (AttributeError, KeyError):
+        except (AttributeError, KeyError, TypeError):
             model_name = 'unknown'
             pass
         return model_name
@@ -168,81 +170,9 @@ class Model(six.with_metaclass(ABCMeta)):
     def get_filtered_field_value(
             self, field_name, ts_filter=None, lookup_index=None,
             subset_index=None):
-        """
-        Gets the values for the given field and applies the
-        defined filters
-
-        :param field_name: name of the models field
-        :return: numpy array containing the filtered fields values
-        """
-        kwargs = {}
-        if ts_filter is None:
-            if hasattr(self, 'get_timeseries_mask_filter'):
-                timeseries_filter = self.get_timeseries_mask_filter()
-                ts_filter = timeseries_filter
-                if isinstance(timeseries_filter, dict):
-                    ts_filter = timeseries_filter.get(field_name)
-
-        if ts_filter is not None:
-            kwargs.update(
-                {'timeseries_filter': ts_filter}
-            )
-
-        if lookup_index is None:
-            if self._mixin and hasattr(self.Meta, 'lookup_fields'):
-                lookup_index = self._meta._get_lookup_index()
-
-        if lookup_index is not None:
-            kwargs.update({'lookup_index': lookup_index})
-
-        if subset_index is None:
-            if self._mixin and hasattr(self.Meta, 'subset_fields'):
-                subset_index = self._get_subset_idx(field_name)
-
-        if subset_index is not None:
-            kwargs.update({'subset_index': self._get_subset_idx(field_name)})
-
-        value = self.get_field_value(field_name, **kwargs)
-
-        # Transform the base_filter by prepending slice(None) to
-        # match the dimensionality of the nparray_dict[key].shape
-        #
-        #      shape(100,) => _filter = [base_filter]
-        #      shape(2, 100)  => _filter = [slice(None), base_filter]
-        #
-        #      Note: x[slice(None),[1,2,3]] == x[:,[1,2,3]]
-        # if hasattr(self, 'get_timeseries_mask_filter'):
-        #     timeseries_filter = self.get_timeseries_mask_filter()
-        # else:
-        #     timeseries_filter = slice(None)
-
-        # Return a numpy array with None as only element when
-        # the value is None.
-        if value is None:
-            return np.array(None)
-
-        _filter = [slice(None)] * (
-            len(value.shape) - 1) + [self.boolean_mask_filter]
-
-        # By default load all data from H5,
-        # this is WAY much faster
-        if isinstance(value, Dataset):
-            value = value[:]
-
-        # Perform slicing by applying the mask
-        value = value[tuple(_filter)]
-
-        # Reproject any coordinates if a reproject_to_epsg is set and
-        # there are coordinatefields in the selection
-        if self.reproject_to_epsg and self._is_coords(field_name):
-            value = self.__do_reproject_value(
-                    value, field_name, self.reproject_to_epsg)
-
-        if isinstance(value, np.ma.core.MaskedArray):
-            # Always return the data of a masked array
-            value = value.data
-
-        return value
+        # Redirect via datasource
+        return self._datasource.get_filtered_field_value(
+            self, field_name, ts_filter, lookup_index, subset_index)
 
     def __getattribute__(self, attr_name):
         """
@@ -293,6 +223,7 @@ class Model(six.with_metaclass(ABCMeta)):
 
         """
         new_slice_filters = list(self.slice_filters)  # make copy
+        filter_as = kwargs.pop('filter___as', False)
 
         for key, value in six.iteritems(kwargs):
             # python2/3 combat
@@ -311,7 +242,8 @@ class Model(six.with_metaclass(ABCMeta)):
                     splitted_key,
                     self._meta.get_field(splitted_key[0]),
                     value,
-                    filter_map=self._filter_map)
+                    filter_map=self._filter_map,
+                    filter_as=filter_as)
             )
 
         return new_slice_filters
@@ -321,6 +253,10 @@ class Model(six.with_metaclass(ABCMeta)):
         Same as self.filter, but now return "klass" instance instead of
         self.__class__ instance
         """
+        # Inject filter___as, set this on the filters
+        # so they can identified as filters that
+        # produce submodels
+        kwargs['filter___as'] = True
         slice_filters = self.__get_filters(**kwargs)
         new_class_kwargs = dict(self.class_kwargs)
         new_class_kwargs.update(
@@ -360,7 +296,7 @@ class Model(six.with_metaclass(ABCMeta)):
         return self.__init_class(
             self.__class__, **new_class_kwargs)
 
-    def slice(self, s, override_filter_error=False):
+    def slice(self, start, stop=None, step=None, override_filter_error=False):
         """
         slice by name or slice. See instance.predefined_slices for an overview
         of predefined slices
@@ -380,12 +316,10 @@ class Model(six.with_metaclass(ABCMeta)):
             raise OperationNotSupportedError(
                 'You cannot use slices on a filtered dataset')
 
-        slice_filter = s
-
-        if not isinstance(s, slice):
-            raise TypeError(
-                'Type %s not supported, must be a slice' % type(s,)
-            )
+        if isinstance(start, slice):
+            slice_filter = start
+        else:
+            slice_filter = slice(start, stop, step)
 
         new_class_kwargs = dict(self.class_kwargs)
         new_class_kwargs.update(
@@ -463,50 +397,6 @@ class Model(six.with_metaclass(ABCMeta)):
         return self.__init_class(
             self.__class__, **new_class_kwargs)
 
-    def __do_filter(self):
-        """
-        Performs: the filters defined in self._filters
-
-        Returns: a dictionairy with filtered values
-        """
-
-        # No cached data
-        # filter all the data using the defined filters.
-
-        selection = OrderedDict()
-
-        for n in self._field_names:
-            selection[n] = self.get_field_value(n)
-
-        # Apply all filters sequential on the selection dict
-        # Every filter can, when matches are found, remove items
-        # from the values in the dict.
-        #
-        # For example filtering on content_pk=2 works like:
-        #      1. Get the boolean mask:
-        #              mask = selection['content_pk'][
-        #                  selection['content_pk'] ==  2]
-        #      2. Apply it to all values in selection.
-        #              selection[x] = selection[x][mask]
-        #              (for x in selection.keys())
-        for filter_instance in self.slice_filters:
-            filter_instance.filter_dict(selection, self)
-
-        # Reproject any coordinates if a reproject_to_epsg is set and
-        # there are coordinatefields in the selection
-        if self.reproject_to_epsg and self._includes_coords(selection):
-            selection = self.__do_reproject(
-                    selection, self.reproject_to_epsg)
-
-        # Prune all unwanted fields
-        if self.only_fields:
-            for key in [x for x in selection.keys()
-                        if x not in self.only_fields]:
-                selection.pop(key)
-        if not self.slice_filters:
-            selection = self._get_values(selection)
-        return selection
-
     def _get_values(self, selection):
         """
         when no filters are specified, we are still operating on the hdf5
@@ -529,42 +419,7 @@ class Model(six.with_metaclass(ABCMeta)):
         """
         Returns: the filtered values as dictionairy
         """
-        # Note: the __do_filter functions returns
-        # a dictionairy by default.
-
-        selection = OrderedDict()
-
-        ts_filter = None
-        timeseries_filter = None
-        lookup_index = None
-        has_subsets = False
-
-        if hasattr(self, 'get_timeseries_mask_filter'):
-            timeseries_filter = self.get_timeseries_mask_filter()
-
-        if self._mixin and hasattr(self.Meta, 'lookup_fields'):
-            lookup_index = self._meta._get_lookup_index()
-
-        if self._mixin and hasattr(self.Meta, 'subset_fields'):
-            has_subsets = True
-
-        for n in self._field_names:
-            if not self.only_fields or n in self.only_fields:
-                if isinstance(timeseries_filter, dict):
-                    ts_filter = timeseries_filter.get(n)
-                else:
-                    ts_filter = timeseries_filter
-
-                if has_subsets:
-                    subset_index = self._get_subset_idx(n)
-                else:
-                    subset_index = None
-
-                selection[n] = self.get_filtered_field_value(
-                    n, ts_filter=ts_filter, lookup_index=lookup_index,
-                    subset_index=subset_index)
-
-        return selection
+        return self._datasource.execute_query(self)
 
     def to_structured_array(self):
         """
