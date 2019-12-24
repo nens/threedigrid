@@ -161,7 +161,7 @@ class InFilter(BaseCompareFilter):
     func_str = ' in '
     func_name = 'in'
 
-    def __init__(self, key, field, value):
+    def __init__(self, key, field, value, filter_as):
         try:
             iter(value)
         except TypeError:
@@ -170,6 +170,7 @@ class InFilter(BaseCompareFilter):
         self._field = field
         self._key = key
         self._value = value
+        self._filter_as = filter_as
 
     def filter(self, nparray_dict):
         # Concatenate equals with | (or)
