@@ -10,7 +10,13 @@ from threedigrid.orm.base.filters import FILTER_MAP as BASE_FILTER_MAP
 
 
 class GeomFilter(BaseFilter):
-    pass
+    def to_dict(self):
+        return {
+            'filter': {
+                "{0}__{1}".format(
+                    self._key, self.func_name): self._value
+            }
+        }
 
 
 class BboxFilter(GeomFilter):
@@ -18,11 +24,13 @@ class BboxFilter(GeomFilter):
     Bbox (geom) filter
     """
     include_intersections = False
+    func_name = 'in_bbox'
 
-    def __init__(self, key, field, values):
+    def __init__(self, key, field, values, filter_as=False):
         self.field = field
         self.key = key
         self.bbox = values
+        self._filter_as = filter_as
         assert hasattr(self.field, 'get_mask_by_bbox')
 
     def get_field_name(self):
@@ -47,11 +55,13 @@ class BboxFilter(GeomFilter):
 
 
 class PointFilter(GeomFilter):
+    func_name = 'contains_point'
 
-    def __init__(self, key, field, values):
+    def __init__(self, key, field, values, filter_as=False):
         self.field = field
         self.key = key
         self.x, self.y = values
+        self._filter_as = filter_as
         assert hasattr(self.field, 'get_mask_by_point')
 
     def get_field_name(self):
@@ -80,11 +90,13 @@ class TileFilter(GeomFilter):
     Tile (geom) filter
     """
     include_intersections = False
+    func_name = 'in_tile'
 
-    def __init__(self, key, field, values):
+    def __init__(self, key, field, values, filter_as=False):
         self.field = field
         self.key = key
         self.x, self.y, self.z = values
+        self._filter_as = filter_as
         assert hasattr(self.field, 'get_mask_by_tile')
 
     def get_field_name(self):
@@ -111,10 +123,12 @@ class TileFilter(GeomFilter):
 
 class BboxIntersectsFilter(BboxFilter):
     include_intersections = True
+    func_name = 'intersects_bbox'
 
 
 class TileIntersectsFilter(TileFilter):
     include_intersections = True
+    func_name = 'intersects_tile'
 
 
 FILTER_MAP = dict(BASE_FILTER_MAP, ** {
