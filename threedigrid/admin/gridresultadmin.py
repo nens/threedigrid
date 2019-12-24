@@ -16,6 +16,7 @@ from threedigrid.admin.breaches.timeseries_mixin import (
 from threedigrid.admin.constants import DEFAULT_CHUNK_TIMESERIES
 from threedigrid.admin.gridadmin import GridH5Admin
 from threedigrid.admin.h5py_datasource import H5pyResultGroup
+from threedigrid.admin.h5py_swmr import H5SwmrFile
 from threedigrid.admin.lines.models import Lines
 from threedigrid.admin.lines.timeseries_mixin import LinesAggregateResultsMixin
 from threedigrid.admin.lines.timeseries_mixin import LinesResultsMixin
@@ -28,6 +29,12 @@ from threedigrid.admin.pumps.timeseries_mixin import PumpsResultsMixin
 from threedigrid.orm.models import Model
 
 logger = logging.getLogger(__name__)
+
+try:
+    import asyncio_rpc # noqa
+    asyncio_rpc_support = True
+except ImportError:
+    asyncio_rpc_support = False
 
 
 class GridH5ResultAdmin(GridH5Admin):
@@ -47,9 +54,28 @@ class GridH5ResultAdmin(GridH5Admin):
         self._field_model_dict = defaultdict(list)
         self._netcdf_file_path = netcdf_file_path
         super(GridH5ResultAdmin, self).__init__(h5_file_path, file_modus)
-        self.netcdf_file = h5py.File(netcdf_file_path, file_modus, swmr=swmr)
+
+        self.datasource_class = H5pyResultGroup
+
+        if h5_file_path.startswith('rpc://'):
+            if not asyncio_rpc_support:
+                raise Exception(
+                    "Please reinstall this package with threedigrid[rpc]")
+
+            from threedigrid.admin.rpc_datasource import (
+                H5RPCResultGroup, RPCFile)
+            self.netcdf_file = RPCFile(h5_file_path, file_modus)
+            self.datasource_class = H5RPCResultGroup
+        else:
+            if swmr:
+                print('using swmr!!!')
+                self.netcdf_file = H5SwmrFile(
+                    netcdf_file_path, file_modus)
+            else:
+                self.netcdf_file = h5py.File(
+                    netcdf_file_path, file_modus)
+            self.version_check()
         self.set_timeseries_chunk_size(DEFAULT_CHUNK_TIMESERIES.stop)
-        self.version_check()
 
     def set_timeseries_chunk_size(self, new_chunk_size):
         """
@@ -81,13 +107,13 @@ class GridH5ResultAdmin(GridH5Admin):
     @property
     def lines(self):
         return Lines(
-            H5pyResultGroup(self.h5py_file, 'lines', self.netcdf_file),
+            self.datasource_class(self.h5py_file, 'lines', self.netcdf_file),
             **dict(self._grid_kwargs, **{'mixin': LinesResultsMixin}))
 
     @property
     def nodes(self):
         return Nodes(
-            H5pyResultGroup(self.h5py_file, 'nodes', self.netcdf_file),
+            self.datasource_class(self.h5py_file, 'nodes', self.netcdf_file),
             **dict(self._grid_kwargs, **{'mixin': NodesResultsMixin}))
 
     @property
@@ -96,7 +122,8 @@ class GridH5ResultAdmin(GridH5Admin):
             logger.info('Threedimodel has no breaches')
             return
         return Breaches(
-            H5pyResultGroup(self.h5py_file, 'breaches', self.netcdf_file),
+            self.datasource_class(
+                self.h5py_file, 'breaches', self.netcdf_file),
             **dict(self._grid_kwargs, **{'mixin': BreachesResultsMixin}))
 
     @property
@@ -105,7 +132,7 @@ class GridH5ResultAdmin(GridH5Admin):
             logger.info('Threedimodel has no pumps')
             return
         return Pumps(
-            H5pyResultGroup(self.h5py_file, 'pumps', self.netcdf_file),
+            self.datasource_class(self.h5py_file, 'pumps', self.netcdf_file),
             **dict(self._grid_kwargs, **{'mixin': PumpsResultsMixin}))
 
     def version_check(self):

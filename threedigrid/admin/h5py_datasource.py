@@ -131,6 +131,10 @@ class H5pyGroup(DataSource):
                     n, ts_filter=ts_filter, lookup_index=lookup_index,
                     subset_index=subset_index)
 
+        # Inject timestamps automatically
+        if hasattr(model, 'get_timestamps'):
+            selection['timestamps'] = model.get_timestamps(timeseries_filter)
+
         return selection
 
     def __init__(self, h5py_file, group_name, meta=None, required=False):
@@ -169,6 +173,14 @@ class H5pyGroup(DataSource):
 
     def keys(self):
         return list(self._source.keys())
+
+    def has_any(self, sources):
+        """
+        Check if the any of the sources can be found in
+        the file
+        """
+        return any(x in list(self.keys())
+                   for x in sources)
 
 
 class H5pyResultGroup(H5pyGroup):
@@ -215,4 +227,4 @@ class H5pyResultGroup(H5pyGroup):
             return self._source[name]
 
         if name in self.netcdf_file.keys():
-            return self.netcdf_file[name]
+            return self.netcdf_file.get(name)

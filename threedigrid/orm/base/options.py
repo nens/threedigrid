@@ -129,14 +129,13 @@ class Options(object):
             return field_name in list(self.inst._datasource.keys())
 
         sources = self.inst.Meta.composite_fields.get(field_name)
+
         if sources:
-            return any(x in list(self.inst._datasource.keys())
-                       for x in sources)
+            return self.inst._datasource.has_any(sources)
         sources = self.inst.Meta.subset_fields.get(field_name)
         if sources:
             _sources = _flatten_dict_values(sources, as_set=True)
-            return any(x in set(self.inst._datasource.keys())
-                       for x in _sources)
+            return self.inst._datasource.has_any(_sources)
 
     def _get_meta_values(self, field_name):
         """

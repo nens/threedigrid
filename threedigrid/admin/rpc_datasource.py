@@ -73,6 +73,9 @@ class RPCFile:
         self.file_modus = file_modus
         self._client = None
 
+    def filepath(self):
+        return self.path
+
     @property
     async def client(self):
         if self._client is None:
@@ -220,3 +223,36 @@ class H5RPCGroup(DataSource):
 
     def keys(self):
         return []
+
+    def has_any(self, sources):
+        """
+        Check if the any of the sources can be found in
+        the file.
+        """
+        # By default pretend to have all sources,
+        # an exception is thrown if the source is not available
+        return True
+
+
+class H5RPCResultGroup(H5RPCGroup):
+    def __init__(self, rpc_file, group_name, netcdf_file,
+                 meta=None, required=False):
+        super(H5RPCResultGroup, self).__init__(
+            rpc_file, group_name, meta, required)
+        self.netcdf_file = netcdf_file
+
+    def get_rpc_actions(self, model, field_name=None):
+        rpc_actions = super(H5RPCResultGroup, self).get_rpc_actions(
+            model, field_name)
+
+        # Check if we need to inject timeseries_filter
+        if model.timeseries_filter is not None:
+            # insert action
+            rpc_actions.insert(
+                0, {'timeseries': model.timeseries_filter}
+            )
+
+        return rpc_actions
+
+    def attr(self, var_name, attr_name):
+        pass
