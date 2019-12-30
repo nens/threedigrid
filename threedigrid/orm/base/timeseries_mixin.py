@@ -221,6 +221,33 @@ class AggregateResultMixin(ResultMixin):
     def __init__(self, *args, **kwargs):
         super(AggregateResultMixin, self).__init__(*args, **kwargs)
 
+        # Create a copy of the class_kwargs
+        # and update it with timeseries_mask
+        new_class_kwargs = dict(self.class_kwargs)
+        new_class_kwargs.update({
+            'timeseries_mask': self.timeseries_mask})
+
+    def get_timeseries_mask_filter(self):
+        """
+        :return: the timeseries mask to be used for filtering
+                 on timeseries
+        """
+        if self.timeseries_filter is not None:
+            start_time = self.timeseries_filter['start_time']
+            end_time = self.timeseries_filter['end_time']
+            indexes = self.timeseries_filter['indexes']
+
+            self.timeseries_mask = {}
+            field_names = self._meta.get_fields()
+            for field_name, field_inst in six.iteritems(field_names):
+                if not isinstance(field_inst, TimeSeriesArrayField):
+                    continue
+                ts = self.get_timestamps(field_name)
+                mask = self._get_mask(start_time, end_time, indexes, ts)
+                self.timeseries_mask[field_name] = mask
+            return self.timeseries_mask
+        return None
+
     def timeseries(self, start_time=None, end_time=None, indexes=None):
         """
         Allows filtering on timeseries.
@@ -252,21 +279,13 @@ class AggregateResultMixin(ResultMixin):
             >>> 3
 
         """
-        self.timeseries_mask = {}
-        field_names = self._meta.get_fields()
-        for field_name, field_inst in six.iteritems(field_names):
-            if not isinstance(field_inst, TimeSeriesArrayField):
-                continue
-            ts = self.get_timestamps(field_name)
-            mask = self._get_mask(start_time, end_time, indexes, ts)
-            self.timeseries_mask[field_name] = mask
-
-        # Create a copy of the class_kwargs
-        # and update it with timeseries_mask
         new_class_kwargs = dict(self.class_kwargs)
         new_class_kwargs.update({
-            'timeseries_mask': self.timeseries_mask})
-
+            'timeseries_filter': {
+                'start_time': start_time,
+                'end_time': end_time,
+                'indexes': indexes}
+        })
         return self.__class__(
             datasource=self._datasource,
             **new_class_kwargs)
@@ -301,14 +320,14 @@ class AggregateResultMixin(ResultMixin):
 
         return timeseries_mask
 
-    def get_timeseries_mask_filter(self):
-        """
-        :return: the timeseries mask to be used for filtering
-                 on timeseries
-        """
-        if self.timeseries_mask:
-            return self.timeseries_mask
-        return self.class_kwargs.get('timeseries_chunk_size')
+    #def get_timeseries_mask_filter(self):
+    #    """
+    #    :return: the timeseries mask to be used for filtering
+    #             on timeseries
+    #    """
+    #    if self.timeseries_mask:
+    #        return self.timeseries_mask
+    #    return self.class_kwargs.get('timeseries_chunk_size')
 
     @property
     def timestamps(self):

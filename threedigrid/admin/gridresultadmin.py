@@ -55,7 +55,7 @@ class GridH5ResultAdmin(GridH5Admin):
         self._netcdf_file_path = netcdf_file_path
         super(GridH5ResultAdmin, self).__init__(h5_file_path, file_modus)
 
-        self.datasource_class = H5pyResultGroup
+        self.result_datasource_class = H5pyResultGroup
 
         if h5_file_path.startswith('rpc://'):
             if not asyncio_rpc_support:
@@ -65,7 +65,7 @@ class GridH5ResultAdmin(GridH5Admin):
             from threedigrid.admin.rpc_datasource import (
                 H5RPCResultGroup, RPCFile)
             self.netcdf_file = RPCFile(h5_file_path, file_modus)
-            self.datasource_class = H5RPCResultGroup
+            self.result_datasource_class = H5RPCResultGroup
         else:
             if swmr:
                 print('using swmr!!!')
@@ -107,13 +107,13 @@ class GridH5ResultAdmin(GridH5Admin):
     @property
     def lines(self):
         return Lines(
-            self.datasource_class(self.h5py_file, 'lines', self.netcdf_file),
+            self.result_datasource_class(self.h5py_file, 'lines', self.netcdf_file),
             **dict(self._grid_kwargs, **{'mixin': LinesResultsMixin}))
 
     @property
     def nodes(self):
         return Nodes(
-            self.datasource_class(self.h5py_file, 'nodes', self.netcdf_file),
+            self.result_datasource_class(self.h5py_file, 'nodes', self.netcdf_file),
             **dict(self._grid_kwargs, **{'mixin': NodesResultsMixin}))
 
     @property
@@ -122,7 +122,7 @@ class GridH5ResultAdmin(GridH5Admin):
             logger.info('Threedimodel has no breaches')
             return
         return Breaches(
-            self.datasource_class(
+            self.result_datasource_class(
                 self.h5py_file, 'breaches', self.netcdf_file),
             **dict(self._grid_kwargs, **{'mixin': BreachesResultsMixin}))
 
@@ -132,7 +132,7 @@ class GridH5ResultAdmin(GridH5Admin):
             logger.info('Threedimodel has no pumps')
             return
         return Pumps(
-            self.datasource_class(self.h5py_file, 'pumps', self.netcdf_file),
+            self.result_datasource_class(self.h5py_file, 'pumps', self.netcdf_file),
             **dict(self._grid_kwargs, **{'mixin': PumpsResultsMixin}))
 
     def version_check(self):
