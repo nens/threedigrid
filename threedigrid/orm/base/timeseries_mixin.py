@@ -320,15 +320,6 @@ class AggregateResultMixin(ResultMixin):
 
         return timeseries_mask
 
-    #def get_timeseries_mask_filter(self):
-    #    """
-    #    :return: the timeseries mask to be used for filtering
-    #             on timeseries
-    #    """
-    #    if self.timeseries_mask:
-    #        return self.timeseries_mask
-    #    return self.class_kwargs.get('timeseries_chunk_size')
-
     @property
     def timestamps(self):
         timestamps_dict = {}

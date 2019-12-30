@@ -107,13 +107,15 @@ class GridH5ResultAdmin(GridH5Admin):
     @property
     def lines(self):
         return Lines(
-            self.result_datasource_class(self.h5py_file, 'lines', self.netcdf_file),
+            self.result_datasource_class(
+                self.h5py_file, 'lines', self.netcdf_file),
             **dict(self._grid_kwargs, **{'mixin': LinesResultsMixin}))
 
     @property
     def nodes(self):
         return Nodes(
-            self.result_datasource_class(self.h5py_file, 'nodes', self.netcdf_file),
+            self.result_datasource_class(
+                self.h5py_file, 'nodes', self.netcdf_file),
             **dict(self._grid_kwargs, **{'mixin': NodesResultsMixin}))
 
     @property
@@ -132,7 +134,8 @@ class GridH5ResultAdmin(GridH5Admin):
             logger.info('Threedimodel has no pumps')
             return
         return Pumps(
-            self.result_datasource_class(self.h5py_file, 'pumps', self.netcdf_file),
+            self.result_datasource_class(
+                self.h5py_file, 'pumps', self.netcdf_file),
             **dict(self._grid_kwargs, **{'mixin': PumpsResultsMixin}))
 
     def version_check(self):
