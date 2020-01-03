@@ -29,6 +29,16 @@ try:
 except ImportError:
     asyncio_rpc_support = False
 
+try:
+    from autobahn.asyncio import ApplicationSession
+    from autobahn.asyncio.wamp import ApplicationRunner
+    from autobahn.asyncio.component import Component, run  # noqa
+    from threedigrid.admin.wamp_datasource import WampBackendGroup, WampClientGroup, WAMPFile
+    autobahn_support = True
+except ImportError:
+    autobahn_support = False
+
+
 
 from . import constants
 import six
@@ -46,7 +56,8 @@ class GridH5Admin(object):
         >>> ...
     """
 
-    def __init__(self, h5_file_path, file_modus='r', set_props=False):
+    def __init__(self, h5_file_path, file_modus='r', set_props=False,
+                 wamp_backend=False, realm='realm1'):
         """
         :param h5_file_path: path to the gridadmin file
         :param file_modus: mode with which to open the file
@@ -54,7 +65,6 @@ class GridH5Admin(object):
         """
 
         self.grid_file = h5_file_path
-        self.datasource_class = H5pyGroup
         self.is_rpc = False
 
         if h5_file_path.startswith('rpc://'):
@@ -69,9 +79,36 @@ class GridH5Admin(object):
             self.is_rpc = True
             self.has_1d = True
             self.has_2d = True
+        elif h5_file_path.startswith('ws://'):
+            if not autobahn_support:
+                raise Exception(
+                    "Please reinstall this package with threedigrid[autobahn]"
+                )
+            self.comp = Component(
+                transports=h5_file_path,
+                realm=realm,
+            )
+            self.datasource_class = WampClientGroup
+            self.comp.on('join', self.joined_client)
+
+            set_props = False
+            self.has_1d = True
         else:
+            self.datasource_class = H5pyGroup
             self.h5py_file = h5py.File(h5_file_path, file_modus)
             set_props = True
+
+        if wamp_backend:
+            if not autobahn_support:
+                raise Exception(
+                    "Please reinstall this package with threedigrid[autobahn]"
+                )
+            self.datasource_class = WampBackendGroup
+            self.comp = Component(
+                transports="ws://localhost:8080/ws",
+                realm=realm,
+            )
+            self.comp.on('join', self.joined_backend)
 
         if set_props:
             self._set_props()
@@ -79,6 +116,41 @@ class GridH5Admin(object):
         self._grid_kwargs = {
             'has_1d': self.has_1d
         }
+
+    async def joined_backend(self, session, details):
+        print("Backend session ready")
+        session.register(
+            self.breaches._datasource.get_filtered_field_value,
+            'Breaches.get_filtered_field_value'
+        )
+        session.register(
+            self.levees._datasource.get_filtered_field_value,
+            'Levees.get_filtered_field_value'
+        )
+        session.register(
+            self.lines._datasource.get_filtered_field_value,
+            'Lines.get_filtered_field_value'
+        )
+        session.register(
+            self.nodes._datasource.get_filtered_field_value,
+            'Nodes.get_filtered_field_value'
+        )
+        session.register(
+            self.pumps._datasource.get_filtered_field_value,
+            'Pumps.get_filtered_field_value'
+        )
+        session.register(
+            self.h5py_file.__getattribute__,
+            'ga.__getattribute__'
+        )
+
+    async def joined_client(self, session, details):
+        print("Client session ready")
+        self.datasource_class.session = session
+        self.h5py_file = WAMPFile(session)
+
+        data = await self.nodes.filter(id=5).id
+        print(data)
 
     @property
     def grid(self):
