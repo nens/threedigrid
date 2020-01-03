@@ -9,7 +9,7 @@ except ImportError:
         "asyncio_rpc needs to be installed when using this module,"
         "install it with: pip install asyncio_rpc")
 
-from asyncio_rpc.models import RPCStack, RPCCall
+from asyncio_rpc.models import RPCStack, RPCSubStack, RPCCall
 from asyncio_rpc.client import RPCClient
 from asyncio_rpc.commlayers.redis import RPCRedisCommLayer
 from asyncio_rpc.serialization import msgpack
@@ -19,7 +19,7 @@ NAMESPACE = 'GRIDRESULTADMIN'
 RESULT_EXPIRE_TIME = 30
 
 
-class Results(object):
+class Future(object):
     def __init__(self, rpc_file, rpc_stack):
         self.rpc_file = rpc_file
         self.rpc_stack = rpc_stack
@@ -30,6 +30,26 @@ class Results(object):
         """
         client = await self.rpc_file.client
         return await client.rpc_call(self.rpc_stack)
+
+
+class FutureResult(Future):
+
+    async def resolve(self, limit=None, limit_include_end=True):
+        """
+        :param limit: the maximum number of points to return
+        :param limit_include_end: include the last timeserie point or the first
+        """
+        client = await self.rpc_file.client
+        return await client.rpc_call(self.rpc_stack)
+
+    async def subscribe(self, limit=None, limit_include_end=True):
+        """
+        :param limit: the maximum number of points to return
+        :param limit_include_end: include the last timeserie point or the first
+        """
+        client = await self.rpc_file.client
+        rpc_substack = RPCSubStack(**self.rpc_stack.__dict__)
+        return await client.subscribe_call(rpc_substack)
 
 
 class RPCAttrs:
@@ -46,7 +66,7 @@ class RPCAttrs:
 
         rpc_stack = RPCStack(
             uuid4().hex, NAMESPACE, RESULT_EXPIRE_TIME, stack)
-        return Results(self.rpc_file, rpc_stack)
+        return Future(self.rpc_file, rpc_stack)
 
     def __getitem__(self, key):
         """
@@ -96,7 +116,7 @@ class RPCFile:
         ]
         rpc_stack = RPCStack(
             uuid4().hex, NAMESPACE, RESULT_EXPIRE_TIME, stack)
-        return Results(self, rpc_stack)
+        return Future(self, rpc_stack)
 
     def get_extent_subset(self, subset_name, target_espg_code=''):
         stack = [
@@ -105,7 +125,7 @@ class RPCFile:
         ]
         rpc_stack = RPCStack(
             uuid4().hex, NAMESPACE, RESULT_EXPIRE_TIME, stack)
-        return Results(self, rpc_stack)
+        return Future(self, rpc_stack)
 
     def __getitem__(self, key):
         if key == 'meta':
@@ -124,7 +144,7 @@ class RPCFile:
 
         rpc_stack = RPCStack(
             uuid4().hex, NAMESPACE, RESULT_EXPIRE_TIME, stack)
-        return Results(self, rpc_stack)
+        return Future(self, rpc_stack)
 
     @property
     def attrs(self):
@@ -136,6 +156,8 @@ class H5RPCGroup(DataSource):
     Datasource wrapper for h5py groups,
     adding meta data to all groups.
     """
+    future_class = Future
+
     def __init__(self, rpc_file, group_name, meta=None, required=False):
         self.rpc_file = rpc_file
         self.group_name = group_name
@@ -199,13 +221,13 @@ class H5RPCGroup(DataSource):
             model, field_name=field_name)
         rpc_stack = self.get_asyncio_rpc_stack(model, rpc_actions)
 
-        return Results(self.rpc_file, rpc_stack)
+        return self.future_class(self.rpc_file, rpc_stack)
 
     def execute_query(self, model):
         rpc_actions = self.get_rpc_actions(model)
         rpc_stack = self.get_asyncio_rpc_stack(model, rpc_actions)
 
-        return Results(self.rpc_file, rpc_stack)
+        return self.future_class(self.rpc_file, rpc_stack)
 
     def set(self, name, values):
         pass
@@ -219,7 +241,7 @@ class H5RPCGroup(DataSource):
 
         rpc_stack = RPCStack(
             uuid4().hex, NAMESPACE, RESULT_EXPIRE_TIME, stack)
-        return Results(self.rpc_file, rpc_stack)
+        return self.future_class(self.rpc_file, rpc_stack)
 
     def keys(self):
         return []
@@ -235,15 +257,35 @@ class H5RPCGroup(DataSource):
 
 
 class H5RPCResultGroup(H5RPCGroup):
+    future_class = FutureResult
+
     def __init__(self, rpc_file, group_name, netcdf_file,
                  meta=None, required=False):
         super(H5RPCResultGroup, self).__init__(
             rpc_file, group_name, meta, required)
         self.netcdf_file = netcdf_file
 
+    def get_timestamps(self):
+        stack = [
+            RPCCall(self.group_name, [], {}),
+            RPCCall('_datasource', [], {}),
+            RPCCall('get', ['time'], {}),
+            RPCCall('value', [], {})
+        ]
+
+        rpc_stack = RPCStack(
+            uuid4().hex, NAMESPACE, RESULT_EXPIRE_TIME, stack)
+        return self.future_class(self.rpc_file, rpc_stack)
+
     def get_rpc_actions(self, model, field_name=None):
         rpc_actions = super(H5RPCResultGroup, self).get_rpc_actions(
             model, field_name)
+
+        # Check if we need to sample
+        if model.timeseries_sample is not None:
+            rpc_actions.insert(
+                0, {'sample': model.timeseries_sample}
+            )
 
         # Check if we need to inject timeseries_filter
         if model.timeseries_filter is not None:
