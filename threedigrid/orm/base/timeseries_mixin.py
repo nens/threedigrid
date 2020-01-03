@@ -31,9 +31,11 @@ class ResultMixin(object):
         # pop mixin specific fields and store them
         # in the class_kwargs
         self.timeseries_filter = kwargs.pop('timeseries_filter', None)
+        self.timeseries_sample = kwargs.pop("timeseries_sample", None)
         self.timeseries_mask = None
         self.class_kwargs.update({
-            'timeseries_filter': self.timeseries_filter})
+            'timeseries_filter': self.timeseries_filter,
+            'timeseries_sample': self.timeseries_sample})
         if not self._done_composition and hasattr(self, 'Meta'):
             self._set_composite_fields()
             self._set_subset_fields()
@@ -107,7 +109,64 @@ class ResultMixin(object):
                 raise TypeError(
                     "indexes should either be a list/tuple or a slice")
 
-    def timeseries(self, start_time=None, end_time=None, indexes=None):
+        if self.timeseries_sample:
+            num_points = self.timeseries_sample['num_points']
+            # Only sample if the required num_points is smaller
+            # than the available points
+            if self.timestamps.size > num_points:
+                indexes = np.argwhere(
+                    self.timestamps[self.timeseries_mask]).flatten().tolist()
+                self.timeseries_mask = self._get_indexes_subset(
+                    indexes,
+                    limit=self.timeseries_sample['num_points'],
+                    include_end=self.timeseries_sample['include_end'])
+
+    def _get_indexes_subset(self, indexes, limit, include_end=True):
+        """
+        Get indexes subset with length limit
+        """
+        start = indexes[0]
+        end = indexes[-1]
+        divider = (end - start) / float(limit)
+        indexes = []
+
+        if include_end:
+            divider = -divider
+            x = end
+        else:
+            x = start
+
+        while len(indexes) < limit:
+            indexes.append(round(x))
+            x += divider
+
+        if include_end:
+            indexes = indexes[::-1]
+
+        return indexes
+
+    def sample(self, num_points=None, include_end=True):
+        """
+        Sample the requested timeseries and return at
+        maximum 'num_points' amount of points.
+
+        :param num_points: the amount of sample points to return
+        :param include_end: if true, the last point is always included,
+                            else the first point is always included.
+        """
+        new_class_kwargs = dict(self.class_kwargs)
+        new_class_kwargs.update({
+            'timeseries_sample': {
+                'num_points': num_points,
+                'include_end': include_end}
+        })
+
+        return self.__class__(
+            datasource=self._datasource,
+            **new_class_kwargs)
+
+    def timeseries(
+            self, start_time=None, end_time=None, indexes=None):
         """
         Allows filtering on timeseries.
 
@@ -182,12 +241,18 @@ class ResultMixin(object):
         """
         Get the list of timestamps for the results
         """
+
+        # override if datasource has get_timestamps function
+        if hasattr(self._datasource, 'get_timestamps'):
+            return self._datasource.get_timestamps()
+
         time_key = 'time'
         if time_key not in list(self._datasource.keys()):
             raise AttributeError(
                 'Result {} has no attribute {}'.format(
                     self._datasource.netcdf_file.filepath(), time_key)
             )
+
         value = self._datasource['time'][:]
         if self.timeseries_mask is not None:
             value = value[self.timeseries_mask]
