@@ -36,6 +36,14 @@ try:
 except ImportError:
     asyncio_rpc_support = False
 
+try:
+    from autobahn.asyncio.component import Component  # noqa
+    from threedigrid.admin.wamp_datasource import WAMPFile, WampBackendResultGroup, \
+        WampClientResultGroup
+    autobahn_support = True
+except ImportError:
+    autobahn_support = False
+
 
 class GridH5ResultAdmin(GridH5Admin):
     """
@@ -43,7 +51,9 @@ class GridH5ResultAdmin(GridH5Admin):
     """
 
     def __init__(
-            self, h5_file_path, netcdf_file_path, file_modus='r', swmr=False):
+            self, h5_file_path, netcdf_file_path, file_modus='r', swmr=False,
+            wamp_backend=False, realm='realm1'
+    ):
         """
 
         :param h5_file_path: path to the hdf5 gridadmin file
@@ -66,6 +76,19 @@ class GridH5ResultAdmin(GridH5Admin):
                 H5RPCResultGroup, RPCFile)
             self.netcdf_file = RPCFile(h5_file_path, file_modus)
             self.result_datasource_class = H5RPCResultGroup
+        elif h5_file_path.startswith('ws://'):
+            if not autobahn_support:
+                raise Exception(
+                    "Please reinstall this package with threedigrid[autobahn]"
+                )
+
+            self.netcdf_file = WAMPFile
+            self.result_datasource_class = WampClientResultGroup
+            self.comp = Component(
+                transports=h5_file_path,
+                realm=realm,
+            )
+            self.comp.on('join', self.joined_client)
         else:
             if swmr:
                 print('using swmr!!!')
@@ -75,7 +98,65 @@ class GridH5ResultAdmin(GridH5Admin):
                 self.netcdf_file = h5py.File(
                     netcdf_file_path, file_modus)
             self.version_check()
+
+        if wamp_backend:
+            if not autobahn_support:
+                raise Exception(
+                    "Please reinstall this package with threedigrid[autobahn]"
+                )
+            self.result_datasource_class = WampBackendResultGroup
+            self.comp = Component(
+                transports="ws://localhost:8080/ws",
+                realm=realm,
+            )
+            self.comp.on('join', self.joined_backend)
+
         self.set_timeseries_chunk_size(DEFAULT_CHUNK_TIMESERIES.stop)
+
+    async def joined_backend(self, session, details):
+        print("Backend session ready")
+        session.register(
+            self.breaches._datasource.get_filtered_field_value,
+            'breaches.get_filtered_field_value'
+        )
+        session.register(
+            self.breaches._datasource.execute_query,
+            'breaches.execute_query'
+        )
+        session.register(
+            self.lines._datasource.get_filtered_field_value,
+            'lines.get_filtered_field_value'
+        )
+        session.register(
+            self.lines._datasource.execute_query,
+            'lines.execute_query'
+        )
+        session.register(
+            self.nodes._datasource.get_filtered_field_value,
+            'nodes.get_filtered_field_value'
+        )
+        session.register(
+            self.nodes._datasource.execute_query,
+            'nodes.execute_query'
+        )
+        session.register(
+            self.pumps._datasource.get_filtered_field_value,
+            'pumps.get_filtered_field_value'
+        )
+        session.register(
+            self.pumps._datasource.execute_query,
+            'pumps.execute_query'
+        )
+        session.register(
+            self.h5py_file.__getattribute__,
+            'ga.__getattribute__'
+        )
+
+    async def joined_client(self, session, details):
+        await super().joined_client(session, details)
+        # data = await self.nodes.manholes.filter(id=10776).data
+        data = await self.nodes.s1
+        print(data)
 
     def set_timeseries_chunk_size(self, new_chunk_size):
         """
