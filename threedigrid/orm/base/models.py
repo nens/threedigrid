@@ -88,7 +88,6 @@ class Model(six.with_metaclass(ABCMeta)):
         # after it has been computed once
         self._boolean_mask_filter = None
         self._mixin = mixin
-
         self._epsg_code = epsg_code
 
         # Cache the field names

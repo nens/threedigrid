@@ -34,20 +34,32 @@ class Future(object):
 
 class FutureResult(Future):
 
-    async def resolve(self, limit=None, limit_include_end=True):
+    async def resolve(self):
         """
-        :param limit: the maximum number of points to return
-        :param limit_include_end: include the last timeserie point or the first
+        Returns by default only NetCDF results
         """
         client = await self.rpc_file.client
         return await client.rpc_call(self.rpc_stack)
 
-    async def subscribe(self, limit=None, limit_include_end=True):
+    async def subscribe(
+            self, only_netcdf_results=False, max_items_per_second=None):
         """
-        :param limit: the maximum number of points to return
-        :param limit_include_end: include the last timeserie point or the first
+        :param rate_limit:
+            maximum number of items returned per second. Cannot
+            be higher than 5
+
+        :param only_netcdf_results:
+            if True, only include results that are in the NetCDF
         """
         client = await self.rpc_file.client
+        if only_netcdf_results:
+            self.rpc_stack.stack.append(
+                RPCCall('only_netcdf_results', [], {})
+            )
+        if max_items_per_second is not None:
+            self.rpc_stack.stack.append(
+                RPCCall('max_items_per_second', [max_items_per_second], {})
+            )
         rpc_substack = RPCSubStack(**self.rpc_stack.__dict__)
         return await client.subscribe_call(rpc_substack)
 
