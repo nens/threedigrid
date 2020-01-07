@@ -248,3 +248,19 @@ def get_filter(
         raise ValueError("'%s' is an unknown filter name" % filter_name)
 
     return filter_class(field_name, field, value, filter_as)
+
+
+def get_filter_from_dict(filter_dict: dict) -> BaseFilter:
+    """Return filter-object from its dict.
+
+    :param filter_dict: dict created with the method `.to_dict()`
+    :return: an instance of filter
+
+    Example:
+     >>> get_filter_from_dict({'filter': {'is_manhole__eq': True}})
+    EqualsFilter(== is_manhole True)
+    """
+    filter_dict = filter_dict['filter']
+    for key, value in filter_dict.items():
+        _key, filter_class = key.split('__')
+        return FILTER_MAP[filter_class](_key, None, value)
