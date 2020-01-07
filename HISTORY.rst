@@ -4,8 +4,14 @@ History
 1.0.19 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Added RPC datasource which enables to use the majority of
+  threedigrid in a RPC setting. Uses asyncio-rpc for
+  sending/handling RPC calls.
 
+- RPC datasource allows both one time executing (`resolve()`) and pub/sub
+  (`subscribe()`) functionialty.
+
+- Refactored to allow using RPC datasource
 
 1.0.18 (2019-11-28)
 -------------------
