@@ -30,8 +30,6 @@ except ImportError:
     asyncio_rpc_support = False
 
 try:
-    from autobahn.asyncio import ApplicationSession
-    from autobahn.asyncio.wamp import ApplicationRunner
     from autobahn.asyncio.component import Component, run  # noqa
     from threedigrid.admin.wamp_datasource import WampBackendGroup, WampClientGroup, \
         WAMPFile
@@ -169,9 +167,6 @@ class GridH5Admin(object):
         print("Client session ready")
         self.datasource_class.session = session
         self.h5py_file = WAMPFile(session)
-
-        data = await self.nodes.manholes.filter(id=10750).data
-        print(data)
 
     @property
     def grid(self):
