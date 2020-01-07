@@ -33,7 +33,8 @@ try:
     from autobahn.asyncio import ApplicationSession
     from autobahn.asyncio.wamp import ApplicationRunner
     from autobahn.asyncio.component import Component, run  # noqa
-    from threedigrid.admin.wamp_datasource import WampBackendGroup, WampClientGroup, WAMPFile
+    from threedigrid.admin.wamp_datasource import WampBackendGroup, WampClientGroup, \
+        WAMPFile
     autobahn_support = True
 except ImportError:
     autobahn_support = False
@@ -121,23 +122,43 @@ class GridH5Admin(object):
         print("Backend session ready")
         session.register(
             self.breaches._datasource.get_filtered_field_value,
-            'Breaches.get_filtered_field_value'
+            'breaches.get_filtered_field_value'
+        )
+        session.register(
+            self.breaches._datasource.execute_query,
+            'breaches.execute_query'
         )
         session.register(
             self.levees._datasource.get_filtered_field_value,
-            'Levees.get_filtered_field_value'
+            'levees.get_filtered_field_value'
+        )
+        session.register(
+            self.levees._datasource.execute_query,
+            'levees.execute_query'
         )
         session.register(
             self.lines._datasource.get_filtered_field_value,
-            'Lines.get_filtered_field_value'
+            'lines.get_filtered_field_value'
+        )
+        session.register(
+            self.lines._datasource.execute_query,
+            'lines.execute_query'
         )
         session.register(
             self.nodes._datasource.get_filtered_field_value,
-            'Nodes.get_filtered_field_value'
+            'nodes.get_filtered_field_value'
+        )
+        session.register(
+            self.nodes._datasource.execute_query,
+            'nodes.execute_query'
         )
         session.register(
             self.pumps._datasource.get_filtered_field_value,
-            'Pumps.get_filtered_field_value'
+            'pumps.get_filtered_field_value'
+        )
+        session.register(
+            self.pumps._datasource.execute_query,
+            'pumps.execute_query'
         )
         session.register(
             self.h5py_file.__getattribute__,
@@ -149,7 +170,7 @@ class GridH5Admin(object):
         self.datasource_class.session = session
         self.h5py_file = WAMPFile(session)
 
-        data = await self.nodes.filter(id=5).id
+        data = await self.nodes.manholes.filter(id=10750).data
         print(data)
 
     @property

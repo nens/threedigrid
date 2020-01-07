@@ -7,8 +7,7 @@ from threedigrid.admin.levees.models import Levees
 from threedigrid.admin.lines.models import Lines
 from threedigrid.admin.nodes.models import Nodes
 from threedigrid.admin.pumps.models import Pumps
-from threedigrid.orm.base.filters import get_filter, deserialize_filter, \
-    get_filter_from_dict
+from threedigrid.orm.base.filters import get_filter_from_dict
 
 try:
     from autobahn.asyncio import ApplicationSession
