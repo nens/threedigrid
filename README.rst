@@ -114,14 +114,14 @@ Installation:
     $ pip install threedigrid[rpc]
 
 
-Basic usage:
+Basic usage::
 
     ga = GridH5ResultAdmin('rpc://REDIS_HOST/SIMULATION_ID', 'rpc://REDIS_HOST/SIMULATION_ID')
     # Replace REDIS_HOST and SIMULATION_ID with actual values.
     future_result = ga.nodes.filter(lik__eq=4).data
     data = await future_result.resolve()
 
-Subscription usage:
+Subscription usage::
 
     subscription = await future_result.subscribe()
 
