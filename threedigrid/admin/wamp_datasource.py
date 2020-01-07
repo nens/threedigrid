@@ -7,6 +7,8 @@ from threedigrid.admin.levees.models import Levees
 from threedigrid.admin.lines.models import Lines
 from threedigrid.admin.nodes.models import Nodes
 from threedigrid.admin.pumps.models import Pumps
+from threedigrid.orm.base.filters import get_filter, deserialize_filter, \
+    get_filter_from_dict
 
 try:
     from autobahn.asyncio import ApplicationSession
@@ -18,11 +20,11 @@ except ImportError:
 
 
 MODEL_KLASS_MAP = {
-    'Breaches': Breaches,
-    'Levees': Levees,
-    'Lines': Lines,
-    'Nodes': Nodes,
-    'Pumps': Pumps
+    'breaches': Breaches,
+    'levees': Levees,
+    'lines': Lines,
+    'nodes': Nodes,
+    'pumps': Pumps
 }
 
 
@@ -32,11 +34,19 @@ class WampBackendGroup(H5pyGroup):
         super().__init__(h5py_file, group_name, meta, required)
 
     def get_filtered_field_value(
-            self, model, field_name, ts_filter=None, lookup_index=None,
-            subset_index=None):
-        klass = model.pop('klass')
-        model_klass = MODEL_KLASS_MAP[klass]
-        model = model_klass(datasource=self, **model)
+            self,
+            model,
+            field_name,
+            ts_filter=None,
+            lookup_index=None,
+            subset_index=None
+    ):
+        if type(model) == dict:
+            klass = self.group_name
+            model_klass = MODEL_KLASS_MAP[klass]
+            filters = [get_filter_from_dict(f) for f in model.get('slice_filters')]
+            model['slice_filters'] = filters
+            model = model_klass(datasource=self, **model)
 
         data = super().get_filtered_field_value(
             model, field_name, ts_filter, lookup_index, subset_index
@@ -44,32 +54,49 @@ class WampBackendGroup(H5pyGroup):
         return data.tolist()
 
     def execute_query(self, model):
-        return super().execute_query(model)
+        if type(model) == dict:
+            model_klass = MODEL_KLASS_MAP[self.group_name]
+            filters = [get_filter_from_dict(f) for f in model.get('slice_filters')]
+            model['slice_filters'] = filters
+
+            model = model_klass(datasource=self, **model)
+
+        data = super().execute_query(model)
+        return data
 
 
 class WampClientGroup(DataSource):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, data_source, group_name):
+        self.data_source = data_source
+        self.group_name = group_name
+
+    def serialize_model(self, class_kwargs):
+        serialized_model = {**class_kwargs}
+        slice_filters = serialized_model.get('slice_filters', [])
+        slice_filters = [f.to_dict() for f in slice_filters]
+        serialized_model['slice_filters'] = slice_filters
+        return serialized_model
 
     async def get_filtered_field_value(
-            self, model, field_name, ts_filter=None, lookup_index=None,
-            subset_index=None):
-        klass = type(model).__name__
-
-        filters = None
-
-        class_kwargs = model.class_kwargs
-        class_kwargs['klass'] = klass
-
+            self,
+            model,
+            field_name,
+            ts_filter=None,
+            lookup_index=None,
+            subset_index=None
+    ):
+        serialized_model = self.serialize_model(model.class_kwargs)
         res = await self.session.call(
-            '%s.get_filtered_field_value' % klass, class_kwargs, field_name, ts_filter,
-            lookup_index, subset_index)
+            '%s.get_filtered_field_value' % self.group_name, serialized_model, field_name,
+            ts_filter, lookup_index, subset_index
+        )
         return np.array(res)
 
     async def execute_query(self, model):
+        serialized_model = self.serialize_model(model.class_kwargs)
         res = await self.session.call(
-            'nodes.execute_query', model
+            '%s.execute_query' % self.group_name, serialized_model
         )
         return res
 
