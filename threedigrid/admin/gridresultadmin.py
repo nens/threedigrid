@@ -148,14 +148,15 @@ class GridH5ResultAdmin(GridH5Admin):
             'pumps.execute_query'
         )
         session.register(
-            self.h5py_file.__getattribute__,
-            'ga.__getattribute__'
+            self.h5py_file.attrs.__getitem__,
+            'ga.attrs.__getitem__'
         )
 
     async def joined_client(self, session, details):
         await super().joined_client(session, details)
-        # data = await self.nodes.manholes.filter(id=10776).data
-        data = await self.nodes.s1
+        self.netcdf_file = WAMPFile(session)
+
+        data = await self.epsg_code
         print(data)
 
     def set_timeseries_chunk_size(self, new_chunk_size):
