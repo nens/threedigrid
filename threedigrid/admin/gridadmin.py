@@ -159,8 +159,8 @@ class GridH5Admin(object):
             'pumps.execute_query'
         )
         session.register(
-            self.h5py_file.__getattribute__,
-            'ga.__getattribute__'
+            self.h5py_file.attrs.__getitem__,
+            'ga.attrs.__getitem__'
         )
 
     async def joined_client(self, session, details):

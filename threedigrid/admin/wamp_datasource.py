@@ -16,17 +16,20 @@ try:
 except ImportError:
     autobahn_support = False
 
-
 MODEL_KLASS_MAP = {
     'breaches': Breaches,
-    'levees': Levees,
     'lines': Lines,
     'nodes': Nodes,
-    'pumps': Pumps
+    'grid': Grid,
+    'pumps': Pumps,
+    'levees': Levees
 }
-
-MIXIN_MAP = {
-    'NodesResultsMixin': NodesResultsMixin
+RESULT_MIXIN_MAP = {
+    'AggregateResultMixin': AggregateResultMixin,
+    'BreachesResultsMixin': BreachesResultsMixin,
+    'LinesResultsMixin': LinesResultsMixin,
+    'NodesResultsMixin': NodesResultsMixin,
+    'PumpsResultsMixin': PumpsResultsMixin
 }
 
 
@@ -46,7 +49,7 @@ class WampBackendGroup(H5pyGroup):
         # serialize mixin:
         mixin = model_kwargs.get('mixin')
         if mixin:
-            model_kwargs['mixin'] = MIXIN_MAP[mixin]
+            model_kwargs['mixin'] = RESULT_MIXIN_MAP[mixin]
 
         # timeseries_chunk_size
         timeseries_chunk_size = model_kwargs.get('timeseries_chunk_size')
@@ -190,7 +193,6 @@ class WampClientGroup(DataSource):
         return True
 
 
-
 class WampClientResultGroup(WampClientGroup):
 
     def __init__(self, data_source, group_name, netcdf_file):
@@ -211,11 +213,18 @@ class WAMPFile:
     def __init__(self, session):
         self.session = session
 
-    async def get(self, item):
-        res = await self.session.call(
-            'ga.__getattribute__', item
+    def __getitem__(self, item):
+        return self.get(item)
+
+    def get(self, item):
+        future = self.session.call(
+            'ga.attrs.__getitem__', item
         )
-        return res
+        return future
 
     def keys(self):
         return []
+
+    @property
+    def attrs(self):
+        return self
