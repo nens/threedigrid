@@ -32,7 +32,8 @@ except ImportError:
 try:
     from autobahn.asyncio.component import Component, run  # noqa
     from threedigrid.admin.wamp_datasource import WampBackendGroup, WampClientGroup, \
-        WAMPFile
+    WAMPFile, ThreedigridWampComponent
+
     autobahn_support = True
 except ImportError:
     autobahn_support = False
@@ -88,6 +89,7 @@ class GridH5Admin(object):
                 realm=realm,
             )
             self.datasource_class = WampClientGroup
+            self.h5py_file = WAMPFile
             self.comp.on('join', self.joined_client)
 
             set_props = False
@@ -103,11 +105,12 @@ class GridH5Admin(object):
                     "Please reinstall this package with threedigrid[autobahn]"
                 )
             self.datasource_class = WampBackendGroup
-            self.comp = Component(
+            self.comp = ThreedigridWampComponent(
+                self,
                 transports="ws://localhost:8080/ws",
                 realm=realm,
             )
-            self.comp.on('join', self.joined_backend)
+            self.comp.start()
 
         if set_props:
             self._set_props()
@@ -116,57 +119,10 @@ class GridH5Admin(object):
             'has_1d': self.has_1d
         }
 
-    async def joined_backend(self, session, details):
-        print("Backend session ready")
-        session.register(
-            self.breaches._datasource.get_filtered_field_value,
-            'breaches.get_filtered_field_value'
-        )
-        session.register(
-            self.breaches._datasource.execute_query,
-            'breaches.execute_query'
-        )
-        session.register(
-            self.levees._datasource.get_filtered_field_value,
-            'levees.get_filtered_field_value'
-        )
-        session.register(
-            self.levees._datasource.execute_query,
-            'levees.execute_query'
-        )
-        session.register(
-            self.lines._datasource.get_filtered_field_value,
-            'lines.get_filtered_field_value'
-        )
-        session.register(
-            self.lines._datasource.execute_query,
-            'lines.execute_query'
-        )
-        session.register(
-            self.nodes._datasource.get_filtered_field_value,
-            'nodes.get_filtered_field_value'
-        )
-        session.register(
-            self.nodes._datasource.execute_query,
-            'nodes.execute_query'
-        )
-        session.register(
-            self.pumps._datasource.get_filtered_field_value,
-            'pumps.get_filtered_field_value'
-        )
-        session.register(
-            self.pumps._datasource.execute_query,
-            'pumps.execute_query'
-        )
-        session.register(
-            self.h5py_file.attrs.__getitem__,
-            'ga.attrs.__getitem__'
-        )
-
     async def joined_client(self, session, details):
         print("Client session ready")
         self.datasource_class.session = session
-        self.h5py_file = WAMPFile(session)
+        self.h5py_file = WAMPFile(session, file_type='ga')
 
     @property
     def grid(self):

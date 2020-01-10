@@ -39,7 +39,8 @@ except ImportError:
 try:
     from autobahn.asyncio.component import Component  # noqa
     from threedigrid.admin.wamp_datasource import WAMPFile, WampBackendResultGroup, \
-        WampClientResultGroup
+    WampClientResultGroup, ThreedigridWampComponent
+
     autobahn_support = True
 except ImportError:
     autobahn_support = False
@@ -82,7 +83,6 @@ class GridH5ResultAdmin(GridH5Admin):
                     "Please reinstall this package with threedigrid[autobahn]"
                 )
 
-            self.netcdf_file = WAMPFile
             self.result_datasource_class = WampClientResultGroup
             self.comp = Component(
                 transports=h5_file_path,
@@ -105,59 +105,18 @@ class GridH5ResultAdmin(GridH5Admin):
                     "Please reinstall this package with threedigrid[autobahn]"
                 )
             self.result_datasource_class = WampBackendResultGroup
-            self.comp = Component(
+            self.comp = ThreedigridWampComponent(
+                self,
                 transports="ws://localhost:8080/ws",
                 realm=realm,
             )
-            self.comp.on('join', self.joined_backend)
+            self.comp.start()
 
         self.set_timeseries_chunk_size(DEFAULT_CHUNK_TIMESERIES.stop)
 
-    async def joined_backend(self, session, details):
-        print("Backend session ready")
-        session.register(
-            self.breaches._datasource.get_filtered_field_value,
-            'breaches.get_filtered_field_value'
-        )
-        session.register(
-            self.breaches._datasource.execute_query,
-            'breaches.execute_query'
-        )
-        session.register(
-            self.lines._datasource.get_filtered_field_value,
-            'lines.get_filtered_field_value'
-        )
-        session.register(
-            self.lines._datasource.execute_query,
-            'lines.execute_query'
-        )
-        session.register(
-            self.nodes._datasource.get_filtered_field_value,
-            'nodes.get_filtered_field_value'
-        )
-        session.register(
-            self.nodes._datasource.execute_query,
-            'nodes.execute_query'
-        )
-        session.register(
-            self.pumps._datasource.get_filtered_field_value,
-            'pumps.get_filtered_field_value'
-        )
-        session.register(
-            self.pumps._datasource.execute_query,
-            'pumps.execute_query'
-        )
-        session.register(
-            self.h5py_file.attrs.__getitem__,
-            'ga.attrs.__getitem__'
-        )
-
     async def joined_client(self, session, details):
         await super().joined_client(session, details)
-        self.netcdf_file = WAMPFile(session)
-
-        data = await self.epsg_code
-        print(data)
+        self.netcdf_file = WAMPFile(session, file_type='gr')
 
     def set_timeseries_chunk_size(self, new_chunk_size):
         """
