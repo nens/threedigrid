@@ -263,4 +263,4 @@ def get_filter_from_dict(filter_dict: dict) -> BaseFilter:
     filter_dict = filter_dict['filter']
     for key, value in filter_dict.items():
         _key, filter_class = key.split('__')
-        return FILTER_MAP[filter_class](_key, None, value)
+        return FILTER_MAP[filter_class](_key, None, value, filter_as=False)
