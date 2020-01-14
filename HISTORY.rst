@@ -1,8 +1,8 @@
 History
 =======
 
-1.0.19 (unreleased)
--------------------
+1.0.19rc1 (2020-01-14)
+----------------------
 
 - Added RPC datasource which enables to use the majority of
   threedigrid in a RPC setting. Uses asyncio-rpc for
