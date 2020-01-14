@@ -4,7 +4,7 @@ History
 1.0.19 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fixed incorrect version number
 
 
 1.0.19rc1 (2020-01-14)
