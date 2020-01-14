@@ -1,8 +1,8 @@
 History
 =======
 
-1.0.19 (unreleased)
--------------------
+1.0.19rc2 (2020-01-14)
+----------------------
 
 - Fixed incorrect version number
 
