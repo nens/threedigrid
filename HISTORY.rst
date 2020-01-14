@@ -1,7 +1,7 @@
 History
 =======
 
-1.0.19rc3 (unreleased)
+1.0.19rc3 (2020-01-14)
 ----------------------
 
 - Bumped version of asyncio-rpc
