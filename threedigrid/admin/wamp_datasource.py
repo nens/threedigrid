@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 import numpy as np
@@ -42,10 +43,28 @@ RESULT_MIXIN_MAP = {
 
 
 class ThreedigridWampComponent(Component):
-    def __init__(self, gridadmin, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, gridadmin, transports, realm, allow_pubsub=False):
+        super().__init__(transports=transports, realm=realm)
         self.ga = gridadmin
-        self.on_join(self.register_endpoints)
+        self.allow_pubsub = allow_pubsub
+        self.on_join(self.on_session_ready)
+        self.last_observed_timestamp = None
+
+    async def on_session_ready(self, session, details):
+        await self.register_endpoints(session, details)
+        if self.allow_pubsub:
+            while True:
+                self.ga.netcdf_file.refresh_datasets()
+                last_timestamp = self.ga.nodes.timestamps[-1]
+                if last_timestamp != self.last_observed_timestamp:
+                    logger.info("new_data %s" % last_timestamp)
+                    session.publish("new_data", last_timestamp)
+                    self.last_observed_timestamp = last_timestamp
+                await asyncio.sleep(1)
+
+    def has_new_data(self):
+        last_timestamp = self.ga.nodes.timestamps[-1]
+        return last_timestamp != self.last_observed_timestamp
 
     async def register_endpoints(self, session, details):
         print("Backend session ready")
@@ -93,10 +112,19 @@ class ThreedigridWampComponent(Component):
             self.ga.h5py_file.attrs.__getitem__,
             'ga.attrs.__getitem__'
         )
+        session.register(
+            self.ga.h5py_file.__getitem__,
+            'ga.__getitem__'
+        )
         if hasattr(self.ga, 'netcdf_file'):
             session.register(
                 self.ga.netcdf_file.attrs.__getitem__,
                 'gr.attrs.__getitem__'
+            )
+            # Needed for timestamps
+            session.register(
+                self.ga.netcdf_file.__getitem__,
+                'gr.__getitem__'
             )
 
 
@@ -240,6 +268,11 @@ class WampClientGroup(DataSource):
             subset_index=None
     ):
         serialized_model = self.serialize_model(model.class_kwargs)
+        logger.debug(
+            "'%s.get_filtered_field_value', [%s, %s, %s, %s, %s]" %
+            (self.group_name, serialized_model, field_name, ts_filter, lookup_index,
+             subset_index)
+        )
         res = await self.session.call(
             '%s.get_filtered_field_value' % self.group_name, serialized_model, field_name,
             ts_filter, lookup_index, subset_index
@@ -248,6 +281,7 @@ class WampClientGroup(DataSource):
 
     async def execute_query(self, model):
         serialized_model = self.serialize_model(model.class_kwargs)
+        logger.debug("'%s.execute_query', [%s]" % (self.group_name, serialized_model))
         res = await self.session.call(
             '%s.execute_query' % self.group_name, serialized_model
         )
@@ -268,11 +302,6 @@ class WampClientResultGroup(WampClientGroup):
 
     def attr(self, var_name, attr_name):
         pass
-        # res = await self.session.call(
-        #     '%s.attr' % self.group_name, var_name, attr_name
-        # )
-        # return res
-
 
 
 class WAMPFile:
@@ -284,6 +313,7 @@ class WAMPFile:
         return self.get(item)
 
     def get(self, item):
+        logger.info("'%s.attrs.__getitem__', ['%s']" % (self.file_type, item))
         future = self.session.call(
             '%s.attrs.__getitem__' % self.file_type, item
         )

@@ -109,6 +109,7 @@ class GridH5ResultAdmin(GridH5Admin):
                 self,
                 transports="ws://localhost:8080/ws",
                 realm=realm,
+                allow_pubsub=True
             )
             self.comp.start()
 

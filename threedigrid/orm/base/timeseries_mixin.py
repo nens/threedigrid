@@ -169,11 +169,12 @@ class ResultMixin(object):
         :return: the timeseries mask to be used for filtering
                  on timeseries
         """
-        if self.timeseries_mask is None and self.timeseries_filter is not None:
+        if self.timeseries_mask is None and hasattr(self, 'timeseries_filter') \
+                and self.timeseries_filter is not None:
             self.generate_timeseries_mask(
                 **self.timeseries_filter
             )
-        if self.timeseries_mask is not None:
+        if hasattr(self, 'timeseries_filter') and self.timeseries_mask is not None:
             return self.timeseries_mask
         return self.class_kwargs.get('timeseries_chunk_size')
 
