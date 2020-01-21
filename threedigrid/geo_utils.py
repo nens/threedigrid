@@ -57,7 +57,7 @@ def transform_xys(x_array, y_array, source_epsg, target_epsg):
         if isinstance(epsg_code, bytes):
             epsg_code = epsg_code.decode('utf-8')
         epsg_str = u'epsg:{}'.format(epsg_code)
-        projection = pyproj.Proj(init=epsg_str)
+        projection = pyproj.Proj(epsg_str)
         projections.append(projection)
 
     return np.array(pyproj.transform(
