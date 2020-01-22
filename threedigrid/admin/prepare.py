@@ -25,6 +25,7 @@ from threedigrid.admin.nodes.prepare import (
     PrepareNodes, PrepareManholes, PrepareConnectionNodes)
 from threedigrid.admin.pumps.prepare import PreparePumps
 from threedigrid.admin.levees.models import Levees
+from threedigrid.orm.constants import EXPORT_METHOD_TO_EXTENSION_MAP
 
 logger = logging.getLogger(__name__)
 
@@ -267,6 +268,7 @@ class GridAdminH5Export(object):
         self.ga = GridH5Admin(gridadmin_file)
         self._dest = os.path.split(gridadmin_file)[0]
         self._export_method = export_method
+        self._extension = EXPORT_METHOD_TO_EXTENSION_MAP[export_method]
 
     def export_all(self):
         """convenience function to run all exports"""
@@ -288,7 +290,7 @@ class GridAdminH5Export(object):
                 "skipping export nodes...".format(self.ga.model_name)
             )
             return
-        dest = os.path.join(self._dest, constants.NODES_SHP)
+        dest = os.path.join(self._dest, constants.NODES + self._extension)
         getattr(self.ga.nodes.subset(
             constants.SUBSET_1D_ALL), self._export_method)(dest)
 
@@ -302,7 +304,7 @@ class GridAdminH5Export(object):
                 "skipping export lines...".format(self.ga.model_name)
             )
             return
-        dest = os.path.join(self._dest, constants.LINES_SHP)
+        dest = os.path.join(self._dest, constants.LINES + self._extension)
         getattr(self.ga.lines.subset(
             constants.SUBSET_1D_ALL), self._export_method)(dest)
 
@@ -316,7 +318,7 @@ class GridAdminH5Export(object):
                 "skipping export levees...".format(self.ga.model_name)
             )
             return
-        dest = os.path.join(self._dest, constants.LEVEES_SHP)
+        dest = os.path.join(self._dest, constants.LEVEES + self._extension)
         getattr(self.ga.levees, self._export_method)(dest)
 
     def export_grid(self):
@@ -335,7 +337,7 @@ class GridAdminH5Export(object):
                     self.ga.model_name)
             )
             return
-        dest = os.path.join(self._dest, constants.GROUNDWATER_LINES_SHP)
+        dest = os.path.join(self._dest, constants.GROUNDWATER_LINES + self._extension)
         getattr(self.ga.lines.subset(
             constants.SUBSET_2D_GROUNDWATER), self._export_method)(dest)
 
@@ -347,7 +349,7 @@ class GridAdminH5Export(object):
                     self.ga.model_name)
             )
             return
-        dest = os.path.join(self._dest, constants.OPEN_WATER_LINES_SHP)
+        dest = os.path.join(self._dest, constants.OPEN_WATER_LINES + self._extension)
         getattr(self.ga.lines.subset(
             constants.SUBSET_2D_OPEN_WATER), self._export_method)(dest)
 
@@ -360,7 +362,8 @@ class GridAdminH5Export(object):
             )
             return
         dest = os.path.join(
-            self._dest, constants.VERTICAL_INFILTRATION_LINES_SHP)
+            self._dest, constants.VERTICAL_INFILTRATION_LINES + self._extension
+        )
         getattr(
             self.ga.lines.subset(constants.SUBSET_2D_VERTICAL_INFILTRATION),
             self._export_method)(dest)
@@ -374,7 +377,7 @@ class GridAdminH5Export(object):
                 )
             )
             return
-        dest_gw = os.path.join(self._dest, constants.GROUNDWATER_SHP)
+        dest_gw = os.path.join(self._dest, constants.GROUNDWATER + self._extension)
         getattr(self.ga.cells.subset(
             constants.SUBSET_2D_GROUNDWATER), self._export_method)(dest_gw)
 
@@ -387,7 +390,7 @@ class GridAdminH5Export(object):
             )
             return
 
-        dest_ow = os.path.join(self._dest, constants.OPEN_WATER_SHP)
+        dest_ow = os.path.join(self._dest, constants.OPEN_WATER + self._extension)
 
         getattr(self.ga.cells.subset(
             constants.SUBSET_2D_OPEN_WATER), self._export_method)(dest_ow)

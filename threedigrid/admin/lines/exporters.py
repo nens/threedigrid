@@ -51,6 +51,7 @@ class LinesOgrExporter(BaseOgrExporter):
         self.supported_drivers = {
             const.GEO_PACKAGE_DRIVER_NAME,
             const.SHP_DRIVER_NAME,
+            const.GEOJSON_DRIVER_NAME,
         }
         self.driver = None
 

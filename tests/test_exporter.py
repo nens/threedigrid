@@ -69,6 +69,29 @@ class ExporterTestGpkg(unittest.TestCase):
         )
 
 
+class ExporterTestGeojson(unittest.TestCase):
+    def setUp(self):
+        self.parser = GridH5Admin(grid_admin_h5_file)
+        d = tempfile.mkdtemp()
+        self.f_geojson = os.path.join(d, "exporter_test_lines.json")
+
+    def tearDown(self):
+        shutil.rmtree(os.path.dirname(self.f_geojson))
+
+    def test_export_by_extension(self):
+        line_2d_open_water_wgs84 = self.parser.lines.subset(
+            "2D_OPEN_WATER"
+        ).reproject_to("4326")
+        exporter = LinesOgrExporter(line_2d_open_water_wgs84)
+        exporter.save(self.f_geojson, line_2d_open_water_wgs84.data, "4326")
+        self.assertTrue(os.path.exists(self.f_geojson))
+        s = ogr.Open(self.f_geojson)
+        layer = s.GetLayer()
+        self.assertEqual(
+            layer.GetFeatureCount(), line_2d_open_water_wgs84.id.size
+        )
+
+
 class GridadminH5ExportTest(unittest.TestCase):
     def setUp(self):
         self.d = tempfile.mkdtemp()
@@ -80,22 +103,26 @@ class GridadminH5ExportTest(unittest.TestCase):
 
     def test_export_2d_groundwater(self):
         self.exporter.export_2d_groundwater_lines()
-        result = os.path.join(self.d, constants.GROUNDWATER_LINES_SHP)
+        result = os.path.join(
+            self.d, constants.GROUNDWATER_LINES + self.exporter._extension
+        )
         self.assertTrue(os.path.exists(result))
 
     def test_export_2d_openwater_lines(self):
         self.exporter.export_2d_openwater_lines()
-        result = os.path.join(self.d, constants.OPEN_WATER_LINES_SHP)
+        result = os.path.join(
+            self.d, constants.OPEN_WATER_LINES + self.exporter._extension
+        )
         self.assertTrue(os.path.exists(result))
 
     def test_export_2d_vertical_infiltration_lines(self):
         self.exporter.export_2d_vertical_infiltration_lines()
         result = os.path.join(
-            self.d, constants.VERTICAL_INFILTRATION_LINES_SHP
+            self.d, constants.VERTICAL_INFILTRATION_LINES + self.exporter._extension
         )
         self.assertTrue(os.path.exists(result))
 
     def test_export_levees(self):
         self.exporter.export_levees()
-        result = os.path.join(self.d, constants.LEVEES_SHP)
+        result = os.path.join(self.d, constants.LEVEES + self.exporter._extension)
         self.assertTrue(os.path.exists(result))
