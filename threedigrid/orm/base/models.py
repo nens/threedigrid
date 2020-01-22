@@ -75,6 +75,7 @@ class Model(six.with_metaclass(ABCMeta)):
             'slice_filters': slice_filters,
             'only_fields': only_fields,
             'reproject_to_epsg': reproject_to_epsg,
+            'has_1d': has_1d,
             'mixin': mixin,
             'timeseries_chunk_size': timeseries_chunk_size
         }
