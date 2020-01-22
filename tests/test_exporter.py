@@ -118,11 +118,14 @@ class GridadminH5ExportTest(unittest.TestCase):
     def test_export_2d_vertical_infiltration_lines(self):
         self.exporter.export_2d_vertical_infiltration_lines()
         result = os.path.join(
-            self.d, constants.VERTICAL_INFILTRATION_LINES + self.exporter._extension
+            self.d,
+            constants.VERTICAL_INFILTRATION_LINES + self.exporter._extension
         )
         self.assertTrue(os.path.exists(result))
 
     def test_export_levees(self):
         self.exporter.export_levees()
-        result = os.path.join(self.d, constants.LEVEES + self.exporter._extension)
+        result = os.path.join(
+            self.d, constants.LEVEES + self.exporter._extension
+        )
         self.assertTrue(os.path.exists(result))

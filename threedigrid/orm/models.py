@@ -4,7 +4,8 @@ from __future__ import unicode_literals
 from __future__ import print_function
 
 from __future__ import absolute_import
-from .constants import SHP_DRIVER_NAME, GEO_PACKAGE_DRIVER_NAME, GEOJSON_DRIVER_NAME
+from .constants import SHP_DRIVER_NAME, GEO_PACKAGE_DRIVER_NAME, \
+    GEOJSON_DRIVER_NAME
 
 from threedigrid.orm.base.models import Model as BaseModel
 from threedigrid.orm.fields import LineArrayField

@@ -337,7 +337,9 @@ class GridAdminH5Export(object):
                     self.ga.model_name)
             )
             return
-        dest = os.path.join(self._dest, constants.GROUNDWATER_LINES + self._extension)
+        dest = os.path.join(
+            self._dest, constants.GROUNDWATER_LINES + self._extension
+        )
         getattr(self.ga.lines.subset(
             constants.SUBSET_2D_GROUNDWATER), self._export_method)(dest)
 
@@ -349,7 +351,9 @@ class GridAdminH5Export(object):
                     self.ga.model_name)
             )
             return
-        dest = os.path.join(self._dest, constants.OPEN_WATER_LINES + self._extension)
+        dest = os.path.join(
+            self._dest, constants.OPEN_WATER_LINES + self._extension
+        )
         getattr(self.ga.lines.subset(
             constants.SUBSET_2D_OPEN_WATER), self._export_method)(dest)
 
@@ -377,7 +381,9 @@ class GridAdminH5Export(object):
                 )
             )
             return
-        dest_gw = os.path.join(self._dest, constants.GROUNDWATER + self._extension)
+        dest_gw = os.path.join(
+            self._dest, constants.GROUNDWATER + self._extension
+        )
         getattr(self.ga.cells.subset(
             constants.SUBSET_2D_GROUNDWATER), self._export_method)(dest_gw)
 
@@ -390,7 +396,8 @@ class GridAdminH5Export(object):
             )
             return
 
-        dest_ow = os.path.join(self._dest, constants.OPEN_WATER + self._extension)
-
+        dest_ow = os.path.join(
+            self._dest, constants.OPEN_WATER + self._extension
+        )
         getattr(self.ga.cells.subset(
             constants.SUBSET_2D_OPEN_WATER), self._export_method)(dest_ow)
