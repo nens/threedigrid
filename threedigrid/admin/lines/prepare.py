@@ -265,13 +265,17 @@ class PreparePipes(object):
         content_type = line_group['content_type'].value
 
         pipes_field_names = [
-            'pk', 'display_name',
+            'pk',
+            'display_name',
             'invert_level_start_point',
             'invert_level_end_point',
-            'friction_type', 'friction_value',
-            'sewerage_type', 'calculation_type',
+            'friction_type',
+            'friction_value',
+            'sewerage_type',
+            'calculation_type',
             'connection_node_start_pk',
-            'connection_node_end_pk', 'zoom_category',
+            'connection_node_end_pk',
+            'zoom_category',
             'cross_section_definition__db_width',
             'cross_section_definition__db_height',
             'cross_section_definition__db_shape']
@@ -301,12 +305,18 @@ class PrepareWeirs(object):
         content_type = line_group['content_type'].value
 
         weirs_field_names = [
-            'pk', 'code', 'display_name',
+            'pk',
+            'code',
+            'display_name',
             'discharge_coefficient_negative',
             'discharge_coefficient_positive',
-            'sewerage', 'friction_type', 'friction_value',
-            'crest_type', 'crest_level',
-            'connection_node_start_pk', 'connection_node_end_pk',
+            'sewerage',
+            'friction_type',
+            'friction_value',
+            'crest_type',
+            'crest_level',
+            'connection_node_start_pk',
+            'connection_node_end_pk',
             'zoom_category'
         ]
 
@@ -329,12 +339,17 @@ class PrepareOrifices(object):
         content_type = line_group['content_type'].value
 
         orifices_field_names = [
-            'pk', 'display_name', 'sewerage',
-            'friction_type', 'friction_value',
+            'pk',
+            'display_name',
+            'sewerage',
+            'friction_type',
+            'friction_value',
             'discharge_coefficient_negative',
             'discharge_coefficient_positive',
-            'crest_type', 'crest_level',
-            'connection_node_start_pk', 'connection_node_end_pk',
+            'crest_type',
+            'crest_level',
+            'connection_node_start_pk',
+            'connection_node_end_pk',
             'zoom_category'
         ]
 
@@ -357,14 +372,19 @@ class PrepareCulverts(object):
         content_type = line_group['content_type'].value
 
         culverts_field_names = [
-            'pk', 'code', 'display_name',
+            'pk',
+            'code',
+            'display_name',
             'discharge_coefficient_negative',
             'discharge_coefficient_positive',
-            'friction_type', 'friction_value',
+            'friction_type',
+            'friction_value',
             'invert_level_start_point',
             'invert_level_end_point',
-            'calculation_type', 'dist_calc_points',
-            'connection_node_start_pk', 'connection_node_end_pk',
+            'calculation_type',
+            'dist_calc_points',
+            'connection_node_start_pk',
+            'connection_node_end_pk',
             'zoom_category',
             'cross_section_definition__db_width',
             'cross_section_definition__db_height',
