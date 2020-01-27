@@ -11,6 +11,8 @@ from threedigrid.orm.base.models import Model as BaseModel
 from threedigrid.orm.fields import LineArrayField
 from threedigrid.orm.fields import GeomArrayField
 from threedigrid.orm.filters import FILTER_MAP
+from threedigrid.admin.exporter_constants import DEFAULT_EXPORT_FIELDS
+from threedigrid.admin.serializers import GeoJsonSerializer
 
 
 class Model(BaseModel):
@@ -100,8 +102,17 @@ class Model(BaseModel):
             GEO_PACKAGE_DRIVER_NAME, file_name, **kwargs)
 
     def to_geojson(self, file_name, **kwargs):
-        self._to_ogr(
-            GEOJSON_DRIVER_NAME, file_name, **kwargs)
+        if kwargs.get('use_ogr', True):
+            self._to_ogr(GEOJSON_DRIVER_NAME, file_name, **kwargs)
+        else:
+            # Use our custom geojson serializer,
+            # unlike ogr it supports nesting of properties
+            fields = kwargs.get(
+                'fields', DEFAULT_EXPORT_FIELDS[self.__class__.__name__]
+            )
+            indent = kwargs.get('indent', None)
+            serializer = GeoJsonSerializer(fields, self, indent)
+            serializer.save(file_name)
 
     def _to_ogr(self, driver_name, file_name, **kwargs):
         exporter = self._get_exporter(driver_name)

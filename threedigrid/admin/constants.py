@@ -158,6 +158,8 @@ LINE_1D_FIELDS = OrderedDict([
     ('seq_id', 'int'),
 ])
 
+LINE_BASE_FIELDS_ALL = OrderedDict(LINE_BASE_FIELDS,  **LINE_1D_FIELDS)
+
 # maps the fields names of grid line objects
 # to their external representation
 LINE_FIELD_NAME_MAP = OrderedDict([

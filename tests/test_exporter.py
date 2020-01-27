@@ -3,6 +3,7 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
 
+import json
 import os
 import unittest
 import tempfile
@@ -90,6 +91,38 @@ class ExporterTestGeojson(unittest.TestCase):
         self.assertEqual(
             layer.GetFeatureCount(), line_2d_open_water_wgs84.id.size
         )
+
+    def test_export_specify_fields(self):
+        self.parser.lines.pipes.filter(id=27449).to_geojson(
+            self.f_geojson,
+            use_ogr=False,
+            fields={'display_name': 'str', 'calculation_type': 'str'}
+        )
+        with open(self.f_geojson) as file:
+            data = json.load(file)
+            self.assertEqual(len(data['features'][0]['properties']), 2)
+            self.assertTrue('display_name' in data['features'][0]['properties'])
+            self.assertTrue('calculation_type' in data['features'][0]['properties'])
+
+    def test_export_filter(self):
+        self.parser.lines.pipes.filter(id=27449).to_geojson(
+            self.f_geojson, use_ogr=False
+        )
+        with open(self.f_geojson) as file:
+            data = json.load(file)
+            self.assertEqual(len(data['features']), 1)
+
+    def test_export_reproject(self):
+        self.parser.lines.reproject_to("4326").to_geojson(
+            self.f_geojson, use_ogr=False
+        )
+        with open(self.f_geojson) as file:
+            data = json.load(file)
+            p1, _ = data['features'][0]['geometry']['coordinates']
+            x, y = p1
+            # Should be somewhere in the Netherlands
+            self.assertTrue(4.185791 < x < 5.663452)
+            self.assertTrue(52.109879 < y < 52.912215)
 
 
 class GridadminH5ExportTest(unittest.TestCase):
