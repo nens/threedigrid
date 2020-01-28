@@ -118,7 +118,7 @@ class Model(BaseModel):
         exporter = self._get_exporter(driver_name)
         if not exporter:
             raise AttributeError(
-                "Instance has no {} exporter".format(driver_name)
+                "Instance {} has no {} exporter".format(self, driver_name)
             )
         filtered = self.__do_filter()
         exporter.set_driver(driver_name=driver_name)

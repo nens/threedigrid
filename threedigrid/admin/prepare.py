@@ -280,6 +280,22 @@ class GridAdminH5Export(object):
         self.export_2d_openwater_lines()
         self.export_2d_vertical_infiltration_lines()
 
+    def export_frontend(self):
+        self.export_breaches()
+        self.export_channels()
+        self.export_pipes()
+        self.export_weirs()
+        self.export_culverts()
+        self.export_orifices()
+        self.export_manholes()
+        self.export_nodes()
+        self.export_pumps()
+
+    def export_1d_all(self):
+        self.export_nodes()
+        self.export_lines()
+        self.export_levees()
+
     def export_nodes(self):
         """
         writes shapefile of all 1D nodes
@@ -307,6 +323,87 @@ class GridAdminH5Export(object):
         dest = os.path.join(self._dest, constants.LINES + self._extension)
         getattr(self.ga.lines.subset(
             constants.SUBSET_1D_ALL), self._export_method)(dest)
+
+    def export_breaches(self):
+        if not hasattr(self.ga, 'breaches'):
+            logger.info(
+                "[*] Model {} does not have 1D, "
+                "skipping export lines...".format(self.ga.model_name)
+            )
+            return
+        dest = os.path.join(self._dest, 'breaches' + self._extension)
+        getattr(self.ga.breaches, self._export_method)(dest)
+
+    def export_channels(self):
+        if not hasattr(self.ga.lines, 'channels'):
+            logger.info(
+                "[*] Model {} does not have 1D, "
+                "skipping export lines...".format(self.ga.model_name)
+            )
+            return
+        dest = os.path.join(self._dest, 'channels' + self._extension)
+        getattr(self.ga.lines.channels, self._export_method)(dest)
+
+    def export_pipes(self):
+        if not hasattr(self.ga.lines, 'pipes'):
+            logger.info(
+                "[*] Model {} does not have 1D, "
+                "skipping export lines...".format(self.ga.model_name)
+            )
+            return
+        dest = os.path.join(self._dest, 'pipes' + self._extension)
+        getattr(self.ga.lines.pipes, self._export_method)(dest)
+
+    def export_weirs(self):
+        if not hasattr(self.ga.lines, 'weirs'):
+            logger.info(
+                "[*] Model {} does not have 1D, "
+                "skipping export lines...".format(self.ga.model_name)
+            )
+            return
+        dest = os.path.join(self._dest, 'weirs' + self._extension)
+        getattr(self.ga.lines.weirs, self._export_method)(dest)
+
+    def export_culverts(self):
+        if not hasattr(self.ga.lines, 'culverts'):
+            logger.info(
+                "[*] Model {} does not have 1D, "
+                "skipping export lines...".format(self.ga.model_name)
+            )
+            return
+        dest = os.path.join(self._dest, 'culverts' + self._extension)
+        getattr(self.ga.lines.culverts, self._export_method)(dest)
+
+    def export_orifices(self):
+        if not hasattr(self.ga.lines, 'orifices'):
+            logger.info(
+                "[*] Model {} does not have 1D, "
+                "skipping export lines...".format(self.ga.model_name)
+            )
+            return
+        dest = os.path.join(self._dest, 'orifices' + self._extension)
+        getattr(self.ga.lines.orifices, self._export_method)(dest)
+
+    def export_manholes(self):
+        if not hasattr(self.ga.nodes, 'manholes'):
+            logger.info(
+                "[*] Model {} does not have 1D, "
+                "skipping export lines...".format(self.ga.model_name)
+            )
+            return
+        dest = os.path.join(self._dest, 'manholes' + self._extension)
+        getattr(self.ga.nodes.manholes, self._export_method)(dest)
+
+    def export_pumps(self):
+        if not hasattr(self.ga, 'pumps'):
+            logger.info(
+                "[*] Model {} does not have 1D, "
+                "skipping export lines...".format(self.ga.model_name)
+            )
+            return
+        dest = os.path.join(self._dest, 'pumps' + self._extension)
+        getattr(self.ga.pumps, self._export_method)(dest)
+
 
     def export_levees(self):
         """

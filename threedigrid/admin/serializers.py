@@ -40,7 +40,7 @@ class GeoJsonSerializer:
     def geos(self):
         geos = []
         data = self._model.to_dict()
-        if self._model.__contenttype__() == 'lines':
+        if self._model.__contenttype__() in ('lines',):
             for i in range(data['id'].shape[-1]):
                 # Pack line_coords as [[y1, x1], [y2, x2]], rounded with LONLAT_DIGITS
                 p1, p2 = np.round(
@@ -54,14 +54,24 @@ class GeoJsonSerializer:
                     properties=properties,
                 )
                 geos.append(feat)
-        elif self._model.__contenttype__() in ('nodes', 'cells'):
+        elif self._model.__contenttype__() in ('nodes', 'cells', 'breaches', 'pumps'):
             for i in range(data['id'].shape[-1]):
-                coords = np.round(data['node_coords'][:, i], constants.LONLAT_DIGITS)
+                coords = np.round(data['coordinates'][:, i], constants.LONLAT_DIGITS)
                 # Swap x and y
                 point = geojson.Point([coords[1], coords[0]])
                 properties = fill_properties(self.fields, data, i)
                 feat = geojson.Feature(
                     geometry=point,
+                    properties=properties,
+                )
+                geos.append(feat)
+        elif self._model.__contenttype__() == 'levees':
+            for i in range(data['id'].shape[-1]):
+                coords = np.round(data['coords'][i], constants.LONLAT_DIGITS)
+                line = geojson.LineString(coords.tolist())
+                properties = fill_properties(self.fields, data, i)
+                feat = geojson.Feature(
+                    geometry=line,
                     properties=properties,
                 )
                 geos.append(feat)
@@ -86,7 +96,10 @@ def fill_properties(fields: dict, data: dict, index: int) -> OrderedDict:
         if isinstance(field_type, dict):
             result[field] = fill_properties(fields[field], data, index)
         else:
-            result[field] = data[field][index]
+            value = data[field][..., index]
+            if value.size == 1:
+                value = value.item()
+            result[field] = value
     return result
 
 

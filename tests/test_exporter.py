@@ -80,6 +80,7 @@ class ExporterTestGeojson(unittest.TestCase):
         shutil.rmtree(os.path.dirname(self.f_geojson))
 
     def test_export_by_extension(self):
+        # .json extension automatically uses geojson exporter
         line_2d_open_water_wgs84 = self.parser.lines.subset(
             "2D_OPEN_WATER"
         ).reproject_to("4326")
