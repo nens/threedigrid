@@ -110,7 +110,9 @@ class Model(BaseModel):
             fields = kwargs.get(
                 'fields', DEFAULT_EXPORT_FIELDS[self.__class__.__name__]
             )
-            indent = kwargs.get('indent', None)
+            if fields == 'ALL':
+                fields = {k: None for k in self.data.keys()}
+            indent = kwargs.get('indent', 2)
             serializer = GeoJsonSerializer(fields, self, indent)
             serializer.save(file_name)
 
