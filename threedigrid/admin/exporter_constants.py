@@ -147,5 +147,5 @@ DEFAULT_EXPORT_FIELDS = {
     'Grid': 'ALL',
     'Breaches': 'ALL',
     'Levees': 'ALL',
-    'Pumps': 'ALL',
+    'Pumps': PUMPS_EXPORT_FIELDS,
 }

@@ -290,6 +290,7 @@ class GridAdminH5Export(object):
         self.export_manholes()
         self.export_nodes()
         self.export_pumps()
+        self.export_levees()
 
     def export_1d_all(self):
         self.export_nodes()

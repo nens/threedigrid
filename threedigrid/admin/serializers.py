@@ -67,7 +67,12 @@ class GeoJsonSerializer:
                 geos.append(feat)
         elif self._model.__contenttype__() == 'levees':
             for i in range(data['id'].shape[-1]):
-                coords = np.round(data['coords'][i], constants.LONLAT_DIGITS)
+                coords = np.round(
+                    data['coords'][i].reshape(2, -1),
+                    constants.LONLAT_DIGITS
+                ).T
+                # swap x, y
+                coords = np.array([coords[:, 1], coords[:, 0]]).T
                 line = geojson.LineString(coords.tolist())
                 properties = fill_properties(self.fields, data, i)
                 feat = geojson.Feature(
