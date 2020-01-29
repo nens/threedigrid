@@ -24,115 +24,104 @@ SHP_DRIVER_NAME = 'ESRI Shapefile'
 GEO_PACKAGE_DRIVER_NAME = 'GPKG'
 GEOJSON_DRIVER_NAME = 'GeoJSON'
 
-CHANNELS_EXPORT_FIELDS = OrderedDict([
-    ('display_name', None),  # missing in prepare step
-    ('material', 'str'),
-    ('extra_data', OrderedDict([
-        ('code', None),
-        ('calculation_type', None),
-        ('dist_calc_points', None),
-        ('connection_node_start_id', None),
-        ('connection_node_end_id', None)
-    ]))
 
-])
+CHANNELS_EXPORT_FIELDS = [
+    'id',
+    'display_name',  # missing in prepare step
+    'material',
+    'code',
+    'calculation_type',
+    'dist_calc_points',
+    'connection_node_start_id',
+    'connection_node_end_id',
+]
 
-PIPES_EXPORT_FIELDS = OrderedDict([
-    ('display_name', 'str'),
-    ('material', 'int'),  # missing in prepare step
-    ('calculation_type', 'int'),
-    ('cross_section_shape', 'int'),
-    ('cross_section_width', 'int'),
-    ('cross_section_height', 'int'),
-    ('extra_data', OrderedDict([
-        ('id', 'int'),
-        ('code', 'str'),  # missing in prepare step
-        ('sewerage_type', 'str'),
-        ('calculation_type', 'str'),
-        ('invert_level_start_point', 'str'),
-        ('invert_level_end_point', 'str'),
-        ('cross_section_definition_id', 'str'),  # missing in prepare step
-        ('friction_value', 'int'),
-        ('original_lenght', 'int'),
-        ('connection_node_start_id', 'int'),  # ! map to connection_node_start_pk
-        ('connection_node_end_id', 'int'),  # !  map to connection_node_end_pk
-        ('cross_section_code', 'int'),
-    ]))
-])
+PIPES_EXPORT_FIELDS = [
+    'id',
+    'display_name',
+    'material',  # missing in prepare step
+    'calculation_type',
+    'cross_section_shape',
+    'cross_section_width',
+    'cross_section_height',
+    'code',  # missing in prepare step
+    'sewerage_type',
+    'calculation_type',
+    'invert_level_start_point',
+    'invert_level_end_point',
+    'cross_section_definition_id',  # missing in prepare step
+    'friction_value',
+    'original_lenght',  # missing in prepare step
+    'connection_node_start_id',  # ! map to connection_node_start_pk
+    'connection_node_end_id',  # !  map to connection_node_end_pk
+    'cross_section_code',  # missing in prepare step
+]
 
-WEIRS_EXPORT_FIELDS = OrderedDict([
-    ('display_name', None),
-    ('cross_section_shape', 'int'),
-    ('cross_section_width', 'int'),
-    ('cross_section_height', 'int'),
-    ('extra_data', OrderedDict([
-        ('id', None),
-        ('code', None),
-        ('crest_level', None),
-        ('crest_type', None),
-        ('discharge_coefficient_positive', None),
-        ('discharge_coefficient_negative', None),
-        ('friction_value', None),
-        ('friction_type', None),
-        ('connection_node_start_id', None),
-        ('connection_node_end_id', None),
-    ]))
-])
+WEIRS_EXPORT_FIELDS = [
+    'id',
+    'display_name',
+    'cross_section_shape',
+    'cross_section_width',
+    'cross_section_height',
+    'code',
+    'crest_level',
+    'crest_type',
+    'discharge_coefficient_positive',
+    'discharge_coefficient_negative',
+    'friction_value',
+    'friction_type',
+    'connection_node_start_id',
+    'connection_node_end_id',
+]
 
-CULVERT_EXPORT_FIELDS = OrderedDict([
-    ('display_name', None),
-    ('cross_section_shape', 'int'),
-    ('cross_section_width', 'int'),
-    ('cross_section_height', 'int'),
-    ('extra_data', OrderedDict([
-        ('calculation_type', None),
-        ('friction_value', None),
-        ('friction_type', None),
-        ('discharge_coefficient_positive', None),
-        ('discharge_coefficient_negative', None),
-        ('invert_level_start_point', None),
-        ('invert_level_end_point', None),
-        ('connection_node_start_id', None),
-        ('connection_node_end_id', None),
-    ]))
-])
+CULVERT_EXPORT_FIELDS = [
+    'id',
+    'display_name',
+    'cross_section_shape',
+    'cross_section_width',
+    'cross_section_height',
+    'calculation_type',
+    'friction_value',
+    'friction_type',
+    'discharge_coefficient_positive',
+    'discharge_coefficient_negative',
+    'invert_level_start_point',
+    'invert_level_end_point',
+    'connection_node_start_id',
+    'connection_node_end_id',
+]
 
-CONNECTION_NODES_EXPORT_FIELDS = OrderedDict([
-    ('extra_data', OrderedDict([
-        ('initial_waterlevel', None),  # missing in prepare step
-    ]))
-])
+CONNECTION_NODES_EXPORT_FIELDS = [
+    'initial_waterlevel',   # missing in prepare step
+]
 
-MANHOLE_EXPORT_FIELDS = OrderedDict([
-    ('display_name', None),
-    ('cross_section_shape', 'int'),
-    ('calculation_type', None),
-    ('bottom_level', None),
-    ('surface_level', None),
-    ('storage_area', None),
-    ('initial_waterlevel', None),
-    ('extra_data', OrderedDict([
-        ('code', None),  # missing in prepare step
-        ('cross_section_width', 'int'),
-        ('cross_section_height', 'int'),
-        ('drain_level', None),
-    ]))
-])
+MANHOLE_EXPORT_FIELDS = [
+    'id',
+    'display_name',
+    'cross_section_shape',
+    'calculation_type',
+    'bottom_level',
+    'surface_level',
+    'storage_area',
+    'initial_waterlevel',
+    'code',  # missing in prepare step
+    'cross_section_width',
+    'cross_section_height',
+    'drain_level',
+]
 
-PUMPS_EXPORT_FIELDS = OrderedDict([
-    ('id', None),
-    ('display_name', None),
-    ('start_level', None),
-    ('lower_stop_level', None),
-    ('upper_stop_level', None),  # missing in prepare step
-    ('capacity', None),
-    ('connection_node_start_id', None),
-    ('connection_node_end_id', None),
-    ('extra_data', OrderedDict([
-        ('classification', None),  # missing in prepare step
-        ('type', None),  # missing in prepare step
-    ]))
-])
+PUMPS_EXPORT_FIELDS = [
+    'id',
+    'display_name',
+    'start_level',
+    'lower_stop_level',
+    'upper_stop_level',  # missing in prepare step
+    'capacity',
+    'connection_node_start_id',
+    'connection_node_end_id',
+    'classification',  # missing in prepare step
+    'type',  # missing in prepare step
+]
 
 
 DEFAULT_EXPORT_FIELDS = {

@@ -89,16 +89,22 @@ class GeoJsonSerializer:
         }, indent=self._indent, cls=NumpyEncoder)
 
 
-def fill_properties(fields: dict, data: dict, index: int) -> OrderedDict:
+def fill_properties(fields: list, data: dict, index: int) -> OrderedDict:
+    """Returns a dict containing the keys from `fields` filled from `data` at `index`"""
     result = OrderedDict()
-    remove_missing_fields(fields, data)
-    for field, field_type in six.iteritems(fields):
-        if isinstance(field_type, dict):
-            result[field] = fill_properties(fields[field], data, index)
+    for i, field in enumerate(fields):
+        if isinstance(field, dict):
+            for key, sub_list in field.items():
+                result[key] = fill_properties(sub_list, data, index)
         else:
-            value = data[field][..., index]
-            if value.size == 1:
-                value = value.item()
+            field_data = data.get(field, None)
+            if field_data is not None:
+                value = field_data[..., index]
+                if value.size == 1:
+                    value = value.item()
+            else:
+                logger.warning("missing field %s" % field)
+                value = None
             result[field] = value
     return result
 

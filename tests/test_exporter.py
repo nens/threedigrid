@@ -93,11 +93,23 @@ class ExporterTestGeojson(unittest.TestCase):
             layer.GetFeatureCount(), line_2d_open_water_wgs84.id.size
         )
 
-    def test_export_specify_fields(self):
+    def test_export_specify_fields_as_dict(self):
         self.parser.lines.pipes.filter(id=27449).to_geojson(
             self.f_geojson,
             use_ogr=False,
             fields={'display_name': 'str', 'calculation_type': 'str'}
+        )
+        with open(self.f_geojson) as file:
+            data = json.load(file)
+            self.assertEqual(len(data['features'][0]['properties']), 2)
+            self.assertTrue('display_name' in data['features'][0]['properties'])
+            self.assertTrue('calculation_type' in data['features'][0]['properties'])
+
+    def test_export_specify_fields_as_list(self):
+        self.parser.lines.pipes.filter(id=27449).to_geojson(
+            self.f_geojson,
+            use_ogr=False,
+            fields=['display_name', 'calculation_type']
         )
         with open(self.f_geojson) as file:
             data = json.load(file)
@@ -119,7 +131,7 @@ class ExporterTestGeojson(unittest.TestCase):
         )
         with open(self.f_geojson) as file:
             data = json.load(file)
-            p1, _ = data['features'][0]['geometry']['coordinates']
+            p1, _ = data['features'][1]['geometry']['coordinates']
             x, y = p1
             # Should be somewhere in the Netherlands
             self.assertTrue(4.185791 < x < 5.663452)
