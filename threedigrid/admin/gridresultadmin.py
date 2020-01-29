@@ -68,7 +68,6 @@ class GridH5ResultAdmin(GridH5Admin):
             self.result_datasource_class = H5RPCResultGroup
         else:
             if swmr:
-                print('using swmr!!!')
                 self.netcdf_file = H5SwmrFile(
                     netcdf_file_path, file_modus)
             else:
