@@ -80,7 +80,7 @@ class GeoJsonSerializer:
         )
 
 
-def fill_properties(fields: list, data: dict, index: int) -> OrderedDict:
+def fill_properties(fields, data, index):
     """Returns a dict containing the keys from `fields` filled from `data`
     at `index`
 
