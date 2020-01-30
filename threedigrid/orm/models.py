@@ -102,17 +102,16 @@ class Model(BaseModel):
             GEO_PACKAGE_DRIVER_NAME, file_name, **kwargs)
 
     def to_geojson(self, file_name, **kwargs):
-        if kwargs.get('use_ogr', True):
+        if kwargs.get('use_ogr', False):
             self._to_ogr(GEOJSON_DRIVER_NAME, file_name, **kwargs)
         else:
-            # Use our custom geojson serializer,
-            # unlike ogr it supports nesting of properties
             fields = kwargs.get(
                 'fields', DEFAULT_EXPORT_FIELDS[self.__class__.__name__]
             )
             if fields == 'ALL':
                 fields = self._field_names
-            indent = kwargs.get('indent', 2)
+
+            indent = kwargs.get('indent', None)
             serializer = GeoJsonSerializer(fields, self, indent)
             serializer.save(file_name)
 
