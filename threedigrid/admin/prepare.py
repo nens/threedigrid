@@ -257,7 +257,7 @@ class GridAdminH5Prepare(object):
 
 class GridAdminH5Export(object):
     """
-    Exporter that saves shapefiles/geopackage/geojson to the destination folder
+    Exporter that saves shapefiles/geopackage/geojson to destination folder
     """
 
     def __init__(
@@ -328,7 +328,9 @@ class GridAdminH5Export(object):
             return
         dest = os.path.join(self._dest, constants.NODES + self._extension)
         getattr(
-            self.ga.nodes.subset(constants.SUBSET_1D_ALL).reproject_to(self._epsg),
+            self.ga.nodes.subset(
+                constants.SUBSET_1D_ALL
+            ).reproject_to(self._epsg),
             self._export_method
         )(dest, indent=self._indent)
 
@@ -344,7 +346,9 @@ class GridAdminH5Export(object):
             return
         dest = os.path.join(self._dest, constants.LINES + self._extension)
         getattr(
-            self.ga.lines.subset(constants.SUBSET_1D_ALL).reproject_to(self._epsg),
+            self.ga.lines.subset(
+                constants.SUBSET_1D_ALL
+            ).reproject_to(self._epsg),
             self._export_method
         )(dest, indent=self._indent)
 
@@ -452,7 +456,6 @@ class GridAdminH5Export(object):
             self._export_method
         )(dest, indent=self._indent)
 
-
     def export_levees(self):
         """
         writes shapefile of levees
@@ -520,11 +523,13 @@ class GridAdminH5Export(object):
             )
             return
         dest = os.path.join(
-            self._dest, constants.VERTICAL_INFILTRATION_LINES + self._extension
+            self._dest,
+            constants.VERTICAL_INFILTRATION_LINES + self._extension
         )
         getattr(
             self.ga.lines.subset(
-                constants.SUBSET_2D_VERTICAL_INFILTRATION).reproject_to(self._epsg),
+                constants.SUBSET_2D_VERTICAL_INFILTRATION
+            ).reproject_to(self._epsg),
             self._export_method
         )(dest, indent=self._indent)
 
