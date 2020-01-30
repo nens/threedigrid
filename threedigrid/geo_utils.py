@@ -61,7 +61,8 @@ def transform_xys(x_array, y_array, source_epsg, target_epsg):
         projections.append(projection)
 
     return np.array(pyproj.transform(
-        projections[0], projections[1], x_array, y_array))
+        projections[0], projections[1], x_array, y_array, always_xy=True)
+    )
 
 
 def get_spatial_reference(epsg_code):
