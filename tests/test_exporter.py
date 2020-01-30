@@ -125,6 +125,33 @@ class ExporterTestGeojson(unittest.TestCase):
                 'calculation_type' in data['features'][0]['properties']
             )
 
+    def test_export_specify_nested_fields(self):
+        self.parser.lines.pipes.filter(id=27449).to_geojson(
+            self.f_geojson,
+            use_ogr=False,
+            fields=[
+                {
+                    'first': [
+                        'display_name',
+                        {'second': ['calculation_type']}
+                    ]
+                }
+            ]
+        )
+        with open(self.f_geojson) as file:
+            data = json.load(file)
+            self.assertEqual(len(data['features'][0]['properties']), 1)
+            self.assertTrue(
+                'first' in data['features'][0]['properties']
+            )
+            self.assertTrue(
+                'display_name' in data['features'][0]['properties']['first']
+            )
+            self.assertTrue(
+                'calculation_type' in
+                data['features'][0]['properties']['first']['second']
+            )
+
     def test_export_filter(self):
         self.parser.lines.pipes.filter(id=27449).to_geojson(
             self.f_geojson, use_ogr=False

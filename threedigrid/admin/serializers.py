@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class GeoJsonSerializer:
-    def __init__(self, fields, model: Model = None, indent: int = None):
+    def __init__(self, fields, model=None, indent=None):
         self.fields = fields
         if model:
             assert isinstance(model, Model)
@@ -82,7 +82,14 @@ class GeoJsonSerializer:
 
 def fill_properties(fields: list, data: dict, index: int) -> OrderedDict:
     """Returns a dict containing the keys from `fields` filled from `data`
-    at `index`"""
+    at `index`
+
+    :param fields: (list) list of keys (str) to extract from data. The keys
+        can can also be a dict, in which case fill_properties will be called
+        on its items.
+    :param data: (dict) the original data
+    :param index: (int) index value to extract from data
+    """
     result = OrderedDict()
     for i, field in enumerate(fields):
         if isinstance(field, dict):
