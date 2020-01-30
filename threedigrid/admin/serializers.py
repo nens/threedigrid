@@ -39,6 +39,8 @@ class GeoJsonSerializer:
     @property
     def geos(self):
         geos = []
+        if self._model.count == 0:
+            return geos
         data = self._model.to_dict()
         if self._model.__contenttype__() in ('lines',):
             for i in range(data['id'].shape[-1]):

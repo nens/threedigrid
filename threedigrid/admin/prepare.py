@@ -257,18 +257,35 @@ class GridAdminH5Prepare(object):
 
 class GridAdminH5Export(object):
     """
-    Exporter that saves shapefiles to the model's /preprocessed dir
+    Exporter that saves shapefiles/geopackage/geojson to the destination folder
     """
 
-    def __init__(self, gridadmin_file, export_method='to_shape'):
+    def __init__(
+            self,
+            gridadmin_file,
+            export_method='to_shape',
+            target_epsg_code=None,
+            destination=None
+    ):
         """
 
         :param gridadmin_file: hdf5 file (full path)
+        :param export_method: (str) 'to_shape', 'to_gpkg' or 'to_geojson'
+        :param target_epsg_code: (str) epsg code
+        :param destination: path to folder the export folder, defaults to
+            the same folder as the gridadmin_file
         """
         self.ga = GridH5Admin(gridadmin_file)
-        self._dest = os.path.split(gridadmin_file)[0]
         self._export_method = export_method
         self._extension = EXPORT_METHOD_TO_EXTENSION_MAP[export_method]
+        if not target_epsg_code:
+            self._epsg = self.ga.epsg_code
+        else:
+            self._epsg = target_epsg_code
+        if not destination:
+            self._dest = os.path.split(gridadmin_file)[0]
+        else:
+            self._dest = destination
 
     def export_all(self):
         """convenience function to run all exports"""
@@ -308,8 +325,10 @@ class GridAdminH5Export(object):
             )
             return
         dest = os.path.join(self._dest, constants.NODES + self._extension)
-        getattr(self.ga.nodes.subset(
-            constants.SUBSET_1D_ALL), self._export_method)(dest)
+        getattr(
+            self.ga.nodes.subset(constants.SUBSET_1D_ALL).reproject_to(self._epsg),
+            self._export_method
+        )(dest)
 
     def export_lines(self):
         """
@@ -322,8 +341,10 @@ class GridAdminH5Export(object):
             )
             return
         dest = os.path.join(self._dest, constants.LINES + self._extension)
-        getattr(self.ga.lines.subset(
-            constants.SUBSET_1D_ALL), self._export_method)(dest)
+        getattr(
+            self.ga.lines.subset(constants.SUBSET_1D_ALL).reproject_to(self._epsg),
+            self._export_method
+        )(dest)
 
     def export_breaches(self):
         if not hasattr(self.ga, 'breaches'):
@@ -333,7 +354,10 @@ class GridAdminH5Export(object):
             )
             return
         dest = os.path.join(self._dest, 'breaches' + self._extension)
-        getattr(self.ga.breaches, self._export_method)(dest)
+        getattr(
+            self.ga.breaches.reproject_to(self._epsg),
+            self._export_method
+        )(dest)
 
     def export_channels(self):
         if not hasattr(self.ga.lines, 'channels'):
@@ -343,7 +367,10 @@ class GridAdminH5Export(object):
             )
             return
         dest = os.path.join(self._dest, 'channels' + self._extension)
-        getattr(self.ga.lines.channels, self._export_method)(dest)
+        getattr(
+            self.ga.lines.channels.reproject_to(self._epsg),
+            self._export_method
+        )(dest)
 
     def export_pipes(self):
         if not hasattr(self.ga.lines, 'pipes'):
@@ -353,7 +380,10 @@ class GridAdminH5Export(object):
             )
             return
         dest = os.path.join(self._dest, 'pipes' + self._extension)
-        getattr(self.ga.lines.pipes, self._export_method)(dest)
+        getattr(
+            self.ga.lines.pipes.reproject_to(self._epsg),
+            self._export_method
+        )(dest)
 
     def export_weirs(self):
         if not hasattr(self.ga.lines, 'weirs'):
@@ -363,7 +393,10 @@ class GridAdminH5Export(object):
             )
             return
         dest = os.path.join(self._dest, 'weirs' + self._extension)
-        getattr(self.ga.lines.weirs, self._export_method)(dest)
+        getattr(
+            self.ga.lines.weirs.reproject_to(self._epsg),
+            self._export_method
+        )(dest)
 
     def export_culverts(self):
         if not hasattr(self.ga.lines, 'culverts'):
@@ -373,7 +406,10 @@ class GridAdminH5Export(object):
             )
             return
         dest = os.path.join(self._dest, 'culverts' + self._extension)
-        getattr(self.ga.lines.culverts, self._export_method)(dest)
+        getattr(
+            self.ga.lines.culverts.reproject_to(self._epsg),
+            self._export_method
+        )(dest)
 
     def export_orifices(self):
         if not hasattr(self.ga.lines, 'orifices'):
@@ -383,7 +419,10 @@ class GridAdminH5Export(object):
             )
             return
         dest = os.path.join(self._dest, 'orifices' + self._extension)
-        getattr(self.ga.lines.orifices, self._export_method)(dest)
+        getattr(
+            self.ga.lines.orifices.reproject_to(self._epsg),
+            self._export_method
+        )(dest)
 
     def export_manholes(self):
         if not hasattr(self.ga.nodes, 'manholes'):
@@ -393,7 +432,10 @@ class GridAdminH5Export(object):
             )
             return
         dest = os.path.join(self._dest, 'manholes' + self._extension)
-        getattr(self.ga.nodes.manholes, self._export_method)(dest)
+        getattr(
+            self.ga.nodes.manholes.reproject_to(self._epsg),
+            self._export_method
+        )(dest)
 
     def export_pumps(self):
         if not hasattr(self.ga, 'pumps'):
@@ -403,7 +445,10 @@ class GridAdminH5Export(object):
             )
             return
         dest = os.path.join(self._dest, 'pumps' + self._extension)
-        getattr(self.ga.pumps, self._export_method)(dest)
+        getattr(
+            self.ga.pumps.reproject_to(self._epsg),
+            self._export_method
+        )(dest)
 
 
     def export_levees(self):
@@ -417,7 +462,10 @@ class GridAdminH5Export(object):
             )
             return
         dest = os.path.join(self._dest, constants.LEVEES + self._extension)
-        getattr(self.ga.levees, self._export_method)(dest)
+        getattr(
+            self.ga.levees.reproject_to(self._epsg),
+            self._export_method
+        )(dest)
 
     def export_grid(self):
         """
@@ -438,8 +486,11 @@ class GridAdminH5Export(object):
         dest = os.path.join(
             self._dest, constants.GROUNDWATER_LINES + self._extension
         )
-        getattr(self.ga.lines.subset(
-            constants.SUBSET_2D_GROUNDWATER), self._export_method)(dest)
+        getattr(
+            self.ga.lines.subset(
+                constants.SUBSET_2D_GROUNDWATER).reproject_to(self._epsg),
+            self._export_method
+        )(dest)
 
     def export_2d_openwater_lines(self):
         if not self.ga.has_2d:
@@ -452,8 +503,11 @@ class GridAdminH5Export(object):
         dest = os.path.join(
             self._dest, constants.OPEN_WATER_LINES + self._extension
         )
-        getattr(self.ga.lines.subset(
-            constants.SUBSET_2D_OPEN_WATER), self._export_method)(dest)
+        getattr(
+            self.ga.lines.subset(
+                constants.SUBSET_2D_OPEN_WATER).reproject_to(self._epsg),
+            self._export_method
+        )(dest)
 
     def export_2d_vertical_infiltration_lines(self):
         if not self.ga.has_2d:
@@ -467,8 +521,10 @@ class GridAdminH5Export(object):
             self._dest, constants.VERTICAL_INFILTRATION_LINES + self._extension
         )
         getattr(
-            self.ga.lines.subset(constants.SUBSET_2D_VERTICAL_INFILTRATION),
-            self._export_method)(dest)
+            self.ga.lines.subset(
+                constants.SUBSET_2D_VERTICAL_INFILTRATION).reproject_to(self._epsg),
+            self._export_method
+        )(dest)
 
     def _export_groundwater_grid(self):
         if not self.ga.has_groundwater:
@@ -482,8 +538,11 @@ class GridAdminH5Export(object):
         dest_gw = os.path.join(
             self._dest, constants.GROUNDWATER + self._extension
         )
-        getattr(self.ga.cells.subset(
-            constants.SUBSET_2D_GROUNDWATER), self._export_method)(dest_gw)
+        getattr(
+            self.ga.cells.subset(
+                constants.SUBSET_2D_GROUNDWATER).reproject_to(self._epsg),
+            self._export_method
+        )(dest_gw)
 
     def _export_2d_grid(self):
         if not self.ga.has_2d:
@@ -497,5 +556,8 @@ class GridAdminH5Export(object):
         dest_ow = os.path.join(
             self._dest, constants.OPEN_WATER + self._extension
         )
-        getattr(self.ga.cells.subset(
-            constants.SUBSET_2D_OPEN_WATER), self._export_method)(dest_ow)
+        getattr(
+            self.ga.cells.subset(
+                constants.SUBSET_2D_OPEN_WATER).reproject_to(self._epsg),
+            self._export_method
+        )(dest_ow)
