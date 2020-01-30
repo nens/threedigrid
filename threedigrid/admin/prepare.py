@@ -265,7 +265,8 @@ class GridAdminH5Export(object):
             gridadmin_file,
             export_method='to_shape',
             target_epsg_code=None,
-            destination=None
+            destination=None,
+            indent=None
     ):
         """
 
@@ -286,6 +287,7 @@ class GridAdminH5Export(object):
             self._dest = os.path.split(gridadmin_file)[0]
         else:
             self._dest = destination
+        self._indent = indent
 
     def export_all(self):
         """convenience function to run all exports"""
@@ -328,7 +330,7 @@ class GridAdminH5Export(object):
         getattr(
             self.ga.nodes.subset(constants.SUBSET_1D_ALL).reproject_to(self._epsg),
             self._export_method
-        )(dest)
+        )(dest, indent=self._indent)
 
     def export_lines(self):
         """
@@ -344,7 +346,7 @@ class GridAdminH5Export(object):
         getattr(
             self.ga.lines.subset(constants.SUBSET_1D_ALL).reproject_to(self._epsg),
             self._export_method
-        )(dest)
+        )(dest, indent=self._indent)
 
     def export_breaches(self):
         if not hasattr(self.ga, 'breaches'):
@@ -357,7 +359,7 @@ class GridAdminH5Export(object):
         getattr(
             self.ga.breaches.reproject_to(self._epsg),
             self._export_method
-        )(dest)
+        )(dest, indent=self._indent)
 
     def export_channels(self):
         if not hasattr(self.ga.lines, 'channels'):
@@ -370,7 +372,7 @@ class GridAdminH5Export(object):
         getattr(
             self.ga.lines.channels.reproject_to(self._epsg),
             self._export_method
-        )(dest)
+        )(dest, indent=self._indent)
 
     def export_pipes(self):
         if not hasattr(self.ga.lines, 'pipes'):
@@ -383,7 +385,7 @@ class GridAdminH5Export(object):
         getattr(
             self.ga.lines.pipes.reproject_to(self._epsg),
             self._export_method
-        )(dest)
+        )(dest, indent=self._indent)
 
     def export_weirs(self):
         if not hasattr(self.ga.lines, 'weirs'):
@@ -396,7 +398,7 @@ class GridAdminH5Export(object):
         getattr(
             self.ga.lines.weirs.reproject_to(self._epsg),
             self._export_method
-        )(dest)
+        )(dest, indent=self._indent)
 
     def export_culverts(self):
         if not hasattr(self.ga.lines, 'culverts'):
@@ -409,7 +411,7 @@ class GridAdminH5Export(object):
         getattr(
             self.ga.lines.culverts.reproject_to(self._epsg),
             self._export_method
-        )(dest)
+        )(dest, indent=self._indent)
 
     def export_orifices(self):
         if not hasattr(self.ga.lines, 'orifices'):
@@ -422,7 +424,7 @@ class GridAdminH5Export(object):
         getattr(
             self.ga.lines.orifices.reproject_to(self._epsg),
             self._export_method
-        )(dest)
+        )(dest, indent=self._indent)
 
     def export_manholes(self):
         if not hasattr(self.ga.nodes, 'manholes'):
@@ -435,7 +437,7 @@ class GridAdminH5Export(object):
         getattr(
             self.ga.nodes.manholes.reproject_to(self._epsg),
             self._export_method
-        )(dest)
+        )(dest, indent=self._indent)
 
     def export_pumps(self):
         if not hasattr(self.ga, 'pumps'):
@@ -448,7 +450,7 @@ class GridAdminH5Export(object):
         getattr(
             self.ga.pumps.reproject_to(self._epsg),
             self._export_method
-        )(dest)
+        )(dest, indent=self._indent)
 
 
     def export_levees(self):
@@ -465,7 +467,7 @@ class GridAdminH5Export(object):
         getattr(
             self.ga.levees.reproject_to(self._epsg),
             self._export_method
-        )(dest)
+        )(dest, indent=self._indent)
 
     def export_grid(self):
         """
@@ -490,7 +492,7 @@ class GridAdminH5Export(object):
             self.ga.lines.subset(
                 constants.SUBSET_2D_GROUNDWATER).reproject_to(self._epsg),
             self._export_method
-        )(dest)
+        )(dest, indent=self._indent)
 
     def export_2d_openwater_lines(self):
         if not self.ga.has_2d:
@@ -507,7 +509,7 @@ class GridAdminH5Export(object):
             self.ga.lines.subset(
                 constants.SUBSET_2D_OPEN_WATER).reproject_to(self._epsg),
             self._export_method
-        )(dest)
+        )(dest, indent=self._indent)
 
     def export_2d_vertical_infiltration_lines(self):
         if not self.ga.has_2d:
@@ -524,7 +526,7 @@ class GridAdminH5Export(object):
             self.ga.lines.subset(
                 constants.SUBSET_2D_VERTICAL_INFILTRATION).reproject_to(self._epsg),
             self._export_method
-        )(dest)
+        )(dest, indent=self._indent)
 
     def _export_groundwater_grid(self):
         if not self.ga.has_groundwater:
@@ -542,7 +544,7 @@ class GridAdminH5Export(object):
             self.ga.cells.subset(
                 constants.SUBSET_2D_GROUNDWATER).reproject_to(self._epsg),
             self._export_method
-        )(dest_gw)
+        )(dest_gw, indent=self._indent)
 
     def _export_2d_grid(self):
         if not self.ga.has_2d:
@@ -560,4 +562,4 @@ class GridAdminH5Export(object):
             self.ga.cells.subset(
                 constants.SUBSET_2D_OPEN_WATER).reproject_to(self._epsg),
             self._export_method
-        )(dest_ow)
+        )(dest_ow, indent=self._indent)
