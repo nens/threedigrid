@@ -19,7 +19,7 @@ class GeoJsonSerializer:
             self,
             fields,
             model: Model = None,
-            indent: int =None,
+            indent: int = None,
     ):
         self.fields = fields
         if model:
@@ -44,12 +44,10 @@ class GeoJsonSerializer:
         data = self._model.to_dict()
         if self._model.__contenttype__() in ('lines',):
             for i in range(data['id'].shape[-1]):
-                # Pack line_coords as [[y1, x1], [y2, x2]], rounded with LONLAT_DIGITS
                 p1, p2 = np.round(
                     data['line_coords'][:, i].reshape((2, -1)), constants.LONLAT_DIGITS
                 )
-                # Swap x and y
-                line = geojson.LineString([(p1[1], p1[0]), (p2[1], p2[0])])
+                line = geojson.LineString([(p1[0], p1[1]), (p2[0], p2[1])])
                 properties = fill_properties(self.fields, data, i)
                 feat = geojson.Feature(
                     geometry=line,
@@ -59,8 +57,7 @@ class GeoJsonSerializer:
         elif self._model.__contenttype__() in ('nodes', 'cells', 'breaches', 'pumps'):
             for i in range(data['id'].shape[-1]):
                 coords = np.round(data['coordinates'][:, i], constants.LONLAT_DIGITS)
-                # Swap x and y
-                point = geojson.Point([coords[1], coords[0]])
+                point = geojson.Point([coords[0], coords[1]])
                 properties = fill_properties(self.fields, data, i)
                 feat = geojson.Feature(
                     geometry=point,
@@ -73,8 +70,6 @@ class GeoJsonSerializer:
                     data['coords'][i].reshape(2, -1),
                     constants.LONLAT_DIGITS
                 ).T
-                # swap x, y
-                coords = np.array([coords[:, 1], coords[:, 0]]).T
                 line = geojson.LineString(coords.tolist())
                 properties = fill_properties(self.fields, data, i)
                 feat = geojson.Feature(
@@ -110,25 +105,9 @@ def fill_properties(fields: list, data: dict, index: int) -> OrderedDict:
                 if value.size == 1:
                     value = value.item()
             else:
-                logger.warning("missing field %s" % field)
+                if index == 0:
+                    # only log it once
+                    logger.warning("missing field %s" % field)
                 value = None
             result[field] = value
     return result
-
-
-def remove_missing_fields(fields: OrderedDict, data: OrderedDict) -> OrderedDict:
-    """Removes all keys in `fields` which are not present in `data`
-
-    Skips the key when its value is a dict.
-    WARNING: modifies the `field` object inplace!
-    """
-    requested_fields = set(fields.keys())
-    available_fields = set(data.keys())
-    missing_fields = requested_fields.difference(available_fields)
-    for f in missing_fields:
-        if isinstance(fields[f], dict):
-            # keep the dicts
-            continue
-        else:
-            logger.warning("The field '%s' is not available and will be skipped" % f)
-            fields.pop(f)
