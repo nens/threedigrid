@@ -56,7 +56,7 @@ class FutureResult(Future):
             self.rpc_stack.stack.append(
                 RPCCall('only_netcdf_results', [], {})
             )
-        if max_items_per_second is not None:
+        if max_items_per_second:
             self.rpc_stack.stack.append(
                 RPCCall('max_items_per_second', [max_items_per_second], {})
             )
@@ -90,7 +90,8 @@ class RPCAttrs:
 class RPCFile:
     def __init__(self, path, file_modus):
         match = re.match(r"rpc://(?P<host>\S+)/(?P<channel>\S+)", path)
-        self._redis_host = 'localhost'
+
+        # Default value for now
         self._redis_port = 6379
 
         if match:

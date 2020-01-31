@@ -83,7 +83,7 @@ class GridH5Admin(object):
     @property
     def grid(self):
         if self.is_rpc:
-            raise Exception("RPC is not enabled for grid")
+            raise Exception("RPC not available for grid")
         kwargs = self._grid_kwargs.copy()
         kwargs['n2dtot'] = self.get_from_meta('n2dtot')
         kwargs['dx'] = self.h5py_file['grid_coordinate_attributes']['dx'].value
@@ -95,7 +95,7 @@ class GridH5Admin(object):
     @property
     def levees(self):
         if self.is_rpc:
-            raise Exception("RPC is not enabled for levees")
+            raise Exception("RPC no available for levees")
 
         return Levees(
             self.datasource_class(
