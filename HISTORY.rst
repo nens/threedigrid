@@ -4,7 +4,7 @@ History
 1.0.19 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- First release with RPC integration.
 
 
 1.0.19rc3 (2020-01-14)
