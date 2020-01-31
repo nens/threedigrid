@@ -1,7 +1,7 @@
 History
 =======
 
-1.0.19 (unreleased)
+1.0.19 (2020-01-31)
 -------------------
 
 - First release with RPC integration.
