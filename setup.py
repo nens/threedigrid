@@ -51,6 +51,10 @@ geo_requirements = [
     'geojson>=2.3.0',
 ]
 
+rpc_requirements = [
+    'asyncio-rpc>=0.1.7',
+]
+
 setup_requirements = []
 
 test_requirements = ['pytest==3.4.1']
@@ -89,6 +93,7 @@ setup(
     extras_require={
         'geo': geo_requirements,
         'results': results_requirements,
+        'rpc': rpc_requirements
     },
     url='https://github.com/nens/threedigrid',
     version=find_version("threedigrid", "__init__.py"),

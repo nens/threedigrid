@@ -101,6 +101,33 @@ The filtering is lazy, that is, to retrieve data you have to call data explicitl
 
     ga.lines.filter(lik__eq=4).data  # will return an ordered dict
 
+Remote procedure calls
+----------------------
+
+Currently only the client-side is included. The server-side might be added in a later stage.
+Note: this is an advanced feature used inside the 3Di stack, probably you don't need this.
+Note2: you need Python 3.7 or higher for this to work.
+
+
+Installation:
+
+    $ pip install threedigrid[rpc]
+
+
+Basic usage::
+
+    ga = GridH5ResultAdmin('rpc://REDIS_HOST/SIMULATION_ID', 'rpc://REDIS_HOST/SIMULATION_ID')
+    # Replace REDIS_HOST and SIMULATION_ID with actual values.
+    future_result = ga.nodes.filter(lik__eq=4).data
+    data = await future_result.resolve()
+
+Subscription usage::
+
+    subscription = await future_result.subscribe()
+
+    async for item in subscription.enumerate():
+          # do something with item
+
 
 Credits
 -------
