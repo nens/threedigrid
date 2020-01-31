@@ -7,6 +7,30 @@ History
 - Nothing changed yet.
 
 
+1.0.19rc3 (2020-01-14)
+----------------------
+
+- Bumped version of asyncio-rpc
+
+
+1.0.19rc2 (2020-01-14)
+----------------------
+
+- Fixed incorrect version number
+
+
+1.0.19rc1 (2020-01-14)
+----------------------
+
+- Added RPC datasource which enables to use the majority of
+  threedigrid in a RPC setting. Uses asyncio-rpc for
+  sending/handling RPC calls.
+
+- RPC datasource allows both one time executing (`resolve()`) and pub/sub
+  (`subscribe()`) functionialty.
+
+- Refactored to allow using RPC datasource
+
 1.0.18 (2019-11-28)
 -------------------
 

@@ -19,5 +19,5 @@ before_script:
 
 script:
   - pytest
-  - flake8
+  - if [[ $TRAVIS_PYTHON_VERSION != '2.7' ]]; then flake8; fi;
   - sphinx-build -nW docs docs/_build/html
