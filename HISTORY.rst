@@ -1,10 +1,11 @@
 History
 =======
 
-1.0.20 (unreleased)
+1.0.19.1 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Minor bugfix: need to check if h5py filepath is a str or bytes string
+  during initialization
 
 
 1.0.19 (2020-01-31)
