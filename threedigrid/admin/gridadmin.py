@@ -57,7 +57,8 @@ class GridH5Admin(object):
         self.datasource_class = H5pyGroup
         self.is_rpc = False
 
-        if h5_file_path.startswith('rpc://'):
+        if ((type(h5_file_path) in (str, bytes) and
+             h5_file_path.startswith('rpc://'))):
             if not asyncio_rpc_support:
                 raise Exception(
                     "Please reinstall this package with threedigrid[rpc]")
