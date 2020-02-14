@@ -47,7 +47,7 @@ class GeoJsonSerializer:
                 properties = fill_properties(self.fields, data, i)
                 feat = geojson.Feature(geometry=line, properties=properties)
                 geos.append(feat)
-        elif content_type in ("nodes", "cells", "breaches", "pumps"):
+        elif content_type in ("nodes", "breaches", "pumps"):
             for i in range(data["id"].shape[-1]):
                 coords = np.round(
                     data["coordinates"][:, i], constants.LONLAT_DIGITS
@@ -55,6 +55,29 @@ class GeoJsonSerializer:
                 point = geojson.Point([coords[0], coords[1]])
                 properties = fill_properties(self.fields, data, i)
                 feat = geojson.Feature(geometry=point, properties=properties)
+                geos.append(feat)
+        elif content_type == "cells":
+            for i in range(data["id"].shape[-1]):
+                coords = np.round(
+                    data["cell_coords"][:, i], constants.LONLAT_DIGITS
+                )
+                bottom_left = ([coords[0], coords[1]])
+                upper_right = ([coords[2], coords[3]])
+                top_lef = (coords[0], coords[3])
+                bottom_right = (coords[2], coords[1])
+                polygon = geojson.Polygon(
+                    [
+                        [
+                            bottom_left,
+                            top_lef,
+                            upper_right,
+                            bottom_right,
+                            bottom_left
+                        ]
+                    ]
+                )
+                properties = fill_properties(self.fields, data, i)
+                feat = geojson.Feature(geometry=polygon, properties=properties)
                 geos.append(feat)
         elif content_type == "levees":
             for i in range(data["id"].shape[-1]):
