@@ -67,13 +67,13 @@ class GeoJsonSerializer:
                 bottom_right = (coords[2], coords[1])
                 polygon = geojson.Polygon(
                     [
-                        [
+                        (
                             bottom_left,
                             top_lef,
                             upper_right,
                             bottom_right,
                             bottom_left
-                        ]
+                        )
                     ]
                 )
                 properties = fill_properties(self.fields, data, i)
