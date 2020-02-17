@@ -37,6 +37,7 @@ class GeoJsonSerializer:
             return geos
         data = self._model.to_dict()
         content_type = self._model.__contenttype__()
+        model_type = type(self._model).__name__
         if content_type == "lines":
             for i in range(data["id"].shape[-1]):
                 p1, p2 = np.round(
@@ -44,7 +45,9 @@ class GeoJsonSerializer:
                     constants.LONLAT_DIGITS
                 )
                 line = geojson.LineString([(p1[0], p1[1]), (p2[0], p2[1])])
-                properties = fill_properties(self.fields, data, i)
+                properties = fill_properties(
+                    self.fields, data, i, model_type
+                )
                 feat = geojson.Feature(geometry=line, properties=properties)
                 geos.append(feat)
         elif content_type in ("nodes", "breaches", "pumps"):
@@ -53,7 +56,9 @@ class GeoJsonSerializer:
                     data["coordinates"][:, i], constants.LONLAT_DIGITS
                 )
                 point = geojson.Point([coords[0], coords[1]])
-                properties = fill_properties(self.fields, data, i)
+                properties = fill_properties(
+                    self.fields, data, i, model_type
+                )
                 feat = geojson.Feature(geometry=point, properties=properties)
                 geos.append(feat)
         elif content_type == "cells":
@@ -76,7 +81,9 @@ class GeoJsonSerializer:
                         )
                     ]
                 )
-                properties = fill_properties(self.fields, data, i)
+                properties = fill_properties(
+                    self.fields, data, i, model_type
+                )
                 feat = geojson.Feature(geometry=polygon, properties=properties)
                 geos.append(feat)
         elif content_type == "levees":
@@ -85,7 +92,9 @@ class GeoJsonSerializer:
                     data["coords"][i].reshape(2, -1), constants.LONLAT_DIGITS
                 ).T
                 line = geojson.LineString(coords.tolist())
-                properties = fill_properties(self.fields, data, i)
+                properties = fill_properties(
+                    self.fields, data, i, model_type
+                )
                 feat = geojson.Feature(geometry=line, properties=properties)
                 geos.append(feat)
         else:
@@ -103,7 +112,7 @@ class GeoJsonSerializer:
         )
 
 
-def fill_properties(fields, data, index):
+def fill_properties(fields, data, index, model_type=None):
     """Returns a dict containing the keys from `fields` filled from `data`
     at `index`
 
@@ -112,6 +121,7 @@ def fill_properties(fields, data, index):
         on its items.
     :param data: (dict) the original data
     :param index: (int) index value to extract from data
+    :param model_type: (str, optional) optionally adds the given model_type
     """
     result = OrderedDict()
     for i, field in enumerate(fields):
@@ -130,4 +140,7 @@ def fill_properties(fields, data, index):
                     logger.warning("missing field %s" % field)
                 value = None
             result[field] = value
+    if model_type:
+        result['type'] = model_type
+
     return result

@@ -335,7 +335,9 @@ class PrepareWeirs(object):
             line_group, weirs_numpy_array_dict,
             weirs_field_names,
             weirs_numpy_array_dict['pk'], content_pk,
-            ignore_mask=content_type != 'v2_weir')
+            ignore_mask=content_type != 'v2_weir',
+            field_name_override=weir_field_name_override
+        )
 
 
 class PrepareOrifices(object):
