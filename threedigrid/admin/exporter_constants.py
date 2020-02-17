@@ -25,6 +25,7 @@ GEOJSON_DRIVER_NAME = 'GeoJSON'
 
 CHANNELS_EXPORT_FIELDS = [
     'id',
+    'content_type',
     'display_name',  # missing in prepare step
     'code',
     'material',
@@ -37,6 +38,7 @@ CHANNELS_EXPORT_FIELDS = [
 
 PIPES_EXPORT_FIELDS = [
     'id',
+    'content_type',
     'display_name',
     'code',  # missing in prepare step
     'material',  # missing in prepare step
@@ -58,6 +60,7 @@ PIPES_EXPORT_FIELDS = [
 
 WEIRS_EXPORT_FIELDS = [
     'id',
+    'content_type',
     'display_name',
     'code',
     'kcu',
@@ -77,6 +80,7 @@ WEIRS_EXPORT_FIELDS = [
 
 CULVERT_EXPORT_FIELDS = [
     'id',
+    'content_type',
     'display_name',
     'code',
     'kcu',
@@ -101,6 +105,7 @@ CONNECTION_NODES_EXPORT_FIELDS = [
 
 MANHOLE_EXPORT_FIELDS = [
     'id',
+    'content_type',
     'display_name',
     'code',  # missing in prepare step
     'cross_section_shape',
@@ -118,6 +123,7 @@ MANHOLE_EXPORT_FIELDS = [
 
 PUMPS_EXPORT_FIELDS = [
     'id',
+    'content_type',
     'display_name',
     'start_level',
     'bottom_level',
