@@ -26,36 +26,31 @@ GEOJSON_DRIVER_NAME = 'GeoJSON'
 CHANNELS_EXPORT_FIELDS = [
     'id',
     'content_type',
-    'display_name',  # missing in prepare step
     'code',
-    'material',
-    'kcu'
+    'material',  # missing in prepare step
+    'kcu',
     'calculation_type',
     'dist_calc_points',
-    'connection_node_start_id',
-    'connection_node_end_id',
+    'connection_node_start_pk',
+    'connection_node_end_pk',
 ]
 
 PIPES_EXPORT_FIELDS = [
     'id',
     'content_type',
     'display_name',
-    'code',  # missing in prepare step
-    'material',  # missing in prepare step
+    'material',  # missing in prepare step # add
     'kcu',
     'friction_value',
     'calculation_type',
     'sewerage_type',
-    'original_length',  # missing in prepare step
     'cross_section_shape',
     'cross_section_width',
     'cross_section_height',
-    'cross_section_code',  # missing in prepare step
-    'cross_section_definition_id',  # missing in prepare step
     'invert_level_start_point',
     'invert_level_end_point',
-    'connection_node_start_id',  # ! map to connection_node_start_pk
-    'connection_node_end_id',  # !  map to connection_node_end_pk
+    'connection_node_start_pk',
+    'connection_node_end_pk',
 ]
 
 WEIRS_EXPORT_FIELDS = [
@@ -64,9 +59,9 @@ WEIRS_EXPORT_FIELDS = [
     'display_name',
     'code',
     'kcu',
-    'cross_section_shape',
-    'cross_section_width',
-    'cross_section_height',
+    'cross_section_shape',  # missing in prepare step
+    'cross_section_width',  # missing in prepare step
+    'cross_section_height',  # missing in prepare step
     'crest_level',
     'crest_type',
     'sewerage',
@@ -74,8 +69,8 @@ WEIRS_EXPORT_FIELDS = [
     'discharge_coefficient_negative',
     'friction_value',
     'friction_type',
-    'connection_node_start_id',
-    'connection_node_end_id',
+    'connection_node_start_pk',
+    'connection_node_end_pk',
 ]
 
 CULVERT_EXPORT_FIELDS = [
@@ -95,27 +90,26 @@ CULVERT_EXPORT_FIELDS = [
     'discharge_coefficient_negative',
     'invert_level_start_point',
     'invert_level_end_point',
-    'connection_node_start_id',
-    'connection_node_end_id',
+    'connection_node_start_pk',
+    'connection_node_end_pk',
 ]
 
 CONNECTION_NODES_EXPORT_FIELDS = [
+    'content_type',
     'initial_waterlevel',   # missing in prepare step
 ]
 
 MANHOLE_EXPORT_FIELDS = [
     'id',
-    'content_type',
+    'content_type',  # missing in prepare step
     'display_name',
-    'code',  # missing in prepare step
-    'cross_section_shape',
+    'cross_section_shape',  # missing in prepare step
     'calculation_type',
     'sumax',
     'bottom_level',
     'surface_level',
     'drain_level',
     'width',
-    'length',  # missing in prepare step
     'shape',
     'storage_area',
     'initial_waterlevel',
@@ -123,19 +117,30 @@ MANHOLE_EXPORT_FIELDS = [
 
 PUMPS_EXPORT_FIELDS = [
     'id',
-    'content_type',
+    'content_type',  # missing in prepare step
     'display_name',
     'start_level',
     'bottom_level',
     'lower_stop_level',
-    'upper_stop_level',  # missing in prepare step
     'capacity',
-    'classification',  # missing in prepare step
-    'type',  # missing in prepare step
-    'connection_node_start_id',  # missing in prepare step
-    'connection_node_end_id',  # missing in prepare step
+    'type',  # missing in prepare step  # add
 ]
 
+LEVEES_EXPORT_FIELDS = [
+    'id',
+    'content_type',  # missing in prepare step
+    'crest_level',
+    'max_breach_depth',
+]
+
+BREACHES_EXPORT_FIELDS = [
+    "id",
+    'content_type',  # missing in prepare step
+    "levmat",
+    "levbr",
+    "kcu",
+    "levl",
+]
 
 DEFAULT_EXPORT_FIELDS = {
     'Lines': 'ALL',
@@ -149,7 +154,7 @@ DEFAULT_EXPORT_FIELDS = {
     'Manholes': MANHOLE_EXPORT_FIELDS,
     'Cells': 'ALL',
     'Grid': 'ALL',
-    'Breaches': 'ALL',
-    'Levees': 'ALL',
+    'Breaches': BREACHES_EXPORT_FIELDS,
+    'Levees': LEVEES_EXPORT_FIELDS,
     'Pumps': PUMPS_EXPORT_FIELDS,
 }
