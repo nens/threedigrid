@@ -22,7 +22,7 @@ class PreparePumps:
 
         # Step 1: Load data from threedi_datasource
         pumpstations_field_names = [
-            'pk', 'display_name', 'start_level',
+            'pk', 'display_name', 'type', 'start_level',
             'lower_stop_level', 'capacity',
             'connection_node_start_pk', 'connection_node_end_pk',
             'zoom_category'

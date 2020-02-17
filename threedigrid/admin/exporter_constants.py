@@ -25,9 +25,7 @@ GEOJSON_DRIVER_NAME = 'GeoJSON'
 
 CHANNELS_EXPORT_FIELDS = [
     'id',
-    'content_type',
     'code',
-    'material',  # missing in prepare step
     'kcu',
     'calculation_type',
     'dist_calc_points',
@@ -37,9 +35,8 @@ CHANNELS_EXPORT_FIELDS = [
 
 PIPES_EXPORT_FIELDS = [
     'id',
-    'content_type',
     'display_name',
-    'material',  # missing in prepare step # add
+    'material',
     'kcu',
     'friction_value',
     'calculation_type',
@@ -55,13 +52,12 @@ PIPES_EXPORT_FIELDS = [
 
 WEIRS_EXPORT_FIELDS = [
     'id',
-    'content_type',
     'display_name',
     'code',
     'kcu',
-    'cross_section_shape',  # missing in prepare step
-    'cross_section_width',  # missing in prepare step
-    'cross_section_height',  # missing in prepare step
+    'cross_section_shape',
+    'cross_section_width',
+    'cross_section_height',
     'crest_level',
     'crest_type',
     'sewerage',
@@ -75,7 +71,6 @@ WEIRS_EXPORT_FIELDS = [
 
 CULVERT_EXPORT_FIELDS = [
     'id',
-    'content_type',
     'display_name',
     'code',
     'kcu',
@@ -95,15 +90,12 @@ CULVERT_EXPORT_FIELDS = [
 ]
 
 CONNECTION_NODES_EXPORT_FIELDS = [
-    'content_type',
     'initial_waterlevel',   # missing in prepare step
 ]
 
 MANHOLE_EXPORT_FIELDS = [
     'id',
-    'content_type',  # missing in prepare step
     'display_name',
-    'cross_section_shape',  # missing in prepare step
     'calculation_type',
     'sumax',
     'bottom_level',
@@ -117,7 +109,6 @@ MANHOLE_EXPORT_FIELDS = [
 
 PUMPS_EXPORT_FIELDS = [
     'id',
-    'content_type',  # missing in prepare step
     'display_name',
     'start_level',
     'bottom_level',
@@ -128,14 +119,12 @@ PUMPS_EXPORT_FIELDS = [
 
 LEVEES_EXPORT_FIELDS = [
     'id',
-    'content_type',  # missing in prepare step
     'crest_level',
     'max_breach_depth',
 ]
 
 BREACHES_EXPORT_FIELDS = [
     "id",
-    'content_type',  # missing in prepare step
     "levmat",
     "levbr",
     "kcu",

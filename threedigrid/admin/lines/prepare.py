@@ -271,6 +271,7 @@ class PreparePipes(object):
             'invert_level_end_point',
             'friction_type',
             'friction_value',
+            'material',
             'sewerage_type',
             'calculation_type',
             'connection_node_start_pk',
@@ -317,8 +318,15 @@ class PrepareWeirs(object):
             'crest_level',
             'connection_node_start_pk',
             'connection_node_end_pk',
-            'zoom_category'
-        ]
+            'zoom_category',
+            'cross_section_definition__db_width',
+            'cross_section_definition__db_height',
+            'cross_section_definition__db_shape']
+
+        weir_field_name_override = {
+            'cross_section_definition__db_width': 'cross_section_width',
+            'cross_section_definition__db_height': 'cross_section_height',
+            'cross_section_definition__db_shape': 'cross_section_shape'}
 
         weirs_numpy_array_dict = db_objects_to_numpy_array_dict(
             threedi_datasource.v2_weirs, weirs_field_names)
