@@ -4,6 +4,8 @@ from __future__ import unicode_literals
 from __future__ import print_function
 
 from __future__ import absolute_import
+
+import json
 import logging
 import os
 
@@ -25,6 +27,7 @@ from threedigrid.admin.nodes.prepare import (
     PrepareNodes, PrepareManholes, PrepareConnectionNodes)
 from threedigrid.admin.pumps.prepare import PreparePumps
 from threedigrid.admin.levees.models import Levees
+from threedigrid.orm.base.encoder import NumpyEncoder
 from threedigrid.orm.constants import EXPORT_METHOD_TO_EXTENSION_MAP
 
 logger = logging.getLogger(__name__)
@@ -310,6 +313,42 @@ class GridAdminH5Export(object):
         self.export_nodes()
         self.export_pumps()
         self.export_levees()
+        self._combine_all_frontend()
+
+    def _combine_all_frontend(self):
+        """Combines all exported geojsons in the destination folder into
+        one geojson named 'all'
+        """
+        if self._extension not in ('.json', '.geojson'):
+            logger.info("Can only combine exports with geojson")
+            return
+
+        export_types = {
+            'breaches', 'channels', 'pipes', 'weirs', 'culverts',
+            'orifices', 'manholes', constants.NODES, 'pumps', 'levees'
+        }
+
+        dest = os.path.join(self._dest, 'all' + self._extension)
+        with open(dest, 'w') as output_file:
+            features = []
+            for export_type in export_types:
+                intermediate_result = os.path.join(
+                    self._dest, export_type + self._extension
+                )
+                if not os.path.exists(intermediate_result):
+                    continue
+
+                with open(intermediate_result, 'r') as ir:
+                    geojson = json.load(ir)
+                    im_features = geojson['features']
+                    features += im_features
+
+            json.dump(
+                {"type": "FeatureCollection", "features": features},
+                output_file,
+                indent=self._indent,
+                cls=NumpyEncoder,
+            )
 
     def export_1d_all(self):
         self.export_nodes()
