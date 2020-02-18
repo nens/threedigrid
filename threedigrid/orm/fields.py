@@ -25,8 +25,7 @@ except ImportError:
 
 try:
     import shapely
-    from shapely.geometry import Polygon, Point, \
-        asLineString, asPoint, asPolygon
+    from shapely.geometry import Polygon, Point, asLineString, asPolygon
 
 except ImportError:
     shapely = None
@@ -105,7 +104,7 @@ class PointArrayField(GeomArrayField):
         points = []
         for i, coord in enumerate(values.T):
             point = Point(coord[0], coord[1])
-            point.index = i  # the index is in get_mask_by_geometry
+            point.index = i  # the index is used in get_mask_by_geometry
             points.append(point)
         return points
 
@@ -187,7 +186,7 @@ class LineArrayField(GeomArrayField):
         lines = []
         for i, coords in enumerate(values.T):
             line = asLineString(coords.reshape((2, -1)))
-            line.index = i  # the index is in get_mask_by_geometry
+            line.index = i  # the index is used in get_mask_by_geometry
             lines.append(line)
         return lines
 
@@ -233,7 +232,7 @@ class MultiLineArrayField(GeomArrayField):
         multilines = []
         for i, coords in enumerate(values):
             line = asLineString(coords.reshape((2, -1)).T)
-            line.index = i  # the index is in get_mask_by_geometry
+            line.index = i  # the index is used in get_mask_by_geometry
             multilines.append(line)
         return multilines
 
@@ -276,7 +275,7 @@ class PolygonArrayField(GeomArrayField):
         polygons = []
         for i, coords in enumerate(values):
             polygon = asPolygon(coords.reshape((2, -1)))
-            polygon.index = i  # the index is in get_mask_by_geometry
+            polygon.index = i  # the index is used in get_mask_by_geometry
             polygons.append(polygon)
         return polygons
 
@@ -298,6 +297,6 @@ class BboxArrayField(LineArrayField):
                     (coord[2], coord[1])
                 ]
             )
-            polygon.index = i  # the index is in get_mask_by_geometry
+            polygon.index = i  # the index is used in get_mask_by_geometry
             polygons.append(polygon)
         return polygons
