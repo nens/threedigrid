@@ -133,11 +133,12 @@ class TileIntersectsFilter(TileFilter):
 
 class GeometryIntersectionFilter(GeomFilter):
 
-    def __init__(self, key, field, values):
+    def __init__(self, key, field, values, filter_as=False):
         self.field = field
         self.key = key
         self.geometry = values
         # geom is Shapely.geometry
+        self._filter_as = filter_as
         assert hasattr(self.field, 'get_mask_by_geometry')
 
     def get_field_name(self):
