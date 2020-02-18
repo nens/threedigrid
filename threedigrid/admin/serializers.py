@@ -130,7 +130,7 @@ def fill_properties(fields, data, index, model_type=None):
                 result[key] = fill_properties(sub_list, data, index)
         else:
             field_data = data.get(field, None)
-            if field_data is not None:
+            if field_data is not None and field_data.shape:
                 value = field_data[..., index]
                 if value.size == 1:
                     value = value.item()
@@ -140,6 +140,7 @@ def fill_properties(fields, data, index, model_type=None):
                     logger.warning("missing field %s" % field)
                 value = None
             result[field] = value
+
     if model_type:
         result['type'] = model_type
 

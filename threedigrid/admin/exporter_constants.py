@@ -114,7 +114,6 @@ PUMPS_EXPORT_FIELDS = [
     'bottom_level',
     'lower_stop_level',
     'capacity',
-    'type',  # missing in prepare step  # add
 ]
 
 LEVEES_EXPORT_FIELDS = [
