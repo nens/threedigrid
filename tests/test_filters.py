@@ -2,7 +2,7 @@ from __future__ import absolute_import
 import unittest
 
 import numpy as np
-from shapely.geometry import Polygon
+from shapely.geometry import Polygon, Point, LineString
 
 from threedigrid.orm.base.filters import BaseFilter
 from threedigrid.orm.base.filters import BaseCompareFilter
@@ -165,6 +165,32 @@ class GeometryIntersectionFilterTest(unittest.TestCase):
                     np.array([5, 6, 6] + [5, 6, 5])
                 ]
             )}
+        )
+        self.assertTrue(filtered[0])
+        self.assertFalse(filtered[1])
+
+    def test_intersection_geometry_filter_point_geom(self):
+        geometry = Point(0.5, 0.5)
+        f = GeometryIntersectionFilter(
+            'coordinates', PointArrayField(), geometry
+        )
+        filtered = f.filter(
+            {"coordinates": np.array([
+                [0.5, 2], [0.5, 2]
+            ])}
+        )
+        self.assertTrue(filtered[0])
+        self.assertFalse(filtered[1])
+
+    def test_intersection_geometry_filter_line_geom(self):
+        geometry = LineString([(0.5, 0.5), (1.5, 1.5)])
+        f = GeometryIntersectionFilter(
+            'cell_coords', BboxArrayField(), geometry
+        )
+        filtered = f.filter(
+            {"cell_coords": np.array([
+                [0, 0, 1, 1], [2, 2, 3, 3]
+            ]).T}
         )
         self.assertTrue(filtered[0])
         self.assertFalse(filtered[1])
