@@ -20,7 +20,7 @@ class Model(BaseModel):
         Returns: the filtered values with geometries
                  transformed to centroids
         """
-        selection = self.__do_filter()
+        selection = self.data
         for field_name in self._field_names:
             field = self._get_field(field_name)
             if isinstance(field, LineArrayField) and field_name in selection:
@@ -60,7 +60,7 @@ class Model(BaseModel):
         return self.__init_class(
             self.__class__, **new_class_kwargs)
 
-    def __do_reproject_value(self, value, field_name, target_epsg_code):
+    def _do_reproject_value(self, value, field_name, target_epsg_code):
         if target_epsg_code == self.epsg_code:
             # Already done
             return value
@@ -104,7 +104,7 @@ class Model(BaseModel):
             raise AttributeError(
                 "Instance has no {} exporter".format(driver_name)
             )
-        filtered = self.__do_filter()
+        filtered = self.data
         exporter.set_driver(driver_name=driver_name)
 
         epsg_code = self.epsg_code

@@ -30,9 +30,12 @@ class ResultMixin(object):
     def __init__(self, *args, **kwargs):
         # pop mixin specific fields and store them
         # in the class_kwargs
-        self.timeseries_mask = kwargs.pop('timeseries_mask', None)
+        self.timeseries_filter = kwargs.pop('timeseries_filter', None)
+        self.timeseries_sample = kwargs.pop("timeseries_sample", None)
+        self.timeseries_mask = None
         self.class_kwargs.update({
-            'timeseries_mask': self.timeseries_mask})
+            'timeseries_filter': self.timeseries_filter,
+            'timeseries_sample': self.timeseries_sample})
         if not self._done_composition and hasattr(self, 'Meta'):
             self._set_composite_fields()
             self._set_subset_fields()
@@ -63,7 +66,12 @@ class ResultMixin(object):
             return
 
         fields = {}
-        count = self.get_field_value('id').size
+        id_value = self.get_field_value('id')
+        if id_value:
+            count = self.get_field_value('id').size
+        else:
+            # Dummy value
+            count = 1024
         for v, k in six.iteritems(self.Meta.subset_fields):
             _source_name = _flatten_dict_values(k)
             if not _source_name:
@@ -76,7 +84,89 @@ class ResultMixin(object):
 
         self._meta.add_fields(fields, hide_private=True)
 
-    def timeseries(self, start_time=None, end_time=None, indexes=None):
+    def generate_timeseries_mask(
+            self, start_time=None, end_time=None, indexes=None):
+        timestamps = self.timestamps
+        timeseries_mask = True
+
+        if not any((start_time, end_time, indexes)):
+            raise KeyError(
+                "Please provide either start_time, end_time or indexes")
+
+        if any((start_time, end_time)):
+            if start_time:
+                timeseries_mask &= timestamps >= start_time
+            if end_time:
+                timeseries_mask &= timestamps <= end_time
+
+            self.timeseries_mask = timeseries_mask
+        else:
+            if isinstance(indexes, list) or isinstance(indexes, tuple):
+                self.timeseries_mask = np.array(indexes)
+            elif isinstance(indexes, slice):
+                self.timeseries_mask = indexes
+            else:
+                raise TypeError(
+                    "indexes should either be a list/tuple or a slice")
+
+        if self.timeseries_sample:
+            num_points = self.timeseries_sample['num_points']
+            # Only sample if the required num_points is smaller
+            # than the available points
+            if self.timestamps.size > num_points:
+                indexes = np.argwhere(
+                    self.timestamps[self.timeseries_mask]).flatten().tolist()
+                self.timeseries_mask = self._get_indexes_subset(
+                    indexes,
+                    limit=self.timeseries_sample['num_points'],
+                    include_end=self.timeseries_sample['include_end'])
+
+    def _get_indexes_subset(self, indexes, limit, include_end=True):
+        """
+        Get indexes subset with length limit
+        """
+        start = indexes[0]
+        end = indexes[-1]
+        divider = (end - start) / float(limit)
+        indexes = []
+
+        if include_end:
+            divider = -divider
+            x = end
+        else:
+            x = start
+
+        while len(indexes) < limit:
+            indexes.append(round(x))
+            x += divider
+
+        if include_end:
+            indexes = indexes[::-1]
+
+        return indexes
+
+    def sample(self, num_points=None, include_end=True):
+        """
+        Sample the requested timeseries and return at
+        maximum 'num_points' amount of points.
+
+        :param num_points: the amount of sample points to return
+        :param include_end: if true, the last point is always included,
+                            else the first point is always included.
+        """
+        new_class_kwargs = dict(self.class_kwargs)
+        new_class_kwargs.update({
+            'timeseries_sample': {
+                'num_points': num_points,
+                'include_end': include_end}
+        })
+
+        return self.__class__(
+            datasource=self._datasource,
+            **new_class_kwargs)
+
+    def timeseries(
+            self, start_time=None, end_time=None, indexes=None):
         """
         Allows filtering on timeseries.
 
@@ -117,34 +207,17 @@ class ResultMixin(object):
         :return: new instance with filtering options enabled
         """
 
-        timestamps = self.timestamps
-        timeseries_mask = True
-
-        if not any((start_time, end_time, indexes)):
-            raise KeyError(
-                "Please provide either start_time, end_time or indexes")
-
-        if any((start_time, end_time)):
-            if start_time:
-                timeseries_mask &= timestamps >= start_time
-            if end_time:
-                timeseries_mask &= timestamps <= end_time
-
-            self.timeseries_mask = timeseries_mask
-        else:
-            if isinstance(indexes, list) or isinstance(indexes, tuple):
-                self.timeseries_mask = np.array(indexes)
-            elif isinstance(indexes, slice):
-                self.timeseries_mask = indexes
-            else:
-                raise TypeError(
-                    "indexes should either be a list/tuple or a slice")
+        # self.generate_timeseries_mask(start_time, end_time, indexes)
 
         # Create a copy of the class_kwargs
         # and update it with timeseries_mask
         new_class_kwargs = dict(self.class_kwargs)
         new_class_kwargs.update({
-            'timeseries_mask': self.timeseries_mask})
+            'timeseries_filter': {
+                'start_time': start_time,
+                'end_time': end_time,
+                'indexes': indexes}
+        })
 
         return self.__class__(
             datasource=self._datasource,
@@ -155,6 +228,10 @@ class ResultMixin(object):
         :return: the timeseries mask to be used for filtering
                  on timeseries
         """
+        if self.timeseries_mask is None and self.timeseries_filter is not None:
+            self.generate_timeseries_mask(
+                **self.timeseries_filter
+            )
         if self.timeseries_mask is not None:
             return self.timeseries_mask
         return self.class_kwargs.get('timeseries_chunk_size')
@@ -164,6 +241,24 @@ class ResultMixin(object):
         """
         Get the list of timestamps for the results
         """
+
+        # override if datasource has get_timestamps function
+        if hasattr(self._datasource, 'get_timestamps'):
+            return self._datasource.get_timestamps()
+
+        time_key = 'time'
+        if time_key not in list(self._datasource.keys()):
+            raise AttributeError(
+                'Result {} has no attribute {}'.format(
+                    self._datasource.netcdf_file.filepath(), time_key)
+            )
+
+        value = self._datasource['time'][:]
+        if self.timeseries_mask is not None:
+            value = value[self.timeseries_mask]
+        return value
+
+    def get_timestamps(self, timeseries_mask):
         time_key = 'time'
         if time_key not in list(self._datasource.keys()):
             raise AttributeError(
@@ -171,9 +266,7 @@ class ResultMixin(object):
                     self._datasource.netcdf_file.filepath(), time_key)
             )
         value = self._datasource['time'][:]
-        if self.timeseries_mask is not None:
-            value = value[self.timeseries_mask]
-        return value
+        return value[timeseries_mask]
 
     @property
     def dt_timestamps(self):
@@ -192,6 +285,33 @@ class AggregateResultMixin(ResultMixin):
     """
     def __init__(self, *args, **kwargs):
         super(AggregateResultMixin, self).__init__(*args, **kwargs)
+
+        # Create a copy of the class_kwargs
+        # and update it with timeseries_mask
+        new_class_kwargs = dict(self.class_kwargs)
+        new_class_kwargs.update({
+            'timeseries_mask': self.timeseries_mask})
+
+    def get_timeseries_mask_filter(self):
+        """
+        :return: the timeseries mask to be used for filtering
+                 on timeseries
+        """
+        if self.timeseries_filter is not None:
+            start_time = self.timeseries_filter['start_time']
+            end_time = self.timeseries_filter['end_time']
+            indexes = self.timeseries_filter['indexes']
+
+            self.timeseries_mask = {}
+            field_names = self._meta.get_fields()
+            for field_name, field_inst in six.iteritems(field_names):
+                if not isinstance(field_inst, TimeSeriesArrayField):
+                    continue
+                ts = self.get_timestamps(field_name)
+                mask = self._get_mask(start_time, end_time, indexes, ts)
+                self.timeseries_mask[field_name] = mask
+            return self.timeseries_mask
+        return None
 
     def timeseries(self, start_time=None, end_time=None, indexes=None):
         """
@@ -224,21 +344,13 @@ class AggregateResultMixin(ResultMixin):
             >>> 3
 
         """
-        self.timeseries_mask = {}
-        field_names = self._meta.get_fields()
-        for field_name, field_inst in six.iteritems(field_names):
-            if not isinstance(field_inst, TimeSeriesArrayField):
-                continue
-            ts = self.get_timestamps(field_name)
-            mask = self._get_mask(start_time, end_time, indexes, ts)
-            self.timeseries_mask[field_name] = mask
-
-        # Create a copy of the class_kwargs
-        # and update it with timeseries_mask
         new_class_kwargs = dict(self.class_kwargs)
         new_class_kwargs.update({
-            'timeseries_mask': self.timeseries_mask})
-
+            'timeseries_filter': {
+                'start_time': start_time,
+                'end_time': end_time,
+                'indexes': indexes}
+        })
         return self.__class__(
             datasource=self._datasource,
             **new_class_kwargs)
@@ -272,15 +384,6 @@ class AggregateResultMixin(ResultMixin):
                     "indexes should either be a slice")
 
         return timeseries_mask
-
-    def get_timeseries_mask_filter(self):
-        """
-        :return: the timeseries mask to be used for filtering
-                 on timeseries
-        """
-        if self.timeseries_mask:
-            return self.timeseries_mask
-        return self.class_kwargs.get('timeseries_chunk_size')
 
     @property
     def timestamps(self):
