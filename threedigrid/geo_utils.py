@@ -20,6 +20,12 @@ try:
 except ImportError:
     mercantile = None
 
+try:
+    import shapely
+    from shapely.strtree import STRtree
+except ImportError:
+    shapely = None
+
 from threedigrid.numpy_utils import select_lines_by_bbox
 
 logger = logging.getLogger(__name__)
@@ -245,3 +251,18 @@ def select_lines_by_tile(tile_xyz=(0, 0, 0), target_epsg_code='4326',
     return select_lines_by_bbox(
         lines, get_bbox_for_tile(tile_xyz, target_epsg_code),
         include_intersections)
+
+
+def select_geoms_by_geometry(geoms, geometry):
+    """Build a STRtree from geoms and returns intersection with geometry
+
+    :param geoms: list of geometries you want to search from
+    :param geometry: intersection geometry
+    :return: list of geoms intersecting with geometry
+    """
+    if shapely is None:
+        raise_import_exception('shapely')
+
+    tree = STRtree(geoms)
+    intersected_lines = tree.query(geometry)
+    return intersected_lines
