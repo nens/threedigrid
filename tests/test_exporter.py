@@ -101,12 +101,15 @@ class ExporterTestGeojson(unittest.TestCase):
         )
         with open(self.f_geojson) as file:
             data = json.load(file)
-            self.assertEqual(len(data['features'][0]['properties']), 2)
+            self.assertEqual(len(data['features'][0]['properties']), 3)
             self.assertTrue(
                 'display_name' in data['features'][0]['properties']
             )
             self.assertTrue(
                 'calculation_type' in data['features'][0]['properties']
+            )
+            self.assertTrue(
+                'type' in data['features'][0]['properties']
             )
 
     def test_export_specify_fields_as_list(self):
@@ -117,12 +120,15 @@ class ExporterTestGeojson(unittest.TestCase):
         )
         with open(self.f_geojson) as file:
             data = json.load(file)
-            self.assertEqual(len(data['features'][0]['properties']), 2)
+            self.assertEqual(len(data['features'][0]['properties']), 3)
             self.assertTrue(
                 'display_name' in data['features'][0]['properties']
             )
             self.assertTrue(
                 'calculation_type' in data['features'][0]['properties']
+            )
+            self.assertTrue(
+                'type' in data['features'][0]['properties']
             )
 
     def test_export_specify_nested_fields(self):
@@ -140,9 +146,12 @@ class ExporterTestGeojson(unittest.TestCase):
         )
         with open(self.f_geojson) as file:
             data = json.load(file)
-            self.assertEqual(len(data['features'][0]['properties']), 1)
+            self.assertEqual(len(data['features'][0]['properties']), 2)
             self.assertTrue(
                 'first' in data['features'][0]['properties']
+            )
+            self.assertTrue(
+                'type' in data['features'][0]['properties']
             )
             self.assertTrue(
                 'display_name' in data['features'][0]['properties']['first']
