@@ -274,7 +274,7 @@ class PolygonArrayField(GeomArrayField):
 
         polygons = []
         for i, coords in enumerate(values):
-            polygon = asPolygon(coords.reshape((2, -1)))
+            polygon = asPolygon(coords.reshape((2, -1)).T)
             polygon.index = i  # the index is used in get_mask_by_geometry
             polygons.append(polygon)
         return polygons

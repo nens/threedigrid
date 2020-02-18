@@ -144,7 +144,7 @@ class GeometryIntersectionFilterTest(unittest.TestCase):
             'coordinates', PolygonArrayField(), self.geometry
         )
         filtered = f.filter(
-            {"coords": np.array(
+            {"coordinates": np.array(
                 [  # + sign shows the split between x, y coords
                     np.array([0, 0, 2, 2] + [0, 2, 2, 0]),
                     np.array([5, 6, 6] + [5, 6, 5])
