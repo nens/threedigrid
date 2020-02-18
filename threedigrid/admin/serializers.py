@@ -142,6 +142,6 @@ def fill_properties(fields, data, index, model_type=None):
             result[field] = value
 
     if model_type:
-        result['type'] = model_type
+        result['model_type'] = model_type
 
     return result

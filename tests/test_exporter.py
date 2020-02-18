@@ -109,7 +109,7 @@ class ExporterTestGeojson(unittest.TestCase):
                 'calculation_type' in data['features'][0]['properties']
             )
             self.assertTrue(
-                'type' in data['features'][0]['properties']
+                'model_type' in data['features'][0]['properties']
             )
 
     def test_export_specify_fields_as_list(self):
@@ -128,7 +128,7 @@ class ExporterTestGeojson(unittest.TestCase):
                 'calculation_type' in data['features'][0]['properties']
             )
             self.assertTrue(
-                'type' in data['features'][0]['properties']
+                'model_type' in data['features'][0]['properties']
             )
 
     def test_export_specify_nested_fields(self):
@@ -151,7 +151,7 @@ class ExporterTestGeojson(unittest.TestCase):
                 'first' in data['features'][0]['properties']
             )
             self.assertTrue(
-                'type' in data['features'][0]['properties']
+                'model_type' in data['features'][0]['properties']
             )
             self.assertTrue(
                 'display_name' in data['features'][0]['properties']['first']
