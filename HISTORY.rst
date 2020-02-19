@@ -12,6 +12,17 @@ History
 
 - Added `GeometryIntersectionFilter`.
 
+- Added general GeoJsonSerializer which allows you to specify the field names
+  you want to serialize and extract to geojson. The GeoJsonSerializer allows
+  you to specify nested fields.
+
+- Added a set of standard export fields for each model.
+
+- Automatically pick the correct serializer based on file extention
+
+    - .json/.geojson --> to_geojson
+    - .gpgk --> to_geopackage
+    - .shp --> to_shape
 
 1.0.19.1 (2020-02-04)
 ---------------------
