@@ -54,6 +54,7 @@ class BreachesOgrExporter(BaseOgrExporter):
         self.supported_drivers = {
             const.SHP_DRIVER_NAME,
             const.GEO_PACKAGE_DRIVER_NAME,
+            const.GEOJSON_DRIVER_NAME,
         }
 
     def save(self, file_name, breach_data, target_epsg_code, **kwargs):

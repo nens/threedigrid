@@ -40,6 +40,7 @@ class NodesOgrExporter(BaseOgrExporter):
         self.supported_drivers = {
             const.GEO_PACKAGE_DRIVER_NAME,
             const.SHP_DRIVER_NAME,
+            const.GEOJSON_DRIVER_NAME,
         }
 
     def save(self, file_name, node_data, target_epsg_code, **kwargs):

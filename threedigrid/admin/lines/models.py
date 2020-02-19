@@ -95,6 +95,7 @@ class Pipes(Lines):
     invert_level_end_point = ArrayField()
     friction_type = ArrayField()
     friction_value = ArrayField()
+    material = ArrayField()
     cross_section_height = ArrayField()
     cross_section_width = ArrayField()
     cross_section_shape = ArrayField()
@@ -124,6 +125,9 @@ class Weirs(Lines):
     crest_level = ArrayField()
     connection_node_start_pk = ArrayField()
     connection_node_end_pk = ArrayField()
+    cross_section_height = ArrayField()
+    cross_section_width = ArrayField()
+    cross_section_shape = ArrayField()
 
     @property
     def line_coord_angles(self):

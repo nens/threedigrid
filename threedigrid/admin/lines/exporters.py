@@ -29,8 +29,7 @@ from threedigrid.geo_utils import raise_import_exception
 from threedigrid.admin.utils import KCUDescriptor
 from threedigrid.orm.base.exporters import BaseOgrExporter
 from threedigrid.admin import exporter_constants as const
-from threedigrid.admin.constants import LINE_BASE_FIELDS
-from threedigrid.admin.constants import LINE_1D_FIELDS
+from threedigrid.admin.constants import LINE_BASE_FIELDS_ALL
 from threedigrid.admin.constants import LINE_FIELD_NAME_MAP
 from threedigrid.admin.constants import TYPE_FUNC_MAP
 
@@ -51,6 +50,7 @@ class LinesOgrExporter(BaseOgrExporter):
         self.supported_drivers = {
             const.GEO_PACKAGE_DRIVER_NAME,
             const.SHP_DRIVER_NAME,
+            const.GEOJSON_DRIVER_NAME,
         }
         self.driver = None
 
@@ -71,7 +71,7 @@ class LinesOgrExporter(BaseOgrExporter):
         sr = get_spatial_reference(target_epsg_code)
 
         geom_source = 'from_threedicore'
-        if kwargs:
+        if 'geom' in kwargs:
             geom_source = kwargs['geom']
 
         # shapely is needed for the LineString creation, check if installed
@@ -85,9 +85,7 @@ class LinesOgrExporter(BaseOgrExporter):
             sr,
             geomtype
         )
-        fields = LINE_BASE_FIELDS
-        if self._lines.has_1d:
-            fields.update(LINE_1D_FIELDS)
+        fields = kwargs.get('fields', LINE_BASE_FIELDS_ALL)
         for field_name, field_type in six.iteritems(fields):
             layer.CreateField(ogr.FieldDefn(
                     str(field_name),
@@ -112,7 +110,7 @@ class LinesOgrExporter(BaseOgrExporter):
             feature = ogr.Feature(_definition)
             feature.SetGeometry(line)
             for field_name, field_type in six.iteritems(fields):
-                fname = LINE_FIELD_NAME_MAP[field_name]
+                fname = LINE_FIELD_NAME_MAP.get(field_name, field_name)
                 if field_name == 'kcu_descr':
                     value = ''
                     try:
