@@ -4,12 +4,15 @@ from __future__ import unicode_literals
 from __future__ import print_function
 
 from __future__ import absolute_import
-from .constants import SHP_DRIVER_NAME, GEO_PACKAGE_DRIVER_NAME
+from .constants import SHP_DRIVER_NAME, GEO_PACKAGE_DRIVER_NAME, \
+    GEOJSON_DRIVER_NAME
 
 from threedigrid.orm.base.models import Model as BaseModel
 from threedigrid.orm.fields import LineArrayField
 from threedigrid.orm.fields import GeomArrayField
 from threedigrid.orm.filters import FILTER_MAP
+from threedigrid.admin.exporter_constants import DEFAULT_EXPORT_FIELDS
+from threedigrid.admin.serializers import GeoJsonSerializer
 
 
 class Model(BaseModel):
@@ -98,11 +101,25 @@ class Model(BaseModel):
         self._to_ogr(
             GEO_PACKAGE_DRIVER_NAME, file_name, **kwargs)
 
+    def to_geojson(self, file_name, **kwargs):
+        if kwargs.get('use_ogr', False):
+            self._to_ogr(GEOJSON_DRIVER_NAME, file_name, **kwargs)
+        else:
+            fields = kwargs.get(
+                'fields', DEFAULT_EXPORT_FIELDS[self.__class__.__name__]
+            )
+            if fields == 'ALL':
+                fields = self._field_names
+
+            indent = kwargs.get('indent', None)
+            serializer = GeoJsonSerializer(fields, self, indent)
+            serializer.save(file_name)
+
     def _to_ogr(self, driver_name, file_name, **kwargs):
         exporter = self._get_exporter(driver_name)
         if not exporter:
             raise AttributeError(
-                "Instance has no {} exporter".format(driver_name)
+                "Instance {} has no {} exporter".format(self, driver_name)
             )
         filtered = self.data
         exporter.set_driver(driver_name=driver_name)

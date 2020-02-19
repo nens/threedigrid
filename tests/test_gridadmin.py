@@ -450,6 +450,12 @@ class NodeFilterTests(unittest.TestCase):
 
         self.assertEqual(manholes1 + non_manholes2, self.parser.nodes.count)
 
+    def test_node_filter_keeps_has_1d(self):
+        """Property has_1d doesn't disappear"""
+        self.assertEqual(
+            self.parser.nodes.has_1d, self.parser.nodes.filter(id=1).has_1d
+        )
+
 
 class LineFilterTests(unittest.TestCase):
     def setUp(self):
