@@ -109,7 +109,7 @@ a given point falls::
 
     ga.cells.filter(cell_coords__contains_point=xy).id
 
-The ``intersects_geometry`` expects a shapely geometry for the intersection will be determined::
+The ``intersects_geometry`` expects a shapely geometry for which the intersection will be determined::
 
     from shapely.geometry import Polygon
     polygon = Polygon([

@@ -26,7 +26,6 @@ except ImportError:
 try:
     import shapely
     from shapely.geometry import Polygon, Point, asLineString, asPolygon
-
 except ImportError:
     shapely = None
 

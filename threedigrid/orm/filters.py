@@ -154,8 +154,8 @@ class GeometryIntersectionFilter(GeomFilter):
         Filter the values in nparray_dict dictionairy by
         the filter defined in self.filter()
 
-        :param nparray_dict:  dictionairy of np_array's.
-        :param target_epsg_code: epsg_code of instance (ignored for bbox)
+        :param nparray_dict: dictionairy of np_array's.
+        :param model_instance: epsg_code of instance (ignored)
         """
         # Get the filter
         base_filter = self.filter(nparray_dict)
