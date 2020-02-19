@@ -4,7 +4,7 @@ History
 1.0.20 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Added `GeometryIntersectionFilter`.
 
 
 1.0.19.1 (2020-02-04)

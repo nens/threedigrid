@@ -11,7 +11,8 @@ from threedigrid.numpy_utils import angle_in_degrees
 from threedigrid.numpy_utils import get_bbox_by_point
 from threedigrid.numpy_utils import reshape_flat_array
 from threedigrid.numpy_utils import select_lines_by_bbox
-from threedigrid.geo_utils import select_points_by_tile
+from threedigrid.geo_utils import select_points_by_tile, \
+    select_geoms_by_geometry, raise_import_exception
 from threedigrid.geo_utils import select_lines_by_tile
 from threedigrid.geo_utils import select_points_by_bbox
 from threedigrid.geo_utils import transform_xys
@@ -22,6 +23,12 @@ try:
 except ImportError:
     Transformer = None
 
+try:
+    import shapely
+    from shapely.geometry import Polygon, Point, asLineString, asPolygon
+except ImportError:
+    shapely = None
+
 
 class GeomArrayField(ArrayField):
     """
@@ -31,6 +38,25 @@ class GeomArrayField(ArrayField):
         raise NotImplementedError()
 
     def to_centroid(self, values):
+        raise NotImplementedError()
+
+    def get_mask_by_geometry(self, geometry, values):
+        geoms = self._to_shapely_geom(values)
+
+        selected_geoms = select_geoms_by_geometry(geoms, geometry)
+
+        mask = np.zeros((len(values.T),), dtype=bool)
+        for geom in selected_geoms:
+            mask[geom.index] = True
+
+        return mask
+
+    def _to_shapely_geom(self, values):
+        """Returns a list of shapely geometries created from values
+
+        :param values: coordinates
+        :return: list of shapely geometries
+        """
         raise NotImplementedError()
 
 
@@ -69,6 +95,17 @@ class PointArrayField(GeomArrayField):
                  x_array=values[0], y_array=values[1]
         """
         return values
+
+    def _to_shapely_geom(self, values):
+        if shapely is None:
+            raise_import_exception('shapely')
+
+        points = []
+        for i, coord in enumerate(values.T):
+            point = Point(coord[0], coord[1])
+            point.index = i  # the index is used in get_mask_by_geometry
+            points.append(point)
+        return points
 
 
 class LineArrayField(GeomArrayField):
@@ -141,6 +178,17 @@ class LineArrayField(GeomArrayField):
         return angle_in_degrees(
                 values[0], values[1], values[2], values[3])
 
+    def _to_shapely_geom(self, values):
+        if shapely is None:
+            raise_import_exception('shapely')
+
+        lines = []
+        for i, coords in enumerate(values.T):
+            line = asLineString(coords.reshape((2, -1)))
+            line.index = i  # the index is used in get_mask_by_geometry
+            lines.append(line)
+        return lines
+
 
 class MultiLineArrayField(GeomArrayField):
 
@@ -176,6 +224,17 @@ class MultiLineArrayField(GeomArrayField):
 
         return np.array(transform_values)
 
+    def _to_shapely_geom(self, values):
+        if shapely is None:
+            raise_import_exception('shapely')
+
+        multilines = []
+        for i, coords in enumerate(values):
+            line = asLineString(coords.reshape((2, -1)).T)
+            line.index = i  # the index is used in get_mask_by_geometry
+            multilines.append(line)
+        return multilines
+
 
 class PolygonArrayField(GeomArrayField):
     """
@@ -208,9 +267,35 @@ class PolygonArrayField(GeomArrayField):
                 ),
         ))
 
+    def _to_shapely_geom(self, values):
+        if shapely is None:
+            raise_import_exception('shapely')
+
+        polygons = []
+        for i, coords in enumerate(values):
+            polygon = asPolygon(coords.reshape((2, -1)).T)
+            polygon.index = i  # the index is used in get_mask_by_geometry
+            polygons.append(polygon)
+        return polygons
+
 
 class BboxArrayField(LineArrayField):
-    """
-    For now handled same as lines.
-    """
-    pass
+
+    def _to_shapely_geom(self, values):
+        if shapely is None:
+            raise_import_exception('shapely')
+
+        polygons = []
+        for i, coord in enumerate(values.T):
+            # convert the bbox bottom-left and upper-right into a polygon
+            polygon = Polygon(
+                [
+                    (coord[0], coord[1]),
+                    (coord[0], coord[3]),
+                    (coord[2], coord[3]),
+                    (coord[2], coord[1])
+                ]
+            )
+            polygon.index = i  # the index is used in get_mask_by_geometry
+            polygons.append(polygon)
+        return polygons

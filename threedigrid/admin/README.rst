@@ -100,6 +100,7 @@ The grid admin is also able to perform some basic spatial operations. Those are
     - contains_point
     - intersects_tile
     - intersects_bbox
+    - intersects_geometry
 
 *Warning: The geospatial filters only works on data in non-spherical projections.*
 
@@ -107,6 +108,14 @@ The ``contains_point`` filter for instance, can be used to identify a grid cell 
 a given point falls::
 
     ga.cells.filter(cell_coords__contains_point=xy).id
+
+The ``intersects_geometry`` expects a shapely geometry for which the intersection will be determined::
+
+    from shapely.geometry import Polygon
+    polygon = Polygon([
+        [109300.0, 518201.2], [108926.5, 518201.2], [108935.6, 517871.7], [109300.0, 518201.2]
+    ])
+    ga.cells.filter(cell_coords__intersects_geometry=geometry)
 
 Spatial filtering works only on GeomArrayField subclasses.
 

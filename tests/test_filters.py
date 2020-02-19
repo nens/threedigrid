@@ -2,17 +2,19 @@ from __future__ import absolute_import
 import unittest
 
 import numpy as np
+from shapely.geometry import Polygon, Point, LineString
 
 from threedigrid.orm.base.filters import BaseFilter
 from threedigrid.orm.base.filters import BaseCompareFilter
 from threedigrid.orm.base.filters import EqualsFilter
 from threedigrid.orm.base.filters import get_filter
 from threedigrid.orm.base.filters import InFilter
-from threedigrid.orm.filters import PointFilter
+from threedigrid.orm.filters import PointFilter, GeometryIntersectionFilter
 from threedigrid.orm.filters import FILTER_MAP
 
 from threedigrid.orm.base.fields import ArrayField
-from threedigrid.orm.fields import PolygonArrayField
+from threedigrid.orm.fields import PolygonArrayField, BboxArrayField, \
+    LineArrayField, PointArrayField, MultiLineArrayField
 
 
 class BasicFilterTests(unittest.TestCase):
@@ -79,6 +81,116 @@ class PointFilterTests(unittest.TestCase):
         f = PointFilter("coord_cells", self.field, np.array([1, 5]))
         filtered = f.filter(
             {"coord_cells": np.array([[0, 2], [0, 2], [6, 6], [10, 11]])}
+        )
+        self.assertTrue(filtered[0])
+        self.assertFalse(filtered[1])
+
+
+class GeometryIntersectionFilterTest(unittest.TestCase):
+
+    def setUp(self):
+        self.geometry = Polygon(
+            [[0, 0], [0, 1], [1, 1], [0, 0]]
+        )
+        self.field = BboxArrayField()
+
+    def test_get_intersect_geometry_filter(self):
+        f = get_filter(
+            ['cell_coords', 'intersects_geometry'],
+            BboxArrayField(),
+            self.geometry,
+            filter_map=FILTER_MAP
+        )
+        self.assertIsInstance(f, GeometryIntersectionFilter)
+
+    def test_intersection_geometry_filter_bbox_array(self):
+        f = GeometryIntersectionFilter(
+            'cell_coords', BboxArrayField(), self.geometry
+        )
+        filtered = f.filter(
+            {"cell_coords": np.array([
+                [0, 0, 1, 1], [2, 2, 3, 3]
+            ]).T}
+        )
+        self.assertTrue(filtered[0])
+        self.assertFalse(filtered[1])
+
+    def test_intersection_geometry_filter_line_array(self):
+        f = GeometryIntersectionFilter(
+            'line_coords', LineArrayField(), self.geometry
+        )
+        filtered = f.filter(
+            {"line_coords": np.array([
+                [0, 0, 1, 1], [2, 2, 3, 3]
+            ]).T}
+        )
+        self.assertTrue(filtered[0])
+        self.assertFalse(filtered[1])
+
+    def test_intersection_geometry_filter_point_array(self):
+        f = GeometryIntersectionFilter(
+            'coordinates', PointArrayField(), self.geometry
+        )
+        filtered = f.filter(
+            {"coordinates": np.array([
+                [0.5, 2], [0.5, 2]
+            ])}
+        )
+        self.assertTrue(filtered[0])
+        self.assertFalse(filtered[1])
+
+    def test_intersection_geometry_filter_polygon_array(self):
+        f = GeometryIntersectionFilter(
+            'coordinates', PolygonArrayField(), self.geometry
+        )
+        filtered = f.filter(
+            {"coordinates": np.array(
+                [  # + sign shows the split between x, y coords
+                    np.array([0, 0, 2, 2] + [0, 2, 2, 0]),
+                    np.array([5, 6, 6] + [5, 6, 5])
+                ]
+            )}
+        )
+        self.assertTrue(filtered[0])
+        self.assertFalse(filtered[1])
+
+    def test_intersection_geometry_filter_multiline_array(self):
+        f = GeometryIntersectionFilter(
+            'coords', MultiLineArrayField(), self.geometry
+        )
+        filtered = f.filter(
+            {"coords": np.array(
+                [  # + sign shows the split between x, y coords
+                    np.array([0, 0.5, 2, 2] + [0, 0.5, 2, 0]),
+                    np.array([5, 6, 6] + [5, 6, 5])
+                ]
+            )}
+        )
+        self.assertTrue(filtered[0])
+        self.assertFalse(filtered[1])
+
+    def test_intersection_geometry_filter_point_geom(self):
+        geometry = Point(0.5, 0.5)
+        f = GeometryIntersectionFilter(
+            'coordinates', PointArrayField(), geometry
+        )
+        filtered = f.filter(
+            {"coordinates": np.array([
+                [0.5, 2], [0.5, 2]
+            ])}
+        )
+        self.assertTrue(filtered[0])
+        self.assertFalse(filtered[1])
+
+    def test_intersection_geometry_filter_line_geom(self):
+        geometry = LineString([(0.5, 0.5), (1.5, 1.5)])
+        f = GeometryIntersectionFilter(
+            'cell_coords', BboxArrayField(), geometry
+        )
+        filtered = f.filter(
+            {"cell_coords": np.array([
+                [0, 0, 1, 1], [2, 2, 3, 3]
+            ]).T}
         )
         self.assertTrue(filtered[0])
         self.assertFalse(filtered[1])
