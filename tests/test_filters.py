@@ -132,7 +132,6 @@ class GeometryIntersectionFilterTest(unittest.TestCase):
         self.assertTrue(filtered[3])
         self.assertFalse(filtered[1])
 
-
     def test_intersection_geometry_filter_line_array(self):
         f = GeometryIntersectionFilter(
             'line_coords', LineArrayField(), self.geometry
