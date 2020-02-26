@@ -2,7 +2,7 @@ History
 =======
 
 1.0.20.1 (unreleased)
--------------------
+---------------------
 
 - Bugfix: reprojection with no coordinates (empty array's)
 
