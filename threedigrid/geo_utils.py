@@ -56,6 +56,9 @@ def transform_xys(x_array, y_array, source_epsg, target_epsg):
 
     assert isinstance(x_array, np.ndarray)
     assert isinstance(y_array, np.ndarray)
+
+    if x_array.size == 0 and y_array.size == 0:
+        return np.array([[], []])
     # if threedigrid.orm.transform is None:
     #     raise ImportError('')
     projections = []
