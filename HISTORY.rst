@@ -1,7 +1,7 @@
 History
 =======
 
-1.0.20.1 (unreleased)
+1.0.20.1 (2020-02-26)
 ---------------------
 
 - Bugfix: reprojection with no coordinates (empty array's)
