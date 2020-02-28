@@ -24,7 +24,7 @@ from threedigrid.admin.lines.prepare import (
 
 from threedigrid.admin.levees.prepare import PrepareLevees
 from threedigrid.admin.nodes.prepare import (
-    PrepareNodes, PrepareManholes, PrepareConnectionNodes)
+    PrepareNodes, PrepareManholes, PrepareConnectionNodes, PrepareCells)
 from threedigrid.admin.pumps.prepare import PreparePumps
 from threedigrid.admin.levees.models import Levees
 from threedigrid.orm.base.encoder import NumpyEncoder
@@ -144,6 +144,8 @@ class GridAdminH5Prepare(object):
         node_group = H5pyGroup(h5py_file, 'nodes')
         PrepareNodes.prepare_datasource(
             node_group, mapping1d, id_mapper, has_1d=has_1d)
+
+        PrepareCells.prepare_datasource(h5py_file, threedi_datasource)
 
         h5py_file['nodes'].attrs['prepared'] = 1
 
