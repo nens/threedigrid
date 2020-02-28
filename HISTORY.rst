@@ -7,6 +7,12 @@ History
 - Nothing changed yet.
 
 
+1.0.20.1 (2020-02-26)
+---------------------
+
+- Bugfix: reprojection with no coordinates (empty array's)
+
+
 1.0.20 (2020-02-19)
 -------------------
 
