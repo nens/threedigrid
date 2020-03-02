@@ -98,10 +98,18 @@ def get_spatial_reference(epsg_code):
         raise
 
 
-def transform_bbox(bbox, source_epsg_code, target_epsg_code):
+def transform_bbox(
+        bbox, source_epsg_code, target_epsg_code, all_coords=False
+):
     """
     Transform bbox from source_epsg_code to target_epsg_code,
     if necessary
+
+    :returns np.array of shape 4 which represent the two coordinates:
+        left, bottom and right, top.
+        When `all_coords` is set to `True`, a np.array of shape 8 is given
+        which represents coords of the bbox in the following order:
+        left top, right top, right bottom, left bottom
     """
     if source_epsg_code != target_epsg_code:
         # XXX: Not entirely sure whether transformations between two projected
@@ -116,18 +124,32 @@ def transform_bbox(bbox, source_epsg_code, target_epsg_code):
             msg = "Transforming a bbox from %s to %s is inaccurate."
             logger.warning(msg, source_epsg_code, target_epsg_code)
         # Transform to [[left, right],[top, bottom]]
+        input_x = [bbox[BBOX_LEFT], bbox[BBOX_RIGHT]]
+        input_y = [bbox[BBOX_TOP], bbox[BBOX_BOTTOM]]
+        if all_coords:
+            input_x += [bbox[BBOX_RIGHT], bbox[BBOX_LEFT]]
+            input_y += [bbox[BBOX_TOP], bbox[BBOX_BOTTOM]]
         bbox_trans = np.array(
-                transform_xys(
-                    np.array([bbox[BBOX_LEFT], bbox[BBOX_RIGHT]]),
-                    np.array([bbox[BBOX_TOP], bbox[BBOX_BOTTOM]]),
-                    source_epsg_code, target_epsg_code))
+            transform_xys(
+                np.array(input_x), np.array(input_y),
+                source_epsg_code, target_epsg_code
+            )
+        )
 
-        # Transform back to [left,top,right, bottom]
-        bbox = np.array(
-            [min(bbox_trans[0]),
-             min(bbox_trans[1]),
-             max(bbox_trans[0]),
-             max(bbox_trans[1])])
+        if all_coords:
+            bbox = np.array([
+                bbox_trans[0][0], bbox_trans[1][0],  # left_top
+                bbox_trans[0][2], bbox_trans[1][2],  # right_top
+                bbox_trans[0][1], bbox_trans[1][1],  # right_bottom
+                bbox_trans[0][3], bbox_trans[1][3]  # left_bottom
+            ])
+        else:
+            # Transform back to [left,bottom,right,top]
+            bbox = np.array(
+                [min(bbox_trans[0]), min(bbox_trans[1]),  # left_bottom
+                 max(bbox_trans[0]), max(bbox_trans[1])  # right_top
+                 ]
+            )
     return bbox
 
 
