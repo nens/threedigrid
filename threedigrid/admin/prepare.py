@@ -313,6 +313,7 @@ class GridAdminH5Export(object):
         self.export_nodes()
         self.export_pumps()
         self.export_levees()
+        self._export_2d_grid()
         self._combine_all_frontend()
 
     def _combine_all_frontend(self):
