@@ -63,11 +63,12 @@ class GeoJsonSerializer:
                 feat = geojson.Feature(geometry=point, properties=properties)
                 geos.append(feat)
         elif content_type == "cells":
-
             if (self._model.reproject_to_epsg is not None and
                     self._model.reproject_to_epsg != self._model.epsg_code):
                 cell_coords = transform_bbox(
-                    self._model.reproject_to(self._model.epsg_code).cell_coords,
+                    self._model.reproject_to(
+                        self._model.epsg_code
+                    ).cell_coords,
                     self._model.epsg_code, self._model.reproject_to_epsg,
                     all_coords=True
                 )
@@ -84,9 +85,9 @@ class GeoJsonSerializer:
                 right_top = (cell_coords[2][i], cell_coords[3][i])
                 right_bottom = (cell_coords[4][i], cell_coords[5][i])
                 left_bottom = (cell_coords[6][i], cell_coords[7][i])
-                polygon = geojson.Polygon(
-                    [[left_top, right_top, right_bottom, left_bottom, left_top]]
-                )
+                polygon = geojson.Polygon([
+                    (left_top, right_top, right_bottom, left_bottom, left_top)
+                ])
                 properties = fill_properties(
                     self.fields, data, i, model_type
                 )
