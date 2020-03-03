@@ -96,8 +96,8 @@ class GeoJsonSerializer:
             for i in range(data["id"].shape[-1]):
                 coords = np.round(
                     data["coords"][i].reshape(2, -1), constants.LONLAT_DIGITS
-                ).T
-                line = geojson.LineString(coords.tolist())
+                )
+                line = geojson.LineString(zip(coords[1, :], coords[0, :]))
                 properties = fill_properties(
                     self.fields, data, i, model_type
                 )
