@@ -114,6 +114,7 @@ class Cells(Nodes):
     """
 
     z_coordinate = ArrayField()
+    pixel_width = ArrayField()
 
     def __init__(self, *args, **kwargs):
 

@@ -4,7 +4,10 @@ History
 1.0.20.3 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Add extra field `pixel_width` to cells
+
+- Bugfix for GeometryIntersectionFilter: filter was only checking on
+  intersecting bounding boxes
 
 
 1.0.20.2 (2020-03-06)
