@@ -1,11 +1,18 @@
 History
 =======
 
-1.0.21 (unreleased)
--------------------
+1.0.20.3 (unreleased)
+---------------------
 
 - Nothing changed yet.
 
+
+1.0.20.2 (2020-03-06)
+---------------------
+
+- The `sample` method needs to skip the last timestamp for SWMR
+  to work correctly. (time dataset can have one item more
+  than datasets with timeseries)
 
 1.0.20.1 (2020-02-26)
 ---------------------
