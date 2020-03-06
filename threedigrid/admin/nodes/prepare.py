@@ -6,6 +6,7 @@ from __future__ import print_function
 from __future__ import absolute_import
 import numpy as np
 from threedigrid.admin import constants
+from threedigrid.admin.nodes.subsets import NODE_TYPE__IN_SUBSETS
 from threedigrid.admin.prepare_utils import (
         db_objects_to_numpy_array_dict, add_or_update_datasets)
 
@@ -74,6 +75,23 @@ class PrepareConnectionNodes:
             node_group, connection_nodes_numpy_array_dict,
             ['initial_waterlevel', 'storage_area'],
             connection_nodes_numpy_array_dict['pk'], content_pk)
+
+
+class PrepareCells:
+
+    @staticmethod
+    def prepare_datasource(h5py_file, threedi_datasource):
+        node_group = h5py_file['nodes']
+        lgrmin = h5py_file['meta']['lgrmin'].value
+        nodk = h5py_file['grid_coordinate_attributes']['nodk'].value
+        node_types = h5py_file['nodes']['node_type'].value
+
+        pixel_width = np.zeros(nodk.shape, dtype='int')
+        for node_type_subset in NODE_TYPE__IN_SUBSETS['2D_ALL']:
+            mask = node_types == node_type_subset
+            pixel_width[mask] = lgrmin * 2 ** (nodk[mask] - 1)
+
+        node_group.create_dataset('pixel_width', data=pixel_width, dtype='int')
 
 
 class PrepareManholes:

@@ -254,6 +254,7 @@ class GridAdminCellsTest(unittest.TestCase):
             "zoom_category",
             "is_manhole",
             "sumax",
+            "pixel_width",
         }
 
     def test_get_id_from_xy(self):
