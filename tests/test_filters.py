@@ -115,6 +115,23 @@ class GeometryIntersectionFilterTest(unittest.TestCase):
         self.assertTrue(filtered[0])
         self.assertFalse(filtered[1])
 
+    def test_intersection_geometry_filter_bbox_array_line_bbox(self):
+        # the BBOX of the line intersects all cells, but the line intersects
+        # only 3 cells.
+        line = LineString([(0.5, 0.5), (1.5, 0.5), (1.5, 1.5)])
+        values = np.array([[0, 0, 1, 1],
+                           [0, 1, 0, 1],
+                           [1, 1, 2, 2],
+                           [1, 2, 1, 2]])
+        f = GeometryIntersectionFilter(
+            'cell_coords', BboxArrayField(), line
+        )
+        filtered = f.filter({"cell_coords": values})
+        self.assertTrue(filtered[0])
+        self.assertTrue(filtered[2])
+        self.assertTrue(filtered[3])
+        self.assertFalse(filtered[1])
+
     def test_intersection_geometry_filter_line_array(self):
         f = GeometryIntersectionFilter(
             'line_coords', LineArrayField(), self.geometry
