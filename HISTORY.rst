@@ -2,7 +2,7 @@ History
 =======
 
 1.0.20.2 (unreleased)
--------------------
+---------------------
 
 - The `sample` method needs to skip the last timestamp for SWMR
   to work correctly. (time dataset can have one item more
