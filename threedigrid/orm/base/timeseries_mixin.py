@@ -89,7 +89,7 @@ class ResultMixin(object):
         timestamps = self.timestamps
         timeseries_mask = True
 
-        if not any((start_time, end_time, indexes)):
+        if all((start_time is None, end_time is None, indexes is None)):
             raise KeyError(
                 "Please provide either start_time, end_time or indexes")
 
@@ -115,7 +115,15 @@ class ResultMixin(object):
             # than the available points
             if self.timestamps.size > num_points:
                 indexes = np.argwhere(
-                    self.timestamps[self.timeseries_mask]).flatten().tolist()
+                    self.timeseries_mask).flatten().tolist()
+
+                if hasattr(self._datasource, 'swmr_mode'):
+                    # always exclude the last item in swmr_mode, to be sure
+                    # that the datasource['time'].size is the same
+                    # as of the datasource['xxx'].size datasets that
+                    # are going to be sampled.
+                    indexes = indexes[:-1]
+
                 self.timeseries_mask = self._get_indexes_subset(
                     indexes,
                     limit=self.timeseries_sample['num_points'],
@@ -364,7 +372,7 @@ class AggregateResultMixin(ResultMixin):
         :param timestamps: array of timestamps in seconds
         :return:
         """
-        if not any((start_time, end_time, indexes)):
+        if all((start_time is None, end_time is None, indexes is None)):
             raise KeyError(
                 "Please provide either start_time, end_time or indexes")
 

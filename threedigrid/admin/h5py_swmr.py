@@ -13,11 +13,15 @@ class H5SwmrFile(h5py.File):
         super(H5SwmrFile, self).__init__(
             path, file_modus, swmr=True)
 
+        # By default register all datasets
+        for key in self.keys():
+            self.get(key)
+
     def get(self, key):
         return self.__getitem__(key)
 
     def refresh_datasets(self):
-        for key, dataset in self._datasets.items():
+        for _, dataset in self._datasets.items():
             dataset.refresh()
 
     def __getitem__(self, key):
