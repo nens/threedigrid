@@ -9,6 +9,7 @@ import numpy as np
 from threedigrid.orm.base.datasource import DataSource
 from collections import OrderedDict
 from h5py._hl.dataset import Dataset
+from threedigrid.admin.h5py_swmr import H5SwmrFile
 
 
 logger = logging.getLogger(__name__)
@@ -189,6 +190,9 @@ class H5pyResultGroup(H5pyGroup):
         super(H5pyResultGroup, self).__init__(
             h5py_file, group_name, meta, required)
         self.netcdf_file = netcdf_file
+
+        if isinstance(h5py_file, H5SwmrFile):
+            self.swmr_mode = True
 
     def keys(self):
         keys = list(super(H5pyResultGroup, self).keys())
