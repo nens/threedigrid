@@ -1,7 +1,7 @@
 History
 =======
 
-1.0.20.2 (unreleased)
+1.0.20.2 (2020-03-06)
 ---------------------
 
 - The `sample` method needs to skip the last timestamp for SWMR
