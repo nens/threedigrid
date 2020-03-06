@@ -89,7 +89,7 @@ class ResultMixin(object):
         timestamps = self.timestamps
         timeseries_mask = True
 
-        if not all((start_time is None, end_time is None, indexes is None)):
+        if all((start_time is None, end_time is None, indexes is None)):
             raise KeyError(
                 "Please provide either start_time, end_time or indexes")
 
@@ -372,7 +372,7 @@ class AggregateResultMixin(ResultMixin):
         :param timestamps: array of timestamps in seconds
         :return:
         """
-        if not all((start_time is None, end_time is None, indexes is None)):
+        if all((start_time is None, end_time is None, indexes is None)):
             raise KeyError(
                 "Please provide either start_time, end_time or indexes")
 
