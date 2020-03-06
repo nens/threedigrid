@@ -268,5 +268,15 @@ def select_geoms_by_geometry(geoms, geometry):
         raise_import_exception('shapely')
 
     tree = STRtree(geoms)
-    intersected_lines = tree.query(geometry)
-    return intersected_lines
+    # STRtree checks intersection based on bbox of the geometry only:
+    # https://github.com/Toblerity/Shapely/issues/558
+    intersected_geoms = tree.query(geometry)
+
+    # reverse loop because we pop elements based on index
+    for i, intersected_geom in zip(
+            reversed(range(len(intersected_geoms))),
+            reversed(intersected_geoms)
+    ):
+        if not intersected_geom.intersects(geometry):
+            intersected_geoms.pop(i)
+    return intersected_geoms
