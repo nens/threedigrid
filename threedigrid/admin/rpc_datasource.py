@@ -199,11 +199,16 @@ class H5RPCGroup(DataSource):
         return rpc_actions
 
     def get_asyncio_rpc_stack(self, model, rpc_actions):
-        stack = [
-            RPCCall(self.group_name, [], {})
-        ]
-
         model_name = model.__class__.__name__.lower()
+
+        stack = []
+
+        # Override for cells here
+        if model_name != 'cells':
+            stack.append(
+                RPCCall(self.group_name, [], {})
+            )
+
         if model_name != self.group_name:
             stack.append(
                 RPCCall(model_name, [], {})
