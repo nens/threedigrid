@@ -14,7 +14,7 @@ class GeomFilter(BaseFilter):
         return {
             'filter': {
                 "{0}__{1}".format(
-                    self._key, self.func_name): self._value
+                    self.key, self.func_name): self.values
             }
         }
 
@@ -30,6 +30,7 @@ class BboxFilter(GeomFilter):
         self.field = field
         self.key = key
         self.bbox = values
+        self.values = values
         self._filter_as = filter_as
         assert hasattr(self.field, 'get_mask_by_bbox')
 
@@ -61,6 +62,7 @@ class PointFilter(GeomFilter):
         self.field = field
         self.key = key
         self.x, self.y = values
+        self.values = values
         self._filter_as = filter_as
         assert hasattr(self.field, 'get_mask_by_point')
 
@@ -96,6 +98,7 @@ class TileFilter(GeomFilter):
         self.field = field
         self.key = key
         self.x, self.y, self.z = values
+        self.values = values
         self._filter_as = filter_as
         assert hasattr(self.field, 'get_mask_by_tile')
 
@@ -132,11 +135,13 @@ class TileIntersectsFilter(TileFilter):
 
 
 class GeometryIntersectionFilter(GeomFilter):
+    func_name = 'intersects_geometry'
 
     def __init__(self, key, field, values, filter_as=False):
         self.field = field
         self.key = key
         self.geometry = values
+        self.values = values
         # geom is Shapely.geometry
         self._filter_as = filter_as
         assert hasattr(self.field, 'get_mask_by_geometry')

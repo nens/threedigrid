@@ -23,6 +23,7 @@ except ImportError:
 try:
     import shapely
     from shapely.strtree import STRtree
+    from shapely.wkt import loads
 except ImportError:
     shapely = None
 
@@ -266,6 +267,12 @@ def select_geoms_by_geometry(geoms, geometry):
     """
     if shapely is None:
         raise_import_exception('shapely')
+
+    if type(geometry) in (bytes, str):
+        if isinstance(geometry, bytes):
+            geometry = geometry.decode('utf-8')
+        # assume wkt, try to load
+        geometry = loads(geometry)
 
     tree = STRtree(geoms)
     # STRtree checks intersection based on bbox of the geometry only:
