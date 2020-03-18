@@ -1,7 +1,7 @@
 History
 =======
 
-1.0.20.3 (unreleased)
+1.0.20.3 (2020-03-18)
 ---------------------
 
 - Add extra field `pixel_width` to cells
