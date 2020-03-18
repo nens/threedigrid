@@ -93,7 +93,7 @@ class ResultMixin(object):
             raise KeyError(
                 "Please provide either start_time, end_time or indexes")
 
-        if any((start_time, end_time)):
+        if any((start_time is not None, end_time is not None)):
             if start_time:
                 timeseries_mask &= timestamps >= start_time
             if end_time:
@@ -133,6 +133,11 @@ class ResultMixin(object):
         """
         Get indexes subset with length limit
         """
+
+        # only limit if needed
+        if len(indexes) <= limit:
+            return indexes
+
         start = indexes[0]
         end = indexes[-1]
         divider = (end - start) / float(limit)

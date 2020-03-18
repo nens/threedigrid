@@ -191,7 +191,7 @@ class H5pyResultGroup(H5pyGroup):
             h5py_file, group_name, meta, required)
         self.netcdf_file = netcdf_file
 
-        if isinstance(h5py_file, H5SwmrFile):
+        if isinstance(netcdf_file, H5SwmrFile):
             self.swmr_mode = True
 
     def keys(self):
