@@ -131,6 +131,13 @@ BREACHES_EXPORT_FIELDS = [
     "levl",
 ]
 
+CELLS_EXPORT_FIELDS = [
+    "id",
+    "node_type",
+    "sumax",
+    "z_coordinate",
+]
+
 DEFAULT_EXPORT_FIELDS = {
     'Lines': 'ALL',
     'Pipes': PIPES_EXPORT_FIELDS,
@@ -141,7 +148,7 @@ DEFAULT_EXPORT_FIELDS = {
     'Nodes': 'ALL',
     'ConnectionNodes': CONNECTION_NODES_EXPORT_FIELDS,
     'Manholes': MANHOLE_EXPORT_FIELDS,
-    'Cells': 'ALL',
+    'Cells': CELLS_EXPORT_FIELDS,
     'Grid': 'ALL',
     'Breaches': BREACHES_EXPORT_FIELDS,
     'Levees': LEVEES_EXPORT_FIELDS,

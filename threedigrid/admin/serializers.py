@@ -6,6 +6,7 @@ import geojson
 import numpy as np
 
 from threedigrid.admin import constants
+from threedigrid.geo_utils import transform_bbox
 from threedigrid.orm.base.encoder import NumpyEncoder
 from threedigrid.orm.base.models import Model
 
@@ -62,25 +63,31 @@ class GeoJsonSerializer:
                 feat = geojson.Feature(geometry=point, properties=properties)
                 geos.append(feat)
         elif content_type == "cells":
+            if (self._model.reproject_to_epsg is not None and
+                    self._model.reproject_to_epsg != self._model.epsg_code):
+                cell_coords = transform_bbox(
+                    self._model.reproject_to(
+                        self._model.epsg_code
+                    ).cell_coords,
+                    self._model.epsg_code, self._model.reproject_to_epsg,
+                    all_coords=True
+                )
+            else:
+                cell_coords = np.array([
+                    data.get('cell_coords')[0], data.get('cell_coords')[3],
+                    data.get('cell_coords')[2], data.get('cell_coords')[3],
+                    data.get('cell_coords')[2], data.get('cell_coords')[1],
+                    data.get('cell_coords')[0], data.get('cell_coords')[1],
+                ])
+            cell_coords = np.round(cell_coords, constants.LONLAT_DIGITS)
             for i in range(data["id"].shape[-1]):
-                coords = np.round(
-                    data["cell_coords"][:, i], constants.LONLAT_DIGITS
-                )
-                bottom_left = ([coords[0], coords[1]])
-                upper_right = ([coords[2], coords[3]])
-                top_lef = (coords[0], coords[3])
-                bottom_right = (coords[2], coords[1])
-                polygon = geojson.Polygon(
-                    [
-                        (
-                            bottom_left,
-                            top_lef,
-                            upper_right,
-                            bottom_right,
-                            bottom_left
-                        )
-                    ]
-                )
+                left_top = (cell_coords[0][i], cell_coords[1][i])
+                right_top = (cell_coords[2][i], cell_coords[3][i])
+                right_bottom = (cell_coords[4][i], cell_coords[5][i])
+                left_bottom = (cell_coords[6][i], cell_coords[7][i])
+                polygon = geojson.Polygon([
+                    (left_top, right_top, right_bottom, left_bottom, left_top)
+                ])
                 properties = fill_properties(
                     self.fields, data, i, model_type
                 )
@@ -90,8 +97,8 @@ class GeoJsonSerializer:
             for i in range(data["id"].shape[-1]):
                 coords = np.round(
                     data["coords"][i].reshape(2, -1), constants.LONLAT_DIGITS
-                ).T
-                line = geojson.LineString(coords.tolist())
+                )
+                line = geojson.LineString(zip(coords[1, :], coords[0, :]))
                 properties = fill_properties(
                     self.fields, data, i, model_type
                 )
