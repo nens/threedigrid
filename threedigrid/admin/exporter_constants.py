@@ -89,6 +89,21 @@ CULVERT_EXPORT_FIELDS = [
     'connection_node_end_pk',
 ]
 
+ORIFICES_EXPORT_FIELDS = [
+    'id',
+    'display_name',
+    'kcu',
+    'crest_level',
+    'crest_type',
+    'sewerage',
+    'discharge_coefficient_negative',
+    'discharge_coefficient_positive',
+    'friction_type',
+    'friction_value',
+    'connection_node_start_pk',
+    'connection_node_end_pk',
+]
+
 CONNECTION_NODES_EXPORT_FIELDS = [
     'initial_waterlevel',   # missing in prepare step
 ]
@@ -144,7 +159,7 @@ DEFAULT_EXPORT_FIELDS = {
     'Channels': CHANNELS_EXPORT_FIELDS,
     'Weirs': WEIRS_EXPORT_FIELDS,
     'Culverts': CULVERT_EXPORT_FIELDS,
-    'Orifices': 'ALL',
+    'Orifices': ORIFICES_EXPORT_FIELDS,
     'Nodes': 'ALL',
     'ConnectionNodes': CONNECTION_NODES_EXPORT_FIELDS,
     'Manholes': MANHOLE_EXPORT_FIELDS,
