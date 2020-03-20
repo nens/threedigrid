@@ -4,7 +4,7 @@ History
 1.0.20.4 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Add `ORIFICES_EXPORT_FIELDS` to export_constants.
 
 
 1.0.20.3 (2020-03-18)
