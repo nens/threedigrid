@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 from __future__ import print_function
 
 from __future__ import absolute_import
-import geojson
 import json
 
 from threedigrid.admin.utils import _get_storage_area
@@ -12,12 +11,20 @@ from threedigrid.admin.nodes.models import AddedCalculationNodes
 from threedigrid.admin.nodes.models import ConnectionNodes
 from threedigrid.admin.nodes.models import Manholes
 from threedigrid.admin import constants
+from threedigrid.geo_utils import raise_import_exception
 from threedigrid.orm.base.encoder import NumpyEncoder
 from six.moves import range
+
+try:
+    import geojson
+except ImportError:
+    geojson = None
 
 
 class ManholesGeoJsonSerializer():
     def __init__(self, manholes, indent=None):
+        if geojson is None:
+            raise_import_exception('geojson')
         assert isinstance(manholes, Manholes)
         self._manholes = manholes
         self._indent = indent
@@ -82,6 +89,8 @@ class ManholesGeoJsonSerializer():
 
 class ConnectionNodesGeoJsonSerializer():
     def __init__(self, connection_nodes=None, data=None, indent=None):
+        if geojson is None:
+            raise_import_exception('geojson')
         if connection_nodes:
             assert isinstance(connection_nodes, ConnectionNodes)
         self._data = data
@@ -138,6 +147,8 @@ class ConnectionNodesGeoJsonSerializer():
 
 class AddedCalculationNodesGeoJsonSerializer():
     def __init__(self, added_calculationnodes=None, data=None, indent=None):
+        if geojson is None:
+            raise_import_exception('geojson')
         if added_calculationnodes:
             assert isinstance(added_calculationnodes, AddedCalculationNodes)
         self._data = data
