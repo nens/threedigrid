@@ -4,6 +4,9 @@ History
 1.0.20.4 (unreleased)
 ---------------------
 
+- Added try-except surrounding all imports of the package `geojson`. This package is
+  only available when threedigrid is installed with the extra [geo] extension.
+
 - Add `ORIFICES_EXPORT_FIELDS` to export_constants.
 
 
