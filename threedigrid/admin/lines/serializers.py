@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 from __future__ import print_function
 
 from __future__ import absolute_import
-import geojson
 import json
 import numpy as np
 
@@ -14,8 +13,14 @@ from threedigrid.admin.lines.models import Pipes
 from threedigrid.admin.lines.models import Orifices
 from threedigrid.admin.lines.models import Weirs
 from threedigrid.admin import constants
+from threedigrid.geo_utils import raise_import_exception
 from threedigrid.orm.base.encoder import NumpyEncoder
 from six.moves import range
+
+try:
+    import geojson
+except ImportError:
+    geojson = None
 
 FRICTION_CHEZY = 1
 FRICTION_MANNING = 2
@@ -72,6 +77,8 @@ def cross_section_str(width, height, shape):
 
 class ChannelsGeoJsonSerializer():
     def __init__(self, channels=None, data=None, indent=None):
+        if geojson is None:
+            raise_import_exception('geojson')
         if channels:
             assert isinstance(channels, Channels)
         self._data = data
@@ -142,6 +149,8 @@ class ChannelsGeoJsonSerializer():
 
 class PipesGeoJsonSerializer():
     def __init__(self, pipes=None, data=None, indent=None):
+        if geojson is None:
+            raise_import_exception('geojson')
         if pipes:
             assert isinstance(pipes, Pipes)
         self._data = data
@@ -232,6 +241,8 @@ class PipesGeoJsonSerializer():
 
 class WeirsGeoJsonSerializer():
     def __init__(self, weirs=None, data=None, indent=None):
+        if geojson is None:
+            raise_import_exception('geojson')
         if weirs:
             assert isinstance(weirs, Weirs)
         self._data = data
@@ -307,6 +318,8 @@ class WeirsGeoJsonSerializer():
 
 class CulvertsGeoJsonSerializer():
     def __init__(self, culverts=None, data=None, indent=None):
+        if geojson is None:
+            raise_import_exception('geojson')
         if culverts:
             assert isinstance(culverts, Culverts)
         self._data = data
@@ -402,6 +415,8 @@ class CulvertsGeoJsonSerializer():
 
 class OrificesGeoJsonSerializer():
     def __init__(self, orifices=None, data=None, indent=None):
+        if geojson is None:
+            raise_import_exception('geojson')
         if orifices:
             assert isinstance(orifices, Orifices)
         self._data = data

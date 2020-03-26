@@ -2,13 +2,17 @@ import json
 import logging
 from collections import OrderedDict
 
-import geojson
 import numpy as np
 
 from threedigrid.admin import constants
-from threedigrid.geo_utils import transform_bbox
+from threedigrid.geo_utils import transform_bbox, raise_import_exception
 from threedigrid.orm.base.encoder import NumpyEncoder
 from threedigrid.orm.base.models import Model
+
+try:
+    import geojson
+except ImportError:
+    geojson = None
 
 
 logger = logging.getLogger(__name__)
@@ -16,6 +20,8 @@ logger = logging.getLogger(__name__)
 
 class GeoJsonSerializer:
     def __init__(self, fields, model=None, indent=None):
+        if geojson is None:
+            raise_import_exception('geojson')
         self.fields = fields
         if model:
             assert isinstance(model, Model)
