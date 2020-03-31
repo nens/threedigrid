@@ -55,6 +55,9 @@ def transform_xys(x_array, y_array, source_epsg, target_epsg):
     if pyproj is None:
         raise_import_exception('pyproj')
 
+    pyproj_version = pyproj.__version__.split('.')
+    check_version = '2.2.0'.split('.')
+
     assert isinstance(x_array, np.ndarray)
     assert isinstance(y_array, np.ndarray)
 
@@ -67,12 +70,21 @@ def transform_xys(x_array, y_array, source_epsg, target_epsg):
         if isinstance(epsg_code, bytes):
             epsg_code = epsg_code.decode('utf-8')
         epsg_str = u'epsg:{}'.format(epsg_code)
-        projection = pyproj.Proj(epsg_str)
+
+        if pyproj_version >= check_version:
+            projection = pyproj.Proj(epsg_str)
+        else:
+            projection = pyproj.Proj(init=epsg_str)
         projections.append(projection)
 
-    return np.array(pyproj.transform(
-        projections[0], projections[1], x_array, y_array, always_xy=True)
-    )
+    if pyproj_version >= check_version:
+        reprojected = pyproj.transform(
+            projections[0], projections[1], x_array, y_array, always_xy=True)
+    else:
+        reprojected = pyproj.transform(
+            projections[0], projections[1], x_array, y_array)
+
+    return np.array(reprojected)
 
 
 def get_spatial_reference(epsg_code):

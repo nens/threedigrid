@@ -4,6 +4,8 @@ History
 1.0.20.4 (unreleased)
 ---------------------
 
+- Allow older pyrpoj versions. (pre 2.2.0)
+
 - Bugfix for timeseries start_time=0 selection and allow indexes=slice(x,x,x)
   in combination with sample() method.
 
