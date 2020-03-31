@@ -4,6 +4,8 @@ History
 1.0.20.4 (unreleased)
 ---------------------
 
+- Allow older pyrpoj versions. (pre 2.2.0)
+
 - Added try-except surrounding all imports of the package `geojson`. This package is
   only available when threedigrid is installed with the extra [geo] extension.
 
