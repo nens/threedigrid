@@ -127,6 +127,15 @@ def test_dt_timestamps(gr):
     assert len(n_qs.dt_timestamps) == len(n_qs.timestamps)
 
 
+def test_dt_timeseries_sampling(gr):
+    s1 = gr.nodes.timeseries(start_time=0).sample(5).s1
+    assert len(s1) == 5
+    s1 = gr.nodes.timeseries(start_time=1).sample(5).s1
+    assert len(s1) == 5
+    s1 = gr.nodes.timeseries(indexes=slice(1, None)).sample(5).s1
+    assert len(s1) == 5
+
+
 def test_get_model_instance_by_field_name(gr):
     inst = gr.get_model_instance_by_field_name("s1")
     assert isinstance(inst, Nodes)

@@ -94,9 +94,9 @@ class ResultMixin(object):
                 "Please provide either start_time, end_time or indexes")
 
         if any((start_time is not None, end_time is not None)):
-            if start_time:
+            if start_time is not None:
                 timeseries_mask &= timestamps >= start_time
-            if end_time:
+            if end_time is not None:
                 timeseries_mask &= timestamps <= end_time
 
             self.timeseries_mask = timeseries_mask
@@ -113,9 +113,15 @@ class ResultMixin(object):
             num_points = self.timeseries_sample['num_points']
             # Only sample if the required num_points is smaller
             # than the available points
-            if self.timestamps.size > num_points:
-                indexes = np.argwhere(
-                    self.timeseries_mask).flatten().tolist()
+            timestamps_size = self.timestamps.size
+            if timestamps_size > num_points:
+                if isinstance(self.timeseries_mask, slice):
+                    indexes = np.arange(
+                        timestamps_size
+                    )[self.timeseries_mask].flatten().tolist()
+                else:
+                    indexes = np.argwhere(
+                        self.timeseries_mask).flatten().tolist()
 
                 if hasattr(self._datasource, 'swmr_mode'):
                     # always exclude the last item in swmr_mode, to be sure
@@ -382,10 +388,10 @@ class AggregateResultMixin(ResultMixin):
                 "Please provide either start_time, end_time or indexes")
 
         timeseries_mask = True
-        if any((start_time, end_time)):
-            if start_time:
+        if any((start_time is not None, end_time is not None)):
+            if start_time is not None:
                 timeseries_mask &= timestamps >= start_time
-            if end_time:
+            if end_time is not None:
                 timeseries_mask &= timestamps <= end_time
 
             timeseries_mask = timeseries_mask
