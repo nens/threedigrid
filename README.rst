@@ -5,7 +5,7 @@ The Python package for the threedigrid administration.
 
 
 .. image:: https://travis-ci.org/nens/threedigrid.svg?branch=master
-        :target: https://travis-ci.org/larsclaussen/threedigrid
+        :target: https://travis-ci.org/nens/threedigrid
 
 
 .. image:: https://readthedocs.org/projects/threedigrid/badge/?version=latest
