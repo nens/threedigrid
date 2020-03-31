@@ -6,6 +6,9 @@ History
 
 - Allow older pyrpoj versions. (pre 2.2.0)
 
+- Bugfix for timeseries start_time=0 selection and allow indexes=slice(x,x,x)
+  in combination with sample() method.
+
 - Added try-except surrounding all imports of the package `geojson`. This package is
   only available when threedigrid is installed with the extra [geo] extension.
 
