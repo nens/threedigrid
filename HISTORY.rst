@@ -1,7 +1,7 @@
 History
 =======
 
-1.0.20.4 (unreleased)
+1.0.20.4 (2020-03-31)
 ---------------------
 
 - Allow older pyrpoj versions. (pre 2.2.0)
