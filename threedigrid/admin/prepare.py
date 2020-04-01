@@ -395,10 +395,10 @@ class GridAdminH5Export(object):
         )(dest, indent=self._indent)
 
     def export_breaches(self):
-        if not hasattr(self.ga, 'breaches'):
+        if self.ga.breaches.id.size == 0:
             logger.info(
                 "[*] Model {} does not have 1D, "
-                "skipping export lines...".format(self.ga.model_name)
+                "skipping export breaches...".format(self.ga.model_name)
             )
             return
         dest = os.path.join(self._dest, 'breaches' + self._extension)
@@ -408,10 +408,10 @@ class GridAdminH5Export(object):
         )(dest, indent=self._indent)
 
     def export_channels(self):
-        if not hasattr(self.ga.lines, 'channels'):
+        if self.ga.lines.channels.id.size == 0:
             logger.info(
                 "[*] Model {} does not have 1D, "
-                "skipping export lines...".format(self.ga.model_name)
+                "skipping export channels...".format(self.ga.model_name)
             )
             return
         dest = os.path.join(self._dest, 'channels' + self._extension)
@@ -421,10 +421,10 @@ class GridAdminH5Export(object):
         )(dest, indent=self._indent)
 
     def export_pipes(self):
-        if not hasattr(self.ga.lines, 'pipes'):
+        if self.ga.lines.pipes.id.size == 0:
             logger.info(
                 "[*] Model {} does not have 1D, "
-                "skipping export lines...".format(self.ga.model_name)
+                "skipping export pipes...".format(self.ga.model_name)
             )
             return
         dest = os.path.join(self._dest, 'pipes' + self._extension)
@@ -434,10 +434,10 @@ class GridAdminH5Export(object):
         )(dest, indent=self._indent)
 
     def export_weirs(self):
-        if not hasattr(self.ga.lines, 'weirs'):
+        if self.ga.lines.weirs.id.size == 0:
             logger.info(
                 "[*] Model {} does not have 1D, "
-                "skipping export lines...".format(self.ga.model_name)
+                "skipping export weirs...".format(self.ga.model_name)
             )
             return
         dest = os.path.join(self._dest, 'weirs' + self._extension)
@@ -447,10 +447,10 @@ class GridAdminH5Export(object):
         )(dest, indent=self._indent)
 
     def export_culverts(self):
-        if not hasattr(self.ga.lines, 'culverts'):
+        if self.ga.lines.culverts.id.size == 0:
             logger.info(
                 "[*] Model {} does not have 1D, "
-                "skipping export lines...".format(self.ga.model_name)
+                "skipping export culverts...".format(self.ga.model_name)
             )
             return
         dest = os.path.join(self._dest, 'culverts' + self._extension)
@@ -460,10 +460,10 @@ class GridAdminH5Export(object):
         )(dest, indent=self._indent)
 
     def export_orifices(self):
-        if not hasattr(self.ga.lines, 'orifices'):
+        if self.ga.lines.orifices.id.size == 0:
             logger.info(
                 "[*] Model {} does not have 1D, "
-                "skipping export lines...".format(self.ga.model_name)
+                "skipping export orifices...".format(self.ga.model_name)
             )
             return
         dest = os.path.join(self._dest, 'orifices' + self._extension)
@@ -473,10 +473,10 @@ class GridAdminH5Export(object):
         )(dest, indent=self._indent)
 
     def export_manholes(self):
-        if not hasattr(self.ga.nodes, 'manholes'):
+        if self.ga.nodes.manholes.id.size == 0:
             logger.info(
                 "[*] Model {} does not have 1D, "
-                "skipping export lines...".format(self.ga.model_name)
+                "skipping export manholes...".format(self.ga.model_name)
             )
             return
         dest = os.path.join(self._dest, 'manholes' + self._extension)
@@ -486,10 +486,10 @@ class GridAdminH5Export(object):
         )(dest, indent=self._indent)
 
     def export_pumps(self):
-        if not hasattr(self.ga, 'pumps'):
+        if self.ga.pumps.id.size == 0:
             logger.info(
                 "[*] Model {} does not have 1D, "
-                "skipping export lines...".format(self.ga.model_name)
+                "skipping export pumps...".format(self.ga.model_name)
             )
             return
         dest = os.path.join(self._dest, 'pumps' + self._extension)
