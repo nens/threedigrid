@@ -1,7 +1,7 @@
 History
 =======
 
-1.0.20.5 (unreleased)
+1.0.20.5 (2020-04-01)
 ---------------------
 
 - Use 'ga.xxx.id.size' to check if certain submodels (like channels/weirs/manholes)
