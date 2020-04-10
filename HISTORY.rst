@@ -4,7 +4,8 @@ History
 1.0.20.6 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Bugfix for `Model._get_subset_idx` not instantiating new subsets with their parent's
+  mixins.
 
 
 1.0.20.5 (2020-04-01)

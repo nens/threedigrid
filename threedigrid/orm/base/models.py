@@ -158,7 +158,7 @@ class Model(six.with_metaclass(ABCMeta)):
         :param field_name: field name
         """
         new_inst = self.__init_class(
-            self.__class__, **{})
+            self.__class__, **self.class_kwargs)
         subset_dict = new_inst.Meta.subset_fields.get(field_name)
         if not subset_dict:
             return

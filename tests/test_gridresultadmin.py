@@ -151,6 +151,13 @@ def test_get_model_instance_by_field_name_raises_index_error(gr):
         gr.get_model_instance_by_field_name("zoom_category")
 
 
+def test_gr_get_subset_idx_leak(gr):
+    assert gr.nodes._get_subset_idx('leak').shape == (10748,)
+
+
+def test_gr_get_subset_ids_no_composite_field(gr):
+    assert gr.nodes._get_subset_idx('s1') is None
+
 # commented for now until the new aggregate.nc is finished
 
 # def test_get_node_aggregate_netcdf_results(agg_gr):
