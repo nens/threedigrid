@@ -158,6 +158,10 @@ def test_gr_get_subset_idx_leak(gr):
 def test_gr_get_subset_ids_no_composite_field(gr):
     assert gr.nodes._get_subset_idx('s1') is None
 
+
+def test_gr_chain_filter(gr):
+    assert gr.nodes.filter(id=4).get_filtered_field_value('leak').shape == (9, 1)
+
 # commented for now until the new aggregate.nc is finished
 
 # def test_get_node_aggregate_netcdf_results(agg_gr):
