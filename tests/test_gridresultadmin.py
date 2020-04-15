@@ -160,7 +160,8 @@ def test_gr_get_subset_ids_no_composite_field(gr):
 
 
 def test_gr_chain_filter(gr):
-    assert gr.nodes.filter(id=4).get_filtered_field_value('leak').shape == (9, 1)
+    assert gr.nodes.filter(
+        id=4).get_filtered_field_value('leak').shape == (9, 1)
 
 # commented for now until the new aggregate.nc is finished
 
