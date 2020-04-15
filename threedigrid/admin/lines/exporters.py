@@ -122,7 +122,10 @@ class LinesOgrExporter(BaseOgrExporter):
                 elif field_name == 'node_b':
                     value = TYPE_FUNC_MAP[field_type](node_b[i])
                 else:
-                    raw_value = line_data[fname][i]
+                    try:
+                        raw_value = line_data[fname][i]
+                    except IndexError:
+                        raw_value = '-9999'
                     value = TYPE_FUNC_MAP[field_type](raw_value)
                 feature.SetField(str(field_name), value)
 

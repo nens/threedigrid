@@ -4,6 +4,11 @@ History
 1.0.20.6 (unreleased)
 ---------------------
 
+- An empy array [] is returned now instead of None if there is no
+  dataset.
+
+- Line geojson items need to use line_geometry values
+
 - Bugfix for `Model._get_subset_idx` not instantiating new subsets with their parent's
   mixins.
 
