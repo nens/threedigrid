@@ -1,7 +1,7 @@
 History
 =======
 
-1.0.20.6 (unreleased)
+1.0.20.6 (2020-04-15)
 ---------------------
 
 - An empy array [] is returned now instead of None if there is no
