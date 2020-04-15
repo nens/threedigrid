@@ -47,11 +47,12 @@ class GeoJsonSerializer:
         model_type = type(self._model).__name__
         if content_type == "lines":
             for i in range(data["id"].shape[-1]):
-                p1, p2 = np.round(
-                    data["line_coords"][:, i].reshape((2, -1)),
+                linepoints = np.round(
+                    data['line_geometries'][i].reshape(2, -1)[::-1].T,
                     constants.LONLAT_DIGITS
                 )
-                line = geojson.LineString([(p1[0], p1[1]), (p2[0], p2[1])])
+                line = geojson.LineString(linepoints.tolist())
+
                 properties = fill_properties(
                     self.fields, data, i, model_type
                 )
@@ -143,7 +144,7 @@ def fill_properties(fields, data, index, model_type=None):
                 result[key] = fill_properties(sub_list, data, index)
         else:
             field_data = data.get(field, None)
-            if field_data is not None and field_data.shape:
+            if field_data is not None and field_data.size > 0:
                 value = field_data[..., index]
                 if value.size == 1:
                     value = value.item()
