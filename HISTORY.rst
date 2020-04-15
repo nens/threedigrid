@@ -4,7 +4,10 @@ History
 1.0.20.6 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- An empy array [] is returned now instead of None if there is no
+  dataset.
+
+- Line geojson items need to use line_geometry values
 
 
 1.0.20.5 (2020-04-01)

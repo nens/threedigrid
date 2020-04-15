@@ -29,7 +29,7 @@ class ArrayField:
         if name in list(datasource.keys()):
             return datasource[name]
 
-        return None
+        return np.array([])
 
     def __repr__(self):
         return self.__class__.__name__
@@ -55,7 +55,7 @@ class BooleanArrayField(ArrayField):
             data[data == NO_DATA_VALUE] = 0
             return data
 
-        return None
+        return np.array([])
 
     def __repr__(self):
         return self.__class__.__name__

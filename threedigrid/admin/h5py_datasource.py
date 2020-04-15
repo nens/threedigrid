@@ -70,8 +70,8 @@ class H5pyGroup(DataSource):
 
         # Return a numpy array with None as only element when
         # the value is None.
-        if value is None:
-            return np.array(None)
+        if value is None or value.size == 0:
+            return np.array([])
 
         _filter = [slice(None)] * (
             len(value.shape) - 1) + [model.boolean_mask_filter]
@@ -139,6 +139,9 @@ class H5pyGroup(DataSource):
         return selection
 
     def __init__(self, h5py_file, group_name, meta=None, required=False):
+        self.group_name = group_name
+        self._h5py_file = h5py_file
+
         if group_name not in list(h5py_file.keys()) and not required:
             logger.info(
                 '[*] {0} not found in file {1}, not required...'.format(
@@ -146,9 +149,6 @@ class H5pyGroup(DataSource):
             )
             return
 
-        self.group_name = group_name
-
-        self._h5py_file = h5py_file
         try:
             self._source = h5py_file.require_group(group_name)
         except TypeError:
@@ -173,6 +173,8 @@ class H5pyGroup(DataSource):
         return attr
 
     def keys(self):
+        if self._source is None:
+            return []
         return list(self._source.keys())
 
     def has_any(self, sources):
