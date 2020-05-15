@@ -142,7 +142,6 @@ PUMPS_EXPORT_FIELDS = [
 
 LEVEES_EXPORT_FIELDS = [
     'id',
-    'content_pk',
     'crest_level',
     'max_breach_depth',
 ]
