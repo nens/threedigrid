@@ -25,6 +25,7 @@ GEOJSON_DRIVER_NAME = 'GeoJSON'
 
 CHANNELS_EXPORT_FIELDS = [
     'id',
+    'content_pk',
     'code',
     'kcu',
     'calculation_type',
@@ -35,6 +36,7 @@ CHANNELS_EXPORT_FIELDS = [
 
 PIPES_EXPORT_FIELDS = [
     'id',
+    'content_pk',
     'display_name',
     'material',
     'kcu',
@@ -52,6 +54,7 @@ PIPES_EXPORT_FIELDS = [
 
 WEIRS_EXPORT_FIELDS = [
     'id',
+    'content_pk',
     'display_name',
     'code',
     'kcu',
@@ -71,6 +74,7 @@ WEIRS_EXPORT_FIELDS = [
 
 CULVERT_EXPORT_FIELDS = [
     'id',
+    'content_pk',
     'display_name',
     'code',
     'kcu',
@@ -91,6 +95,7 @@ CULVERT_EXPORT_FIELDS = [
 
 ORIFICES_EXPORT_FIELDS = [
     'id',
+    'content_pk',
     'display_name',
     'kcu',
     'crest_level',
@@ -105,11 +110,13 @@ ORIFICES_EXPORT_FIELDS = [
 ]
 
 CONNECTION_NODES_EXPORT_FIELDS = [
+    'content_pk',
     'initial_waterlevel',   # missing in prepare step
 ]
 
 MANHOLE_EXPORT_FIELDS = [
     'id',
+    'content_pk',
     'display_name',
     'calculation_type',
     'sumax',
@@ -124,6 +131,7 @@ MANHOLE_EXPORT_FIELDS = [
 
 PUMPS_EXPORT_FIELDS = [
     'id',
+    'content_pk',
     'display_name',
     'start_level',
     'bottom_level',
@@ -140,6 +148,7 @@ LEVEES_EXPORT_FIELDS = [
 
 BREACHES_EXPORT_FIELDS = [
     "id",
+    'content_pk',
     "levmat",
     "levbr",
     "kcu",
@@ -148,6 +157,7 @@ BREACHES_EXPORT_FIELDS = [
 
 CELLS_EXPORT_FIELDS = [
     "id",
+    'content_pk',
     "node_type",
     "sumax",
     "z_coordinate",

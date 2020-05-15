@@ -4,7 +4,8 @@ History
 1.0.20.7 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Added `content_pk` to the export_constants of all structures which have a
+  `content_pk`.
 
 
 1.0.20.6 (2020-04-15)
