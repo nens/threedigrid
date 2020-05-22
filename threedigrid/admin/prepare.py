@@ -315,28 +315,38 @@ class GridAdminH5Export(object):
         self.export_nodes()
         self.export_pumps()
         self.export_levees()
-        self._export_2d_grid()
-        self._combine_all_frontend()
+        self.export_grid()
+        self._combine(
+            output_name="all",
+            file_names={
+                'breaches', 'channels', 'pipes', 'weirs', 'culverts',
+                'orifices', 'manholes', constants.NODES, 'pumps', 'levees'
+            }
+        )
+        self._combine(
+            output_name="cells",
+            file_names={constants.OPEN_WATER, constants.GROUNDWATER}
+        )
 
-    def _combine_all_frontend(self):
-        """Combines all exported geojsons in the destination folder into
-        one geojson named 'all'
+    def _combine(self, output_name, file_names):
+        """Combine the `file_names` into a new file called `output_name`.
+
+        The files are simply appended. Only works for geojson.
+
+        :param output_name: name of the new file
+        :param file_names: file names to combine
+        :return:
         """
         if self._extension not in ('.json', '.geojson'):
             logger.info("Can only combine exports with geojson")
             return
 
-        export_types = {
-            'breaches', 'channels', 'pipes', 'weirs', 'culverts',
-            'orifices', 'manholes', constants.NODES, 'pumps', 'levees'
-        }
-
-        dest = os.path.join(self._dest, 'all' + self._extension)
+        dest = os.path.join(self._dest, output_name + self._extension)
         with open(dest, 'w') as output_file:
             features = []
-            for export_type in export_types:
+            for file_name in file_names:
                 intermediate_result = os.path.join(
-                    self._dest, export_type + self._extension
+                    self._dest, file_name + self._extension
                 )
                 if not os.path.exists(intermediate_result):
                     continue
