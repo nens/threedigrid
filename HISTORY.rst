@@ -1,7 +1,7 @@
 History
 =======
 
-1.0.20.8 (unreleased)
+1.0.20.8 (2020-05-22)
 ---------------------
 
 - Add groundwater_cells to exporter for frontend.
