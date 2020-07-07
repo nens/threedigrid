@@ -268,10 +268,10 @@ class GridH5Admin(object):
             return x
 
     def __enter__(self):
-        return self.h5py_file
+        return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        self.close()
+        self.h5py_file.close()
 
     def close(self):
         self.h5py_file.flush()
