@@ -4,7 +4,7 @@ History
 1.0.20.10 (unreleased)
 ----------------------
 
-- Nothing changed yet.
+- Added missing numba requirement in setup.py
 
 
 1.0.20.9 (2020-07-07)
