@@ -12,7 +12,8 @@ before_install:
   - sudo apt-get install -y libgdal-dev libhdf5-serial-dev
 
 install:
-  - pip install -r requirements_geo.txt -e .
+  - if [[ $TRAVIS_PYTHON_VERSION != '2.7' ]]; then pip install -r requirements_geo.txt; fi;
+  - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then pip install -r requirements_geo27.txt;
 
 before_script:
   - pip install flake8 sphinx==1.8.5
