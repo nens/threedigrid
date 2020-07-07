@@ -6,6 +6,10 @@
 from __future__ import absolute_import
 from setuptools import setup, find_packages
 
+import sys
+
+python_27 = sys.version_info <= (2,7)
+
 import codecs
 import re
 import os
@@ -38,6 +42,15 @@ lightweight_requirements = [
     'h5py>=2.7.1',
 ]
 
+if python_27:
+    lightweight_requirements += [
+        'llvmlite==0.31.0'
+    ]
+else:
+    lightweight_requirements += [
+        'llvmlite'
+    ]
+    
 results_requirements = [
     'cftime>=1.0.1'
 ]
