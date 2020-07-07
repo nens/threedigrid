@@ -1,10 +1,12 @@
 History
 =======
 
-\ (unreleased)
---------------
+1.0.20.9 (unreleased)
+---------------------
 
-- Nothing changed yet.
+- Fixed RPC breaches/pumps bug
+
+- Added fast nod_grid generation on cells
 
 
 1.0.20.8 (2020-05-22)
