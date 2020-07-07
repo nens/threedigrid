@@ -13,7 +13,7 @@ before_install:
 
 install:
   - if [[ $TRAVIS_PYTHON_VERSION != '2.7' ]]; then pip install -r requirements_geo.txt; fi;
-  - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then pip install -r requirements_geo27.txt;
+  - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then pip install -r requirements_geo27.txt; fi;
 
 before_script:
   - pip install flake8 sphinx==1.8.5
