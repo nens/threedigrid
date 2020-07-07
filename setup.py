@@ -49,7 +49,7 @@ else:
     lightweight_requirements += [
         'llvmlite'
     ]
-    
+
 results_requirements = [
     'cftime>=1.0.1'
 ]
