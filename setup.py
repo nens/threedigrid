@@ -7,12 +7,11 @@ from __future__ import absolute_import
 from setuptools import setup, find_packages
 
 import sys
-
-python_27 = sys.version_info <= (2,7)
-
 import codecs
 import re
 import os
+
+python_27 = sys.version_info <= (2, 7)
 
 here = os.path.abspath(os.path.dirname(__file__))
 
