@@ -43,11 +43,13 @@ lightweight_requirements = [
 
 if python_27:
     lightweight_requirements += [
-        'llvmlite==0.31.0'
+        'llvmlite==0.31.0',
+        'numba>=0.47.0'
     ]
 else:
     lightweight_requirements += [
-        'llvmlite'
+        'llvmlite',
+        'numba>=0.47.0'
     ]
 
 results_requirements = [
