@@ -1,7 +1,7 @@
 History
 =======
 
-1.0.20.9 (unreleased)
+1.0.20.9 (2020-07-07)
 ---------------------
 
 - Fixed RPC breaches/pumps bug
