@@ -146,6 +146,8 @@ class GridAdminGridTest(unittest.TestCase):
             "nodk",
             "nodm",
             "nodn",
+            "ip",
+            "jp"
         }
 
     @unittest.skip("TODO")
@@ -255,6 +257,7 @@ class GridAdminCellsTest(unittest.TestCase):
             "is_manhole",
             "sumax",
             "pixel_width",
+            "pixel_coords",
         }
 
     def test_get_id_from_xy(self):
