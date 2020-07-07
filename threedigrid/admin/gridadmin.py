@@ -70,6 +70,8 @@ class GridH5Admin(object):
             self.is_rpc = True
             self.has_1d = True
             self.has_2d = True
+            self.has_breaches = True
+            self.has_pumpstations = True
         else:
             self.h5py_file = h5py.File(h5_file_path, file_modus)
             set_props = True
