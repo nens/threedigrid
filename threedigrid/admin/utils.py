@@ -102,7 +102,7 @@ class PKMapper(object):
         # Enable multidimensional array's.
         _filter = [slice(None)] * (
             len(np_array.shape) - 1) + [self._indices]
-        return to_select_from[_filter]
+        return to_select_from[tuple(_filter)]
 
 
 class KCUDescriptor(dict):
