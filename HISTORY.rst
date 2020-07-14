@@ -1,7 +1,7 @@
 History
 =======
 
-1.0.20.12 (unreleased)
+1.0.20.12 (2020-07-14)
 ----------------------
 
 - Fixed problem with previous release
