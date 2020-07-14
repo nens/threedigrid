@@ -4,7 +4,7 @@ History
 1.0.20.11 (unreleased)
 ----------------------
 
-- Nothing changed yet.
+- Nodgrid generation bugfixes
 
 
 1.0.20.10 (2020-07-07)
