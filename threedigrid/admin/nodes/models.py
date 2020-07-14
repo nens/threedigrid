@@ -186,7 +186,8 @@ class Cells(Nodes):
             ids[:],
             int(pix_bbox[2] - pix_bbox[0]),
             int(pix_bbox[3] - pix_bbox[1]),
-            int(pix_bbox[0])
+            int(pix_bbox[0]),
+            int(pix_bbox[1])
         )
 
     def __repr__(self):
