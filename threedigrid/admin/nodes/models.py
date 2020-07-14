@@ -189,7 +189,7 @@ class Cells(Nodes):
             int(pix_bbox[0])
         )
 
-    def __repr__(self):	
+    def __repr__(self):
         return "<orm cells instance of {}>".format(self.model_name)
 
     def __contenttype__(self):
