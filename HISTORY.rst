@@ -1,7 +1,7 @@
 History
 =======
 
-1.0.20.11 (unreleased)
+1.0.20.11 (2020-07-14)
 ----------------------
 
 - Nodgrid generation bugfixes
