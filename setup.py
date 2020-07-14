@@ -6,9 +6,12 @@
 from __future__ import absolute_import
 from setuptools import setup, find_packages
 
+import sys
 import codecs
 import re
 import os
+
+python_27 = sys.version_info <= (2, 7)
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -37,6 +40,17 @@ lightweight_requirements = [
     'numpy>=1.13',
     'h5py>=2.7.1',
 ]
+
+if python_27:
+    lightweight_requirements += [
+        'llvmlite==0.31.0',
+        'numba>=0.47.0'
+    ]
+else:
+    lightweight_requirements += [
+        'llvmlite',
+        'numba>=0.47.0'
+    ]
 
 results_requirements = [
     'cftime>=1.0.1'

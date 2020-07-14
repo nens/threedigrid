@@ -186,12 +186,8 @@ class Cells(Nodes):
             ids[:],
             int(pix_bbox[2] - pix_bbox[0]),
             int(pix_bbox[3] - pix_bbox[1]),
-            int(pix_bbox[0]),
-            int(pix_bbox[1])
+            int(pix_bbox[0])
         )
-
-    def __repr__(self):
-        return "<orm cells instance of {}>".format(self.model_name)
 
     def __contenttype__(self):
         return 'cells'

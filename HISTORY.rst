@@ -1,10 +1,24 @@
 History
 =======
 
-\ (unreleased)
---------------
+1.0.20.11 (unreleased)
+----------------------
 
 - Nothing changed yet.
+
+
+1.0.20.10 (2020-07-07)
+----------------------
+
+- Added missing numba requirement in setup.py
+
+
+1.0.20.9 (2020-07-07)
+---------------------
+
+- Fixed RPC breaches/pumps bug
+
+- Added fast nod_grid generation on cells
 
 
 1.0.20.8 (2020-05-22)
