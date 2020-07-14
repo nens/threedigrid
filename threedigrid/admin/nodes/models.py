@@ -178,15 +178,15 @@ class Cells(Nodes):
 
     def get_nodgrid(self, pix_bbox, subset_name=None):
         ids = np.array(
-            self.get_ids_from_pix_bbox(pix_bbox, subset_name=subset_name)
+            self.get_ids_from_pix_bbox(pix_bbox, subset_name=subset_name),
+            dtype=np.int32
         )
         return create_nodgrid(
             self.pixel_coords[:],
             ids[:],
-            pix_bbox[2] - pix_bbox[0],
-            pix_bbox[3] - pix_bbox[1],
-            pix_bbox[0],
-            pix_bbox[1]
+            int(pix_bbox[2] - pix_bbox[0]),
+            int(pix_bbox[3] - pix_bbox[1]),
+            int(pix_bbox[0])
         )
 
     def __repr__(self):
@@ -263,7 +263,7 @@ class Grid(Model):
 
 @jit(nopython=True)
 def create_nodgrid(pixel_coords, ids, width, height, offset_i, offset_j):
-    grid_arr = np.full((height, width), -9999, dtype=np.int16)
+    grid_arr = np.full((height, width), -9999, dtype=np.int32)
     for id in ids:
         i0 = np.maximum(pixel_coords[0, id], offset_i)
         i1 = np.minimum(pixel_coords[2, id], offset_i + width)
