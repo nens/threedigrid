@@ -4,7 +4,7 @@ History
 1.0.20.12 (unreleased)
 ----------------------
 
-- Nothing changed yet.
+- Fixed problem with previous release
 
 
 1.0.20.11 (2020-07-14)
