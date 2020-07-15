@@ -181,7 +181,7 @@ class Cells(Nodes):
             self.get_ids_from_pix_bbox(pix_bbox, subset_name=subset_name),
             dtype=np.int32
         )
-        return create_nodgrid(
+        nodgrid = create_nodgrid(
             self.pixel_coords[:],
             ids[:],
             int(pix_bbox[2] - pix_bbox[0]),
@@ -189,6 +189,7 @@ class Cells(Nodes):
             int(pix_bbox[0]),
             int(pix_bbox[1])
         )
+        return nodgrid[::-1, ::]
 
     def __repr__(self):
         return "<orm cells instance of {}>".format(self.model_name)
@@ -264,11 +265,11 @@ class Grid(Model):
 
 @jit(nopython=True)
 def create_nodgrid(pixel_coords, ids, width, height, offset_i, offset_j):
-    grid_arr = np.full((height, width), -9999, dtype=np.int32)
+    grid_arr = np.zeros((height, width), dtype=np.int32)
     for id in ids:
         i0 = np.maximum(pixel_coords[0, id], offset_i)
         i1 = np.minimum(pixel_coords[2, id], offset_i + width)
         j0 = np.maximum(pixel_coords[1, id], offset_j)
         j1 = np.minimum(pixel_coords[3, id], offset_j + height)
-        grid_arr[j0: j1, i0: i1] = id
+        grid_arr[j0:j1, i0:i1] = id
     return grid_arr
