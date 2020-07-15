@@ -173,7 +173,7 @@ class Cells(Nodes):
         inst = self
         if subset_name:
             inst = self.subset(subset_name)
-        id = inst.filter(pixel_coords__in_bbox=bbox).id
+        id = inst.filter(pixel_coords__intersects_bbox=bbox).id
         return id.tolist()
 
     def get_nodgrid(self, pix_bbox, subset_name=None):
