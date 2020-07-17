@@ -267,8 +267,8 @@ class PreparePipes(object):
         pipes_field_names = [
             'pk',
             'display_name',
-            'invert_level_start_point',
-            'invert_level_end_point',
+            'invert_level_start_point_raw',
+            'invert_level_end_point_raw',
             'friction_type',
             'friction_value',
             'material',
@@ -282,6 +282,8 @@ class PreparePipes(object):
             'cross_section_definition__db_shape']
 
         pipes_field_name_override = {
+            'invert_level_start_point_raw': 'invert_level_start_point',
+            'invert_level_end_point_raw': 'invert_level_end_point',
             'cross_section_definition__db_width': 'cross_section_width',
             'cross_section_definition__db_height': 'cross_section_height',
             'cross_section_definition__db_shape': 'cross_section_shape'}
@@ -389,8 +391,8 @@ class PrepareCulverts(object):
             'discharge_coefficient_positive',
             'friction_type',
             'friction_value',
-            'invert_level_start_point',
-            'invert_level_end_point',
+            'invert_level_start_point_raw',
+            'invert_level_end_point_raw',
             'calculation_type',
             'dist_calc_points',
             'connection_node_start_pk',
@@ -401,6 +403,8 @@ class PrepareCulverts(object):
             'cross_section_definition__db_shape']
 
         culverts_field_name_override = {
+            'invert_level_start_point_raw': 'invert_level_start_point',
+            'invert_level_end_point_raw': 'invert_level_end_point',
             'cross_section_definition__db_width': 'cross_section_width',
             'cross_section_definition__db_height': 'cross_section_height',
             'cross_section_definition__db_shape': 'cross_section_shape'}

@@ -1,8 +1,12 @@
 History
 =======
 
-1.0.20.13 (unreleased)
-----------------------
+1.0.21 (unreleased)
+-------------------
+
+- Invert_level_start_point and end point where inverted
+  by Inpy. After this change the values will be correct again,
+  however present gridadmin files will still have the incorrect value.
 
 - Added `Breaches` model under lines with specific breach fields
   mapped from the 'breaches' h5py datagroup.
