@@ -178,9 +178,9 @@ class PipesGeoJsonSerializer():
                         (2, -1)), constants.LONLAT_DIGITS).tolist())
 
             invert_level_start_point_str = format_to_str(
-                -selection['invert_level_start_point'][i])
+                selection['invert_level_start_point'][i])
             invert_level_end_point_str = format_to_str(
-                -selection['invert_level_end_point'][i])
+                selection['invert_level_end_point'][i])
 
             cross_section = cross_section_str(
                 selection['cross_section_width'][i],
@@ -348,9 +348,9 @@ class CulvertsGeoJsonSerializer():
                         (2, -1)).T, constants.LONLAT_DIGITS).tolist())
 
             invert_level_start_point_str = format_to_str(
-                -selection['invert_level_start_point'][i])
+                selection['invert_level_start_point'][i])
             invert_level_end_point_str = format_to_str(
-                -selection['invert_level_end_point'][i])
+                selection['invert_level_end_point'][i])
 
             cross_section = cross_section_str(
                 selection['cross_section_width'][i],

@@ -1,10 +1,12 @@
 History
 =======
 
-1.0.20.13 (unreleased)
-----------------------
+1.0.21 (unreleased)
+-------------------
 
-- Nothing changed yet.
+- Invert_level_start_point and end point where inverted
+  by Inpy. After this change the values will be correct again,
+  however present gridadmin files will still have the incorrect value.
 
 
 1.0.20.12 (2020-07-14)
