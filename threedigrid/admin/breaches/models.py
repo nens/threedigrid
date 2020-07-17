@@ -22,17 +22,19 @@ To query the ``Breaches`` model::
     >>> ga.breaches.filter(kcu__eq=56).data
 
 """
-
 from __future__ import unicode_literals
 from __future__ import print_function
-
 from __future__ import absolute_import
+import logging
 from threedigrid.admin.breaches import exporters
 from threedigrid.admin import constants
 from threedigrid.orm.models import Model
 from threedigrid.orm.fields import (
     ArrayField, PointArrayField)
 from threedigrid.orm.base.fields import IndexArrayField
+
+
+logger = logging.getLogger(__name__)
 
 
 class Breaches(Model):
@@ -62,6 +64,11 @@ class Breaches(Model):
     OBJECT_TYPE = constants.TYPE_V2_BREACH
 
     def __init__(self, *args, **kwargs):
+        logger.warning(
+            "Deprecation warning: This model is going to be removed "
+            " in the near future, "
+            "please use breaches under lines (lines.breaches) instead"
+        )
         super(Breaches, self).__init__(*args, **kwargs)
 
         self._exporters = [

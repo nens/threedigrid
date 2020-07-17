@@ -23,6 +23,10 @@ BASE_SUBSET_FIELDS = {
     'qp': {'2d_all': 'Mesh2D_qp'},
     'up1':
         {'2d_all': 'Mesh2D_up1'},
+    'breach_depth':
+        {'1d_all': 'Mesh1D_breach_depth'},
+    'breach_width':
+        {'1d_all': 'Mesh1D_breach_width'}
 }
 
 
