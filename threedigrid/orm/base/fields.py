@@ -11,6 +11,7 @@ from __future__ import absolute_import
 import numpy as np
 
 from threedigrid.admin.constants import NO_DATA_VALUE
+from threedigrid.admin.utils import PKMapper
 
 
 class ArrayField:
@@ -207,6 +208,11 @@ class TimeSeriesSubsetArrayField(TimeSeriesArrayField):
         source_data = datasource[self._source_name][timeseries_filter, :]
         shp = (source_data.shape[0], self._size)
         templ = np.zeros(shp, dtype=source_data.dtype)
+
+        # Fix trash element mis-aligments
+        if source_data.shape[1] == subset_index.shape[0] - 1:
+            subset_index = subset_index[1:]
+
         templ[:, subset_index] = source_data
 
         # sort the stacked array by lookup
@@ -216,3 +222,118 @@ class TimeSeriesSubsetArrayField(TimeSeriesArrayField):
 
     def __repr__(self):
         return self.__class__.__name__
+
+
+def resolve_h5py_file_datasource(h5py_file, dotted_path):
+    # Follow the 'path' with dots to get a datasource
+    # in the h5py_file
+    # For example:
+    #    dotted_path = 'lines.id'
+    res = h5py_file
+    for key in dotted_path.split('.'):
+        res = res.get(key)
+    return res[:]
+
+
+class MappedSubsetArrayField(ArrayField):
+    """
+    Field for subset arrays (for example only spanning the 2d section)
+    And also mapped -> using another ordering than in the hdf5 file.
+    """
+    def __init__(self, array_to_map=None, map_from_array=None,
+                 map_to_array=None, subset_filter=None,
+                 skip_if_datasource_present=False):
+        """
+        Use map_from_array and map_to_array to map array_to_map
+        onto an new array with the name as specified for this field.
+
+        :param array_to_map: the 'group.datasource' that is going to be mapped
+        :map_from_array: the 'group.datasource' that is used to map from
+        :map_to_array: the 'group.datasource' to map to
+        :skip_if_datasource_present: skip the whole mapping process if the
+           array is available on the default datasource
+
+        For example:
+            breach_id = MappedSubsetArrayField(
+                array_to_map='breaches.id',
+                map_from_array='breaches.levl', map_to_array='lines.id',
+                subset_filter={
+                    'lines.kcu':
+                        subsets.KCU__IN_SUBSETS['POTENTIAL_BREACH'][0]})
+
+            Maps breach.id array into lines for kcu=55 on lines using
+            breach.levl -> lines.id to order breach.id
+
+        Warning: the subset_filter needs to match the 'map_to_array' in length,
+        so make sure they use the same h5py group.
+        """
+        self._array_to_map = array_to_map
+        self._map_from_array = map_from_array
+        self._map_to_array = map_to_array
+        self._subset_filter = subset_filter
+        self._skip_if_datasource_present = skip_if_datasource_present
+
+    def get_value(self, datasource, name, **kwargs):
+        # Skip the whole mapping if the dataset is
+        # already present on the default datasource
+        if ((self._skip_if_datasource_present
+             and name in list(datasource.keys()))):
+            data = datasource[name][:]
+            data[data == NO_DATA_VALUE] = 0
+            return data
+
+        # Retrieve all specified arrays from
+        # the h5py_file
+        array_to_map = resolve_h5py_file_datasource(
+            datasource._h5py_file,
+            self._array_to_map
+        )
+        map_from_array = resolve_h5py_file_datasource(
+            datasource._h5py_file,
+            self._map_from_array
+        )
+        map_to_array = resolve_h5py_file_datasource(
+            datasource._h5py_file,
+            self._map_to_array
+        )
+
+        subset_key, subset_value = list(
+            self._subset_filter.items())[0]
+
+        subset_filter_array = resolve_h5py_file_datasource(
+            datasource._h5py_file,
+            subset_key
+        )
+
+        # Create a filter based on the specified subset_filter
+        boolean_filter = subset_filter_array == subset_value
+
+        new_shape = map_to_array.shape
+
+        # Adjust for array's with 2 dimensions
+        if len(array_to_map.shape) == 2:
+            new_shape = (array_to_map.shape[0], new_shape[0])
+
+        # Create an empty array that we are going to (partial) fill
+        data = np.full(new_shape, 0,  dtype=array_to_map.dtype)
+
+        # Use the PKMapper to create a mapping from:
+        # 'map_from_array' to 'map_to_array'
+        # and apply that mapping
+        # on the 'array_to_map'
+        mapper = PKMapper(
+            map_from_array, map_to_array[boolean_filter])
+
+        output = mapper.apply_on(array_to_map)
+
+        # Adjust filter dimensionality
+        if len(array_to_map.shape) == 2:
+            boolean_filter = tuple([slice(None), boolean_filter])
+
+        # Fix trash element mis-aligments
+        if output.shape[0] == data[boolean_filter].shape[0] + 1:
+            output = output[1:]
+
+        # Set the output on the correct subset on the data
+        data[boolean_filter] = output
+        return data

@@ -8,6 +8,13 @@ History
   by Inpy. After this change the values will be correct again,
   however present gridadmin files will still have the incorrect value.
 
+- Added `Breaches` model under lines with specific breach fields
+  mapped from the 'breaches' h5py datagroup.
+
+- Added `MappedSubsetArrayField` allowing to map arrays from other
+  h5py datagroups to a model on another datagroup subset. Breaches
+  uses this to map the array's under 'breaches' to 'lines'
+
 
 1.0.20.12 (2020-07-14)
 ----------------------
