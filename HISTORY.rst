@@ -1,7 +1,7 @@
 History
 =======
 
-1.0.21 (unreleased)
+1.0.21 (2020-07-17)
 -------------------
 
 - Invert_level_start_point and end point where inverted
