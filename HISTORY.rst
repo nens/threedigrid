@@ -4,7 +4,8 @@ History
 1.0.22 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Added extra field 'discharge_coefficient' to channels and pipes. These
+  fields default to 1.0.
 
 
 1.0.21 (2020-07-17)
