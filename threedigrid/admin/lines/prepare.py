@@ -249,6 +249,12 @@ class PrepareChannels(object):
         channels_numpy_array_dict = db_objects_to_numpy_array_dict(
             threedi_datasource.v2_channels, channels_field_names)
 
+        # discharge_coefficient defaults to 1.0 for channels
+        channels_field_names.append('discharge_coefficient')
+        channels_numpy_array_dict['discharge_coefficient'] = np.ones(
+            len(content_pk), dtype=np.float32
+        )
+
         add_or_update_datasets(
             line_group, channels_numpy_array_dict,
             channels_field_names,
@@ -290,6 +296,12 @@ class PreparePipes(object):
 
         pipes_numpy_array_dict = db_objects_to_numpy_array_dict(
             threedi_datasource.v2_pipes, pipes_field_names)
+
+        # discharge_coefficient defaults to 1.0 for pipes
+        pipes_field_names.append('discharge_coefficient')
+        pipes_numpy_array_dict['discharge_coefficient'] = np.ones(
+            len(content_pk), dtype=np.float32
+        )
 
         add_or_update_datasets(
             line_group, pipes_numpy_array_dict,
