@@ -107,6 +107,7 @@ class Pipes(Lines):
     calculation_type = ArrayField()
     connection_node_start_pk = ArrayField()
     connection_node_end_pk = ArrayField()
+    discharge_coefficient = ArrayField()
 
 
 class Channels(Lines):
@@ -115,6 +116,7 @@ class Channels(Lines):
     dist_calc_points = ArrayField()
     connection_node_start_pk = ArrayField()
     connection_node_end_pk = ArrayField()
+    discharge_coefficient = ArrayField()
 
 
 class Weirs(Lines):
