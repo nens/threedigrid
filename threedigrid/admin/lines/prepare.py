@@ -154,7 +154,12 @@ class PrepareLines(object):
                 end_pnt = end_points[piece]
             start_distance = round(geom.project(start_pnt), 3)
             end_distance = round(geom.project(end_pnt), 3)
-            coords = list(geom.coords)
+
+            # Don't use the z-coordinate
+            if geom.has_z:
+                coords = [(x, y) for x, y, z in geom.coords]
+            else:
+                coords = list(geom.coords)
             start_set = False
             # no additional calc points
             if start_distance <= 0.0 and end_distance >= geom.length:
