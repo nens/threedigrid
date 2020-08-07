@@ -4,6 +4,9 @@ History
 1.0.22 (unreleased)
 -------------------
 
+- Added extra field 'discharge_coefficient' to channels and pipes. These
+  fields default to 1.0.
+
 - Bugfix: don't use the z-coordinate when making line_geometries during the prepare step
 
 
