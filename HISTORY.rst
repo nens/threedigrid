@@ -4,7 +4,7 @@ History
 1.0.22 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Bugfix: don't use the z-coordinate when making line_geometries during the prepare step
 
 
 1.0.21 (2020-07-17)
