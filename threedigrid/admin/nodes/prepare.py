@@ -6,7 +6,7 @@ from __future__ import print_function
 from __future__ import absolute_import
 import numpy as np
 from threedigrid.admin import constants
-from threedigrid.admin.nodes.subsets import NODE_TYPE__IN_SUBSETS
+from threedigrid.admin.nodes.subsets import NODE_TYPE__EQ_SUBSETS
 from threedigrid.admin.prepare_utils import (
         db_objects_to_numpy_array_dict, add_or_update_datasets)
 
@@ -93,7 +93,8 @@ class PrepareCells:
 
         pixel_width = np.zeros(nodk.shape, dtype='int')
         pixel_coords = np.full((4, nodk.shape[0]), -9999, dtype='int')
-        for node_type_subset in NODE_TYPE__IN_SUBSETS['2D_ALL']:
+        for node_type_subset in [NODE_TYPE__EQ_SUBSETS['2D_BOUNDARIES'],
+                                 NODE_TYPE__EQ_SUBSETS['2D_OPEN_WATER']]:
             mask = node_types == node_type_subset
             pixel_width[mask] = lgrmin * 2 ** (nodk[mask] - 1)
             pixel_coords[0, mask] = ip[0, nodm[mask] - 1, nodk[mask] - 1] - 1
