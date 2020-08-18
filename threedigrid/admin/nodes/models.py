@@ -267,9 +267,9 @@ class Grid(Model):
 def create_nodgrid(pixel_coords, ids, width, height, offset_i, offset_j):
     grid_arr = np.zeros((height, width), dtype=np.int32)
     for id in ids:
-        i0 = np.maximum(pixel_coords[0, id], offset_i)
-        i1 = np.minimum(pixel_coords[2, id], offset_i + width)
-        j0 = np.maximum(pixel_coords[1, id], offset_j)
-        j1 = np.minimum(pixel_coords[3, id], offset_j + height)
+        i0 = np.maximum(pixel_coords[0, id], offset_i) - offset_i
+        i1 = np.minimum(pixel_coords[2, id], offset_i + width) - offset_i
+        j0 = np.maximum(pixel_coords[1, id], offset_j) - offset_j
+        j1 = np.minimum(pixel_coords[3, id], offset_j + height) - offset_j
         grid_arr[j0:j1, i0:i1] = id
     return grid_arr
