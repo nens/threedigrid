@@ -161,7 +161,7 @@ class Cells(Nodes):
         id = inst.filter(cell_coords__contains_point=xy).id
         return id.tolist()
 
-    def get_ids_from_pix_bbox(self, bbox, subset_name=None):
+    def get_ids_from_pix_bbox(self, bbox, subset_name='2D_OPEN_WATER'):
         """
         :param x: the x coordinate in xy_epsg_code
         :param y: the y coordinate in xy_epsg_code
@@ -176,7 +176,7 @@ class Cells(Nodes):
         id = inst.filter(pixel_coords__intersects_bbox=bbox).id
         return id.tolist()
 
-    def get_nodgrid(self, pix_bbox, subset_name=None):
+    def get_nodgrid(self, pix_bbox, subset_name='2D_OPEN_WATER'):
         ids = np.array(
             self.get_ids_from_pix_bbox(pix_bbox, subset_name=subset_name),
             dtype=np.int32
