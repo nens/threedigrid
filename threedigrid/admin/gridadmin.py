@@ -70,6 +70,8 @@ class GridH5Admin(object):
             self.is_rpc = True
             self.has_1d = True
             self.has_2d = True
+            self.has_breaches = True
+            self.has_pumpstations = True
         else:
             self.h5py_file = h5py.File(h5_file_path, file_modus)
             set_props = True
@@ -268,10 +270,10 @@ class GridH5Admin(object):
             return x
 
     def __enter__(self):
-        return self.h5py_file
+        return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        self.close()
+        self.h5py_file.close()
 
     def close(self):
         self.h5py_file.flush()
