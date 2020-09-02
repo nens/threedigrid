@@ -1,7 +1,7 @@
 History
 =======
 
-1.0.24 (unreleased)
+1.0.24 (2020-09-02)
 -------------------
 
 - Removed numba as dependency, since it did not really give any
