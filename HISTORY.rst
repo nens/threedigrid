@@ -1,7 +1,7 @@
 History
 =======
 
-1.0.23 (unreleased)
+1.0.23 (2020-09-02)
 -------------------
 
 - Creating fresh release after upload failed.
