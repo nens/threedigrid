@@ -4,7 +4,7 @@ History
 1.0.23 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Creating fresh release after upload failed.
 
 
 1.0.22 (2020-09-02)
