@@ -17,7 +17,6 @@ from __future__ import print_function
 
 from __future__ import absolute_import
 import numpy as np
-from numba import jit
 
 from threedigrid.orm.models import Model
 from threedigrid.orm.fields import ArrayField
@@ -161,7 +160,7 @@ class Cells(Nodes):
         id = inst.filter(cell_coords__contains_point=xy).id
         return id.tolist()
 
-    def get_ids_from_pix_bbox(self, bbox, subset_name=None):
+    def get_ids_from_pix_bbox(self, bbox, subset_name='2D_OPEN_WATER'):
         """
         :param x: the x coordinate in xy_epsg_code
         :param y: the y coordinate in xy_epsg_code
@@ -173,15 +172,15 @@ class Cells(Nodes):
         inst = self
         if subset_name:
             inst = self.subset(subset_name)
-        id = inst.filter(pixel_coords__in_bbox=bbox).id
+        id = inst.filter(pixel_coords__intersects_bbox=bbox).id
         return id.tolist()
 
-    def get_nodgrid(self, pix_bbox, subset_name=None):
+    def get_nodgrid(self, pix_bbox, subset_name='2D_OPEN_WATER'):
         ids = np.array(
             self.get_ids_from_pix_bbox(pix_bbox, subset_name=subset_name),
             dtype=np.int32
         )
-        return create_nodgrid(
+        nodgrid = create_nodgrid(
             self.pixel_coords[:],
             ids[:],
             int(pix_bbox[2] - pix_bbox[0]),
@@ -189,6 +188,7 @@ class Cells(Nodes):
             int(pix_bbox[0]),
             int(pix_bbox[1])
         )
+        return nodgrid[::-1, ::]
 
     def __repr__(self):
         return "<orm cells instance of {}>".format(self.model_name)
@@ -262,13 +262,12 @@ class Grid(Model):
         return grid_arr[::-1, ::]
 
 
-@jit(nopython=True)
 def create_nodgrid(pixel_coords, ids, width, height, offset_i, offset_j):
-    grid_arr = np.full((height, width), -9999, dtype=np.int32)
+    grid_arr = np.zeros((height, width), dtype=np.int32)
     for id in ids:
-        i0 = np.maximum(pixel_coords[0, id], offset_i)
-        i1 = np.minimum(pixel_coords[2, id], offset_i + width)
-        j0 = np.maximum(pixel_coords[1, id], offset_j)
-        j1 = np.minimum(pixel_coords[3, id], offset_j + height)
-        grid_arr[j0: j1, i0: i1] = id
+        i0 = np.maximum(pixel_coords[0, id], offset_i) - offset_i
+        i1 = np.minimum(pixel_coords[2, id], offset_i + width) - offset_i
+        j0 = np.maximum(pixel_coords[1, id], offset_j) - offset_j
+        j1 = np.minimum(pixel_coords[3, id], offset_j + height) - offset_j
+        grid_arr[j0:j1, i0:i1] = id
     return grid_arr
