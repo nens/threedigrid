@@ -19,7 +19,7 @@ from threedigrid.admin.lines import exporters
 from threedigrid.orm.models import Model
 from threedigrid.orm.fields import (
     ArrayField, LineArrayField, MultiLineArrayField)
-from threedigrid.orm.base.fields import IndexArrayField
+from threedigrid.orm.base.fields import IndexArrayField, MappedSubsetArrayField
 from threedigrid.admin.lines import subsets
 
 
@@ -85,6 +85,10 @@ class Lines(Model):
         return self._filter_as(Culverts, content_type='v2_culvert')
 
     @property
+    def breaches(self):
+        return self._filter_as(Breaches, kcu=55)
+
+    @property
     def line_nodes(self):
         return np.dstack(self.line)[0]
 
@@ -103,6 +107,7 @@ class Pipes(Lines):
     calculation_type = ArrayField()
     connection_node_start_pk = ArrayField()
     connection_node_end_pk = ArrayField()
+    discharge_coefficient = ArrayField()
 
 
 class Channels(Lines):
@@ -111,6 +116,7 @@ class Channels(Lines):
     dist_calc_points = ArrayField()
     connection_node_start_pk = ArrayField()
     connection_node_end_pk = ArrayField()
+    discharge_coefficient = ArrayField()
 
 
 class Weirs(Lines):
@@ -174,3 +180,35 @@ class Orifices(Lines):
     discharge_coefficient_positive = ArrayField()
     connection_node_start_pk = ArrayField()
     connection_node_end_pk = ArrayField()
+
+
+class Breaches(Lines):
+    breach_id = MappedSubsetArrayField(
+        array_to_map='breaches.id',
+        map_from_array='breaches.levl', map_to_array='lines.id',
+        subset_filter={
+            'lines.kcu': subsets.KCU__IN_SUBSETS['POTENTIAL_BREACH'][0]})
+
+    content_pk = MappedSubsetArrayField(
+        array_to_map='breaches.content_pk',
+        map_from_array='breaches.levl', map_to_array='lines.id',
+        subset_filter={
+            'lines.kcu': subsets.KCU__IN_SUBSETS['POTENTIAL_BREACH'][0]})
+
+    levbr = MappedSubsetArrayField(
+        array_to_map='breaches.levbr',
+        map_from_array='breaches.levl', map_to_array='lines.id',
+        subset_filter={
+            'lines.kcu': subsets.KCU__IN_SUBSETS['POTENTIAL_BREACH'][0]})
+
+    levmat = MappedSubsetArrayField(
+        array_to_map='breaches.levmat',
+        map_from_array='breaches.levl', map_to_array='lines.id',
+        subset_filter={
+            'lines.kcu': subsets.KCU__IN_SUBSETS['POTENTIAL_BREACH'][0]})
+
+    coordinates = MappedSubsetArrayField(
+        array_to_map='breaches.coordinates',
+        map_from_array='breaches.levl', map_to_array='lines.id',
+        subset_filter={
+            'lines.kcu': subsets.KCU__IN_SUBSETS['POTENTIAL_BREACH'][0]})

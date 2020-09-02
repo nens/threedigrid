@@ -154,7 +154,12 @@ class PrepareLines(object):
                 end_pnt = end_points[piece]
             start_distance = round(geom.project(start_pnt), 3)
             end_distance = round(geom.project(end_pnt), 3)
-            coords = list(geom.coords)
+
+            # Don't use the z-coordinate
+            if geom.has_z:
+                coords = [(x, y) for x, y, z in geom.coords]
+            else:
+                coords = list(geom.coords)
             start_set = False
             # no additional calc points
             if start_distance <= 0.0 and end_distance >= geom.length:
@@ -249,6 +254,12 @@ class PrepareChannels(object):
         channels_numpy_array_dict = db_objects_to_numpy_array_dict(
             threedi_datasource.v2_channels, channels_field_names)
 
+        # discharge_coefficient defaults to 1.0 for channels
+        channels_field_names.append('discharge_coefficient')
+        channels_numpy_array_dict['discharge_coefficient'] = np.ones(
+            len(content_pk), dtype=np.float32
+        )
+
         add_or_update_datasets(
             line_group, channels_numpy_array_dict,
             channels_field_names,
@@ -267,8 +278,8 @@ class PreparePipes(object):
         pipes_field_names = [
             'pk',
             'display_name',
-            'invert_level_start_point',
-            'invert_level_end_point',
+            'invert_level_start_point_raw',
+            'invert_level_end_point_raw',
             'friction_type',
             'friction_value',
             'material',
@@ -282,12 +293,20 @@ class PreparePipes(object):
             'cross_section_definition__db_shape']
 
         pipes_field_name_override = {
+            'invert_level_start_point_raw': 'invert_level_start_point',
+            'invert_level_end_point_raw': 'invert_level_end_point',
             'cross_section_definition__db_width': 'cross_section_width',
             'cross_section_definition__db_height': 'cross_section_height',
             'cross_section_definition__db_shape': 'cross_section_shape'}
 
         pipes_numpy_array_dict = db_objects_to_numpy_array_dict(
             threedi_datasource.v2_pipes, pipes_field_names)
+
+        # discharge_coefficient defaults to 1.0 for pipes
+        pipes_field_names.append('discharge_coefficient')
+        pipes_numpy_array_dict['discharge_coefficient'] = np.ones(
+            len(content_pk), dtype=np.float32
+        )
 
         add_or_update_datasets(
             line_group, pipes_numpy_array_dict,
@@ -389,8 +408,8 @@ class PrepareCulverts(object):
             'discharge_coefficient_positive',
             'friction_type',
             'friction_value',
-            'invert_level_start_point',
-            'invert_level_end_point',
+            'invert_level_start_point_raw',
+            'invert_level_end_point_raw',
             'calculation_type',
             'dist_calc_points',
             'connection_node_start_pk',
@@ -401,6 +420,8 @@ class PrepareCulverts(object):
             'cross_section_definition__db_shape']
 
         culverts_field_name_override = {
+            'invert_level_start_point_raw': 'invert_level_start_point',
+            'invert_level_end_point_raw': 'invert_level_end_point',
             'cross_section_definition__db_width': 'cross_section_width',
             'cross_section_definition__db_height': 'cross_section_height',
             'cross_section_definition__db_shape': 'cross_section_shape'}

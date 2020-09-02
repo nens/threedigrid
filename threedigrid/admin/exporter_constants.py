@@ -32,6 +32,7 @@ CHANNELS_EXPORT_FIELDS = [
     'dist_calc_points',
     'connection_node_start_pk',
     'connection_node_end_pk',
+    'discharge_coefficient'
 ]
 
 PIPES_EXPORT_FIELDS = [
@@ -50,6 +51,7 @@ PIPES_EXPORT_FIELDS = [
     'invert_level_end_point',
     'connection_node_start_pk',
     'connection_node_end_pk',
+    'discharge_coefficient',
 ]
 
 WEIRS_EXPORT_FIELDS = [

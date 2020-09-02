@@ -1,10 +1,40 @@
 History
 =======
 
-1.0.20.13 (unreleased)
-----------------------
+1.0.24 (unreleased)
+-------------------
 
 - Nothing changed yet.
+
+
+1.0.23 (2020-09-02)
+-------------------
+
+- Creating fresh release after upload failed.
+
+
+1.0.22 (2020-09-02)
+-------------------
+
+- Added extra field 'discharge_coefficient' to channels and pipes. These
+  fields default to 1.0.
+
+- Bugfix: don't use the z-coordinate when making line_geometries during the prepare step
+
+
+1.0.21 (2020-07-17)
+-------------------
+
+- Invert_level_start_point and end point where inverted
+  by Inpy. After this change the values will be correct again,
+  however present gridadmin files will still have the incorrect value.
+
+- Added `Breaches` model under lines with specific breach fields
+  mapped from the 'breaches' h5py datagroup.
+
+- Added `MappedSubsetArrayField` allowing to map arrays from other
+  h5py datagroups to a model on another datagroup subset. Breaches
+  uses this to map the array's under 'breaches' to 'lines'
 
 
 1.0.20.12 (2020-07-14)
