@@ -1,7 +1,7 @@
 History
 =======
 
-1.0.22 (unreleased)
+1.0.22 (2020-09-02)
 -------------------
 
 - Added extra field 'discharge_coefficient' to channels and pipes. These
