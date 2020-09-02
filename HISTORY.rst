@@ -4,7 +4,8 @@ History
 1.0.24 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Removed numba as dependency, since it did not really give any
+  performance gain on Linux.
 
 
 1.0.23 (2020-09-02)
