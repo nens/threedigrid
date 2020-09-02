@@ -4,7 +4,7 @@ History
 1.0.24 (unreleased)
 -------------------
 
-- Removed numbas as dependency, since it did not really give any
+- Removed numba as dependency, since it did not really give any
   performance gain on Linux.
 
 
