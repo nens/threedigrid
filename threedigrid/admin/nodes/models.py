@@ -17,7 +17,6 @@ from __future__ import print_function
 
 from __future__ import absolute_import
 import numpy as np
-from numba import jit
 
 from threedigrid.orm.models import Model
 from threedigrid.orm.fields import ArrayField
@@ -263,7 +262,6 @@ class Grid(Model):
         return grid_arr[::-1, ::]
 
 
-@jit(nopython=True)
 def create_nodgrid(pixel_coords, ids, width, height, offset_i, offset_j):
     grid_arr = np.zeros((height, width), dtype=np.int32)
     for id in ids:

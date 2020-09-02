@@ -41,17 +41,6 @@ lightweight_requirements = [
     'h5py>=2.7.1',
 ]
 
-if python_27:
-    lightweight_requirements += [
-        'llvmlite==0.31.0',
-        'numba>=0.47.0'
-    ]
-else:
-    lightweight_requirements += [
-        'llvmlite',
-        'numba>=0.47.0'
-    ]
-
 results_requirements = [
     'cftime>=1.0.1'
 ]
