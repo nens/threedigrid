@@ -4,7 +4,9 @@ History
 1.0.25 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Bugfix: crest_level is also inverted by Inpy. Use
+  the raw value in the prepare step to include the
+  correct (non inverted) value.
 
 
 1.0.24 (2020-09-02)
