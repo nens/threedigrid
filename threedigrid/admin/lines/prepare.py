@@ -334,7 +334,7 @@ class PrepareWeirs(object):
             'friction_type',
             'friction_value',
             'crest_type',
-            'crest_level',
+            'crest_level_raw',
             'connection_node_start_pk',
             'connection_node_end_pk',
             'zoom_category',
@@ -343,6 +343,7 @@ class PrepareWeirs(object):
             'cross_section_definition__db_shape']
 
         weir_field_name_override = {
+            'crest_level_raw': 'crest_level',
             'cross_section_definition__db_width': 'cross_section_width',
             'cross_section_definition__db_height': 'cross_section_height',
             'cross_section_definition__db_shape': 'cross_section_shape'}
@@ -376,11 +377,15 @@ class PrepareOrifices(object):
             'discharge_coefficient_negative',
             'discharge_coefficient_positive',
             'crest_type',
-            'crest_level',
+            'crest_level_raw',
             'connection_node_start_pk',
             'connection_node_end_pk',
             'zoom_category'
         ]
+
+        orifices_field_name_override = {
+            'crest_level_raw': 'crest_level'
+        }
 
         orifices_numpy_array_dict = db_objects_to_numpy_array_dict(
             threedi_datasource.v2_orifices, orifices_field_names)
@@ -389,7 +394,9 @@ class PrepareOrifices(object):
             line_group, orifices_numpy_array_dict,
             orifices_field_names,
             orifices_numpy_array_dict['pk'], content_pk,
-            ignore_mask=content_type != 'v2_orifice')
+            ignore_mask=content_type != 'v2_orifice',
+            field_name_override=orifices_field_name_override
+        )
 
 
 class PrepareCulverts(object):
