@@ -1,7 +1,7 @@
 History
 =======
 
-1.0.25 (unreleased)
+1.0.25 (2020-09-15)
 -------------------
 
 - Bugfix: crest_level is also inverted by Inpy. Use
