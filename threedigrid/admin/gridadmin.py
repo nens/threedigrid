@@ -251,7 +251,8 @@ class GridH5Admin(object):
                         setattr(self, prop, bool(value))
                     except AttributeError:
                         logger.warning(
-                            'Can not set property {}, already exists'.format(prop)
+                            'Can not set property {}, already exists'.format(
+                                prop)
                         )
                         pass
         else:
