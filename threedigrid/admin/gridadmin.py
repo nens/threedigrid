@@ -69,9 +69,6 @@ class GridH5Admin(object):
             self._grid_kwargs = {}
             self.is_rpc = True
             self.has_1d = True
-            self.has_2d = True
-            self.has_breaches = True
-            self.has_pumpstations = True
         else:
             self.h5py_file = h5py.File(h5_file_path, file_modus)
             set_props = True
@@ -246,15 +243,27 @@ class GridH5Admin(object):
         return np.array([np.min(x), np.min(y), np.max(x), np.max(y)])
 
     def _set_props(self):
-        for prop, value in six.iteritems(self.h5py_file.attrs):
-            if prop and prop.startswith('has_'):
-                try:
-                    setattr(self, prop, bool(value))
-                except AttributeError:
-                    logger.warning(
-                        'Can not set property {}, already exists'.format(prop)
-                    )
-                    pass
+        if not self.is_rpc:
+            for prop, value in six.iteritems(self.h5py_file.attrs):
+                if prop and prop.startswith('has_'):
+                    try:
+                        setattr(self, prop, bool(value))
+                    except AttributeError:
+                        logger.warning(
+                            'Can not set property {}, already exists'.format(prop)
+                        )
+                        pass
+        else:
+            properties = [
+                "has_1d", "has_2d", "has_breaches", "has_pumpstations"
+            ]
+
+            async def _set_property(prop):
+                value = await self.h5py_file.attrs[prop].resolve()
+                setattr(self, prop, bool(value))
+
+            futures = [_set_property(prop) for prop in properties]
+            return asyncio.gather(*futures)
 
     def get_from_meta(self, prop_name):
         if prop_name not in list(self.h5py_file['meta'].keys()):
