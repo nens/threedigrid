@@ -24,6 +24,7 @@ from threedigrid.admin.levees.models import Levees
 from threedigrid.admin.h5py_datasource import H5pyGroup
 
 try:
+    import asyncio
     import asyncio_rpc # noqa
     asyncio_rpc_support = True
 except ImportError:
