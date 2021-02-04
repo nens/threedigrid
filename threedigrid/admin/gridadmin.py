@@ -256,15 +256,11 @@ class GridH5Admin(object):
                         )
                         pass
         else:
+            from threedigrid.admin.rpc_datasource import _set_property
             properties = [
                 "has_1d", "has_2d", "has_breaches", "has_pumpstations"
             ]
-
-            async def _set_property(prop):
-                value = await self.h5py_file.attrs[prop].resolve()
-                setattr(self, prop, bool(value))
-
-            futures = [_set_property(prop) for prop in properties]
+            futures = [_set_property(self, prop) for prop in properties]
             return asyncio.gather(*futures)
 
     def get_from_meta(self, prop_name):
