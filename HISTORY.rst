@@ -4,7 +4,7 @@ History
 1.0.26 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fixed rpc gridadmin properties
 
 
 1.0.25 (2020-09-15)
