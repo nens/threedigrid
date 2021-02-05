@@ -19,6 +19,11 @@ NAMESPACE = 'GRIDRESULTADMIN'
 RESULT_EXPIRE_TIME = 30
 
 
+async def _set_property(ga, prop):
+    value = await ga.h5py_file.attrs[prop].resolve()
+    setattr(ga, prop, bool(value))
+
+
 class Future(object):
     def __init__(self, rpc_file, rpc_stack):
         self.rpc_file = rpc_file
