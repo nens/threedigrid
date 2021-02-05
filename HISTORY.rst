@@ -1,7 +1,7 @@
 History
 =======
 
-1.0.26 (unreleased)
+1.0.26 (2021-02-05)
 -------------------
 
 - Fixed rpc gridadmin properties
