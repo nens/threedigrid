@@ -18,7 +18,7 @@ from threedigrid.geo_utils import raise_import_exception
 def as_numpy_array(array):
     if hasattr(array, 'value'):
         return array.value
-    return array
+    return array[()]
 
 
 class PrepareBreaches(object):

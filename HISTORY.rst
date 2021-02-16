@@ -4,7 +4,7 @@ History
 1.0.27 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Upgraded to H5py 3.1.0, needs Python >= 3.6
 
 
 1.0.26 (2021-02-05)

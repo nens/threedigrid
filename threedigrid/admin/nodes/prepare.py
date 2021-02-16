@@ -14,7 +14,7 @@ from threedigrid.admin.prepare_utils import (
 def as_numpy_array(array):
     if hasattr(array, 'value'):
         return array.value
-    return array
+    return array[()]
 
 
 class PrepareNodes:
@@ -51,7 +51,7 @@ class PrepareNodes:
                 'content_pk', cls.get_node_pks(mapping1d, id_mapper))
 
         if 'seq_id' not in list(datasource.keys()) and has_1d:
-            datasource.set('seq_id', mapping1d['nend1d'].value)
+            datasource.set('seq_id', mapping1d['nend1d'][:])
 
         if 'coordinates' not in list(datasource.keys()):
             datasource.set(
@@ -65,7 +65,7 @@ class PrepareConnectionNodes:
     @staticmethod
     def prepare_datasource(h5py_file, threedi_datasource):
         node_group = h5py_file['nodes']
-        content_pk = node_group['content_pk'].value
+        content_pk = node_group['content_pk'][:]
 
         connection_nodes_numpy_array_dict = db_objects_to_numpy_array_dict(
             threedi_datasource.connection_nodes,
@@ -82,14 +82,14 @@ class PrepareCells:
     @staticmethod
     def prepare_datasource(h5py_file, threedi_datasource):
         node_group = h5py_file['nodes']
-        lgrmin = h5py_file['meta']['lgrmin'].value
-        nodk = h5py_file['grid_coordinate_attributes']['nodk'].value
-        nodm = h5py_file['grid_coordinate_attributes']['nodm'].value
-        nodn = h5py_file['grid_coordinate_attributes']['nodn'].value
-        ip = h5py_file['grid_coordinate_attributes']['ip'].value
-        jp = h5py_file['grid_coordinate_attributes']['jp'].value
+        lgrmin = h5py_file['meta']['lgrmin'][()]
+        nodk = h5py_file['grid_coordinate_attributes']['nodk'][()]
+        nodm = h5py_file['grid_coordinate_attributes']['nodm'][()]
+        nodn = h5py_file['grid_coordinate_attributes']['nodn'][()]
+        ip = h5py_file['grid_coordinate_attributes']['ip'][()]
+        jp = h5py_file['grid_coordinate_attributes']['jp'][()]
 
-        node_types = h5py_file['nodes']['node_type'].value
+        node_types = h5py_file['nodes']['node_type'][:]
 
         pixel_width = np.zeros(nodk.shape, dtype='int')
         pixel_coords = np.full((4, nodk.shape[0]), -9999, dtype='int')
@@ -112,7 +112,7 @@ class PrepareManholes:
     @staticmethod
     def prepare_datasource(h5py_file, threedi_datasource):
         node_group = h5py_file['nodes']
-        content_pk = node_group['content_pk'].value
+        content_pk = node_group['content_pk'][:]
 
         manhole_numpy_array_dict = db_objects_to_numpy_array_dict(
             threedi_datasource.v2_manholes, [
