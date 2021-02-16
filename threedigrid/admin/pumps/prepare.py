@@ -52,16 +52,16 @@ class PreparePumps:
         # Step 2: Postprocessing data
 
         # Connection nodes are nodes with content_pk != 0
-        connection_nodes_mask = node_group['content_pk'].value != 0
+        connection_nodes_mask = node_group['content_pk'][:] != 0
         connection_nodes_content_pks = node_group[
-            'content_pk'].value[connection_nodes_mask]
-        connection_nodes_content_id = node_group['id'].value[
+            'content_pk'][:][connection_nodes_mask]
+        connection_nodes_content_id = node_group['id'][:][
             connection_nodes_mask]
-        connection_nodes_content_coordinates = node_group['coordinates'].value[
+        connection_nodes_content_coordinates = node_group['coordinates'][:][
             :, connection_nodes_mask]
 
         connection_nodes_initial_waterlevel = node_group[
-            'initial_waterlevel'].value[connection_nodes_mask]
+            'initial_waterlevel'][:][connection_nodes_mask]
 
         cn1_mapper = PKMapper(
             connection_nodes_content_pks,
@@ -98,11 +98,11 @@ class PreparePumps:
         if 'coordinates' not in list(datasource.keys()):
             # Set the coordinates based on the centroid of node_coordinates
             # if both set and else the one that is set.
-            node_coordinates = datasource['node_coordinates'].value
+            node_coordinates = datasource['node_coordinates'][:]
             node1_coords = node_coordinates[0:2, :]
             node2_coords = node_coordinates[2:4, :]
-            node1_id = datasource['node1_id'].value
-            node2_id = datasource['node2_id'].value
+            node1_id = datasource['node1_id'][:]
+            node2_id = datasource['node2_id'][:]
             node1_not_set = node1_id == -9999
             node2_not_set = node2_id == -9999
 
