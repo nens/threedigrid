@@ -55,7 +55,7 @@ geo_requirements = [
 ]
 
 rpc_requirements = [
-    'asyncio-rpc>=0.1.9',
+    'asyncio-rpc>=0.1.10',
 ]
 
 setup_requirements = []
