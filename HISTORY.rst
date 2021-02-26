@@ -4,7 +4,7 @@ History
 1.0.28 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Bumped asyncio-rpc to 0.1.10
 
 
 1.0.27 (2021-02-22)
