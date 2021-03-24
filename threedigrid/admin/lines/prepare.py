@@ -21,7 +21,7 @@ DT_VARIABLE = h5py.special_dtype(vlen=np.dtype('float64'))
 def as_numpy_array(array):
     if hasattr(array, 'value'):
         return array.value
-    return array
+    return array[:]
 
 
 class PrepareLines(object):
@@ -41,7 +41,7 @@ class PrepareLines(object):
             constants.TYPE_V2_CULVERT,
             constants.TYPE_V2_ORIFICE, constants.TYPE_V2_WEIR]
 
-        _tmp_kcu = datasource['kcu'].value
+        _tmp_kcu = datasource['kcu'][:]
         filter_1d = (_tmp_kcu >= 0) & (_tmp_kcu <= 5)
 
         lik_all = as_numpy_array(datasource['lik'])
@@ -107,8 +107,8 @@ class PrepareLines(object):
         for line_type, db_objects in line_db_dict.items():
             for db_object in db_objects:
                 line_idx = np.where(
-                    (datasource['content_pk'].value == db_object.pk) &
-                    (datasource['content_type'].value == line_type))[0]
+                    (datasource['content_pk'][:] == db_object.pk) &
+                    (datasource['content_type'][:] == line_type))[0]
                 geom = wkt.loads(db_object.the_geom.wkt)
                 line_geometries[line_idx] = PrepareLines._cut_geometries(
                     geom,
@@ -242,8 +242,8 @@ class PrepareChannels(object):
     def prepare_datasource(h5py_file, threedi_datasource):
         line_group = h5py_file['lines']
 
-        content_pk = line_group['content_pk'].value
-        content_type = line_group['content_type'].value
+        content_pk = line_group['content_pk'][:]
+        content_type = line_group['content_type'][:]
 
         channels_field_names = [
             'pk', 'code', 'calculation_type', 'dist_calc_points',
@@ -272,8 +272,8 @@ class PreparePipes(object):
     @staticmethod
     def prepare_datasource(h5py_file, threedi_datasource):
         line_group = h5py_file['lines']
-        content_pk = line_group['content_pk'].value
-        content_type = line_group['content_type'].value
+        content_pk = line_group['content_pk'][:]
+        content_type = line_group['content_type'][:]
 
         pipes_field_names = [
             'pk',
@@ -321,8 +321,8 @@ class PrepareWeirs(object):
     @staticmethod
     def prepare_datasource(h5py_file, threedi_datasource):
         line_group = h5py_file['lines']
-        content_pk = line_group['content_pk'].value
-        content_type = line_group['content_type'].value
+        content_pk = line_group['content_pk'][:]
+        content_type = line_group['content_type'][:]
 
         weirs_field_names = [
             'pk',
@@ -365,8 +365,8 @@ class PrepareOrifices(object):
     @staticmethod
     def prepare_datasource(h5py_file, threedi_datasource):
         line_group = h5py_file['lines']
-        content_pk = line_group['content_pk'].value
-        content_type = line_group['content_type'].value
+        content_pk = line_group['content_pk'][:]
+        content_type = line_group['content_type'][:]
 
         orifices_field_names = [
             'pk',
@@ -404,8 +404,8 @@ class PrepareCulverts(object):
     @staticmethod
     def prepare_datasource(h5py_file, threedi_datasource):
         line_group = h5py_file['lines']
-        content_pk = line_group['content_pk'].value
-        content_type = line_group['content_type'].value
+        content_pk = line_group['content_pk'][:]
+        content_type = line_group['content_type'][:]
 
         culverts_field_names = [
             'pk',
