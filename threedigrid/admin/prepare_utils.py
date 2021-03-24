@@ -86,7 +86,7 @@ def add_or_update_datasets(h5py_group, numpy_array_dict, field_names,
             h5py_group.create_dataset(
                 dataset_name, data=data, dtype=dt)
         else:
-            values = h5py_group[dataset_name].value
+            values = h5py_group[dataset_name][:]
             mask = data != null_value
             values[mask] = data[mask]
             h5py_group[dataset_name][:] = values

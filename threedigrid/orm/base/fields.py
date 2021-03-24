@@ -139,15 +139,27 @@ class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
         lookup_index = kwargs.get('lookup_index')
         values = []
         source_names = self._meta.composite_fields.get(name)
+
+        timeseries_filter_to_use = timeseries_filter
+
+        if isinstance(timeseries_filter, np.ndarray):
+            if timeseries_filter.dtype == np.dtype(bool):
+                # Convert to integer index array
+                # to support h5py >= 3.1.0
+                timeseries_filter_to_use = np.argwhere(
+                    timeseries_filter).flatten()
+
         for source_name in source_names:
             if source_name not in list(datasource.keys()):
                 continue
 
-            if ((isinstance(timeseries_filter, np.ndarray)
+            if ((isinstance(timeseries_filter_to_use, np.ndarray)
                  and len(datasource[source_name].shape) > 1)):
-                values.append(datasource[source_name][timeseries_filter, :])
+                values.append(
+                    datasource[source_name][timeseries_filter_to_use, :])
             else:
-                values.append(datasource[source_name][timeseries_filter])
+                values.append(
+                    datasource[source_name][timeseries_filter_to_use])
 
         if not values:
             return np.array([])
