@@ -14,25 +14,26 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # legacy python 2.7
-        - python: 2.7
-          pins: "numpy==1.13.* h5py==2.7.* pygdal==2.2.3.* shapely==1.6.4 pyproj==1.9.5.1 geojson==2.3.0 mercantile==1.0.1 cftime==1.0.1"
-        # 2017
-        - python: 3.6
-          pins: "numpy==1.13.* h5py==2.7.* pygdal==2.2.3.* shapely==1.6.4 pyproj==1.9.5.1 geojson==2.3.0 mercantile==1.0.1 cftime==1.0.1"
-        # 2018
-        - python: 3.7
-          pins: "numpy==1.15.* h5py==2.9.* pygdal==2.2.3.* shapely==1.6.4 pyproj==1.9.6 geojson==2.4.* mercantile==1.0.4 cftime==1.0.3"
-        # 2019
-        - python: 3.8
-          pins: "numpy==1.17.* h5py==2.10.* pygdal==2.2.3.* shapely==1.6.4 pyproj==2.4.* geojson==2.5.* mercantile==1.1.2 cftime==1.0.4"
-        # 2020
-        - python: 3.9
-          pins: "numpy==1.19.* h5py==3.1.* pygdal==2.2.3.* shapely==1.7.1 pyproj==2.6.* geojson==2.5.* mercantile==1.1.6 cftime==1.2.1"
-        # current
-        - python: 3.9
-          display_name: "latest"
-          pins: ""
+        include:
+          # legacy python 2.7
+          - python: 2.7
+            pins: "numpy==1.13.* h5py==2.7.* pygdal==2.2.3.* shapely==1.6.4 pyproj==1.9.5.1 geojson==2.3.0 mercantile==1.0.1 cftime==1.0.1"
+          # 2017
+          - python: 3.6
+            pins: "numpy==1.13.* h5py==2.7.* pygdal==2.2.3.* shapely==1.6.4 pyproj==1.9.5.1 geojson==2.3.0 mercantile==1.0.1 cftime==1.0.1"
+          # 2018
+          - python: 3.7
+            pins: "numpy==1.15.* h5py==2.9.* pygdal==2.2.3.* shapely==1.6.4 pyproj==1.9.6 geojson==2.4.* mercantile==1.0.4 cftime==1.0.3"
+          # 2019
+          - python: 3.8
+            pins: "numpy==1.17.* h5py==2.10.* pygdal==2.2.3.* shapely==1.6.4 pyproj==2.4.* geojson==2.5.* mercantile==1.1.2 cftime==1.0.4"
+          # 2020
+          - python: 3.9
+            pins: "numpy==1.19.* h5py==3.1.* pygdal==2.2.3.* shapely==1.7.1 pyproj==2.6.* geojson==2.5.* mercantile==1.1.6 cftime==1.2.1"
+          # current
+          - python: 3.9
+            display_name: "latest"
+            pins: ""
 
     steps:
       - uses: actions/checkout@v2
