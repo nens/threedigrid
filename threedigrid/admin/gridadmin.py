@@ -128,10 +128,16 @@ class GridH5Admin(object):
 
     @property
     def cells(self):
+        # retrieve the geotransform (if present)
+        grid_attrs = self.h5py_file['grid_coordinate_attributes']
+        try:
+            transform = grid_attrs["pixel_geotransform"].value
+        except KeyError:
+            transform = None
         # treated as nodes
         return Cells(
             self.datasource_class(
-                self.h5py_file, 'nodes'), **self._grid_kwargs)
+                self.h5py_file, 'nodes'), transform=transform, **self._grid_kwargs)
 
     @property
     def revision_hash(self):
