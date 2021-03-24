@@ -87,7 +87,7 @@ class GridH5Admin(object):
             raise Exception("RPC not available for grid")
         kwargs = self._grid_kwargs.copy()
         kwargs['n2dtot'] = self.get_from_meta('n2dtot')
-        kwargs['dx'] = self.h5py_file['grid_coordinate_attributes']['dx'].value
+        kwargs['dx'] = self.h5py_file['grid_coordinate_attributes']['dx'][:]
         return Grid(
             self.datasource_class(
                 self.h5py_file, 'grid_coordinate_attributes'), **kwargs
@@ -273,7 +273,7 @@ class GridH5Admin(object):
         if prop_name not in list(self.h5py_file['meta'].keys()):
             return None
 
-        return self.h5py_file['meta'][prop_name].value
+        return self.h5py_file['meta'][prop_name]
 
     @staticmethod
     def _to_str(x):
