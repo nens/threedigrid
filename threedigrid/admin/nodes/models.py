@@ -242,6 +242,54 @@ class Cells(Nodes):
         )
         return nodgrid[::-1, ::]
 
+    def get_px_extent(self):
+        """Determine the extent of the cells (in pixels)
+
+        The returned bounding box is left-exclusive; cells cover the
+        the half-open intervals [xmin, xmax) and [ymin, ymax).
+
+        :return: tuple of xmin, ymin, xmax, ymax or None
+        """
+        coords = self.pixel_coords
+        mask = ~np.any(coords == -9999, axis=0)
+        if not np.any(mask):
+            return
+        xmin = coords[0, mask].min()
+        ymin = coords[1, mask].min()
+        xmax = coords[2, mask].max()
+        ymax = coords[3, mask].max()
+        return xmin, ymin, xmax, ymax
+
+    def iter_by_px_window(self, width, height):
+        """Iterate over groups of cells given a window shape (in pixels).
+
+        :param width: the width of the window in pixels
+        :param height: the height of the window in pixels
+
+        :yield: extent, Cells
+        """
+        # determine the total extent of the 2d nodes
+        xmin, ymin, xmax, ymax = self.get_px_extent()
+
+        # determine the amount of rows and cols
+        n_rows = np.ceil((ymax - ymin) / height).astype(int)
+        n_cols = np.ceil((xmax - xmin) / width).astype(int)
+
+        # loop over the windows
+        for x_i in range(n_cols):
+            for y_i in range(n_rows):
+                x1, y1, x2, y2 = (
+                    x_i * width + xmin,
+                    y_i * height + ymin,
+                    (x_i + 1) * width + xmin,
+                    (y_i + 1) * height + ymin,
+                )
+                result = self.filter(
+                    pixel_coords__intersects_bbox=(x1 + 1, y1 + 1, x2 - 1, y2 - 1)
+                )
+                if result is not None:
+                    yield (x1, y1, x2, y2), result
+
     def __repr__(self):
         return "<orm cells instance of {}>".format(self.model_name)
 

@@ -310,6 +310,23 @@ class GridAdminCellsTest(unittest.TestCase):
             [5375],
         )
 
+    def test_get_px_extent(self):
+        cells = self.parser.cells
+        assert cells.get_px_extent() == (0, 0, 9600, 9920)
+        assert cells.filter(id__lt=10).get_px_extent() == (0, 640, 640, 5440)
+
+    def test_iter_by_px_window(self):
+        w, h = 10000, 1280
+        windows = list(self.parser.cells.subset("2D_OPEN_WATER").iter_by_px_window(w, h))
+        #assert len(windows) == 8  # ceil(9920/1280)
+        total = 0
+        for i, (bbox, cells) in enumerate(windows):
+            assert bbox == (0, i * h, w, (i + 1) * h)
+            assert np.all(cells.pixel_coords[1] >= i * h)
+            assert np.all(cells.pixel_coords[1] < (i + 1) * h)
+            total += cells.count
+        assert total == self.parser.cells.subset("2D_OPEN_WATER").count
+
     def test_exporters(self):
         self.assertEqual(len(self.parser.cells._exporters), 1)
         self.assertIsInstance(
