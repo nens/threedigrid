@@ -223,7 +223,7 @@ class MultiLineArrayField(GeomArrayField):
                 for x in reshaped_values
             ]
 
-        return np.array(transform_values)
+        return np.array(transform_values, dtype=object)
 
     def _to_shapely_geom(self, values):
         if shapely is None:
