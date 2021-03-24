@@ -6,6 +6,8 @@ History
 
 - Bumped asyncio-rpc to 0.1.10
 
+- Fixed GeoJSON export with pyproj <= 1.9.6.
+
 
 1.0.27 (2021-02-22)
 -------------------

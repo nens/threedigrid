@@ -210,7 +210,8 @@ class MultiLineArrayField(GeomArrayField):
             # in Python 3 it works well, however in Python 2.7
             # it seams to break
             transformer = Transformer.from_proj(
-                int(source_epsg), int(target_epsg))
+                int(source_epsg), int(target_epsg), always_xy=True
+            )
 
             transform_values = [
                 np.array(transformer.transform(x[0], x[1])).flatten()
