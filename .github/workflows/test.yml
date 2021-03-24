@@ -53,7 +53,7 @@ jobs:
         shell: bash
         run: |
           pip install --disable-pip-version-check --upgrade pip setuptools wheel
-          pip install -e .[geo,result,test] ${{ matrix.pins }} flake8 sphinx==1.8.5
+          pip install -e .[geo,result] ${{ matrix.pins }} pytest flake8 sphinx==1.8.5
           pip list
 
       - name: Run tests
