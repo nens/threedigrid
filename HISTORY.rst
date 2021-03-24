@@ -8,7 +8,7 @@ History
 
 - Fixed GeoJSON export with pyproj <= 1.9.6.
 
-- Upgraded to H5py 3.1.0, needs Python >= 3.6
+- Fixed compatibility with h5py 3.*.
 
 
 1.0.27 (2021-02-22)
