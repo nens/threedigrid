@@ -269,14 +269,10 @@ class Grid(Model):
     jp = ArrayField()
 
     def __init__(self, *args, **kwargs):
+
         super(Grid, self).__init__(*args, **kwargs)
-        grid_attrs = self._datasource._source
-        self.dx = grid_attrs["dx"].value
-        try:
-            self._transform = grid_attrs["transform"].value
-        except KeyError:
-            self._transform = None
         self.n2dtot = kwargs['n2dtot']
+        self.dx = kwargs['dx']
 
     def get_pixel_map(self, dem_pixelsize, dem_shape):
         """
