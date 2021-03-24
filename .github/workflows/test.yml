@@ -1,0 +1,74 @@
+name: Linux
+
+# Run on PR requests. And on master itself.
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  TestLinux:
+    name: Python ${{ matrix.python }} ${{ matrix.display_name }}
+    runs-on: ubuntu-18.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # legacy python 2.7
+          - python: 2.7
+            pins: "mock numpy==1.13.* h5py==2.7.* shapely==1.6.4 pyproj==1.9.5.1 geojson==2.3.0 mercantile==1.0.1 cftime==1.0.1"
+          # 2017
+          - python: 3.6
+            pins: "numpy==1.13.* h5py==2.7.* shapely==1.6.4 pyproj==1.9.5.1 geojson==2.3.0 mercantile==1.0.1 cftime==1.0.1"
+          # 2018
+          - python: 3.7
+            pins: "numpy==1.15.* h5py==2.9.* shapely==1.6.4 pyproj==1.9.6 geojson==2.4.* mercantile==1.0.4 cftime==1.0.3"
+          # 2019
+          - python: 3.8
+            pins: "numpy==1.17.* h5py==2.10.* shapely==1.6.4 pyproj==2.4.* geojson==2.5.* mercantile==1.1.2 cftime==1.0.4"
+          # 2020
+          - python: 3.9
+            pins: "numpy==1.19.* h5py==3.1.* shapely==1.7.1 pyproj==3.0.* geojson==2.5.* mercantile==1.1.6 cftime==1.2.1"
+          # current
+          - python: 3.9
+            display_name: "latest"
+            pins: ""
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          lfs: true
+
+      - name: Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install gdal
+        run: |
+          sudo apt-get install --yes --no-install-recommends libgdal-dev
+      
+      - name: Install python dependencies
+        shell: bash
+        run: |
+          pip install --disable-pip-version-check --upgrade pip setuptools wheel
+          pip install -e .[geo,results] ${{ matrix.pins }} pygdal==2.2.3.* ipython pytest flake8 sphinx==1.8.5
+          pip list
+
+      - name: Run tests
+        shell: bash
+        run: |
+          pytest
+
+      - name: Run flake8
+        shell: bash
+        if: ${{ matrix.python != '2.7' }}
+        run: |
+          flake8
+
+      - name: Run sphinx-build
+        shell: bash
+        run: |
+          sphinx-build -nW docs docs/_build/html
+  

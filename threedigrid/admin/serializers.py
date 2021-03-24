@@ -48,7 +48,7 @@ class GeoJsonSerializer:
         if content_type == "lines":
             for i in range(data["id"].shape[-1]):
                 linepoints = np.round(
-                    data['line_geometries'][i].reshape(2, -1)[::-1].T,
+                    data['line_geometries'][i].reshape(2, -1).T,
                     constants.LONLAT_DIGITS
                 )
                 line = geojson.LineString(linepoints.tolist())

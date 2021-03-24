@@ -48,7 +48,7 @@ class IdMapper(object):
 
     @property
     def id_mapping(self):
-        return self._id_mapping.value
+        return self._id_mapping[:]
 
     def get_by_name(self, obj_name):
         """

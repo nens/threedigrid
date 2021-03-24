@@ -141,10 +141,10 @@ class Weirs(Lines):
         # to always get the raw (metric) values
         # and not the reprojected ones to calculate
         # the angles with.
-        content_type = self._datasource['content_type'].value
-        line_content_pk = self._datasource['content_pk'].value
+        content_type = self._datasource['content_type'][:]
+        line_content_pk = self._datasource['content_pk'][:]
         pk_mask = np.isin(line_content_pk, self.content_pk)
-        raw_values = self._datasource['line_coords'].value[
+        raw_values = self._datasource['line_coords'][:][
             :, (content_type == b'v2_weir') & pk_mask]
 
         return self._get_field('line_coords').get_angles_in_degrees(
