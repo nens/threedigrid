@@ -17,6 +17,7 @@ from __future__ import print_function
 
 from __future__ import absolute_import
 import numpy as np
+import itertools
 
 from threedigrid.orm.models import Model
 from threedigrid.orm.fields import ArrayField
@@ -276,14 +277,13 @@ class Cells(Nodes):
         n_cols = np.ceil((xmax - xmin) / width).astype(int)
 
         # loop over the windows
-        for x_i in range(n_cols):
-            for y_i in range(n_rows):
-                x1, y1, x2, y2 = (
-                    x_i * width + xmin,
-                    y_i * height + ymin,
-                    (x_i + 1) * width + xmin,
-                    (y_i + 1) * height + ymin,
-                )
+        for window_i, window_j in itertools.product(range(n_cols), range(n_rows)):
+            i1, j1, i2, j2 = (
+                window_i * width + xmin,
+                window_j * height + ymin,
+                (window_i + 1) * width + xmin,
+                (window_j + 1) * height + ymin,
+            )
                 result = self.filter(
                     pixel_coords__intersects_bbox=(x1 + 1, y1 + 1, x2 - 1, y2 - 1)
                 )
