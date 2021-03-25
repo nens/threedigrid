@@ -135,9 +135,8 @@ class GridH5Admin(object):
         except KeyError:
             transform = None
         # treated as nodes
-        return Cells(
-            self.datasource_class(
-                self.h5py_file, 'nodes'), transform=transform, **self._grid_kwargs)
+        nodes_src = self.datasource_class(self.h5py_file, 'nodes')
+        return Cells(nodes_src, transform=transform, **self._grid_kwargs)
 
     @property
     def revision_hash(self):

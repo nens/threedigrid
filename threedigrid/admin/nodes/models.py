@@ -181,12 +181,14 @@ class Cells(Nodes):
 
         # compute pixel size
         size = (center_2_m - center_1_m) / (center_2_px - center_1_px)
-        assert abs(size[0]) == abs(size[1]), "Gridadmin cells have non-square pixels."
+        if abs(size[0]) != abs(size[1]):
+            raise ValueError("Gridadmin cells have non-square pixels.")
 
         # compute origin
         origin_1 = center_1_m - center_1_px * size
         origin_2 = center_2_m - center_2_px * size
-        assert np.all(origin_1 == origin_2), "Gridadmin cells have tilt."
+        if np.any(origin_1 != origin_2):
+            raise ValueError("Gridadmin cells have tilt.")
 
         return size[0], 0.0, origin_1[0], 0.0, size[1], origin_1[1]
 
