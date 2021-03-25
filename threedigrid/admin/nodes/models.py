@@ -271,6 +271,13 @@ class Cells(Nodes):
 
         :yield: extent, Cells
         """
+        # determine the width of the largest cell
+        cell_size = self.pixel_width.max()
+        if width % cell_size != 0 or height % cell_size != 0:
+            raise ValueError(
+                "width and height should be a multiple of {}".format(cell_size)
+            )
+
         # determine the total extent of the 2d nodes
         xmin, ymin, xmax, ymax = self.get_px_extent()
 
@@ -279,18 +286,18 @@ class Cells(Nodes):
         n_cols = np.ceil((xmax - xmin) / width).astype(int)
 
         # loop over the windows
-        for window_i, window_j in itertools.product(range(n_cols), range(n_rows)):
-            i1, j1, i2, j2 = (
-                window_i * width + xmin,
-                window_j * height + ymin,
-                (window_i + 1) * width + xmin,
-                (window_j + 1) * height + ymin,
-            )
-                result = self.filter(
-                    pixel_coords__intersects_bbox=(x1 + 1, y1 + 1, x2 - 1, y2 - 1)
-                )
-                if result is not None:
-                    yield (x1, y1, x2, y2), result
+        # for window_i, window_j in itertools.product(range(n_cols), range(n_rows)):
+        #     i1, j1, i2, j2 = (
+        #         window_i * width + xmin,
+        #         window_j * height + ymin,
+        #         (window_i + 1) * width + xmin,
+        #         (window_j + 1) * height + ymin,
+        #     )
+        #         result = self.filter(
+        #             pixel_coords__intersects_bbox=(x1 + 1, y1 + 1, x2 - 1, y2 - 1)
+        #         )
+        #         if result is not None:
+        #             yield (x1, y1, x2, y2), result
 
     def __repr__(self):
         return "<orm cells instance of {}>".format(self.model_name)
