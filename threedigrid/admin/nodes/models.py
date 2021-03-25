@@ -236,8 +236,8 @@ class Cells(Nodes):
         # determine the lower left corner and the number of tiles
         i1 = int(xmin // width)
         j1 = int(ymin // height)
-        i2 = int(np.ceil(xmax / width))
-        j2 = int(np.ceil(ymax / height))
+        i2 = int(np.ceil(np.divide(xmax, width)))
+        j2 = int(np.ceil(np.divide(ymax, height)))
 
         # yield the tiles
         for i, j in itertools.product(range(i1, i2), range(j1, j2)):
