@@ -120,7 +120,6 @@ class Cells(Nodes):
     def __init__(self, *args, **kwargs):
 
         super(Cells, self).__init__(*args, **kwargs)
-        self.class_kwargs["transform"] = kwargs.get("transform")
         self._exporters = [
             exporters.CellsOgrExporter(self),
         ]
@@ -137,60 +136,6 @@ class Cells(Nodes):
              maxx, miny,
              maxx, maxy,
              minx, maxy))
-
-    @property
-    def transform(self):
-        """Return the affine transformation that maps pixels to coordinates.
-
-        The six returned values (a, b, c, d, e, f) map pixels (i, j) to
-        coordinates x, y as follows::
-
-        >>> x = a * i + b * j + c
-        >>> y = d * i + e * j + f
-
-        Note that for older gridadmin files, the transform will be derived
-        from the pixel_coords and cell_coords.
-        """
-        if self.class_kwargs["transform"] is None:
-            self.class_kwargs["transform"] = self._compute_transform()
-        return self.class_kwargs["transform"]
-
-    def _compute_transform(self):
-        """Compute geotransform from pixel_coords and cell_coords"""
-        nodes = self._datasource
-        idx = np.where(nodes["node_type"][:] == 1)[0]
-
-        # find two cells that have different x and y coordinates
-        cell_1_px = nodes["pixel_coords"][:, idx[0]]
-        cell_1_m = nodes["cell_coords"][:, idx[0]]
-        for _idx in idx[1:]:
-            cell_2_px = nodes["pixel_coords"][:, _idx]
-            if cell_1_px[0] != cell_2_px[0] and cell_1_px[1] != cell_2_px[1]:
-                break
-        else:
-            raise RuntimeError(
-                "Unable to determine transform of gridadmin pixel_coords"
-            )
-        cell_2_m = nodes["cell_coords"][:, _idx]
-
-        # compute the centers
-        center_1_px = (cell_1_px[:2] + cell_1_px[2:]) / 2
-        center_1_m = (cell_1_m[:2] + cell_1_m[2:]) / 2
-        center_2_px = (cell_2_px[:2] + cell_2_px[2:]) / 2
-        center_2_m = (cell_2_m[:2] + cell_2_m[2:]) / 2
-
-        # compute pixel size
-        size = (center_2_m - center_1_m) / (center_2_px - center_1_px)
-        if abs(size[0]) != abs(size[1]):
-            raise ValueError("Gridadmin cells have non-square pixels.")
-
-        # compute origin
-        origin_1 = center_1_m - center_1_px * size
-        origin_2 = center_2_m - center_2_px * size
-        if np.any(origin_1 != origin_2):
-            raise ValueError("Gridadmin cells have tilt.")
-
-        return size[0], 0.0, origin_1[0], 0.0, size[1], origin_1[1]
 
     def get_id_from_xy(self, x, y, xy_epsg_code=None, subset_name=None):
         """
@@ -271,10 +216,8 @@ class Grid(Model):
     jp = ArrayField()
 
     def __init__(self, *args, **kwargs):
-
         super(Grid, self).__init__(*args, **kwargs)
         self.class_kwargs["n2dtot"] = kwargs["n2dtot"]
-        self.class_kwargs["dx"] = kwargs["dx"]
 
     @property
     def n2dtot(self):
@@ -282,7 +225,26 @@ class Grid(Model):
 
     @property
     def dx(self):
-        return self.class_kwargs["dx"]
+        return self._datasource["dx"][:]
+
+    @property
+    def transform(self):
+        """Return the transformation that maps pixel_coords to coordinates.
+
+        The six returned values (a, b, c, d, e, f) define the (affine)
+        transform as follows::
+
+        >>> x = a * i + b * j + c
+        >>> y = d * i + e * j + f
+
+        Note that for a 3Di grid, the vertical pixel size is positive, while
+        for most raster files this is negative. This means that you should flip
+        the vertical axis of the raster when using the pixel coordinates.
+        """
+        size = float(self._datasource["dxp"][()])
+        origin_x = float(self._datasource["x0p"][()])
+        origin_y = float(self._datasource["y0p"][()])
+        return size, 0.0, origin_x, 0.0, size, origin_y
 
     def get_pixel_map(self, dem_pixelsize, dem_shape):
         """
