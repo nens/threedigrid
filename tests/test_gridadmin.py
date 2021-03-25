@@ -322,7 +322,8 @@ class GridAdminCellsTest(unittest.TestCase):
 
     def test_transform(self):
         np.testing.assert_almost_equal(
-            self.parser.cells.transform, (0.5, 0.0, 106314.0, 0.0, 0.5, 514912.0)
+            self.parser.cells.transform,
+            (0.5, 0.0, 106314.0, 0.0, 0.5, 514912.0)
         )
 
 
