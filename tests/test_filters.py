@@ -165,7 +165,7 @@ class GeometryIntersectionFilterTest(unittest.TestCase):
                 [  # + sign shows the split between x, y coords
                     np.array([0, 0, 2, 2] + [0, 2, 2, 0]),
                     np.array([5, 6, 6] + [5, 6, 5])
-                ]
+                ], dtype=object
             )}
         )
         self.assertTrue(filtered[0])
@@ -180,7 +180,7 @@ class GeometryIntersectionFilterTest(unittest.TestCase):
                 [  # + sign shows the split between x, y coords
                     np.array([0, 0.5, 2, 2] + [0, 0.5, 2, 0]),
                     np.array([5, 6, 6] + [5, 6, 5])
-                ]
+                ], dtype=object
             )}
         )
         self.assertTrue(filtered[0])

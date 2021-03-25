@@ -121,7 +121,7 @@ class Cells(Nodes):
     def __init__(self, *args, **kwargs):
 
         super(Cells, self).__init__(*args, **kwargs)
-        self._transform = kwargs.get("transform")
+        self.class_kwargs["transform"] = kwargs.get("transform")
         self._exporters = [
             exporters.CellsOgrExporter(self),
         ]
@@ -152,9 +152,9 @@ class Cells(Nodes):
         Note that for older gridadmin files, the transform will be derived
         from the pixel_coords and cell_coords.
         """
-        if self._transform is None:
-            self._transform = self._compute_transform()
-        return self._transform
+        if self.class_kwargs["transform"] is None:
+            self.class_kwargs["transform"] = self._compute_transform()
+        return self.class_kwargs["transform"]
 
     def _compute_transform(self):
         """Compute geotransform from pixel_coords and cell_coords"""
@@ -182,12 +182,14 @@ class Cells(Nodes):
 
         # compute pixel size
         size = (center_2_m - center_1_m) / (center_2_px - center_1_px)
-        assert abs(size[0]) == abs(size[1]), "Gridadmin cells have non-square pixels."
+        if abs(size[0]) != abs(size[1]):
+            raise ValueError("Gridadmin cells have non-square pixels.")
 
         # compute origin
         origin_1 = center_1_m - center_1_px * size
         origin_2 = center_2_m - center_2_px * size
-        assert np.all(origin_1 == origin_2), "Gridadmin cells have tilt."
+        if np.any(origin_1 != origin_2):
+            raise ValueError("Gridadmin cells have tilt.")
 
         return size[0], 0.0, origin_1[0], 0.0, size[1], origin_1[1]
 
@@ -317,14 +319,18 @@ class Grid(Model):
     jp = ArrayField()
 
     def __init__(self, *args, **kwargs):
+
         super(Grid, self).__init__(*args, **kwargs)
-        grid_attrs = self._datasource._source
-        self.dx = grid_attrs["dx"].value
-        try:
-            self._transform = grid_attrs["transform"].value
-        except KeyError:
-            self._transform = None
-        self.n2dtot = kwargs['n2dtot']
+        self.class_kwargs["n2dtot"] = kwargs["n2dtot"]
+        self.class_kwargs["dx"] = kwargs["dx"]
+
+    @property
+    def n2dtot(self):
+        return self.class_kwargs["n2dtot"]
+
+    @property
+    def dx(self):
+        return self.class_kwargs["dx"]
 
     def get_pixel_map(self, dem_pixelsize, dem_shape):
         """
