@@ -190,7 +190,7 @@ class Cells(Nodes):
         )
         return nodgrid[::-1, ::]
 
-    def get_px_extent(self):
+    def get_extent_pixels(self):
         """Determine the extent of the cells (in pixels)
 
         The returned bounding box is left-exclusive; cells cover the
@@ -202,19 +202,26 @@ class Cells(Nodes):
         mask = ~np.any(coords == -9999, axis=0)
         if not np.any(mask):
             return
-        xmin = coords[0, mask].min()
-        ymin = coords[1, mask].min()
-        xmax = coords[2, mask].max()
-        ymax = coords[3, mask].max()
+        coords = coords[:, mask]
+        xmin = coords[0].min()
+        ymin = coords[1].min()
+        xmax = coords[2].max()
+        ymax = coords[3].max()
         return xmin, ymin, xmax, ymax
 
-    def iter_by_px_window(self, width, height):
+    def iter_by_tile(self, width, height):
         """Iterate over groups of cells given a window shape (in pixels).
 
-        :param width: the width of the window in pixels
-        :param height: the height of the window in pixels
+        The tiles are always aligned to pixel (0, 0) so that they align with
+        the grid cell and that 1 grid cell does not overlap with multiple
+        tiles.
 
-        :yield: extent, Cells
+        The tile size should be an integer multiple of the maximum cell size.
+
+        :param width: the width of the tile in pixels
+        :param height: the height of the tile in pixels
+
+        :yield: (xmin, ymin, xmax, ymax), cells
         """
         # determine the width of the largest cell
         cell_size = self.pixel_width.max()
@@ -224,25 +231,27 @@ class Cells(Nodes):
             )
 
         # determine the total extent of the 2d nodes
-        xmin, ymin, xmax, ymax = self.get_px_extent()
+        xmin, ymin, xmax, ymax = self.get_extent_pixels()
 
-        # determine the amount of rows and cols
-        n_rows = np.ceil((ymax - ymin) / height).astype(int)
-        n_cols = np.ceil((xmax - xmin) / width).astype(int)
+        # determine the lower left corner and the number of tiles
+        i1 = int(xmin // width)
+        j1 = int(ymin // height)
+        i2 = int(np.ceil(xmax / width))
+        j2 = int(np.ceil(ymax / height))
 
-        # loop over the windows
-        # for window_i, window_j in itertools.product(range(n_cols), range(n_rows)):
-        #     i1, j1, i2, j2 = (
-        #         window_i * width + xmin,
-        #         window_j * height + ymin,
-        #         (window_i + 1) * width + xmin,
-        #         (window_j + 1) * height + ymin,
-        #     )
-        #         result = self.filter(
-        #             pixel_coords__intersects_bbox=(x1 + 1, y1 + 1, x2 - 1, y2 - 1)
-        #         )
-        #         if result is not None:
-        #             yield (x1, y1, x2, y2), result
+        # yield the tiles
+        for i, j in itertools.product(range(i1, i2), range(j1, j2)):
+            x1, y1, x2, y2 = (
+                i * width,
+                j * height,
+                (i + 1) * width,
+                (j + 1) * height,
+            )
+            result = self.filter(
+                pixel_coords__intersects_bbox=(x1 + 1, y1 + 1, x2 - 1, y2 - 1)
+            )
+            if result is not None:
+                yield (x1, y1, x2, y2), result
 
     def __repr__(self):
         return "<orm cells instance of {}>".format(self.model_name)
@@ -255,16 +264,16 @@ class Grid(Model):
     """
     Implemented fields:
 
-        - nodm
-        - nodn
-        - nodk
+    - nodm: the horizintal index of the cell within its refinement level
+    - nodn: the vertical index of the cell within its refinement level
+    - nodk: the refinement level, 1 being the smallest cell
 
     They all have the same size as nodes and cells, which is why this
     model lives in the nodes/model module. In fact they are attributes
     of the cell coordinates
     """
 
-    nodm = ArrayField()  #
+    nodm = ArrayField()
     nodn = ArrayField()
     nodk = ArrayField()
     ip = ArrayField()
