@@ -87,7 +87,6 @@ class GridH5Admin(object):
             raise Exception("RPC not available for grid")
         kwargs = self._grid_kwargs.copy()
         kwargs['n2dtot'] = self.get_from_meta('n2dtot')
-        kwargs['dx'] = self.h5py_file['grid_coordinate_attributes']['dx'][:]
         return Grid(
             self.datasource_class(
                 self.h5py_file, 'grid_coordinate_attributes'), **kwargs
@@ -128,15 +127,10 @@ class GridH5Admin(object):
 
     @property
     def cells(self):
-        # retrieve the geotransform (if present)
-        grid_attrs = self.h5py_file['grid_coordinate_attributes']
-        try:
-            transform = grid_attrs["pixel_geotransform"][:]
-        except KeyError:
-            transform = None
         # treated as nodes
-        nodes_src = self.datasource_class(self.h5py_file, 'nodes')
-        return Cells(nodes_src, transform=transform, **self._grid_kwargs)
+        return Cells(
+            self.datasource_class(
+                self.h5py_file, 'nodes'), **self._grid_kwargs)
 
     @property
     def revision_hash(self):
