@@ -272,7 +272,7 @@ class GridH5Admin(object):
         if prop_name not in list(self.h5py_file['meta'].keys()):
             return None
 
-        return self.h5py_file['meta'][prop_name]
+        return self.h5py_file['meta'][prop_name][()]
 
     @staticmethod
     def _to_str(x):

@@ -152,9 +152,14 @@ class GridAdminGridTest(unittest.TestCase):
         }
 
     def test_dx(self):
-        np.testing.assert_almost_equal(
-            self.grid.dx, np.array([20.0, 40.0, 80.0, 160.0])
-        )
+        expected = np.array([20.0, 40.0, 80.0, 160.0])
+        np.testing.assert_almost_equal(self.grid.dx, expected)
+        np.testing.assert_almost_equal(self.grid.filter(id=1).dx, expected)
+
+    def test_n2dtot(self):
+        expected = 5374
+        self.assertEqual(self.grid.n2dtot, expected)
+        self.assertEqual(self.grid.filter(id=1).n2dtot, expected)
 
     @unittest.skip("TODO")
     def test_get_pixel_map(self):
@@ -320,11 +325,18 @@ class GridAdminCellsTest(unittest.TestCase):
         self.parser.cells.to_shape(self.f)
         self.assertTrue(os.path.exists, self.f)
 
-    def test_transform(self):
+    def test_transform_compute(self):
+        self.parser.cells.class_kwargs["transform"] = None
         np.testing.assert_almost_equal(
             self.parser.cells.transform,
             (0.5, 0.0, 106314.0, 0.0, 0.5, 514912.0)
         )
+
+    def test_transform_propagates(self):
+        cells = self.parser.cells
+        cells.class_kwargs["transform"] = "foo"
+        self.assertEqual(cells.transform, "foo")
+        self.assertEqual(cells.subset("2D_OPEN_WATER").transform, "foo")
 
 
 class NodeFilterTests(unittest.TestCase):

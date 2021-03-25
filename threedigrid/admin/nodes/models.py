@@ -120,7 +120,7 @@ class Cells(Nodes):
     def __init__(self, *args, **kwargs):
 
         super(Cells, self).__init__(*args, **kwargs)
-        self._transform = kwargs.get("transform")
+        self.class_kwargs["transform"] = kwargs.get("transform")
         self._exporters = [
             exporters.CellsOgrExporter(self),
         ]
@@ -151,9 +151,9 @@ class Cells(Nodes):
         Note that for older gridadmin files, the transform will be derived
         from the pixel_coords and cell_coords.
         """
-        if self._transform is None:
-            self._transform = self._compute_transform()
-        return self._transform
+        if self.class_kwargs["transform"] is None:
+            self.class_kwargs["transform"] = self._compute_transform()
+        return self.class_kwargs["transform"]
 
     def _compute_transform(self):
         """Compute geotransform from pixel_coords and cell_coords"""
@@ -273,8 +273,16 @@ class Grid(Model):
     def __init__(self, *args, **kwargs):
 
         super(Grid, self).__init__(*args, **kwargs)
-        self.n2dtot = kwargs['n2dtot']
-        self.dx = kwargs['dx']
+        self.class_kwargs["n2dtot"] = kwargs["n2dtot"]
+        self.class_kwargs["dx"] = kwargs["dx"]
+
+    @property
+    def n2dtot(self):
+        return self.class_kwargs["n2dtot"]
+
+    @property
+    def dx(self):
+        return self.class_kwargs["dx"]
 
     def get_pixel_map(self, dem_pixelsize, dem_shape):
         """
