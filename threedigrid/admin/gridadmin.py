@@ -131,7 +131,7 @@ class GridH5Admin(object):
         # retrieve the geotransform (if present)
         grid_attrs = self.h5py_file['grid_coordinate_attributes']
         try:
-            transform = grid_attrs["pixel_geotransform"].value
+            transform = grid_attrs["pixel_geotransform"][:]
         except KeyError:
             transform = None
         # treated as nodes
