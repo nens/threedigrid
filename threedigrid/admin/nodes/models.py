@@ -225,6 +225,8 @@ class Grid(Model):
 
     @property
     def dx(self):
+        """Return size of the grid cell for each refinement level, in meters.
+        """
         return self._datasource["dx"][:]
 
     @property
@@ -232,7 +234,8 @@ class Grid(Model):
         """Return the transformation that maps pixel_coords to coordinates.
 
         The six returned values (a, b, c, d, e, f) define the (affine)
-        transform as follows::
+        transform between coordinates (x, y) and pixel indices (i, j)
+        as follows::
 
         >>> x = a * i + b * j + c
         >>> y = d * i + e * j + f

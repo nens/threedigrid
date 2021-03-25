@@ -10,7 +10,7 @@ History
 
 - Fixed compatibility with h5py 3.*.
 
-- Added gridadmin.cells.transform.
+- Added gridadmin.grid.transform.
 
 - Fixed gridadmin.grid.n2dtot and .dx propagation.
 
