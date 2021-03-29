@@ -39,6 +39,7 @@ with open('HISTORY.rst') as history_file:
 lightweight_requirements = [
     'numpy>=1.13',
     'h5py>=2.7.1',
+    'six',
 ]
 
 results_requirements = [

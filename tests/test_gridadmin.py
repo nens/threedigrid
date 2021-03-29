@@ -321,6 +321,51 @@ class GridAdminCellsTest(unittest.TestCase):
             [5375],
         )
 
+    def test_get_extent_pixels(self):
+        cells = self.parser.cells
+        assert cells.get_extent_pixels() == (0, 0, 9600, 9920)
+
+    def test_iter_by_tile(self):
+        cells = self.parser.cells.subset("2D_OPEN_WATER")
+        w, h = 320 * 50, 1280
+        tiles = list(cells.iter_by_tile(w, h))
+        assert len(tiles) == 8  # ceil(9920/1280)
+        total = 0
+        for i, (bbox, cells) in enumerate(tiles):
+            assert bbox == (0, i * h, w, (i + 1) * h)
+            assert np.all(cells.pixel_coords[1] >= i * h)
+            assert np.all(cells.pixel_coords[1] < (i + 1) * h)
+            total += cells.count
+        assert total == self.parser.cells.subset("2D_OPEN_WATER").count
+
+    def test_iter_by_tile_subset_y(self):
+        cells = self.parser.cells.subset("2D_OPEN_WATER").filter(
+            pixel_coords__in_bbox=(0, 2000, 9600, 3000)
+        )
+        w, h = 320 * 50, 1280
+        tiles = list(cells.iter_by_tile(w, h))
+        assert len(tiles) == 2  # 1280 - 2560 and 2560 - 3840
+        assert tiles[0][0] == (0, 1280, w, 1280 * 2)
+        assert tiles[1][0] == (0, 1280 * 2, w, 1280 * 3)
+        assert cells.count == (tiles[0][1].count + tiles[1][1].count)
+
+    def test_iter_by_tile_subset_x(self):
+        cells = self.parser.cells.subset("2D_OPEN_WATER").filter(
+            pixel_coords__in_bbox=(2000, 0, 3000, 9920)
+        )
+        w, h = 1280, 320 * 50
+        tiles = list(cells.iter_by_tile(w, h))
+        assert len(tiles) == 2  # 1280 - 2560 and 2560 - 3840
+        assert tiles[0][0] == (1280, 0, 1280 * 2, h)
+        assert tiles[1][0] == (1280 * 2, 0, 1280 * 3, h)
+        assert cells.count == (tiles[0][1].count + tiles[1][1].count)
+
+    def test_iter_by_tile_should_match(self):
+        cells = self.parser.cells.subset("2D_OPEN_WATER")
+        for tile in ((321, 1280), (160, 1280), (500, 1280), (1280, 500)):
+            with self.assertRaises(ValueError):
+                list(cells.iter_by_tile(*tile))
+
     def test_exporters(self):
         self.assertEqual(len(self.parser.cells._exporters), 1)
         self.assertIsInstance(

@@ -17,6 +17,7 @@ from __future__ import print_function
 
 from __future__ import absolute_import
 import numpy as np
+import itertools
 
 from threedigrid.orm.models import Model
 from threedigrid.orm.fields import ArrayField
@@ -189,6 +190,66 @@ class Cells(Nodes):
         )
         return nodgrid[::-1, ::]
 
+    def get_extent_pixels(self):
+        """Determine the extent of the cells (in pixels)
+
+        The returned bounding box is left-inclusive; cells cover the
+        the half-open intervals [xmin, xmax) and [ymin, ymax).
+
+        :return: tuple of xmin, ymin, xmax, ymax or None
+        """
+        coords = self.pixel_coords
+        mask = ~np.any(coords == -9999, axis=0)
+        if not np.any(mask):
+            return
+        coords = coords[:, mask]
+        xmin = coords[0].min()
+        ymin = coords[1].min()
+        xmax = coords[2].max()
+        ymax = coords[3].max()
+        return xmin, ymin, xmax, ymax
+
+    def iter_by_tile(self, width, height):
+        """Iterate over groups of cells given a tile shape (in pixels).
+
+        The tiles are always aligned to pixel (0, 0) so that a single grid cell
+        never overlaps with multiple tiles. For the the same reason, the tile
+        size should be an integer multiple of the maximum cell size.
+
+        :param width: the width of the tile in pixels
+        :param height: the height of the tile in pixels
+
+        :yield: (xmin, ymin, xmax, ymax), cells
+        """
+        # determine the width of the largest cell
+        cell_size = self.pixel_width.max()
+        if width % cell_size != 0 or height % cell_size != 0:
+            raise ValueError(
+                "width and height should be a multiple of {}".format(cell_size)
+            )
+
+        # determine the total extent of the 2d nodes
+        xmin, ymin, xmax, ymax = self.get_extent_pixels()
+
+        # determine the lower left and upper right corners
+        i1 = int(xmin // width)
+        j1 = int(ymin // height)
+        i2 = int(np.ceil(float(xmax) / width))
+        j2 = int(np.ceil(float(ymax) / height))
+
+        # yield the tiles
+        for i, j in itertools.product(range(i1, i2), range(j1, j2)):
+            x1, y1, x2, y2 = (
+                i * width,
+                j * height,
+                (i + 1) * width,
+                (j + 1) * height,
+            )
+            result = self.filter(
+                pixel_coords__intersects_bbox=(x1 + 1, y1 + 1, x2 - 1, y2 - 1)
+            )
+            yield (x1, y1, x2, y2), result
+
     def __repr__(self):
         return "<orm cells instance of {}>".format(self.model_name)
 
@@ -200,16 +261,16 @@ class Grid(Model):
     """
     Implemented fields:
 
-        - nodm
-        - nodn
-        - nodk
+    - nodm: the horizintal index of the cell within its refinement level
+    - nodn: the vertical index of the cell within its refinement level
+    - nodk: the refinement level, 1 being the smallest cell
 
     They all have the same size as nodes and cells, which is why this
     model lives in the nodes/model module. In fact they are attributes
     of the cell coordinates
     """
 
-    nodm = ArrayField()  #
+    nodm = ArrayField()
     nodn = ArrayField()
     nodk = ArrayField()
     ip = ArrayField()

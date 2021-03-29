@@ -14,6 +14,8 @@ History
 
 - Fixed gridadmin.grid.n2dtot and .dx propagation.
 
+- Added gridadmin.cells.iter_by_tile() and .get_extent_pixels().
+
 
 1.0.27 (2021-02-22)
 -------------------
