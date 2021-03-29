@@ -10,6 +10,10 @@ History
 
 - Fixed compatibility with h5py 3.*.
 
+- Added gridadmin.grid.transform.
+
+- Fixed gridadmin.grid.n2dtot and .dx propagation.
+
 
 1.0.27 (2021-02-22)
 -------------------
