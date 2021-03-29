@@ -120,7 +120,6 @@ class Cells(Nodes):
     def __init__(self, *args, **kwargs):
 
         super(Cells, self).__init__(*args, **kwargs)
-
         self._exporters = [
             exporters.CellsOgrExporter(self),
         ]
@@ -217,10 +216,38 @@ class Grid(Model):
     jp = ArrayField()
 
     def __init__(self, *args, **kwargs):
-
         super(Grid, self).__init__(*args, **kwargs)
-        self.n2dtot = kwargs['n2dtot']
-        self.dx = kwargs['dx']
+        self.class_kwargs["n2dtot"] = kwargs["n2dtot"]
+
+    @property
+    def n2dtot(self):
+        return self.class_kwargs["n2dtot"]
+
+    @property
+    def dx(self):
+        """Return size of the grid cell for each refinement level, in meters.
+        """
+        return self._datasource["dx"][:]
+
+    @property
+    def transform(self):
+        """Return the transformation that maps pixel_coords to coordinates.
+
+        The six returned values (a, b, c, d, e, f) define the (affine)
+        transform between coordinates (x, y) and pixel indices (i, j)
+        as follows::
+
+        >>> x = a * i + b * j + c
+        >>> y = d * i + e * j + f
+
+        Note that for a 3Di grid, the vertical pixel size is positive, while
+        for most raster files this is negative. This means that you should flip
+        the vertical axis of the raster when using the pixel coordinates.
+        """
+        size = float(self._datasource["dxp"][()])
+        origin_x = float(self._datasource["x0p"][()])
+        origin_y = float(self._datasource["y0p"][()])
+        return size, 0.0, origin_x, 0.0, size, origin_y
 
     def get_pixel_map(self, dem_pixelsize, dem_shape):
         """

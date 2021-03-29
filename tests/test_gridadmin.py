@@ -139,16 +139,33 @@ class GridAdminLinesTest(unittest.TestCase):
 class GridAdminGridTest(unittest.TestCase):
     def setUp(self):
         self.parser = GridH5Admin(grid_admin_h5_file)
+        self.grid = self.parser.grid
 
     def test_fields(self):
-        assert set(self.parser.grid._meta.get_fields().keys()) == {
+        assert set(self.grid._meta.get_fields().keys()) == {
             "id",
             "nodk",
             "nodm",
             "nodn",
             "ip",
-            "jp"
+            "jp",
         }
+
+    def test_dx(self):
+        expected = np.array([20.0, 40.0, 80.0, 160.0])
+        np.testing.assert_almost_equal(self.grid.dx, expected)
+        np.testing.assert_almost_equal(self.grid.filter(id=1).dx, expected)
+
+    def test_n2dtot(self):
+        expected = 5374
+        self.assertEqual(self.grid.n2dtot, expected)
+        self.assertEqual(self.grid.filter(id=1).n2dtot, expected)
+
+    def test_transform(self):
+        self.assertEqual(
+            self.grid.transform,
+            (0.5, 0.0, 106314.0, 0.0, 0.5, 514912.0)
+        )
 
     @unittest.skip("TODO")
     def test_get_pixel_map(self):
