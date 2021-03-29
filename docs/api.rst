@@ -1,5 +1,5 @@
 .. _api-label:
 
-.. include:: ../threedigrid/admin/REDME.rst
+.. include:: ../threedigrid/admin/README.rst
 
 
