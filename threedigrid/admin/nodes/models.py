@@ -193,7 +193,7 @@ class Cells(Nodes):
     def get_extent_pixels(self):
         """Determine the extent of the cells (in pixels)
 
-        The returned bounding box is left-exclusive; cells cover the
+        The returned bounding box is left-inclusive; cells cover the
         the half-open intervals [xmin, xmax) and [ymin, ymax).
 
         :return: tuple of xmin, ymin, xmax, ymax or None
@@ -210,13 +210,11 @@ class Cells(Nodes):
         return xmin, ymin, xmax, ymax
 
     def iter_by_tile(self, width, height):
-        """Iterate over groups of cells given a window shape (in pixels).
+        """Iterate over groups of cells given a tile shape (in pixels).
 
-        The tiles are always aligned to pixel (0, 0) so that they align with
-        the grid cell and that 1 grid cell does not overlap with multiple
-        tiles.
-
-        The tile size should be an integer multiple of the maximum cell size.
+        The tiles are always aligned to pixel (0, 0) so that a single grid cell
+        never overlaps with multiple tiles. For the the same reason, the tile
+        size should be an integer multiple of the maximum cell size.
 
         :param width: the width of the tile in pixels
         :param height: the height of the tile in pixels
@@ -233,7 +231,7 @@ class Cells(Nodes):
         # determine the total extent of the 2d nodes
         xmin, ymin, xmax, ymax = self.get_extent_pixels()
 
-        # determine the lower left corner and the number of tiles
+        # determine the lower left and upper right corners
         i1 = int(xmin // width)
         j1 = int(ymin // height)
         i2 = int(np.ceil(float(xmax) / width))
@@ -250,8 +248,7 @@ class Cells(Nodes):
             result = self.filter(
                 pixel_coords__intersects_bbox=(x1 + 1, y1 + 1, x2 - 1, y2 - 1)
             )
-            if result is not None:
-                yield (x1, y1, x2, y2), result
+            yield (x1, y1, x2, y2), result
 
     def __repr__(self):
         return "<orm cells instance of {}>".format(self.model_name)
