@@ -4,14 +4,25 @@ Threedigrid: The 3Di grid admin framework
 The Python package for the threedigrid administration.
 
 
-.. image:: https://travis-ci.org/nens/threedigrid.svg?branch=master
-        :target: https://travis-ci.org/nens/threedigrid
+.. image:: https://github.com/nens/threedigrid/workflows/Linux/badge.svg
+	:alt: Github Actions status
+	:target: https://github.com/nens/threedigrid/actions/workflows/test.yml?query=branch%3Amaster
 
 
 .. image:: https://readthedocs.org/projects/threedigrid/badge/?version=latest
         :target: https://threedigrid.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
+.. PyPI
+
+.. image:: https://badge.fury.io/py/threedigrid.svg
+	:alt: PyPI
+	:target: https://badge.fury.io/py/threedigrid
+
+.. Anaconda
+
+.. image:: https://anaconda.org/conda-forge/threedigrid/badges/version.svg
+  :alt: Anaconda
 
 
 * Free software: BSD license
