@@ -33,10 +33,10 @@ Overview
 
 Features
 --------
- - access to the threedicore administration by a single instance of the ``GridH5Admin`` object
- - query the model data by pre-defined subsets and django style filters
- - export model data to gis formats like shapefile, geopackage
- - serialize model data as geojson
+- access to the threedicore administration by a single instance of the ``GridH5Admin`` object
+- query the model data by pre-defined subsets and django style filters
+- export model data to gis formats like shapefile, geopackage
+- serialize model data as geojson
 
 
 Quick start
@@ -120,7 +120,7 @@ Note: this is an advanced feature used inside the 3Di stack, probably you don't 
 Note2: you need Python 3.7 or higher for this to work.
 
 
-Installation:
+Installation::
 
     $ pip install threedigrid[rpc]
 
