@@ -3,9 +3,11 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
+from __future__ import absolute_import
 from threedigrid.orm.base.timeseries_mixin import ResultMixin
 from threedigrid.orm.base.timeseries_mixin import AggregateResultMixin
 from threedigrid.orm.base.options import ModelMeta
+import six
 
 
 BASE_COMPOSITE_FIELDS = {
@@ -21,6 +23,10 @@ BASE_SUBSET_FIELDS = {
     'qp': {'2d_all': 'Mesh2D_qp'},
     'up1':
         {'2d_all': 'Mesh2D_up1'},
+    'breach_depth':
+        {'1d_all': 'Mesh1D_breach_depth'},
+    'breach_width':
+        {'1d_all': 'Mesh1D_breach_width'}
 }
 
 
@@ -50,10 +56,7 @@ class LinesResultsMixin(ResultMixin):
 
 class LinesAggregateResultsMixin(AggregateResultMixin):
 
-    class Meta:
-        __metaclass__ = ModelMeta
-
-        # attributes for the given fields
+    class Meta(six.with_metaclass(ModelMeta)):
         field_attrs = ['units', 'long_name']
 
         base_composition = BASE_COMPOSITE_FIELDS
@@ -66,7 +69,6 @@ class LinesAggregateResultsMixin(AggregateResultMixin):
             'up1': ['min', 'max', 'avg'],
             'qp': ['min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
         }
-
 
         lookup_fields = ('id', '_mesh_id')
 

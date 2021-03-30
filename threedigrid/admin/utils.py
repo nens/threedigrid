@@ -1,15 +1,16 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
+from __future__ import absolute_import
 from __future__ import print_function
+from __future__ import unicode_literals
 
 import logging
-from itertools import izip
-from itertools import product
 from itertools import tee
 
 import numpy as np
-
+from six.moves import range
+from six.moves import zip
 
 logger = logging.getLogger(__name__)
 
@@ -101,7 +102,7 @@ class PKMapper(object):
         # Enable multidimensional array's.
         _filter = [slice(None)] * (
             len(np_array.shape) - 1) + [self._indices]
-        return to_select_from[_filter]
+        return to_select_from[tuple(_filter)]
 
 
 class KCUDescriptor(dict):
@@ -136,8 +137,8 @@ class KCUDescriptor(dict):
 
     def __init__(self, *arg, **kw):
         super(KCUDescriptor, self).__init__(*arg, **kw)
-        self.bound_keys_groundwater = [x for x in xrange(600, 1000)]
-        self.bound_keys_2d = [x for x in xrange(200, 600)]
+        self.bound_keys_groundwater = [x for x in range(600, 1000)]
+        self.bound_keys_2d = [x for x in range(200, 600)]
 
         self._descr = {
             0: '1d embedded line',
@@ -168,12 +169,15 @@ class KCUDescriptor(dict):
         return self.__getitem__(item)
 
     def values(self):
-        v = self._descr.values()
+        v = list(self._descr.values())
         v.extend(['2d boundary', '2d groundwater boundary'])
         return v
 
     def keys(self):
-        k = self._descr.keys()
+        """
+        Return keys
+        """
+        k = list(self._descr.keys())
         k += self.bound_keys_2d
         k += self.bound_keys_groundwater
         return k
@@ -195,7 +199,7 @@ def pairwise(iterable):
     "s -> (s0,s1), (s1,s2), (s2, s3), ..."
     a, b = tee(iterable)
     next(b, None)
-    return izip(a, b)
+    return zip(a, b)
 
 
 def get_or_create_group(grid_file, group_name):
@@ -210,3 +214,27 @@ def get_or_create_group(grid_file, group_name):
         gr = grid_file.create_group(group_name)
     return gr
 
+
+def _get_storage_area(storage_area):
+    """
+
+    :param storage_area: storage area entry in nodes collection.
+        Either a numpy string or a bytes type
+    :returns default '--' if the input is an empty string or 0., or the
+        given input will be converted to a float representation
+    """
+
+    default_null = '--'
+    # case python string type
+    try:
+        a = float(storage_area)
+        if a > 0.:
+            return a
+    except ValueError:
+        pass
+    except TypeError:
+        if storage_area is None:
+            return default_null
+        return _get_storage_area(np.asscalar(storage_area))
+
+    return default_null

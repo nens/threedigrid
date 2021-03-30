@@ -3,16 +3,25 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
+from __future__ import absolute_import
 import numpy as np
-import geojson
 import json
 from threedigrid.admin.breaches.models import Breaches
 from threedigrid.admin import constants
+from threedigrid.geo_utils import raise_import_exception
 from threedigrid.orm.base.encoder import NumpyEncoder
+from six.moves import range
+
+try:
+    import geojson
+except ImportError:
+    geojson = None
 
 
 class BreachesGeoJsonSerializer():
     def __init__(self, breaches=None, data=None, indent=None):
+        if geojson is None:
+            raise_import_exception('geojson')
         if breaches:
             assert isinstance(breaches, Breaches)
         self._data = data
@@ -31,7 +40,7 @@ class BreachesGeoJsonSerializer():
             raise ValueError(
                 "Can't return data as geojson "
                 "for selection without geometries")
-        for i in xrange(selection['id'].shape[-1]):
+        for i in range(selection['id'].shape[-1]):
             pt = geojson.Point(
                     np.round(
                         selection['coordinates'][:, i],

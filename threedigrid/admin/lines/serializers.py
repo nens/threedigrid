@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
-import geojson
+from __future__ import absolute_import
 import json
 import numpy as np
 
@@ -13,7 +13,14 @@ from threedigrid.admin.lines.models import Pipes
 from threedigrid.admin.lines.models import Orifices
 from threedigrid.admin.lines.models import Weirs
 from threedigrid.admin import constants
+from threedigrid.geo_utils import raise_import_exception
 from threedigrid.orm.base.encoder import NumpyEncoder
+from six.moves import range
+
+try:
+    import geojson
+except ImportError:
+    geojson = None
 
 FRICTION_CHEZY = 1
 FRICTION_MANNING = 2
@@ -70,6 +77,8 @@ def cross_section_str(width, height, shape):
 
 class ChannelsGeoJsonSerializer():
     def __init__(self, channels=None, data=None, indent=None):
+        if geojson is None:
+            raise_import_exception('geojson')
         if channels:
             assert isinstance(channels, Channels)
         self._data = data
@@ -89,7 +98,7 @@ class ChannelsGeoJsonSerializer():
                 "Can't return data as geojson "
                 "for selection without geometries")
 
-        for i in xrange(selection['id'].shape[-1]):
+        for i in range(selection['id'].shape[-1]):
             # Pack line_coords as [[x1, y1], [x2, y2]]
             # rounded with LONLAT_DIGITS
             lines = geojson.LineString(
@@ -140,6 +149,8 @@ class ChannelsGeoJsonSerializer():
 
 class PipesGeoJsonSerializer():
     def __init__(self, pipes=None, data=None, indent=None):
+        if geojson is None:
+            raise_import_exception('geojson')
         if pipes:
             assert isinstance(pipes, Pipes)
         self._data = data
@@ -159,7 +170,7 @@ class PipesGeoJsonSerializer():
                 "Can't return data as geojson "
                 "for selection without geometries")
 
-        for i in xrange(selection['id'].shape[-1]):
+        for i in range(selection['id'].shape[-1]):
             # Pack line_coords as [[x1, y1], [x2, y2]]
             # rounded with LONLAT_DIGITS
             lines = geojson.LineString(
@@ -167,9 +178,9 @@ class PipesGeoJsonSerializer():
                         (2, -1)), constants.LONLAT_DIGITS).tolist())
 
             invert_level_start_point_str = format_to_str(
-                -selection['invert_level_start_point'][i])
+                selection['invert_level_start_point'][i])
             invert_level_end_point_str = format_to_str(
-                -selection['invert_level_end_point'][i])
+                selection['invert_level_end_point'][i])
 
             cross_section = cross_section_str(
                 selection['cross_section_width'][i],
@@ -230,6 +241,8 @@ class PipesGeoJsonSerializer():
 
 class WeirsGeoJsonSerializer():
     def __init__(self, weirs=None, data=None, indent=None):
+        if geojson is None:
+            raise_import_exception('geojson')
         if weirs:
             assert isinstance(weirs, Weirs)
         self._data = data
@@ -249,7 +262,7 @@ class WeirsGeoJsonSerializer():
 
         geos = []
 
-        for i in xrange(selection['id'].shape[-1]):
+        for i in range(selection['id'].shape[-1]):
             # Pack line_coords as [[x1, y1], [x2, y2]]
             # rounded with LONLAT_DIGITS
             lines = geojson.Point(
@@ -305,6 +318,8 @@ class WeirsGeoJsonSerializer():
 
 class CulvertsGeoJsonSerializer():
     def __init__(self, culverts=None, data=None, indent=None):
+        if geojson is None:
+            raise_import_exception('geojson')
         if culverts:
             assert isinstance(culverts, Culverts)
         self._data = data
@@ -325,7 +340,7 @@ class CulvertsGeoJsonSerializer():
                 "Can't return data as geojson "
                 "for selection without geometries")
 
-        for i in xrange(selection['id'].shape[-1]):
+        for i in range(selection['id'].shape[-1]):
             # Pack line_coords as [[x1, y1], [x2, y2]]
             # rounded with LONLAT_DIGITS
             lines = geojson.LineString(
@@ -333,9 +348,9 @@ class CulvertsGeoJsonSerializer():
                         (2, -1)).T, constants.LONLAT_DIGITS).tolist())
 
             invert_level_start_point_str = format_to_str(
-                -selection['invert_level_start_point'][i])
+                selection['invert_level_start_point'][i])
             invert_level_end_point_str = format_to_str(
-                -selection['invert_level_end_point'][i])
+                selection['invert_level_end_point'][i])
 
             cross_section = cross_section_str(
                 selection['cross_section_width'][i],
@@ -400,6 +415,8 @@ class CulvertsGeoJsonSerializer():
 
 class OrificesGeoJsonSerializer():
     def __init__(self, orifices=None, data=None, indent=None):
+        if geojson is None:
+            raise_import_exception('geojson')
         if orifices:
             assert isinstance(orifices, Orifices)
         self._data = data
@@ -415,7 +432,7 @@ class OrificesGeoJsonSerializer():
 
         geos = []
 
-        for i in xrange(selection['id'].shape[-1]):
+        for i in range(selection['id'].shape[-1]):
             # Pack line_coords as [[x1, y1], [x2, y2]]
             # rounded with LONLAT_DIGITS
             lines = geojson.LineString(
@@ -426,9 +443,6 @@ class OrificesGeoJsonSerializer():
                 ['object type', constants.TYPE_V2_ORIFICE],
                 ['display name', selection['display_name'][i]],
                 ['sewerage', str(selection['sewerage'][i] == 1)],
-                ['max capacity', '%s [m3/s]' % str(
-                    selection['max_capacity'][i] if
-                    selection['max_capacity'][i] else '--')],
                 ['discharge coeff. pos.',
                     "%0.1f" % selection['discharge_coefficient_positive'][i]
                     or '--'],

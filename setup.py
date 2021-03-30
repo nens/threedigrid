@@ -3,17 +3,23 @@
 
 """The setup script."""
 
+from __future__ import absolute_import
 from setuptools import setup, find_packages
 
+import sys
 import codecs
 import re
 import os
 
+python_27 = sys.version_info <= (2, 7)
+
 here = os.path.abspath(os.path.dirname(__file__))
+
 
 def read(*parts):
     with codecs.open(os.path.join(here, *parts), 'r') as fp:
         return fp.read()
+
 
 def find_version(*file_paths):
     version_file = read(*file_paths)
@@ -22,7 +28,6 @@ def find_version(*file_paths):
     if version_match:
         return version_match.group(1)
     raise RuntimeError("Unable to find version string.")
-
 
 
 with open('README.rst') as readme_file:
@@ -34,10 +39,11 @@ with open('HISTORY.rst') as history_file:
 lightweight_requirements = [
     'numpy>=1.13',
     'h5py>=2.7.1',
+    'six',
 ]
 
 results_requirements = [
-    'netCDF4>=1.3.1',
+    'cftime>=1.0.1'
 ]
 
 # for extra 'geo'
@@ -47,6 +53,10 @@ geo_requirements = [
     'pyproj>=1.9.5.1',
     'Shapely>=1.6.4',
     'geojson>=2.3.0',
+]
+
+rpc_requirements = [
+    'asyncio-rpc>=0.1.10',
 ]
 
 setup_requirements = []
@@ -63,6 +73,7 @@ setup(
         'Natural Language :: English',
         "Programming Language :: Python :: 2",
         'Programming Language :: Python :: 2.7',
+        "Programming Language :: Python :: 3",
         'Topic :: Scientific/Engineering',
     ],
     description="Python package for the threedigrid administration",
@@ -86,6 +97,7 @@ setup(
     extras_require={
         'geo': geo_requirements,
         'results': results_requirements,
+        'rpc': rpc_requirements
     },
     url='https://github.com/nens/threedigrid',
     version=find_version("threedigrid", "__init__.py"),

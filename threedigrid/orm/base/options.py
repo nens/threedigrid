@@ -19,13 +19,18 @@ Public methods primarily act on fields:
 from __future__ import unicode_literals
 from __future__ import print_function
 
+from __future__ import absolute_import
 from collections import defaultdict
 from collections import namedtuple
 from itertools import product
+
+
 import logging
 
 from threedigrid.numpy_utils import create_np_lookup_index_for
 from threedigrid.orm.base.fields import TimeSeriesCompositeArrayField
+from threedigrid.orm.base.utils import _flatten_dict_values
+import six
 
 logger = logging.getLogger(__name__)
 
@@ -40,10 +45,12 @@ class Options(object):
         >>> ff = "/code/tests/test_files/gridadmin.h5"
         >>> gr = GridH5ResultAdmin(ff, f)
         >>> gr.nodes._meta.s1
-        >>> s1(units=u'm', long_name=u'waterlevel', standard_name=u'water_surface_height_above_reference_datum')
+        >>> s1(units=u'm', long_name=u'waterlevel',
+        ...     standard_name=u'water_surface_height_above_reference_datum')
 
-    ``s1`` is a namedtuple so you can retrieve the units attribute by the the ``.`` notation ``gr.nodes._meta.s1.units``
-    or using the ``_as_dict`` method ``gr.nodes._meta.s1._asdict()['units']``
+    ``s1`` is a namedtuple so you can retrieve the units attribute by the ``.``
+    notation ``gr.nodes._meta.s1.units`` or using the ``_as_dict`` method
+    ``gr.nodes._meta.s1._asdict()['units']``
 
     """
     _lookup = None  # placeholder for lookup index array
@@ -69,7 +76,7 @@ class Options(object):
             for x in self.inst._field_names if x != 'meta'
         }
         if only_names:
-            return fields.keys()
+            return list(fields.keys())
         return fields
 
     def get_field(self, field_name):
@@ -105,7 +112,7 @@ class Options(object):
             instance but excluded from the list of field names
         """
 
-        for field_name, field in fields.iteritems():
+        for field_name, field in six.iteritems(fields):
             self.add_field(field_name, field, hide_private)
 
     def _source_exists(self, field_name):
@@ -119,14 +126,16 @@ class Options(object):
         _has_comp = hasattr(self.inst.Meta, 'composite_fields')
         _has_sub = hasattr(self.inst.Meta, 'subset_fields')
         if not _has_comp and not _has_sub:
-            return field_name in self.inst._datasource.keys()
+            return field_name in list(self.inst._datasource.keys())
 
         sources = self.inst.Meta.composite_fields.get(field_name)
+
         if sources:
-            return any([x in self.inst._datasource.keys() for x in sources])
+            return self.inst._datasource.has_any(sources)
         sources = self.inst.Meta.subset_fields.get(field_name)
         if sources:
-            return any([x in self.inst._datasource.keys() for x in sources.values()])
+            _sources = _flatten_dict_values(sources, as_set=True)
+            return self.inst._datasource.has_any(_sources)
 
     def _get_meta_values(self, field_name):
         """
@@ -190,7 +199,6 @@ class Options(object):
 
         return self._lookup
 
-
     def _get_composite_meta(self, field_name, attr_name):
         """
         get the attr entry for a composite field from the datasource
@@ -207,15 +215,15 @@ class Options(object):
         meta_attrs = [self.inst._datasource.attr(source_name, attr_name)
                       for source_name in source_names]
 
-        if meta_attrs < 2:
+        if len(meta_attrs) < 2:
             return ''
 
         try:
-            assert all(x == meta_attrs[0] for x in meta_attrs) == True, \
+            assert all(x == meta_attrs[0] for x in meta_attrs), \
                 'composite fields must have the same {}. ' \
                 'Failed to get meta info for field_name {} '.format(
                     attr_name, field_name)
-        except AssertionError, _err:
+        except AssertionError:
             return ''
         return meta_attrs[0]
 
@@ -269,7 +277,7 @@ class ModelMeta(type):
         # attribute to the class
         new_mixin.composite_fields = {}
 
-        for k, v in composition_vars.iteritems():
+        for k, v in six.iteritems(composition_vars):
             c_field = base_composition.get(k)
             if not c_field:
                 continue
@@ -280,12 +288,12 @@ class ModelMeta(type):
 
         if base_subset_fields:
             new_mixin.subset_fields = {}
-            for k, v in composition_vars.iteritems():
+            for k, v in six.iteritems(composition_vars):
                 subset_dict = base_subset_fields.get(k)
                 if not subset_dict:
                     continue
-                s_field = subset_dict.values()[0]
-                s_name = subset_dict.keys()[0]
+                s_field = list(subset_dict.values())[0]
+                s_name = list(subset_dict.keys())[0]
                 for p in v:
                     new_key = k + '_' + p
                     agg_fields = ModelMeta.combine_vars({s_field}, {p})
@@ -312,5 +320,4 @@ class ModelMeta(type):
         :param join_str: (string)
         :return: (list) ∏ (set_a, set_b)
         """
-        return map(lambda x: x[0] + join_str + x[1],
-                   product(prod_a, prod_b))
+        return [x[0] + join_str + x[1] for x in product(prod_a, prod_b)]

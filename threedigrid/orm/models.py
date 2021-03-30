@@ -3,12 +3,16 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
-from constants import SHP_DRIVER_NAME, GEO_PACKAGE_DRIVER_NAME
+from __future__ import absolute_import
+from .constants import SHP_DRIVER_NAME, GEO_PACKAGE_DRIVER_NAME, \
+    GEOJSON_DRIVER_NAME
 
 from threedigrid.orm.base.models import Model as BaseModel
 from threedigrid.orm.fields import LineArrayField
 from threedigrid.orm.fields import GeomArrayField
 from threedigrid.orm.filters import FILTER_MAP
+from threedigrid.admin.exporter_constants import DEFAULT_EXPORT_FIELDS
+from threedigrid.admin.serializers import GeoJsonSerializer
 
 
 class Model(BaseModel):
@@ -19,7 +23,7 @@ class Model(BaseModel):
         Returns: the filtered values with geometries
                  transformed to centroids
         """
-        selection = self.__do_filter()
+        selection = self.data
         for field_name in self._field_names:
             field = self._get_field(field_name)
             if isinstance(field, LineArrayField) and field_name in selection:
@@ -59,7 +63,7 @@ class Model(BaseModel):
         return self.__init_class(
             self.__class__, **new_class_kwargs)
 
-    def __do_reproject_value(self, value, field_name, target_epsg_code):
+    def _do_reproject_value(self, value, field_name, target_epsg_code):
         if target_epsg_code == self.epsg_code:
             # Already done
             return value
@@ -97,13 +101,27 @@ class Model(BaseModel):
         self._to_ogr(
             GEO_PACKAGE_DRIVER_NAME, file_name, **kwargs)
 
+    def to_geojson(self, file_name, **kwargs):
+        if kwargs.get('use_ogr', False):
+            self._to_ogr(GEOJSON_DRIVER_NAME, file_name, **kwargs)
+        else:
+            fields = kwargs.get(
+                'fields', DEFAULT_EXPORT_FIELDS[self.__class__.__name__]
+            )
+            if fields == 'ALL':
+                fields = self._field_names
+
+            indent = kwargs.get('indent', None)
+            serializer = GeoJsonSerializer(fields, self, indent)
+            serializer.save(file_name)
+
     def _to_ogr(self, driver_name, file_name, **kwargs):
         exporter = self._get_exporter(driver_name)
         if not exporter:
             raise AttributeError(
-                "Instance has no {} exporter".format(driver_name)
+                "Instance {} has no {} exporter".format(self, driver_name)
             )
-        filtered = self.__do_filter()
+        filtered = self.data
         exporter.set_driver(driver_name=driver_name)
 
         epsg_code = self.epsg_code

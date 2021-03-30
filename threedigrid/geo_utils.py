@@ -1,5 +1,7 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
+from __future__ import unicode_literals
 import numpy as np
 import logging
 
@@ -9,7 +11,7 @@ except ImportError:
     pyproj = None
 
 try:
-    import osr
+    from osgeo import osr
 except ImportError:
     osr = None
 
@@ -17,6 +19,13 @@ try:
     import mercantile
 except ImportError:
     mercantile = None
+
+try:
+    import shapely
+    from shapely.strtree import STRtree
+    from shapely.wkt import loads
+except ImportError:
+    shapely = None
 
 from threedigrid.numpy_utils import select_lines_by_bbox
 
@@ -46,18 +55,36 @@ def transform_xys(x_array, y_array, source_epsg, target_epsg):
     if pyproj is None:
         raise_import_exception('pyproj')
 
+    pyproj_version = pyproj.__version__.split('.')
+    check_version = '2.2.0'.split('.')
+
     assert isinstance(x_array, np.ndarray)
     assert isinstance(y_array, np.ndarray)
+
+    if x_array.size == 0 and y_array.size == 0:
+        return np.array([[], []])
     # if threedigrid.orm.transform is None:
     #     raise ImportError('')
     projections = []
     for epsg_code in (source_epsg, target_epsg):
-        epsg_str = 'epsg:{}'.format(epsg_code)
-        projection = pyproj.Proj(init=epsg_str)
+        if isinstance(epsg_code, bytes):
+            epsg_code = epsg_code.decode('utf-8')
+        epsg_str = u'epsg:{}'.format(epsg_code)
+
+        if pyproj_version >= check_version:
+            projection = pyproj.Proj(epsg_str)
+        else:
+            projection = pyproj.Proj(init=epsg_str)
         projections.append(projection)
 
-    return np.array(pyproj.transform(
-        projections[0], projections[1], x_array, y_array))
+    if pyproj_version >= check_version:
+        reprojected = pyproj.transform(
+            projections[0], projections[1], x_array, y_array, always_xy=True)
+    else:
+        reprojected = pyproj.transform(
+            projections[0], projections[1], x_array, y_array)
+
+    return np.array(reprojected)
 
 
 def get_spatial_reference(epsg_code):
@@ -84,10 +111,18 @@ def get_spatial_reference(epsg_code):
         raise
 
 
-def transform_bbox(bbox, source_epsg_code, target_epsg_code):
+def transform_bbox(
+        bbox, source_epsg_code, target_epsg_code, all_coords=False
+):
     """
     Transform bbox from source_epsg_code to target_epsg_code,
     if necessary
+
+    :returns np.array of shape 4 which represent the two coordinates:
+        left, bottom and right, top.
+        When `all_coords` is set to `True`, a np.array of shape 8 is given
+        which represents coords of the bbox in the following order:
+        left top, right top, right bottom, left bottom
     """
     if source_epsg_code != target_epsg_code:
         # XXX: Not entirely sure whether transformations between two projected
@@ -102,18 +137,32 @@ def transform_bbox(bbox, source_epsg_code, target_epsg_code):
             msg = "Transforming a bbox from %s to %s is inaccurate."
             logger.warning(msg, source_epsg_code, target_epsg_code)
         # Transform to [[left, right],[top, bottom]]
+        input_x = [bbox[BBOX_LEFT], bbox[BBOX_RIGHT]]
+        input_y = [bbox[BBOX_TOP], bbox[BBOX_BOTTOM]]
+        if all_coords:
+            input_x += [bbox[BBOX_RIGHT], bbox[BBOX_LEFT]]
+            input_y += [bbox[BBOX_TOP], bbox[BBOX_BOTTOM]]
         bbox_trans = np.array(
-                transform_xys(
-                    np.array([bbox[BBOX_LEFT], bbox[BBOX_RIGHT]]),
-                    np.array([bbox[BBOX_TOP], bbox[BBOX_BOTTOM]]),
-                    source_epsg_code, target_epsg_code))
+            transform_xys(
+                np.array(input_x), np.array(input_y),
+                source_epsg_code, target_epsg_code
+            )
+        )
 
-        # Transform back to [left,top,right, bottom]
-        bbox = np.array(
-            [min(bbox_trans[0]),
-             min(bbox_trans[1]),
-             max(bbox_trans[0]),
-             max(bbox_trans[1])])
+        if all_coords:
+            bbox = np.array([
+                bbox_trans[0][0], bbox_trans[1][0],  # left_top
+                bbox_trans[0][2], bbox_trans[1][2],  # right_top
+                bbox_trans[0][1], bbox_trans[1][1],  # right_bottom
+                bbox_trans[0][3], bbox_trans[1][3]  # left_bottom
+            ])
+        else:
+            # Transform back to [left,bottom,right,top]
+            bbox = np.array(
+                [min(bbox_trans[0]), min(bbox_trans[1]),  # left_bottom
+                 max(bbox_trans[0]), max(bbox_trans[1])  # right_top
+                 ]
+            )
     return bbox
 
 
@@ -241,3 +290,34 @@ def select_lines_by_tile(tile_xyz=(0, 0, 0), target_epsg_code='4326',
     return select_lines_by_bbox(
         lines, get_bbox_for_tile(tile_xyz, target_epsg_code),
         include_intersections)
+
+
+def select_geoms_by_geometry(geoms, geometry):
+    """Build a STRtree from geoms and returns intersection with geometry
+
+    :param geoms: list of geometries you want to search from
+    :param geometry: intersection geometry
+    :return: list of geoms intersecting with geometry
+    """
+    if shapely is None:
+        raise_import_exception('shapely')
+
+    if type(geometry) in (bytes, str):
+        if isinstance(geometry, bytes):
+            geometry = geometry.decode('utf-8')
+        # assume wkt, try to load
+        geometry = loads(geometry)
+
+    tree = STRtree(geoms)
+    # STRtree checks intersection based on bbox of the geometry only:
+    # https://github.com/Toblerity/Shapely/issues/558
+    intersected_geoms = tree.query(geometry)
+
+    # reverse loop because we pop elements based on index
+    for i, intersected_geom in zip(
+            reversed(range(len(intersected_geoms))),
+            reversed(intersected_geoms)
+    ):
+        if not intersected_geom.intersects(geometry):
+            intersected_geoms.pop(i)
+    return intersected_geoms

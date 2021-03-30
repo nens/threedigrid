@@ -5,7 +5,7 @@ The Python package for the threedigrid administration.
 
 
 .. image:: https://travis-ci.org/nens/threedigrid.svg?branch=master
-        :target: https://travis-ci.org/larsclaussen/threedigrid
+        :target: https://travis-ci.org/nens/threedigrid
 
 
 .. image:: https://readthedocs.org/projects/threedigrid/badge/?version=latest
@@ -35,7 +35,7 @@ The standard threedigrid distribution is pretty lightweight, installing as littl
 as possible. If you want to make use of all capabilities threedigrid has to ofter (e.g. spatial
 operations and command line tools) install like this::
 
-    $ pip install threedigrid[geo]
+    $ pip install threedigrid[geo,results]
 
 
 Console scripts
@@ -100,6 +100,33 @@ or by the lik value::
 The filtering is lazy, that is, to retrieve data you have to call data explicitly::
 
     ga.lines.filter(lik__eq=4).data  # will return an ordered dict
+
+Remote procedure calls
+----------------------
+
+Currently only the client-side is included. The server-side might be added in a later stage.
+Note: this is an advanced feature used inside the 3Di stack, probably you don't need this.
+Note2: you need Python 3.7 or higher for this to work.
+
+
+Installation:
+
+    $ pip install threedigrid[rpc]
+
+
+Basic usage::
+
+    ga = GridH5ResultAdmin('rpc://REDIS_HOST/SIMULATION_ID', 'rpc://REDIS_HOST/SIMULATION_ID')
+    # Replace REDIS_HOST and SIMULATION_ID with actual values.
+    future_result = ga.nodes.filter(lik__eq=4).data
+    data = await future_result.resolve()
+
+Subscription usage::
+
+    subscription = await future_result.subscribe()
+
+    async for item in subscription.enumerate():
+          # do something with item
 
 
 Credits

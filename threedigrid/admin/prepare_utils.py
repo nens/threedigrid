@@ -3,23 +3,24 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
+from __future__ import absolute_import
 import numpy as np
 from .utils import PKMapper
+import six
 
+DEFAULT_NULL_VALUE = -9999
 
 FIELD_NULL_VALUES = {
     'display_name':  b'',
     'code': b'',
 }
 
-DEFAULT_NULL_VALUE = -9999
-
 
 def db_objects_to_numpy_array_dict(db_objects, field_names):
     numpy_array_dict = {}
 
     for field_name in field_names:
-        numpy_array_dict[field_name] = [0] * len(db_objects)
+        numpy_array_dict[field_name] = [DEFAULT_NULL_VALUE] * len(db_objects)
 
     for index, db_object in enumerate(db_objects):
         for field_name in field_names:
@@ -36,7 +37,7 @@ def db_objects_to_numpy_array_dict(db_objects, field_names):
                 value = np.fromstring(str(value.wkb), dtype='uint8')
 
             # Convert unicode to str
-            if isinstance(value, unicode):
+            if isinstance(value, six.text_type):
                 value = value.encode('utf8')
             if value is not None:
                 numpy_array_dict[field_name][index] = value
@@ -72,11 +73,20 @@ def add_or_update_datasets(h5py_group, numpy_array_dict, field_names,
         else:
             dataset_name = field_name
 
-        if dataset_name not in h5py_group.keys():
+        if dataset_name not in list(h5py_group.keys()):
+            dt = None
+            if data.dtype.type is np.string_:
+                if dataset_name == 'code':
+                    dt = 'S32'
+                elif dataset_name == 'display_name':
+                    dt = 'S64'
+                elif dataset_name == 'shape':
+                    dt = 'S4'
+
             h5py_group.create_dataset(
-                dataset_name, data=data)
+                dataset_name, data=data, dtype=dt)
         else:
-            values = h5py_group[dataset_name].value
+            values = h5py_group[dataset_name][:]
             mask = data != null_value
             values[mask] = data[mask]
             h5py_group[dataset_name][:] = values

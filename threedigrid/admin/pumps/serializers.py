@@ -3,11 +3,18 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
+from __future__ import absolute_import
 import json
-import geojson
 from threedigrid.admin.pumps.models import Pumps
 from threedigrid.admin import constants
+from threedigrid.geo_utils import raise_import_exception
 from threedigrid.orm.base.encoder import NumpyEncoder
+from six.moves import range
+
+try:
+    import geojson
+except ImportError:
+    geojson = None
 
 
 def format_to_str(value, empty_value='--', format_string='%0.2f'):
@@ -22,6 +29,8 @@ def format_to_str(value, empty_value='--', format_string='%0.2f'):
 
 class PumpsGeoJsonSerializer():
     def __init__(self, pumps=None, data=None, indent=None):
+        if geojson is None:
+            raise_import_exception('geojson')
         if pumps:
             assert isinstance(pumps, Pumps)
         self._data = data
@@ -41,7 +50,7 @@ class PumpsGeoJsonSerializer():
                 "Can't return data as geojson "
                 "for selection without geometries")
 
-        for i in xrange(selection['id'].shape[-1]):
+        for i in range(selection['id'].shape[-1]):
             pt = geojson.Point(
                 [round(x, constants.LONLAT_DIGITS)
                  for x in selection['coordinates'][:, i]])

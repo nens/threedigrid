@@ -1,43 +1,49 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
+from __future__ import absolute_import
 from __future__ import print_function
+from __future__ import unicode_literals
 
 import logging
 from collections import defaultdict
-import os
 
-from netCDF4 import Dataset
+import h5py
+
 from threedigrid.admin.breaches.models import Breaches
+from threedigrid.admin.breaches.timeseries_mixin import (
+    BreachesAggregateResultsMixin, BreachesResultsMixin)
 from threedigrid.admin.constants import DEFAULT_CHUNK_TIMESERIES
+from threedigrid.admin.gridadmin import GridH5Admin
 from threedigrid.admin.h5py_datasource import H5pyResultGroup
+from threedigrid.admin.h5py_swmr import H5SwmrFile
 from threedigrid.admin.lines.models import Lines
-from threedigrid.admin.pumps.models import Pumps
-from threedigrid import admin
-
-from threedigrid.admin.nodes.timeseries_mixin import NodesAggregateResultsMixin
-from threedigrid.admin.nodes.timeseries_mixin import NodesResultsMixin
 from threedigrid.admin.lines.timeseries_mixin import LinesAggregateResultsMixin
 from threedigrid.admin.lines.timeseries_mixin import LinesResultsMixin
-from threedigrid.admin.breaches.timeseries_mixin import BreachesAggregateResultsMixin
-from threedigrid.admin.breaches.timeseries_mixin import BreachesResultsMixin
-from threedigrid.admin.pumps.timeseries_mixin import PumpsResultsMixin
-from threedigrid.admin.pumps.timeseries_mixin import PumpsAggregateResultsMixin
-
 from threedigrid.admin.nodes.models import Nodes
-from threedigrid.admin.gridadmin import GridH5Admin
+from threedigrid.admin.nodes.timeseries_mixin import NodesAggregateResultsMixin
+from threedigrid.admin.nodes.timeseries_mixin import NodesResultsMixin
+from threedigrid.admin.pumps.models import Pumps
+from threedigrid.admin.pumps.timeseries_mixin import PumpsAggregateResultsMixin
+from threedigrid.admin.pumps.timeseries_mixin import PumpsResultsMixin
 from threedigrid.orm.models import Model
 
 logger = logging.getLogger(__name__)
+
+try:
+    import asyncio_rpc # noqa
+    asyncio_rpc_support = True
+except ImportError:
+    asyncio_rpc_support = False
 
 
 class GridH5ResultAdmin(GridH5Admin):
     """
     Admin interface for threedicore result queries.
     """
-    _field_model_dict = defaultdict(list)
 
-    def __init__(self, h5_file_path, netcdf_file_path, file_modus='r'):
+    def __init__(
+            self, h5_file_path, netcdf_file_path, file_modus='r', swmr=False):
         """
 
         :param h5_file_path: path to the hdf5 gridadmin file
@@ -45,11 +51,30 @@ class GridH5ResultAdmin(GridH5Admin):
             called subgrid_map.nc)
         :param file_modus: modus in which to open the files
         """
+        self._field_model_dict = defaultdict(list)
         self._netcdf_file_path = netcdf_file_path
         super(GridH5ResultAdmin, self).__init__(h5_file_path, file_modus)
-        self.netcdf_file = Dataset(netcdf_file_path)
+
+        self.result_datasource_class = H5pyResultGroup
+
+        if h5_file_path.startswith('rpc://'):
+            if not asyncio_rpc_support:
+                raise Exception(
+                    "Please reinstall this package with threedigrid[rpc]")
+
+            from threedigrid.admin.rpc_datasource import (
+                H5RPCResultGroup, RPCFile)
+            self.netcdf_file = RPCFile(h5_file_path, file_modus)
+            self.result_datasource_class = H5RPCResultGroup
+        else:
+            if swmr:
+                self.netcdf_file = H5SwmrFile(
+                    netcdf_file_path, file_modus)
+            else:
+                self.netcdf_file = h5py.File(
+                    netcdf_file_path, file_modus)
+            self.version_check()
         self.set_timeseries_chunk_size(DEFAULT_CHUNK_TIMESERIES.stop)
-        self.version_check()
 
     def set_timeseries_chunk_size(self, new_chunk_size):
         """
@@ -76,18 +101,20 @@ class GridH5ResultAdmin(GridH5Admin):
 
     @property
     def time_units(self):
-        return self.netcdf_file.variables['time'].getncattr('units')
+        return self.netcdf_file['time'].attrs.get('units')
 
     @property
     def lines(self):
         return Lines(
-            H5pyResultGroup(self.h5py_file, 'lines', self.netcdf_file),
+            self.result_datasource_class(
+                self.h5py_file, 'lines', self.netcdf_file),
             **dict(self._grid_kwargs, **{'mixin': LinesResultsMixin}))
 
     @property
     def nodes(self):
         return Nodes(
-            H5pyResultGroup(self.h5py_file, 'nodes', self.netcdf_file),
+            self.result_datasource_class(
+                self.h5py_file, 'nodes', self.netcdf_file),
             **dict(self._grid_kwargs, **{'mixin': NodesResultsMixin}))
 
     @property
@@ -96,7 +123,8 @@ class GridH5ResultAdmin(GridH5Admin):
             logger.info('Threedimodel has no breaches')
             return
         return Breaches(
-            H5pyResultGroup(self.h5py_file, 'breaches', self.netcdf_file),
+            self.result_datasource_class(
+                self.h5py_file, 'breaches', self.netcdf_file),
             **dict(self._grid_kwargs, **{'mixin': BreachesResultsMixin}))
 
     @property
@@ -105,7 +133,8 @@ class GridH5ResultAdmin(GridH5Admin):
             logger.info('Threedimodel has no pumps')
             return
         return Pumps(
-            H5pyResultGroup(self.h5py_file, 'pumps', self.netcdf_file),
+            self.result_datasource_class(
+                self.h5py_file, 'pumps', self.netcdf_file),
             **dict(self._grid_kwargs, **{'mixin': PumpsResultsMixin}))
 
     def version_check(self):
@@ -123,7 +152,7 @@ class GridH5ResultAdmin(GridH5Admin):
             )
 
     @property
-    def __field_model_map(self):
+    def _field_model_map(self):
         """
         :return: a dict of {<field name>: [model name, ...]}
         """
@@ -136,7 +165,12 @@ class GridH5ResultAdmin(GridH5Admin):
             if any([attr_name.startswith('__'),
                     attr_name.startswith('_')]):
                 continue
-            attr = getattr(self, attr_name)
+            try:
+                attr = getattr(self, attr_name)
+            except AttributeError:
+                logger.warning("Attribute: '{}' does not "
+                               "exist in h5py_file.".format(attr_name))
+                continue
             if not issubclass(type(attr), Model):
                 continue
             model_names.add(attr_name)
@@ -152,7 +186,7 @@ class GridH5ResultAdmin(GridH5Admin):
         :return: instance of the model the field belongs to
         :raises IndexError if the field name is not unique across models
         """
-        model_name = self.__field_model_map.get(field_name)
+        model_name = self._field_model_map.get(field_name)
         if not model_name or len(model_name) != 1:
             raise IndexError(
                 'Ambiguous result. Field name {} yields {} model(s)'.format(
@@ -167,7 +201,7 @@ class GridH5ResultAdmin(GridH5Admin):
         string otherwise
         """
         try:
-            return self.netcdf_file.getncattr('threedicore_version')
+            return self.netcdf_file.attrs.get('threedicore_version')
         except AttributeError:
             logger.error(
                 'Attribute threedicore_version could not be found in result file')  # noqa
@@ -214,11 +248,9 @@ class GridH5AggregateResultAdmin(GridH5ResultAdmin):
             return
         model_name = 'breaches'
         return Breaches(
-            H5pyResultGroup(
-                self.h5py_file, model_name, self.netcdf_file),
-                **dict(
-                    self._grid_kwargs,
-                    **{'mixin': BreachesAggregateResultsMixin})
+            H5pyResultGroup(self.h5py_file, model_name, self.netcdf_file),
+            **dict(self._grid_kwargs,
+                   **{'mixin': BreachesAggregateResultsMixin})
         )
 
     @property

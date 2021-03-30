@@ -3,9 +3,12 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
+from __future__ import absolute_import
 import os
 import logging
 from collections import OrderedDict
+import six
+from six.moves import range
 
 try:
     from osgeo import ogr
@@ -37,6 +40,7 @@ class NodesOgrExporter(BaseOgrExporter):
         self.supported_drivers = {
             const.GEO_PACKAGE_DRIVER_NAME,
             const.SHP_DRIVER_NAME,
+            const.GEOJSON_DRIVER_NAME,
         }
 
     def save(self, file_name, node_data, target_epsg_code, **kwargs):
@@ -60,14 +64,14 @@ class NodesOgrExporter(BaseOgrExporter):
         if self._nodes.has_1d:
             fields.update(NODE_1D_FIELDS)
 
-        for field_name, field_type in fields.iteritems():
+        for field_name, field_type in six.iteritems(fields):
             layer.CreateField(ogr.FieldDefn(
                     str(field_name),
                     const.OGR_FIELD_TYPE_MAP[field_type])
             )
         _definition = layer.GetLayerDefn()
 
-        for i in xrange(node_data['id'].size):
+        for i in range(node_data['id'].size):
             point = ogr.Geometry(ogr.wkbPoint)
             point.AddPoint(
                 node_data['coordinates'][0][i],
@@ -75,7 +79,7 @@ class NodesOgrExporter(BaseOgrExporter):
             )
             feature = ogr.Feature(_definition)
             feature.SetGeometry(point)
-            for field_name, field_type in fields.iteritems():
+            for field_name, field_type in six.iteritems(fields):
                 fname = NODE_FIELD_NAME_MAP[field_name]
                 raw_value = node_data[fname][i]
                 value = TYPE_FUNC_MAP[field_type](raw_value)
@@ -122,7 +126,7 @@ class CellsOgrExporter(BaseOgrExporter):
             ('nod_id', 'int'),
             ('bottom_lev', 'float'),
         ])
-        for field_name, field_type in fields.iteritems():
+        for field_name, field_type in six.iteritems(fields):
             layer.CreateField(
                 ogr.FieldDefn(
                     str(field_name),
@@ -131,7 +135,7 @@ class CellsOgrExporter(BaseOgrExporter):
             )
 
         _definition = layer.GetLayerDefn()
-        for i in xrange(cells_data['id'].size):
+        for i in range(cells_data['id'].size):
             feature = ogr.Feature(_definition)
             # Create ring
             ring = ogr.Geometry(ogr.wkbLinearRing)

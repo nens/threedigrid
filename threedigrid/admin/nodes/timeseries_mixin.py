@@ -3,9 +3,11 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
+from __future__ import absolute_import
 from threedigrid.orm.base.timeseries_mixin import ResultMixin
 from threedigrid.orm.base.timeseries_mixin import AggregateResultMixin
 from threedigrid.orm.base.options import ModelMeta
+import six
 
 
 BASE_COMPOSITE_FIELDS = {
@@ -26,6 +28,10 @@ BASE_SUBSET_FIELDS = {
         {'2d_all': 'Mesh2D_ucy'},
     'leak':
         {'2d_all': 'Mesh2D_leak'},
+    'intercepted_volume':
+        {'2d_all': 'Mesh2D_intercepted_volume'},
+    'q_sss':
+        {'2d_all': 'Mesh2D_q_sss'}
 }
 
 
@@ -62,9 +68,7 @@ class NodesResultsMixin(ResultMixin):
 
 class NodesAggregateResultsMixin(AggregateResultMixin):
 
-    class Meta:
-        __metaclass__ = ModelMeta
-
+    class Meta(six.with_metaclass(ModelMeta)):
         base_composition = BASE_COMPOSITE_FIELDS
         base_subset_fields = BASE_SUBSET_FIELDS
 
@@ -77,18 +81,24 @@ class NodesAggregateResultsMixin(AggregateResultMixin):
         #    --> s1_max  [Mesh2D_s1_max + Mesh1D_s1_max]
         composition_vars = {
             's1': ['min', 'max', 'avg'],
-            'vol': ['min', 'max', 'avg', 'sum'],
+            'vol': ['min', 'max', 'avg', 'sum', 'current'],
             'su': ['min', 'max', 'avg'],
-            'rain': ['min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
-            'q_lat': ['min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
-            'infiltration_rate_simple': ['min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
+            'rain': [
+                'min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
+            'q_lat': [
+                'min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
+            'infiltration_rate_simple': [
+                'min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
             'ucx': ['min', 'max', 'avg'],
             'ucy': ['min', 'max', 'avg'],
-            'leak': ['min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
+            'leak': [
+                'min', 'max', 'avg', 'cum', 'cum_positive', 'cum_negative'],
+            'intercepted_volume': ['min', 'max', 'avg', 'cum', 'current'],
+            'q_sss': ['min', 'max', 'avg', 'cum', 'cum_positive',
+                      'cum_negative']
         }
 
         lookup_fields = ('id', '_mesh_id')
-
 
     def __init__(self, **kwargs):
         """Instantiate a line with netcdf results.

@@ -7,8 +7,11 @@ Exporters
 from __future__ import unicode_literals
 from __future__ import print_function
 
+from __future__ import absolute_import
 import os
 import logging
+import six
+from six.moves import range
 
 try:
     from osgeo import ogr
@@ -26,8 +29,7 @@ from threedigrid.geo_utils import raise_import_exception
 from threedigrid.admin.utils import KCUDescriptor
 from threedigrid.orm.base.exporters import BaseOgrExporter
 from threedigrid.admin import exporter_constants as const
-from threedigrid.admin.constants import LINE_BASE_FIELDS
-from threedigrid.admin.constants import LINE_1D_FIELDS
+from threedigrid.admin.constants import LINE_BASE_FIELDS_ALL
 from threedigrid.admin.constants import LINE_FIELD_NAME_MAP
 from threedigrid.admin.constants import TYPE_FUNC_MAP
 
@@ -48,6 +50,7 @@ class LinesOgrExporter(BaseOgrExporter):
         self.supported_drivers = {
             const.GEO_PACKAGE_DRIVER_NAME,
             const.SHP_DRIVER_NAME,
+            const.GEOJSON_DRIVER_NAME,
         }
         self.driver = None
 
@@ -68,7 +71,7 @@ class LinesOgrExporter(BaseOgrExporter):
         sr = get_spatial_reference(target_epsg_code)
 
         geom_source = 'from_threedicore'
-        if kwargs:
+        if 'geom' in kwargs:
             geom_source = kwargs['geom']
 
         # shapely is needed for the LineString creation, check if installed
@@ -82,10 +85,8 @@ class LinesOgrExporter(BaseOgrExporter):
             sr,
             geomtype
         )
-        fields = LINE_BASE_FIELDS
-        if self._lines.has_1d:
-            fields.update(LINE_1D_FIELDS)
-        for field_name, field_type in fields.iteritems():
+        fields = kwargs.get('fields', LINE_BASE_FIELDS_ALL)
+        for field_name, field_type in six.iteritems(fields):
             layer.CreateField(ogr.FieldDefn(
                     str(field_name),
                     const.OGR_FIELD_TYPE_MAP[field_type])
@@ -94,7 +95,7 @@ class LinesOgrExporter(BaseOgrExporter):
 
         node_a = line_data['line'][0]
         node_b = line_data['line'][1]
-        for i in xrange(node_a.size):
+        for i in range(node_a.size):
             if geom_source == 'from_threedicore':
                 line = ogr.Geometry(ogr.wkbLineString)
                 line.AddPoint(line_data['line_coords'][0][i],
@@ -108,8 +109,8 @@ class LinesOgrExporter(BaseOgrExporter):
 
             feature = ogr.Feature(_definition)
             feature.SetGeometry(line)
-            for field_name, field_type in fields.iteritems():
-                fname = LINE_FIELD_NAME_MAP[field_name]
+            for field_name, field_type in six.iteritems(fields):
+                fname = LINE_FIELD_NAME_MAP.get(field_name, field_name)
                 if field_name == 'kcu_descr':
                     value = ''
                     try:
@@ -121,7 +122,10 @@ class LinesOgrExporter(BaseOgrExporter):
                 elif field_name == 'node_b':
                     value = TYPE_FUNC_MAP[field_type](node_b[i])
                 else:
-                    raw_value = line_data[fname][i]
+                    try:
+                        raw_value = line_data[fname][i]
+                    except IndexError:
+                        raw_value = '-9999'
                     value = TYPE_FUNC_MAP[field_type](raw_value)
                 feature.SetField(str(field_name), value)
 

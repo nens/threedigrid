@@ -3,7 +3,9 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
+from __future__ import absolute_import
 import numpy as np
+from six.moves import range
 
 
 class BaseFilter(object):
@@ -47,7 +49,7 @@ class BaseFilter(object):
 
                 # try both with tuple and list
                 # This solves h5py datasets indexing errors
-                nparray_dict[key] = nparray_dict[key][:][_filter]
+                nparray_dict[key] = nparray_dict[key][:][tuple(_filter)]
 
     def filter_dict(self, nparray_dict, model):
         """
@@ -67,14 +69,18 @@ class BaseFilter(object):
     def get_field_name(self):
         raise NotImplementedError()
 
+    def to_dict(self):
+        raise NotImplementedError()
+
 
 class BaseCompareFilter(BaseFilter):
     """
     Compare filter base
     """
     func_str = '=='
+    func_name = 'eq'
 
-    def __init__(self, key, field, value):
+    def __init__(self, key, field, value, filter_as=False):
         """
         :param key: E.g. 'content_pk'
         :param field: GridDataField instance
@@ -83,6 +89,7 @@ class BaseCompareFilter(BaseFilter):
         self._key = key
         self._field = field
         self._value = value
+        self._filter_as = filter_as
 
     def get_field_name(self):
         return self._key
@@ -93,9 +100,18 @@ class BaseCompareFilter(BaseFilter):
             self.func_str,
             self._key, self._value)
 
+    def to_dict(self):
+        return {
+            'filter': {
+                "{0}__{1}".format(
+                    self._key, self.func_name): self._value
+            }
+        }
+
 
 class EqualsFilter(BaseCompareFilter):
     func_str = '=='
+    func_name = 'eq'
 
     def filter(self, nparray_dict):
         return nparray_dict[self._key][:] == self._value
@@ -103,6 +119,7 @@ class EqualsFilter(BaseCompareFilter):
 
 class NotEqualsFilter(BaseCompareFilter):
     func_str = '!='
+    func_name = 'ne'
 
     def filter(self, nparray_dict):
         return nparray_dict[self._key][:] != self._value
@@ -110,6 +127,7 @@ class NotEqualsFilter(BaseCompareFilter):
 
 class GtFilter(BaseCompareFilter):
     func_str = '>'
+    func_name = 'gt'
 
     def filter(self, nparray_dict):
         return nparray_dict[self._key][:] > self._value
@@ -117,6 +135,7 @@ class GtFilter(BaseCompareFilter):
 
 class GteFilter(BaseCompareFilter):
     func_str = '>='
+    func_name = 'gte'
 
     def filter(self, nparray_dict):
         return nparray_dict[self._key][:] >= self._value
@@ -124,6 +143,7 @@ class GteFilter(BaseCompareFilter):
 
 class LtFilter(BaseCompareFilter):
     func_str = '<'
+    func_name = 'lt'
 
     def filter(self, nparray_dict):
         return nparray_dict[self._key][:] < self._value
@@ -131,6 +151,7 @@ class LtFilter(BaseCompareFilter):
 
 class LteFilter(BaseCompareFilter):
     func_str = '<='
+    func_name = 'lte'
 
     def filter(self, nparray_dict):
         return nparray_dict[self._key][:] <= self._value
@@ -138,8 +159,9 @@ class LteFilter(BaseCompareFilter):
 
 class InFilter(BaseCompareFilter):
     func_str = ' in '
+    func_name = 'in'
 
-    def __init__(self, key, field, value):
+    def __init__(self, key, field, value, filter_as):
         try:
             iter(value)
         except TypeError:
@@ -148,6 +170,7 @@ class InFilter(BaseCompareFilter):
         self._field = field
         self._key = key
         self._value = value
+        self._filter_as = filter_as
 
     def filter(self, nparray_dict):
         # Concatenate equals with | (or)
@@ -171,6 +194,10 @@ class SliceFilter(BaseFilter):
         return "SliceFilter({0})".format(
             self._slice)
 
+    def to_dict(self):
+        return {'slice': [
+            self._slice.start, self._slice.stop, self._slice.step]}
+
 
 FILTER_MAP = {
     'eq': EqualsFilter,
@@ -183,7 +210,8 @@ FILTER_MAP = {
 }
 
 
-def get_filter(splitted_keys, field, value, filter_map=FILTER_MAP):
+def get_filter(
+        splitted_keys, field, value, filter_map=FILTER_MAP, filter_as=False):
     """
     Helper function for getting a filter.
 
@@ -219,4 +247,4 @@ def get_filter(splitted_keys, field, value, filter_map=FILTER_MAP):
     except KeyError:
         raise ValueError("'%s' is an unknown filter name" % filter_name)
 
-    return filter_class(field_name, field, value)
+    return filter_class(field_name, field, value, filter_as)

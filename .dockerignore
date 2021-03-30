@@ -1,0 +1,5 @@
+# Keep the build context small by ignoring everything:
+**
+
+# Except the following files:
+!requirements_*.txt

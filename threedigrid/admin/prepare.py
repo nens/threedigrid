@@ -3,10 +3,14 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
+from __future__ import absolute_import
+
+import json
 import logging
 import os
 
 import numpy as np
+import six
 
 from threedigrid.admin.h5py_datasource import H5pyGroup
 from threedigrid.admin.idmapper import IdMapper
@@ -20,9 +24,11 @@ from threedigrid.admin.lines.prepare import (
 
 from threedigrid.admin.levees.prepare import PrepareLevees
 from threedigrid.admin.nodes.prepare import (
-    PrepareNodes, PrepareManholes, PrepareConnectionNodes)
+    PrepareNodes, PrepareManholes, PrepareConnectionNodes, PrepareCells)
 from threedigrid.admin.pumps.prepare import PreparePumps
 from threedigrid.admin.levees.models import Levees
+from threedigrid.orm.base.encoder import NumpyEncoder
+from threedigrid.orm.constants import EXPORT_METHOD_TO_EXTENSION_MAP
 
 logger = logging.getLogger(__name__)
 
@@ -57,8 +63,8 @@ class GridAdminH5Prepare(object):
         # model_name, revision_number, revision_hash
         # and possible other meta data..
         if extra_attrs:
-            for key, value in extra_attrs.iteritems():
-                if isinstance(value, basestring):
+            for key, value in six.iteritems(extra_attrs):
+                if isinstance(value, six.string_types):
                     value = np.string_(value)
                 h5py_file.attrs[key] = value
 
@@ -83,6 +89,9 @@ class GridAdminH5Prepare(object):
 
     @staticmethod
     def prepare_levees(h5py_file, threedi_datasource, overwrite=False):
+        if not threedi_datasource.levees:
+            return
+
         if skip_prepare(h5py_file, 'levees', 'prepared', overwrite):
             return
 
@@ -135,6 +144,8 @@ class GridAdminH5Prepare(object):
         node_group = H5pyGroup(h5py_file, 'nodes')
         PrepareNodes.prepare_datasource(
             node_group, mapping1d, id_mapper, has_1d=has_1d)
+
+        PrepareCells.prepare_datasource(h5py_file, threedi_datasource)
 
         h5py_file['nodes'].attrs['prepared'] = 1
 
@@ -198,7 +209,7 @@ class GridAdminH5Prepare(object):
         if not has_1d:
             return
 
-        if not is_prepared(h5py_file, 'lines', 'line_prepared'):
+        if not is_prepared(h5py_file, 'lines', 'lines_prepared'):
             # Line data is missing, prepare line data first.
             GridAdminH5Prepare.prepare_lines(h5py_file, threedi_datasource)
 
@@ -251,17 +262,37 @@ class GridAdminH5Prepare(object):
 
 class GridAdminH5Export(object):
     """
-    Exporter that saves shapefiles to the model's /preprocessed dir
+    Exporter that saves shapefiles/geopackage/geojson to destination folder
     """
 
-    def __init__(self, gridadmin_file, export_method='to_shape'):
+    def __init__(
+            self,
+            gridadmin_file,
+            export_method='to_shape',
+            target_epsg_code=None,
+            destination=None,
+            indent=None
+    ):
         """
 
         :param gridadmin_file: hdf5 file (full path)
+        :param export_method: (str) 'to_shape', 'to_gpkg' or 'to_geojson'
+        :param target_epsg_code: (str) epsg code
+        :param destination: path to folder the export folder, defaults to
+            the same folder as the gridadmin_file
         """
         self.ga = GridH5Admin(gridadmin_file)
-        self._dest = os.path.split(gridadmin_file)[0]
         self._export_method = export_method
+        self._extension = EXPORT_METHOD_TO_EXTENSION_MAP[export_method]
+        if not target_epsg_code:
+            self._epsg = self.ga.epsg_code
+        else:
+            self._epsg = target_epsg_code
+        if not destination:
+            self._dest = os.path.split(gridadmin_file)[0]
+        else:
+            self._dest = destination
+        self._indent = indent
 
     def export_all(self):
         """convenience function to run all exports"""
@@ -273,6 +304,70 @@ class GridAdminH5Export(object):
         self.export_2d_openwater_lines()
         self.export_2d_vertical_infiltration_lines()
 
+    def export_frontend(self):
+        self.export_breaches()
+        self.export_channels()
+        self.export_pipes()
+        self.export_weirs()
+        self.export_culverts()
+        self.export_orifices()
+        self.export_manholes()
+        self.export_nodes()
+        self.export_pumps()
+        self.export_levees()
+        self.export_grid()
+        self._combine(
+            output_name="all",
+            file_names={
+                'breaches', 'channels', 'pipes', 'weirs', 'culverts',
+                'orifices', 'manholes', constants.NODES, 'pumps', 'levees'
+            }
+        )
+        self._combine(
+            output_name="cells",
+            file_names={constants.OPEN_WATER, constants.GROUNDWATER}
+        )
+
+    def _combine(self, output_name, file_names):
+        """Combine the `file_names` into a new file called `output_name`.
+
+        The files are simply appended. Only works for geojson.
+
+        :param output_name: name of the new file
+        :param file_names: file names to combine
+        :return:
+        """
+        if self._extension not in ('.json', '.geojson'):
+            logger.info("Can only combine exports with geojson")
+            return
+
+        dest = os.path.join(self._dest, output_name + self._extension)
+        with open(dest, 'w') as output_file:
+            features = []
+            for file_name in file_names:
+                intermediate_result = os.path.join(
+                    self._dest, file_name + self._extension
+                )
+                if not os.path.exists(intermediate_result):
+                    continue
+
+                with open(intermediate_result, 'r') as ir:
+                    geojson = json.load(ir)
+                    im_features = geojson['features']
+                    features += im_features
+
+            json.dump(
+                {"type": "FeatureCollection", "features": features},
+                output_file,
+                indent=self._indent,
+                cls=NumpyEncoder,
+            )
+
+    def export_1d_all(self):
+        self.export_nodes()
+        self.export_lines()
+        self.export_levees()
+
     def export_nodes(self):
         """
         writes shapefile of all 1D nodes
@@ -283,9 +378,13 @@ class GridAdminH5Export(object):
                 "skipping export nodes...".format(self.ga.model_name)
             )
             return
-        dest = os.path.join(self._dest, constants.NODES_SHP)
-        getattr(self.ga.nodes.subset(
-            constants.SUBSET_1D_ALL), self._export_method)(dest)
+        dest = os.path.join(self._dest, constants.NODES + self._extension)
+        getattr(
+            self.ga.nodes.subset(
+                constants.SUBSET_1D_ALL
+            ).reproject_to(self._epsg),
+            self._export_method
+        )(dest, indent=self._indent)
 
     def export_lines(self):
         """
@@ -297,9 +396,117 @@ class GridAdminH5Export(object):
                 "skipping export lines...".format(self.ga.model_name)
             )
             return
-        dest = os.path.join(self._dest, constants.LINES_SHP)
-        getattr(self.ga.lines.subset(
-            constants.SUBSET_1D_ALL), self._export_method)(dest)
+        dest = os.path.join(self._dest, constants.LINES + self._extension)
+        getattr(
+            self.ga.lines.subset(
+                constants.SUBSET_1D_ALL
+            ).reproject_to(self._epsg),
+            self._export_method
+        )(dest, indent=self._indent)
+
+    def export_breaches(self):
+        if self.ga.breaches.id.size == 0:
+            logger.info(
+                "[*] Model {} does not have 1D, "
+                "skipping export breaches...".format(self.ga.model_name)
+            )
+            return
+        dest = os.path.join(self._dest, 'breaches' + self._extension)
+        getattr(
+            self.ga.breaches.reproject_to(self._epsg),
+            self._export_method
+        )(dest, indent=self._indent)
+
+    def export_channels(self):
+        if self.ga.lines.channels.id.size == 0:
+            logger.info(
+                "[*] Model {} does not have 1D, "
+                "skipping export channels...".format(self.ga.model_name)
+            )
+            return
+        dest = os.path.join(self._dest, 'channels' + self._extension)
+        getattr(
+            self.ga.lines.channels.reproject_to(self._epsg),
+            self._export_method
+        )(dest, indent=self._indent)
+
+    def export_pipes(self):
+        if self.ga.lines.pipes.id.size == 0:
+            logger.info(
+                "[*] Model {} does not have 1D, "
+                "skipping export pipes...".format(self.ga.model_name)
+            )
+            return
+        dest = os.path.join(self._dest, 'pipes' + self._extension)
+        getattr(
+            self.ga.lines.pipes.reproject_to(self._epsg),
+            self._export_method
+        )(dest, indent=self._indent)
+
+    def export_weirs(self):
+        if self.ga.lines.weirs.id.size == 0:
+            logger.info(
+                "[*] Model {} does not have 1D, "
+                "skipping export weirs...".format(self.ga.model_name)
+            )
+            return
+        dest = os.path.join(self._dest, 'weirs' + self._extension)
+        getattr(
+            self.ga.lines.weirs.reproject_to(self._epsg),
+            self._export_method
+        )(dest, indent=self._indent)
+
+    def export_culverts(self):
+        if self.ga.lines.culverts.id.size == 0:
+            logger.info(
+                "[*] Model {} does not have 1D, "
+                "skipping export culverts...".format(self.ga.model_name)
+            )
+            return
+        dest = os.path.join(self._dest, 'culverts' + self._extension)
+        getattr(
+            self.ga.lines.culverts.reproject_to(self._epsg),
+            self._export_method
+        )(dest, indent=self._indent)
+
+    def export_orifices(self):
+        if self.ga.lines.orifices.id.size == 0:
+            logger.info(
+                "[*] Model {} does not have 1D, "
+                "skipping export orifices...".format(self.ga.model_name)
+            )
+            return
+        dest = os.path.join(self._dest, 'orifices' + self._extension)
+        getattr(
+            self.ga.lines.orifices.reproject_to(self._epsg),
+            self._export_method
+        )(dest, indent=self._indent)
+
+    def export_manholes(self):
+        if self.ga.nodes.manholes.id.size == 0:
+            logger.info(
+                "[*] Model {} does not have 1D, "
+                "skipping export manholes...".format(self.ga.model_name)
+            )
+            return
+        dest = os.path.join(self._dest, 'manholes' + self._extension)
+        getattr(
+            self.ga.nodes.manholes.reproject_to(self._epsg),
+            self._export_method
+        )(dest, indent=self._indent)
+
+    def export_pumps(self):
+        if self.ga.pumps.id.size == 0:
+            logger.info(
+                "[*] Model {} does not have 1D, "
+                "skipping export pumps...".format(self.ga.model_name)
+            )
+            return
+        dest = os.path.join(self._dest, 'pumps' + self._extension)
+        getattr(
+            self.ga.pumps.reproject_to(self._epsg),
+            self._export_method
+        )(dest, indent=self._indent)
 
     def export_levees(self):
         """
@@ -311,8 +518,11 @@ class GridAdminH5Export(object):
                 "skipping export levees...".format(self.ga.model_name)
             )
             return
-        dest = os.path.join(self._dest, constants.LEVEES_SHP)
-        getattr(self.ga.levees, self._export_method)(dest)
+        dest = os.path.join(self._dest, constants.LEVEES + self._extension)
+        getattr(
+            self.ga.levees.reproject_to(self._epsg),
+            self._export_method
+        )(dest, indent=self._indent)
 
     def export_grid(self):
         """
@@ -330,9 +540,14 @@ class GridAdminH5Export(object):
                     self.ga.model_name)
             )
             return
-        dest = os.path.join(self._dest, constants.GROUNDWATER_LINES_SHP)
-        getattr(self.ga.lines.subset(
-            constants.SUBSET_2D_GROUNDWATER), self._export_method)(dest)
+        dest = os.path.join(
+            self._dest, constants.GROUNDWATER_LINES + self._extension
+        )
+        getattr(
+            self.ga.lines.subset(
+                constants.SUBSET_2D_GROUNDWATER).reproject_to(self._epsg),
+            self._export_method
+        )(dest, indent=self._indent)
 
     def export_2d_openwater_lines(self):
         if not self.ga.has_2d:
@@ -342,9 +557,14 @@ class GridAdminH5Export(object):
                     self.ga.model_name)
             )
             return
-        dest = os.path.join(self._dest, constants.OPEN_WATER_LINES_SHP)
-        getattr(self.ga.lines.subset(
-            constants.SUBSET_2D_OPEN_WATER), self._export_method)(dest)
+        dest = os.path.join(
+            self._dest, constants.OPEN_WATER_LINES + self._extension
+        )
+        getattr(
+            self.ga.lines.subset(
+                constants.SUBSET_2D_OPEN_WATER).reproject_to(self._epsg),
+            self._export_method
+        )(dest, indent=self._indent)
 
     def export_2d_vertical_infiltration_lines(self):
         if not self.ga.has_2d:
@@ -355,10 +575,15 @@ class GridAdminH5Export(object):
             )
             return
         dest = os.path.join(
-            self._dest, constants.VERTICAL_INFILTRATION_LINES_SHP)
+            self._dest,
+            constants.VERTICAL_INFILTRATION_LINES + self._extension
+        )
         getattr(
-            self.ga.lines.subset(constants.SUBSET_2D_VERTICAL_INFILTRATION),
-            self._export_method)(dest)
+            self.ga.lines.subset(
+                constants.SUBSET_2D_VERTICAL_INFILTRATION
+            ).reproject_to(self._epsg),
+            self._export_method
+        )(dest, indent=self._indent)
 
     def _export_groundwater_grid(self):
         if not self.ga.has_groundwater:
@@ -369,9 +594,14 @@ class GridAdminH5Export(object):
                 )
             )
             return
-        dest_gw = os.path.join(self._dest, constants.GROUNDWATER_SHP)
-        getattr(self.ga.cells.subset(
-            constants.SUBSET_2D_GROUNDWATER), self._export_method)(dest_gw)
+        dest_gw = os.path.join(
+            self._dest, constants.GROUNDWATER + self._extension
+        )
+        getattr(
+            self.ga.cells.subset(
+                constants.SUBSET_2D_GROUNDWATER).reproject_to(self._epsg),
+            self._export_method
+        )(dest_gw, indent=self._indent)
 
     def _export_2d_grid(self):
         if not self.ga.has_2d:
@@ -382,7 +612,11 @@ class GridAdminH5Export(object):
             )
             return
 
-        dest_ow = os.path.join(self._dest, constants.OPEN_WATER_SHP)
-
-        getattr(self.ga.cells.subset(
-            constants.SUBSET_2D_OPEN_WATER), self._export_method)(dest_ow)
+        dest_ow = os.path.join(
+            self._dest, constants.OPEN_WATER + self._extension
+        )
+        getattr(
+            self.ga.cells.subset(
+                constants.SUBSET_2D_OPEN_WATER).reproject_to(self._epsg),
+            self._export_method
+        )(dest_ow, indent=self._indent)

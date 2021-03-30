@@ -6,6 +6,7 @@ Main entry point for threedigrid applications.
 from __future__ import unicode_literals
 from __future__ import print_function
 
+from __future__ import absolute_import
 import logging
 
 import h5py
@@ -21,7 +22,17 @@ from threedigrid.admin.breaches.models import Breaches
 from threedigrid.admin.pumps.models import Pumps
 from threedigrid.admin.levees.models import Levees
 from threedigrid.admin.h5py_datasource import H5pyGroup
-import constants
+
+try:
+    import asyncio
+    import asyncio_rpc # noqa
+    asyncio_rpc_support = True
+except ImportError:
+    asyncio_rpc_support = False
+
+
+from . import constants
+import six
 
 logger = logging.getLogger(__name__)
 
@@ -36,15 +47,35 @@ class GridH5Admin(object):
         >>> ...
     """
 
-    def __init__(self, h5_file_path, file_modus='r'):
+    def __init__(self, h5_file_path, file_modus='r', set_props=False):
         """
         :param h5_file_path: path to the gridadmin file
-        :param file_modus: mode with which to open the file (defaults to r=READ)
+        :param file_modus: mode with which to open the file
+            (defaults to r=READ)
         """
 
         self.grid_file = h5_file_path
-        self.h5py_file = h5py.File(h5_file_path, file_modus)
-        self._set_props()
+        self.datasource_class = H5pyGroup
+        self.is_rpc = False
+
+        if ((type(h5_file_path) in (str, bytes) and
+             h5_file_path.startswith('rpc://'))):
+            if not asyncio_rpc_support:
+                raise Exception(
+                    "Please reinstall this package with threedigrid[rpc]")
+
+            from threedigrid.admin.rpc_datasource import H5RPCGroup, RPCFile
+            self.h5py_file = RPCFile(h5_file_path, file_modus)
+            self.datasource_class = H5RPCGroup
+            self._grid_kwargs = {}
+            self.is_rpc = True
+            self.has_1d = True
+        else:
+            self.h5py_file = h5py.File(h5_file_path, file_modus)
+            set_props = True
+
+        if set_props:
+            self._set_props()
 
         self._grid_kwargs = {
             'has_1d': self.has_1d
@@ -52,62 +83,91 @@ class GridH5Admin(object):
 
     @property
     def grid(self):
+        if self.is_rpc:
+            raise Exception("RPC not available for grid")
         kwargs = self._grid_kwargs.copy()
         kwargs['n2dtot'] = self.get_from_meta('n2dtot')
-        kwargs['dx'] = self.h5py_file['grid_coordinate_attributes']['dx'].value
         return Grid(
-            H5pyGroup(self.h5py_file, 'grid_coordinate_attributes'), **kwargs
+            self.datasource_class(
+                self.h5py_file, 'grid_coordinate_attributes'), **kwargs
         )
 
     @property
     def levees(self):
+        if self.is_rpc:
+            raise Exception("RPC no available for levees")
+
         return Levees(
-            H5pyGroup(self.h5py_file, 'levees'), **self._grid_kwargs)
+            self.datasource_class(
+                self.h5py_file, 'levees'), **self._grid_kwargs)
 
     @property
     def nodes(self):
         return Nodes(
-            H5pyGroup(self.h5py_file, 'nodes'), **self._grid_kwargs)
+            self.datasource_class(
+                self.h5py_file, 'nodes'), **self._grid_kwargs)
 
     @property
     def lines(self):
         return Lines(
-            H5pyGroup(self.h5py_file, 'lines'), **self._grid_kwargs)
+            self.datasource_class(
+                self.h5py_file, 'lines'), **self._grid_kwargs)
 
     @property
     def pumps(self):
         return Pumps(
-            H5pyGroup(self.h5py_file, 'pumps'), **self._grid_kwargs)
+            self.datasource_class(
+                self.h5py_file, 'pumps'), **self._grid_kwargs)
 
     @property
     def breaches(self):
         return Breaches(
-            H5pyGroup(self.h5py_file, 'breaches'), **self._grid_kwargs)
+            self.datasource_class(
+                self.h5py_file, 'breaches'), **self._grid_kwargs)
 
     @property
     def cells(self):
         # treated as nodes
         return Cells(
-            H5pyGroup(self.h5py_file, 'nodes'), **self._grid_kwargs)
+            self.datasource_class(
+                self.h5py_file, 'nodes'), **self._grid_kwargs)
 
     @property
     def revision_hash(self):
         """mercurial revision hash of the model"""
-        return self.h5py_file.attrs['revision_hash']
+        return self._to_str(self.h5py_file.attrs['revision_hash'])
 
     @property
     def revision_nr(self):
         """mercurial revision nr or id of the model"""
-        return self.h5py_file.attrs['revision_nr']
+        return self._to_str(self.h5py_file.attrs['revision_nr'])
 
     @property
     def model_name(self):
         """name of the model the gridadmin file belongs to"""
-        return self.h5py_file.attrs['model_name']
+        return self._to_str(self.h5py_file.attrs['model_name'])
 
     @property
     def epsg_code(self):
-        return self.h5py_file.attrs['epsg_code']
+        return self._to_str(self.h5py_file.attrs['epsg_code'])
+
+    @property
+    def model_slug(self):
+        return self._to_str(self.h5py_file.attrs['model_slug'])
+
+    @property
+    def threedicore_version(self):
+        return self._to_str(self.h5py_file.attrs['threedicore_version'])
+
+    @property
+    def threedi_version(self):
+        return self._to_str(self.h5py_file.attrs['threedi_version'])
+
+    @property
+    def has_levees(self):
+        if not hasattr(self, "levees"):
+            return False
+        return bool(self.levees.id.size)
 
     def get_extent_subset(self, subset_name, target_epsg_code=''):
         """
@@ -119,6 +179,11 @@ class GridH5Admin(object):
             output epsg code
         :return: numpy array of xy-min/xy-max pairs
         """
+        if self.is_rpc:
+            # Proxy function via RPC
+            return self.h5py_file.get_extent_subset(
+                subset_name, target_espg_code=target_epsg_code)
+
         attr_name = constants.SUBSET_NAME_H5_ATTR_MAP.get(subset_name.upper())
         extent = self.h5py_file.attrs.get(attr_name, None)
         if extent is None:
@@ -160,6 +225,11 @@ class GridH5Admin(object):
 
         """
         bbox = kwargs.get('extra_extent', [])
+        if self.is_rpc:
+            # Proxy function via RPC
+            return self.h5py_file.get_model_extent(
+                target_epsg_code=target_epsg_code, bbox=bbox)
+
         for k in constants.SUBSET_NAME_H5_ATTR_MAP.keys():
             sub_extent = self.get_extent_subset(
                 subset_name=k, target_epsg_code=target_epsg_code)
@@ -172,46 +242,44 @@ class GridH5Admin(object):
 
         return np.array([np.min(x), np.min(y), np.max(x), np.max(y)])
 
-    @property
-    def model_slug(self):
-        return self.h5py_file.attrs['model_slug']
-
     def _set_props(self):
-        for prop, value in self.h5py_file.attrs.iteritems():
-            if prop and prop.startswith('has_'):
-                try:
-                    setattr(self, prop, bool(value))
-                except AttributeError:
-                    logger.warning(
-                        'Can not set property {}, already exists'.format(prop)
-                    )
-                    pass
-
-    @property
-    def has_levees(self):
-        if not hasattr(self, "levees"):
-            return False
-        return bool(self.levees.id.size)
-
-    @property
-    def threedicore_version(self):
-        return self.h5py_file.attrs['threedicore_version']
-
-    @property
-    def threedi_version(self):
-        return self.h5py_file.attrs['threedi_version']
+        if not self.is_rpc:
+            for prop, value in six.iteritems(self.h5py_file.attrs):
+                if prop and prop.startswith('has_'):
+                    try:
+                        setattr(self, prop, bool(value))
+                    except AttributeError:
+                        logger.warning(
+                            'Can not set property {}, already exists'.format(
+                                prop)
+                        )
+                        pass
+        else:
+            from threedigrid.admin.rpc_datasource import _set_property
+            properties = [
+                "has_1d", "has_2d", "has_breaches", "has_pumpstations"
+            ]
+            futures = [_set_property(self, prop) for prop in properties]
+            return asyncio.gather(*futures)
 
     def get_from_meta(self, prop_name):
-        if prop_name not in self.h5py_file['meta'].keys():
+        if prop_name not in list(self.h5py_file['meta'].keys()):
             return None
 
-        return self.h5py_file['meta'][prop_name].value
+        return self.h5py_file['meta'][prop_name][()]
+
+    @staticmethod
+    def _to_str(x):
+        try:
+            return x.decode('utf-8')
+        except AttributeError:
+            return x
 
     def __enter__(self):
-        return self.h5py_file
+        return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        self.close()
+        self.h5py_file.close()
 
     def close(self):
         self.h5py_file.flush()

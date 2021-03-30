@@ -8,6 +8,7 @@ from __future__ import absolute_import
 from collections import OrderedDict
 
 from threedigrid.admin.gridadmin import GridH5Admin
+import six
 
 
 def model_overview(grid_file):
@@ -36,7 +37,7 @@ def model_overview(grid_file):
         ('has_pumpstations', ''),
     ])
 
-    for k in _attrs.iterkeys():
+    for k in six.iterkeys(_attrs):
         if not hasattr(grid, k):
             continue
         attr = getattr(grid, k)

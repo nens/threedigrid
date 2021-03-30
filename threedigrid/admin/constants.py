@@ -3,7 +3,9 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
+from __future__ import absolute_import
 from collections import OrderedDict
+from six.moves import range
 
 LONLAT_DIGITS = 7  # 7 decimals is about 11mm accuracy
 
@@ -101,11 +103,11 @@ CALCULATION_TYPES = {
 
 
 ZOOM_LEVELS = {
-    'pipe': range(16, 21),
-    'nod': range(16, 21),
-    'nod_1d': range(16, 21),
-    'line': range(16, 21),
-    'pump': range(16, 21),
+    'pipe': list(range(16, 21)),
+    'nod': list(range(16, 21)),
+    'nod_1d': list(range(16, 21)),
+    'line': list(range(16, 21)),
+    'pump': list(range(16, 21)),
 }
 
 
@@ -156,6 +158,8 @@ LINE_1D_FIELDS = OrderedDict([
     ('seq_id', 'int'),
 ])
 
+LINE_BASE_FIELDS_ALL = OrderedDict(LINE_BASE_FIELDS,  **LINE_1D_FIELDS)
+
 # maps the fields names of grid line objects
 # to their external representation
 LINE_FIELD_NAME_MAP = OrderedDict([
@@ -200,22 +204,23 @@ SUBSET_2D_VERTICAL_INFILTRATION = '2D_vertical_infiltration'
 
 # grids
 _BASE_NAME = 'grid_'
-GROUNDWATER_SHP = _BASE_NAME + SUBSET_2D_GROUNDWATER + ".shp"
-OPEN_WATER_SHP = _BASE_NAME + SUBSET_2D_OPEN_WATER + ".shp"
+GROUNDWATER = _BASE_NAME + SUBSET_2D_GROUNDWATER
+OPEN_WATER = _BASE_NAME + SUBSET_2D_OPEN_WATER
 
 # nodes
 _NODES_BASE = 'nodes_'
-NODES_SHP = _NODES_BASE + SUBSET_1D_ALL + ".shp"
+NODES = _NODES_BASE + SUBSET_1D_ALL
 
 # lines
 _LINES_BASE = 'lines_'
-LINES_SHP = _LINES_BASE + SUBSET_1D_ALL + ".shp"
-GROUNDWATER_LINES_SHP =  _LINES_BASE + SUBSET_2D_GROUNDWATER + ".shp"
-OPEN_WATER_LINES_SHP = _LINES_BASE + SUBSET_2D_OPEN_WATER + ".shp"
-VERTICAL_INFILTRATION_LINES_SHP = _LINES_BASE + SUBSET_2D_VERTICAL_INFILTRATION + ".shp"
+LINES = _LINES_BASE + SUBSET_1D_ALL
+GROUNDWATER_LINES = _LINES_BASE + SUBSET_2D_GROUNDWATER
+OPEN_WATER_LINES = _LINES_BASE + SUBSET_2D_OPEN_WATER
+VERTICAL_INFILTRATION_LINES = (
+    _LINES_BASE + SUBSET_2D_VERTICAL_INFILTRATION)
 
 # levees
-LEVEES_SHP = "levees.shp"
+LEVEES = "levees"
 
 
 ###############################################################################

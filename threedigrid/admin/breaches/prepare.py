@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
+from __future__ import absolute_import
 try:
     from osgeo import ogr
 except ImportError:
@@ -17,7 +18,7 @@ from threedigrid.geo_utils import raise_import_exception
 def as_numpy_array(array):
     if hasattr(array, 'value'):
         return array.value
-    return array
+    return array[()]
 
 
 class PrepareBreaches(object):
@@ -68,14 +69,14 @@ class PrepareBreaches(object):
         """
 
         # TODO: Check values below
-        if 'id' not in datasource.keys():
+        if 'id' not in list(datasource.keys()):
             datasource.set(
                 'id', np.arange(0, datasource['levl'].size))
 
-        if 'seq_ids' not in datasource.keys():
+        if 'seq_ids' not in list(datasource.keys()):
             datasource.set(
                 'seq_ids', np.arange(0, datasource['levl'].size))
-        if 'content_pk' not in datasource.keys():
+        if 'content_pk' not in list(datasource.keys()):
             content_pk = np.zeros(datasource['levl'].shape, dtype='i4')
             type_code = constants.TYPE_CODE_MAP['v2_breach']
             id_mapping = id_mapper.id_mapping
@@ -92,10 +93,10 @@ class PrepareBreaches(object):
 
         levl = as_numpy_array(datasource['levl'])
 
-        if 'kcu' not in datasource.keys():
+        if 'kcu' not in list(datasource.keys()):
             datasource.set('kcu', as_numpy_array(kcu)[levl])
 
-        if 'coordinates' not in datasource.keys() and levees:
+        if 'coordinates' not in list(datasource.keys()) and levees:
             datasource.set(
                 'coordinates',
                 cls.get_coordinates(levees, as_numpy_array(line_coords), levl))

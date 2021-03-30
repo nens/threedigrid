@@ -3,17 +3,28 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
-import geojson
+from __future__ import absolute_import
 import json
+
+from threedigrid.admin.utils import _get_storage_area
 from threedigrid.admin.nodes.models import AddedCalculationNodes
 from threedigrid.admin.nodes.models import ConnectionNodes
 from threedigrid.admin.nodes.models import Manholes
 from threedigrid.admin import constants
+from threedigrid.geo_utils import raise_import_exception
 from threedigrid.orm.base.encoder import NumpyEncoder
+from six.moves import range
+
+try:
+    import geojson
+except ImportError:
+    geojson = None
 
 
 class ManholesGeoJsonSerializer():
     def __init__(self, manholes, indent=None):
+        if geojson is None:
+            raise_import_exception('geojson')
         assert isinstance(manholes, Manholes)
         self._manholes = manholes
         self._indent = indent
@@ -28,10 +39,13 @@ class ManholesGeoJsonSerializer():
                 "Can't return data as geojson "
                 "for selection without geometries")
 
-        for i in xrange(selection['id'].shape[-1]):
+        for i in range(selection['id'].shape[-1]):
             pt = geojson.Point(
                 [round(x, constants.LONLAT_DIGITS)
                  for x in selection['coordinates'][:, i]])
+
+            area = _get_storage_area(selection['storage_area'][i])
+
             cn_meta = [
                     ['object_type', constants.TYPE_V2_MANHOLE],
                     ['display_name', selection['display_name'][i]],
@@ -40,9 +54,7 @@ class ManholesGeoJsonSerializer():
                     ['calculation_type', constants.CALCULATION_TYPES.get(
                         selection['calculation_type'][i])],
                     ['shape', selection['shape'][i]],
-                    ['area', "{0} [m2]".format(
-                        selection['storage_area'][i]
-                        if selection['storage_area'][i] > 0 else '--')],
+                    ['area', area],
                     ['bottom_level', "{0} [m MSL]".format(
                         selection['bottom_level'][i])],
                     ['width', "{0} [m]".format(selection['width'][i])],
@@ -77,6 +89,8 @@ class ManholesGeoJsonSerializer():
 
 class ConnectionNodesGeoJsonSerializer():
     def __init__(self, connection_nodes=None, data=None, indent=None):
+        if geojson is None:
+            raise_import_exception('geojson')
         if connection_nodes:
             assert isinstance(connection_nodes, ConnectionNodes)
         self._data = data
@@ -96,15 +110,15 @@ class ConnectionNodesGeoJsonSerializer():
                 "Can't return data as geojson "
                 "for selection without geometries")
 
-        for i in xrange(selection['id'].shape[-1]):
+        for i in range(selection['id'].shape[-1]):
             pt = geojson.Point(
                 [round(x, constants.LONLAT_DIGITS)
                  for x in selection['coordinates'][:, i]])
+            area = _get_storage_area(selection['storage_area'][i])
+
             cn_meta = [
                     ['object_type', constants.TYPE_V2_CONNECTION_NODES],
-                    ['storage area', "{0} [m2]".format(
-                        selection['storage_area'][i]
-                        if selection['storage_area'][i] > 0 else '--')],
+                    ['storage area', area],
                     ['initial_waterlevel', "{0} [m MSL]".format(
                         selection['initial_waterlevel'][i])],
                     ['nod idx', int(selection['id'][i])],
@@ -133,6 +147,8 @@ class ConnectionNodesGeoJsonSerializer():
 
 class AddedCalculationNodesGeoJsonSerializer():
     def __init__(self, added_calculationnodes=None, data=None, indent=None):
+        if geojson is None:
+            raise_import_exception('geojson')
         if added_calculationnodes:
             assert isinstance(added_calculationnodes, AddedCalculationNodes)
         self._data = data
@@ -152,7 +168,7 @@ class AddedCalculationNodesGeoJsonSerializer():
                 "Can't return data as geojson "
                 "for selection without geometries")
 
-        for i in xrange(selection['id'].shape[-1]):
+        for i in range(selection['id'].shape[-1]):
             pt = geojson.Point(
                 [round(x, constants.LONLAT_DIGITS)
                  for x in selection['coordinates'][:, i]])

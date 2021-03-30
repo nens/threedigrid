@@ -12,13 +12,14 @@ For an overview of the kcu types see :ref:`kcu-label`.
 from __future__ import unicode_literals
 from __future__ import print_function
 
+from __future__ import absolute_import
 import numpy as np
 
 from threedigrid.admin.lines import exporters
 from threedigrid.orm.models import Model
 from threedigrid.orm.fields import (
     ArrayField, LineArrayField, MultiLineArrayField)
-from threedigrid.orm.base.fields import IndexArrayField
+from threedigrid.orm.base.fields import IndexArrayField, MappedSubsetArrayField
 from threedigrid.admin.lines import subsets
 
 
@@ -84,6 +85,10 @@ class Lines(Model):
         return self._filter_as(Culverts, content_type='v2_culvert')
 
     @property
+    def breaches(self):
+        return self._filter_as(Breaches, kcu=55)
+
+    @property
     def line_nodes(self):
         return np.dstack(self.line)[0]
 
@@ -94,6 +99,7 @@ class Pipes(Lines):
     invert_level_end_point = ArrayField()
     friction_type = ArrayField()
     friction_value = ArrayField()
+    material = ArrayField()
     cross_section_height = ArrayField()
     cross_section_width = ArrayField()
     cross_section_shape = ArrayField()
@@ -101,6 +107,7 @@ class Pipes(Lines):
     calculation_type = ArrayField()
     connection_node_start_pk = ArrayField()
     connection_node_end_pk = ArrayField()
+    discharge_coefficient = ArrayField()
 
 
 class Channels(Lines):
@@ -109,6 +116,7 @@ class Channels(Lines):
     dist_calc_points = ArrayField()
     connection_node_start_pk = ArrayField()
     connection_node_end_pk = ArrayField()
+    discharge_coefficient = ArrayField()
 
 
 class Weirs(Lines):
@@ -123,6 +131,9 @@ class Weirs(Lines):
     crest_level = ArrayField()
     connection_node_start_pk = ArrayField()
     connection_node_end_pk = ArrayField()
+    cross_section_height = ArrayField()
+    cross_section_width = ArrayField()
+    cross_section_shape = ArrayField()
 
     @property
     def line_coord_angles(self):
@@ -130,11 +141,11 @@ class Weirs(Lines):
         # to always get the raw (metric) values
         # and not the reprojected ones to calculate
         # the angles with.
-        content_type = self._datasource['content_type'].value
-        line_content_pk = self._datasource['content_pk'].value
+        content_type = self._datasource['content_type'][:]
+        line_content_pk = self._datasource['content_pk'][:]
         pk_mask = np.isin(line_content_pk, self.content_pk)
-        raw_values = self._datasource['line_coords'].value[
-            :, (content_type == 'v2_weir') & pk_mask]
+        raw_values = self._datasource['line_coords'][:][
+            :, (content_type == b'v2_weir') & pk_mask]
 
         return self._get_field('line_coords').get_angles_in_degrees(
             raw_values)
@@ -161,7 +172,6 @@ class Culverts(Lines):
 class Orifices(Lines):
     display_name = ArrayField()
     sewerage = ArrayField()
-    max_capacity = ArrayField()
     friction_type = ArrayField()
     friction_value = ArrayField()
     crest_type = ArrayField()
@@ -170,3 +180,35 @@ class Orifices(Lines):
     discharge_coefficient_positive = ArrayField()
     connection_node_start_pk = ArrayField()
     connection_node_end_pk = ArrayField()
+
+
+class Breaches(Lines):
+    breach_id = MappedSubsetArrayField(
+        array_to_map='breaches.id',
+        map_from_array='breaches.levl', map_to_array='lines.id',
+        subset_filter={
+            'lines.kcu': subsets.KCU__IN_SUBSETS['POTENTIAL_BREACH'][0]})
+
+    content_pk = MappedSubsetArrayField(
+        array_to_map='breaches.content_pk',
+        map_from_array='breaches.levl', map_to_array='lines.id',
+        subset_filter={
+            'lines.kcu': subsets.KCU__IN_SUBSETS['POTENTIAL_BREACH'][0]})
+
+    levbr = MappedSubsetArrayField(
+        array_to_map='breaches.levbr',
+        map_from_array='breaches.levl', map_to_array='lines.id',
+        subset_filter={
+            'lines.kcu': subsets.KCU__IN_SUBSETS['POTENTIAL_BREACH'][0]})
+
+    levmat = MappedSubsetArrayField(
+        array_to_map='breaches.levmat',
+        map_from_array='breaches.levl', map_to_array='lines.id',
+        subset_filter={
+            'lines.kcu': subsets.KCU__IN_SUBSETS['POTENTIAL_BREACH'][0]})
+
+    coordinates = MappedSubsetArrayField(
+        array_to_map='breaches.coordinates',
+        map_from_array='breaches.levl', map_to_array='lines.id',
+        subset_filter={
+            'lines.kcu': subsets.KCU__IN_SUBSETS['POTENTIAL_BREACH'][0]})

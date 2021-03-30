@@ -1,27 +1,33 @@
 FROM ubuntu:xenial
 
-MAINTAINER lars.claussen <lars.claussen@nelen-schuurmans.nl>
+LABEL maintainer='lars.claussen <lars.claussen@nelen-schuurmans.nl>'
+LABEL py_version='3.x'
 
-# Change the date to force rebuilding the whole image
+# Change the date to force rebuilding the whole image.
 ENV REFRESHED_AT 2018-03-02
 
-# system dependencies
-RUN apt-get update && apt-get install -y \
-    git \
-    python-pip \
-    python-gdal \
-    libhdf5-serial-dev \
-    netcdf-bin \
-    libnetcdf-dev \
-    software-properties-common \
+# http://click.pocoo.org/5/python3/#python-3-surrogate-handling
+ENV LANG C.UTF-8
+ENV LC_ALL C.UTF-8
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+# Add ubuntugis PPA. A recent GDAL version is required by the GPKG driver.
+# NB: Package software-properties-common has python3 as a dependency.
+RUN apt-get update && apt-get install -y software-properties-common \
+&& add-apt-repository -y ppa:ubuntugis/ppa \
 && rm -rf /var/lib/apt/lists/*
 
-RUN add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable && apt update && apt upgrade -y
+RUN apt-get update && apt-get install -y \
+    curl \
+    libgdal-dev \
+    libhdf5-serial-dev \
+    python3-dev \
+&& rm -rf /var/lib/apt/lists/*
 
-RUN pip install --upgrade pip
+# Avoid issues with upgrading an apt-managed pip.
+RUN curl -s https://bootstrap.pypa.io/get-pip.py | python3
+
 WORKDIR /code
-COPY requirements_dev.txt /code/requirements_dev.txt
-RUN pip install -r requirements_dev.txt
-COPY requirements.txt /code/requirements.txt
-COPY . /code
-RUN pip install --editable /code/.[geo,results]
+COPY requirements_dev.txt requirements_geo.txt requirements_base.txt /code/
+RUN pip install --no-cache-dir -r requirements_dev.txt

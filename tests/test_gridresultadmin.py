@@ -3,41 +3,21 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
 
-import os
 import pytest
-
 import numpy as np
 
-
-from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
 from threedigrid.admin.nodes.models import Nodes
-
-
-test_file_dir = os.path.join(
-    os.getcwd(), "tests/test_files")
-
-# the testfile is a copy of the v2_bergermeer gridadmin file
-result_file = os.path.join(test_file_dir, "results_3di.nc")
-grid_file = os.path.join(test_file_dir, "gridadmin.h5")
-
-
-@pytest.fixture()
-def gr():
-    gr = GridH5ResultAdmin(grid_file, result_file)
-    yield gr
-    gr.close()
 
 
 def test_nodes_timeseries_start_end_time_kwargs(gr):
     ts = gr.nodes.timestamps
     qs_s1 = gr.nodes.timeseries(start_time=ts[0], end_time=ts[6]).s1
-    assert qs_s1.shape[0] == ts[0:6+1].size
+    assert qs_s1.shape[0] == ts[0: 6 + 1].size
 
 
 def test_nodes_timeseries_with_subset(gr):
-    ts = gr.nodes.timestamps
-    qs_s1 = gr.nodes.subset('1d_all').timeseries(start_time=0, end_time=500).s1
-    assert qs_s1.shape[0] == 18 and qs_s1.shape[1] > 0
+    qs_s1 = gr.nodes.subset("1d_all").timeseries(start_time=0, end_time=500).s1
+    assert qs_s1.shape[0] == 9 and qs_s1.shape[1] > 0
 
 
 def test_nodes_timeseries_start_time_only_kwarg(gr):
@@ -49,7 +29,7 @@ def test_nodes_timeseries_start_time_only_kwarg(gr):
 def test_nodes_timeseries_end_time_only_kwarg(gr):
     ts = gr.nodes.timestamps
     qs = gr.nodes.timeseries(end_time=ts[6])
-    assert qs.s1.shape[0] == ts[:6+1].size
+    assert qs.s1.shape[0] == ts[: 6 + 1].size
 
 
 def test_nodes_timeseries_index_filter(gr):
@@ -86,13 +66,16 @@ def test_lines_timeseries_index_filter(gr):
     qs_u1 = gr.lines.timeseries(indexes=[1, 2, 3, 4, 5]).u1
     assert qs_u1.shape[0] == 5
 
+
 def test_lines_timeseries_slice_filter(gr):
     qs_u1 = gr.lines.timeseries(indexes=slice(1, 4)).u1
     assert qs_u1.shape[0] == 3
 
+
 def test_lines_timeseries_with_subset(gr):
-    qs_u1 = gr.lines.subset('1d_all').timeseries(indexes=slice(1, 4)).u1
+    qs_u1 = gr.lines.subset("1d_all").timeseries(indexes=slice(1, 4)).u1
     assert qs_u1.shape[0] == 3 and qs_u1.shape[1] > 0
+
 
 def test_set_timeseries_chunk_size(gr):
     # default should be 10
@@ -110,7 +93,7 @@ def test_missing_kwargs_raises_key_error(gr):
 def test_index_key_raises_type_error(gr):
     # default should be 10
     with pytest.raises(TypeError):
-        gr.lines.timeseries(indexes='wrong').u1
+        gr.lines.timeseries(indexes="wrong").u1
 
 
 def test_set_timeseries_chunk_size_raises_value_error(gr):
@@ -122,7 +105,7 @@ def test_set_timeseries_chunk_size_raises_value_error(gr):
         gr.set_timeseries_chunk_size(-5)
 
     with pytest.raises(ValueError):
-        gr.set_timeseries_chunk_size('20.5')
+        gr.set_timeseries_chunk_size("20.5")
 
 
 def test_get_timeseries_mask_filter(gr):
@@ -138,26 +121,47 @@ def test_timestamps(gr):
     l_qs = gr.lines.timeseries(start_time=0, end_time=500)
     np.testing.assert_array_equal(n_qs.timestamps, l_qs.timestamps)
 
+
 def test_dt_timestamps(gr):
     n_qs = gr.nodes.timeseries(start_time=0, end_time=500)
     assert len(n_qs.dt_timestamps) == len(n_qs.timestamps)
 
 
+def test_dt_timeseries_sampling(gr):
+    s1 = gr.nodes.timeseries(start_time=0).sample(5).s1
+    assert len(s1) == 5
+    s1 = gr.nodes.timeseries(start_time=1).sample(5).s1
+    assert len(s1) == 5
+    s1 = gr.nodes.timeseries(indexes=slice(1, None)).sample(5).s1
+    assert len(s1) == 5
+
+
 def test_get_model_instance_by_field_name(gr):
-    inst = gr.get_model_instance_by_field_name('s1')
+    inst = gr.get_model_instance_by_field_name("s1")
     assert isinstance(inst, Nodes)
 
 
 def test_get_model_instance_by_field_name_raises_index_error_unknown_field(gr):
     with pytest.raises(IndexError):
-        gr.get_model_instance_by_field_name('unknown_field')
+        gr.get_model_instance_by_field_name("unknown_field")
 
 
 def test_get_model_instance_by_field_name_raises_index_error(gr):
     with pytest.raises(IndexError):
-        gr.get_model_instance_by_field_name('zoom_category')
+        gr.get_model_instance_by_field_name("zoom_category")
 
 
+def test_gr_get_subset_idx_leak(gr):
+    assert gr.nodes._get_subset_idx('leak').shape == (10748,)
+
+
+def test_gr_get_subset_ids_no_composite_field(gr):
+    assert gr.nodes._get_subset_idx('s1') is None
+
+
+def test_gr_chain_filter(gr):
+    assert gr.nodes.filter(
+        id=4).get_filtered_field_value('leak').shape == (9, 1)
 
 # commented for now until the new aggregate.nc is finished
 
