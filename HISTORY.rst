@@ -1,7 +1,7 @@
 History
 =======
 
-1.1.1 (unreleased)
+1.1.1 (2021-03-30)
 ------------------
 
 - Reduced the source distribution filesize by removing the tests.
