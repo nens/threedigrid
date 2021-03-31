@@ -15,14 +15,15 @@ The Python package for the threedigrid administration.
 
 .. PyPI
 
-.. image:: https://badge.fury.io/py/threedigrid.svg
+.. image:: https://img.shields.io/pypi/v/threedigrid.svg
 	:alt: PyPI
-	:target: https://badge.fury.io/py/threedigrid
+	:target: https://pypi.org/project/threedigrid/
 
 .. Anaconda
 
-.. image:: https://anaconda.org/conda-forge/threedigrid/badges/version.svg
+.. image:: https://img.shields.io/conda/vn/conda-forge/threedigrid
   :alt: Anaconda
+  :target: https://anaconda.org/conda-forge/threedigrid
 
 
 * Free software: BSD license
