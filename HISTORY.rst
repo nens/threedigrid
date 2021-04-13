@@ -4,7 +4,7 @@ History
 1.1.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fixed only filter for aggregate result admin. (#121)
 
 
 1.1.1 (2021-03-30)

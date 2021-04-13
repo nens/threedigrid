@@ -302,6 +302,8 @@ class AggregateResultMixin(ResultMixin):
     Subclass this mixin and add the result
     fields as 'TimeSeriesArrayField' or TimeSeriesCompositeArrayField
     """
+    is_aggregate = True
+
     def __init__(self, *args, **kwargs):
         super(AggregateResultMixin, self).__init__(*args, **kwargs)
 
@@ -413,7 +415,7 @@ class AggregateResultMixin(ResultMixin):
                 try:
                     timestamps_dict[field_name] = self.get_timestamps(
                         field_name)
-                except AttributeError:
+                except (AttributeError, TypeError):
                     timestamps_dict[field_name] = np.array([])
 
         return timestamps_dict
@@ -426,7 +428,6 @@ class AggregateResultMixin(ResultMixin):
         :return: array of timestamps
         :raises AttributeError when no the field has no timestamps
         """
-
         time_key = 'time_' + field_name
 
         if time_key in list(self._datasource.keys()):

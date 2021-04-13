@@ -134,7 +134,20 @@ class H5pyGroup(DataSource):
 
         # Inject timestamps automatically
         if hasattr(model, 'get_timestamps'):
-            selection['timestamps'] = model.get_timestamps(timeseries_filter)
+            if getattr(model, 'is_aggregate', False):
+                # Output one array of timestamps per field
+                for n in model._field_names:
+                    if not model.only_fields or n in model.only_fields:
+                        field_name = '%s_%s' % (n, 'timestamps')
+                        try:
+                            selection[field_name] = model.get_timestamps(n)
+                        except (AttributeError, TypeError):
+                            selection[field_name] = np.array([])
+
+            else:
+                # Output one array with timestamps for all fields
+                selection['timestamps'] = model.get_timestamps(
+                    timeseries_filter)
 
         return selection
 
