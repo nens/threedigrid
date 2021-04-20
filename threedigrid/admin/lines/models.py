@@ -53,6 +53,7 @@ class Lines(Model):
     content_pk = ArrayField()
     content_type = ArrayField()
     zoom_category = ArrayField()
+    cross_pix_coords = LineArrayField()
     line_coords = LineArrayField()
     line_geometries = MultiLineArrayField()
     SUBSETS = LINE_SUBSETS
