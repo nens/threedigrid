@@ -4,7 +4,7 @@ History
 1.1.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Added cross_pix_coords field to lines.
 
 
 1.1.1 (2021-03-30)
