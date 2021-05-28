@@ -103,7 +103,8 @@ class LinesOgrExporter(BaseOgrExporter):
                 line.AddPoint(line_data['line_coords'][2][i],
                               line_data['line_coords'][3][i])
             elif geom_source == 'from_spatialite':
-                linepoints = line_data['line_geometries'][i].reshape(2, -1).T.astype('float64')
+                linepoints = line_data['line_geometries'][i].reshape(
+                    2, -1).T.astype('float64')
                 line_geom = shapely_geom.LineString(linepoints)
                 line = ogr.CreateGeometryFromWkt(line_geom.wkt)
 
