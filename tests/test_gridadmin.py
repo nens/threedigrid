@@ -118,6 +118,7 @@ class GridAdminLinesTest(unittest.TestCase):
             "lik",
             "line",
             "line_coords",
+            "cross_pix_coords",
             "line_geometries",
             "zoom_category",
         }

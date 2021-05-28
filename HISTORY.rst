@@ -6,6 +6,8 @@ History
 
 - Fixed only filter for aggregate result admin. (#121)
 
+- Added cross_pix_coords field to lines.
+
 
 1.1.1 (2021-03-30)
 ------------------
