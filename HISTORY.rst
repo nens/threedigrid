@@ -6,6 +6,9 @@ History
 
 - Added cross_pix_coords field to lines.
 
+- Bugfix: geojson line_geometries export crashes with
+  Python 3.8.10 and numpy 1.19.1. Needed explicit astype conversion
+
 
 1.1.1 (2021-03-30)
 ------------------
