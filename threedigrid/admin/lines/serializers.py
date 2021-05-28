@@ -103,7 +103,8 @@ class ChannelsGeoJsonSerializer():
             # rounded with LONLAT_DIGITS
             lines = geojson.LineString(
                     np.round(selection['line_geometries'][i].reshape(
-                        (2, -1)).T, constants.LONLAT_DIGITS).tolist())
+                        (2, -1)).T.astype('float64'),
+                        constants.LONLAT_DIGITS).tolist())
 
             cn_meta = [
                 ['object type', constants.TYPE_V2_CHANNEL],
@@ -345,7 +346,8 @@ class CulvertsGeoJsonSerializer():
             # rounded with LONLAT_DIGITS
             lines = geojson.LineString(
                     np.round(selection['line_geometries'][i].reshape(
-                        (2, -1)).T, constants.LONLAT_DIGITS).tolist())
+                        (2, -1)).T.astype('float64'),
+                        constants.LONLAT_DIGITS).tolist())
 
             invert_level_start_point_str = format_to_str(
                 selection['invert_level_start_point'][i])
