@@ -4,6 +4,8 @@ History
 1.1.2 (unreleased)
 ------------------
 
+- Fixed only filter for aggregate result admin. (#121)
+
 - Added cross_pix_coords field to lines.
 
 
