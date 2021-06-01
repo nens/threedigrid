@@ -104,7 +104,8 @@ class GeoJsonSerializer:
         elif content_type == "levees":
             for i in range(data["id"].shape[-1]):
                 coords = np.round(
-                    data["coords"][i].reshape(2, -1), constants.LONLAT_DIGITS
+                    data["coords"][i].reshape(2, -1).astype('float64'),
+                    constants.LONLAT_DIGITS
                 )
                 line = geojson.LineString(zip(coords[1, :], coords[0, :]))
                 properties = fill_properties(
