@@ -4,7 +4,8 @@ History
 1.1.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Bugfix: geojson levees export also crashed
+  due to 3.8.10 and numpy 1.19.1
 
 
 1.1.2 (2021-05-28)
