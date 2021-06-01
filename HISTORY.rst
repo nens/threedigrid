@@ -1,7 +1,7 @@
 History
 =======
 
-1.1.3 (unreleased)
+1.1.3 (2021-06-01)
 ------------------
 
 - Bugfix: geojson levees export also crashed
