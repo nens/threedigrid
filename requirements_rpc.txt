@@ -1,3 +1,0 @@
--r requirements_base.txt
-
-asyncio-rpc==0.1.10

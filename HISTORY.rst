@@ -4,7 +4,7 @@ History
 1.1.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Remove requirements files, only keep one for development in docker.
 
 
 1.1.3 (2021-06-01)

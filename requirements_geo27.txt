@@ -1,7 +1,0 @@
--r requirements_base27.txt
-
-pygdal==2.2.2.3
-pyproj==2.2.2
-Shapely==1.6.4
-mercantile==1.1.2
-geojson==2.5.0
