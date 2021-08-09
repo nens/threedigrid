@@ -112,35 +112,25 @@ def test_export_reproject(ga, tmp_path):
         assert 52.10 < y < 52.92
 
 
-def test_export_2d_groundwater(ga_export):
-    ga_export.export_2d_groundwater_lines()
-    result = os.path.join(
-        ga_export._dest, constants.GROUNDWATER_LINES + ga_export._extension
-    )
-    assert os.path.exists(result)
-
-
-def test_export_2d_openwater_lines(ga_export):
-    ga_export.export_2d_openwater_lines()
-    result = os.path.join(
-        ga_export._dest, constants.OPEN_WATER_LINES + ga_export._extension
-    )
-    assert os.path.exists(result)
-
-
-def test_export_2d_vertical_infiltration_lines(ga_export):
-    ga_export.export_2d_vertical_infiltration_lines()
-    result = os.path.join(
-        ga_export._dest,
-        constants.VERTICAL_INFILTRATION_LINES + ga_export._extension
-    )
-    assert os.path.exists(result)
-
-def test_export_levees(ga_export):
-    if ga_export.ga.grid_file.endswith("gridadmin_v2.h5"):
-        pytest.skip("No levees yet in new gridadmin")
-    ga_export.export_levees()
-    result = os.path.join(
-        ga_export._dest, constants.LEVEES + ga_export._extension
-    )
-    assert os.path.exists(result)
+@pytest.mark.parametrize("export_method,expected_filename,works_in_v2", [
+    ("2d_groundwater_lines", "lines_2D_groundwater", True),
+    ("2d_openwater_lines", "lines_2D_open_water", True),
+    ("2d_vertical_infiltration_lines", "lines_2D_vertical_infiltration", True),
+    ("levees", "levees", False),  # levees are not implemented in v2
+    ("breaches", "breaches", False),  # breaches are not implemented in v2
+    ("channels", "channels", True),
+    ("pipes", "pipes", True),
+    ("weirs", "weirs", True),
+    ("culverts", "culverts", True),
+    # ("orifices", "orifices", True),  no orifices in test file
+    ("manholes", "manholes", False),  # is_manhole flag is incorrect in v2
+    ("nodes", "nodes_1D_all", True),
+    ("pumps", "pumps", True),
+    ("grid", "grid_2D_open_water", True),
+    ("grid", "grid_2D_groundwater", True),
+])
+def test_export_method(ga_export, export_method, expected_filename, works_in_v2):
+    if ga_export.ga.grid_file.endswith("gridadmin_v2.h5") and not works_in_v2:
+        pytest.skip("Export to %s yet supported in new gridadmin" % expected_filename)
+    getattr(ga_export, "export_" + export_method)()
+    assert os.path.exists(os.path.join(ga_export._dest, expected_filename + ".json"))

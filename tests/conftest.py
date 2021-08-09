@@ -44,7 +44,10 @@ def ga(request):
 
 @pytest.fixture(params=["gridadmin.h5", "gridadmin_v2.h5"])
 def ga_export(request, tmp_path):
-    exporter = GridAdminH5Export(os.path.join(test_file_dir, request.param))
+    exporter = GridAdminH5Export(
+        os.path.join(test_file_dir, request.param),
+        export_method="to_geojson",
+    )
     exporter._dest = str(tmp_path)
     yield exporter
 
