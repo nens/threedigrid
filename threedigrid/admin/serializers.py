@@ -34,6 +34,7 @@ class GeoJsonSerializer:
                 {"type": "FeatureCollection", "features": self.geos},
                 file,
                 indent=self._indent,
+                allow_nan=False,
                 cls=NumpyEncoder,
             )
 
