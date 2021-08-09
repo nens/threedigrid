@@ -13,7 +13,8 @@ import pytest
 import six
 
 from threedigrid.admin.constants import TYPE_CODE_MAP
-from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
+from threedigrid.admin.gridresultadmin import GridH5Admin, GridH5ResultAdmin
+from threedigrid.admin.prepare import GridAdminH5Export
 from threedigrid.admin.idmapper import IdMapper
 
 
@@ -23,17 +24,29 @@ grid_bck = os.path.join(test_file_dir, "gridadmin.bck")
 
 # the testfile is a copy of the v2_bergermeer gridadmin file
 result_file = os.path.join(test_file_dir, "results_3di.nc")
-grid_file = os.path.join(test_file_dir, "gridadmin.h5")
 
 
 NODE_LENGTH = 10
 
 
-@pytest.fixture()
-def gr():
-    gr = GridH5ResultAdmin(grid_file, result_file)
+@pytest.fixture(params=["gridadmin.h5"])  # , "gridadmin_v2.h5"])
+def gr(request):
+    gr = GridH5ResultAdmin(os.path.join(test_file_dir, request.param), result_file)
     yield gr
     gr.close()
+
+
+@pytest.fixture(params=["gridadmin.h5", "gridadmin_v2.h5"])
+def ga(request):
+    with GridH5Admin(os.path.join(test_file_dir, request.param)) as ga:
+        yield ga
+
+
+@pytest.fixture(params=["gridadmin.h5", "gridadmin_v2.h5"])
+def ga_export(request, tmp_path):
+    exporter = GridAdminH5Export(os.path.join(test_file_dir, request.param))
+    exporter._dest = str(tmp_path)
+    yield exporter
 
 
 def simple_id_map(node_length=NODE_LENGTH):
