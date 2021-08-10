@@ -1,7 +1,7 @@
 History
 =======
 
-1.1.5 (unreleased)
+1.1.5 (2021-08-10)
 ------------------
 
 - Release on pypi (repo has no Github actions)
