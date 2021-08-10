@@ -152,7 +152,7 @@ def fill_properties(fields, data, index, model_type=None):
                 if value.size == 1:
                     value = value.item()
                 try:
-                    if ~np.isfinite(value):
+                    if ~np.any(np.isfinite(value)):
                         return None
                 except TypeError:  # for e.g. strings
                     pass
