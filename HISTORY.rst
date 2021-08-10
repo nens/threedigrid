@@ -4,6 +4,8 @@ History
 1.1.4 (unreleased)
 ------------------
 
+- Replace nan with null in geojson output.
+
 - Remove requirements files, only keep one for development in docker.
 
 

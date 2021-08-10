@@ -34,6 +34,7 @@ class GeoJsonSerializer:
                 {"type": "FeatureCollection", "features": self.geos},
                 file,
                 indent=self._indent,
+                allow_nan=False,
                 cls=NumpyEncoder,
             )
 
@@ -150,6 +151,11 @@ def fill_properties(fields, data, index, model_type=None):
                 value = field_data[..., index]
                 if value.size == 1:
                     value = value.item()
+                try:
+                    if ~np.any(np.isfinite(value)):
+                        return None
+                except TypeError:  # for e.g. strings
+                    pass
             else:
                 if index == 0:
                     # only log it once
