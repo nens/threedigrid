@@ -9,8 +9,6 @@ import pytest
 
 from osgeo import ogr
 
-from threedigrid.admin import constants
-
 from threedigrid.admin.lines.exporters import LinesOgrExporter
 
 
@@ -85,7 +83,8 @@ def test_export_specify_nested_fields(ga, tmp_path):
         assert 'first' in data['features'][0]['properties']
         assert 'model_type' in data['features'][0]['properties']
         assert 'display_name' in data['features'][0]['properties']['first']
-        assert 'calculation_type' in data['features'][0]['properties']['first']['second']
+        assert 'calculation_type' in data[
+            'features'][0]['properties']['first']['second']
 
 
 def test_export_filter(ga, tmp_path):
@@ -129,8 +128,11 @@ def test_export_reproject(ga, tmp_path):
     ("grid", "grid_2D_open_water", True),
     ("grid", "grid_2D_groundwater", True),
 ])
-def test_export_method(ga_export, export_method, expected_filename, works_in_v2):
+def test_export_method(
+        ga_export, export_method, expected_filename, works_in_v2):
     if ga_export.ga.grid_file.endswith("gridadmin_v2.h5") and not works_in_v2:
-        pytest.skip("Export to %s yet supported in new gridadmin" % expected_filename)
+        pytest.skip(
+            "Export to %s yet supported in new gridadmin" % expected_filename)
     getattr(ga_export, "export_" + export_method)()
-    assert os.path.exists(os.path.join(ga_export._dest, expected_filename + ".json"))
+    assert os.path.exists(
+        os.path.join(ga_export._dest, expected_filename + ".json"))

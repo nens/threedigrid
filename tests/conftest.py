@@ -31,7 +31,8 @@ NODE_LENGTH = 10
 
 @pytest.fixture(params=["gridadmin.h5"])  # , "gridadmin_v2.h5"])
 def gr(request):
-    gr = GridH5ResultAdmin(os.path.join(test_file_dir, request.param), result_file)
+    gr = GridH5ResultAdmin(
+        os.path.join(test_file_dir, request.param), result_file)
     yield gr
     gr.close()
 
