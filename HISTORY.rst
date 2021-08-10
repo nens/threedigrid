@@ -1,7 +1,7 @@
 History
 =======
 
-1.1.4 (unreleased)
+1.1.4 (2021-08-10)
 ------------------
 
 - Replace nan with null in geojson output.
