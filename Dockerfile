@@ -29,5 +29,5 @@ RUN apt-get update && apt-get install -y \
 RUN curl -s https://bootstrap.pypa.io/get-pip.py | python3
 
 WORKDIR /code
-COPY requirements_dev.txt requirements_geo.txt requirements_base.txt /code/
-RUN pip install --no-cache-dir -r requirements_dev.txt
+COPY requirements_docker.txt /code/
+RUN pip install --no-cache-dir -r requirements_docker.txt
