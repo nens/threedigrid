@@ -46,6 +46,9 @@ class Nodes(Model):
     node_type = ArrayField()
     is_manhole = BooleanArrayField()
     sumax = ArrayField()
+    drain_level = ArrayField()
+    storage_area = ArrayField()
+    dmax = ArrayField()
 
     SUBSETS = NODE_SUBSETS
 
