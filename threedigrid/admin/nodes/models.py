@@ -94,15 +94,12 @@ class AddedCalculationNodes(Nodes):
 
 class ConnectionNodes(Nodes):
     initial_waterlevel = ArrayField()
-    storage_area = ArrayField()
 
 
 class Manholes(ConnectionNodes):
     bottom_level = ArrayField()
-    drain_level = ArrayField()
     display_name = ArrayField()
     surface_level = ArrayField()
-    calculation_type = ArrayField()
     shape = ArrayField()
     width = ArrayField()
     manhole_indicator = ArrayField()

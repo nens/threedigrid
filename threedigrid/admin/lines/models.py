@@ -54,7 +54,6 @@ class Lines(Model):
     cross1 = IndexArrayField(to='CrossSections')
     cross2 = IndexArrayField(to='CrossSections')
     ds1d = ArrayField()
-    s1d = ArrayField()
     cross_weight = ArrayField()
     invert_level_start_point = ArrayField()
     invert_level_end_point = ArrayField()
@@ -104,8 +103,6 @@ class Lines(Model):
 
 class Pipes(Lines):
     display_name = ArrayField()
-    invert_level_start_point = ArrayField()
-    invert_level_end_point = ArrayField()
     friction_type = ArrayField()
     friction_value = ArrayField()
     material = ArrayField()
@@ -172,8 +169,6 @@ class Culverts(Lines):
     friction_value = ArrayField()
     discharge_coefficient_negative = ArrayField()
     discharge_coefficient_positive = ArrayField()
-    invert_level_start_point = ArrayField()
-    invert_level_end_point = ArrayField()
     connection_node_start_pk = ArrayField()
     connection_node_end_pk = ArrayField()
 
