@@ -40,6 +40,7 @@ NODE_SUBSETS = {
 class Nodes(Model):
     content_pk = ArrayField()
     seq_id = ArrayField()
+    calculation_type = ArrayField()
     coordinates = PointArrayField()
     cell_coords = BboxArrayField()
     zoom_category = ArrayField()
