@@ -117,9 +117,16 @@ class GridAdminLinesTest(unittest.TestCase):
             "kcu",
             "lik",
             "line",
+            "dpumax",
+            "cross1",
+            "cross2",
+            "ds1d",
             "line_coords",
             "cross_pix_coords",
+            "cross_weight",
             "line_geometries",
+            "invert_level_start_point",
+            "invert_level_end_point",
             "zoom_category",
         }
 
@@ -190,11 +197,16 @@ class GridAdminNodeTest(unittest.TestCase):
             "coordinates",
             "id",
             "node_type",
+            "calculation_type",
             "seq_id",
             "zoom_category",
             "is_manhole",
             "sumax",
+            "drain_level",
+            "storage_area",
+            "dmax"
         }
+
 
     def test_locations_2d(self):
         self.assertGreater(len(self.parser.nodes.locations_2d), 0)
@@ -268,6 +280,7 @@ class GridAdminCellsTest(unittest.TestCase):
             "content_pk",
             "coordinates",
             "id",
+            "calculation_type",
             "node_type",
             "seq_id",
             "z_coordinate",
@@ -276,7 +289,11 @@ class GridAdminCellsTest(unittest.TestCase):
             "sumax",
             "pixel_width",
             "pixel_coords",
+            "drain_level",
+            "storage_area",
+            "dmax"
         }
+
 
     def test_get_id_from_xy(self):
         # should yield tow ids, one for 2d, one for groundwater
