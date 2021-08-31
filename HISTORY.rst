@@ -1,7 +1,7 @@
 History
 =======
 
-1.1.6 (unreleased)
+1.1.6 (2021-08-31)
 ------------------
 
 - Added CrossSection model to ORM.
