@@ -207,7 +207,6 @@ class GridAdminNodeTest(unittest.TestCase):
             "dmax"
         }
 
-
     def test_locations_2d(self):
         self.assertGreater(len(self.parser.nodes.locations_2d), 0)
         frst = self.parser.nodes.locations_2d[0]
@@ -293,7 +292,6 @@ class GridAdminCellsTest(unittest.TestCase):
             "storage_area",
             "dmax"
         }
-
 
     def test_get_id_from_xy(self):
         # should yield tow ids, one for 2d, one for groundwater
