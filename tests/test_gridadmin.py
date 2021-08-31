@@ -395,6 +395,29 @@ class GridAdminCellsTest(unittest.TestCase):
         self.assertTrue(os.path.exists, self.f)
 
 
+class GridAdminCrossSectionsTest(unittest.TestCase):
+    def setUp(self):
+        self.parser = GridH5Admin(grid_admin_h5_file)
+        d = tempfile.mkdtemp()
+        self.f = os.path.join(d, "test_cross_sections.shp")
+
+    def tearDown(self):
+        shutil.rmtree(os.path.dirname(self.f))
+
+    def test_fields(self):
+        # Check dtype names
+        assert set(self.parser.cross_sections._meta.get_fields().keys()) == {
+            "id",
+            "code",
+            "shape",
+            "content_pk",
+            "width_1d",
+            "offset",
+            "count",
+            "tables"
+        }
+
+
 class NodeFilterTests(unittest.TestCase):
     def setUp(self):
         self.parser = GridH5Admin(grid_admin_h5_file)
