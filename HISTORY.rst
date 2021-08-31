@@ -4,7 +4,10 @@ History
 1.1.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Added CrossSection model to ORM.
+- Added following fields to lines: `dpumax cross1 cross2 ds1d s1d cross_weight invert_level_start_point invert_level_end_point`
+- Added following fields to nodes: `calculation_type drain_level storage_area dmax`
+- Created new subset 1D for Nodes.
 
 
 1.1.5 (2021-08-10)

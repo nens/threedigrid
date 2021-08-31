@@ -117,9 +117,16 @@ class GridAdminLinesTest(unittest.TestCase):
             "kcu",
             "lik",
             "line",
+            "dpumax",
+            "cross1",
+            "cross2",
+            "ds1d",
             "line_coords",
             "cross_pix_coords",
+            "cross_weight",
             "line_geometries",
+            "invert_level_start_point",
+            "invert_level_end_point",
             "zoom_category",
         }
 
@@ -190,10 +197,14 @@ class GridAdminNodeTest(unittest.TestCase):
             "coordinates",
             "id",
             "node_type",
+            "calculation_type",
             "seq_id",
             "zoom_category",
             "is_manhole",
             "sumax",
+            "drain_level",
+            "storage_area",
+            "dmax"
         }
 
     def test_locations_2d(self):
@@ -268,6 +279,7 @@ class GridAdminCellsTest(unittest.TestCase):
             "content_pk",
             "coordinates",
             "id",
+            "calculation_type",
             "node_type",
             "seq_id",
             "z_coordinate",
@@ -276,6 +288,9 @@ class GridAdminCellsTest(unittest.TestCase):
             "sumax",
             "pixel_width",
             "pixel_coords",
+            "drain_level",
+            "storage_area",
+            "dmax"
         }
 
     def test_get_id_from_xy(self):
@@ -376,6 +391,29 @@ class GridAdminCellsTest(unittest.TestCase):
     def test_export_to_shape(self):
         self.parser.cells.to_shape(self.f)
         self.assertTrue(os.path.exists, self.f)
+
+
+class GridAdminCrossSectionsTest(unittest.TestCase):
+    def setUp(self):
+        self.parser = GridH5Admin(grid_admin_h5_file)
+        d = tempfile.mkdtemp()
+        self.f = os.path.join(d, "test_cross_sections.shp")
+
+    def tearDown(self):
+        shutil.rmtree(os.path.dirname(self.f))
+
+    def test_fields(self):
+        # Check dtype names
+        assert set(self.parser.cross_sections._meta.get_fields().keys()) == {
+            "id",
+            "code",
+            "shape",
+            "content_pk",
+            "width_1d",
+            "offset",
+            "count",
+            "tables"
+        }
 
 
 class NodeFilterTests(unittest.TestCase):

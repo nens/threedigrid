@@ -117,6 +117,10 @@ def test_get_meta_fields_nodes(agg_gr):
         "vol_min",
         "zoom_category",
         "sumax",
+        'storage_area',
+        'dmax',
+        'drain_level',
+        'calculation_type'
     }
 
 

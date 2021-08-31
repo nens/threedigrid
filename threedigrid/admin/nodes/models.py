@@ -40,12 +40,16 @@ NODE_SUBSETS = {
 class Nodes(Model):
     content_pk = ArrayField()
     seq_id = ArrayField()
+    calculation_type = ArrayField()
     coordinates = PointArrayField()
     cell_coords = BboxArrayField()
     zoom_category = ArrayField()
     node_type = ArrayField()
     is_manhole = BooleanArrayField()
     sumax = ArrayField()
+    drain_level = ArrayField()
+    storage_area = ArrayField()
+    dmax = ArrayField()
 
     SUBSETS = NODE_SUBSETS
 
@@ -90,15 +94,12 @@ class AddedCalculationNodes(Nodes):
 
 class ConnectionNodes(Nodes):
     initial_waterlevel = ArrayField()
-    storage_area = ArrayField()
 
 
 class Manholes(ConnectionNodes):
     bottom_level = ArrayField()
-    drain_level = ArrayField()
     display_name = ArrayField()
     surface_level = ArrayField()
-    calculation_type = ArrayField()
     shape = ArrayField()
     width = ArrayField()
     manhole_indicator = ArrayField()

@@ -18,6 +18,7 @@ from threedigrid.admin.lines.models import Lines
 from threedigrid.admin.nodes.models import Nodes
 from threedigrid.admin.nodes.models import Cells
 from threedigrid.admin.nodes.models import Grid
+from threedigrid.admin.crosssections.models import CrossSections
 from threedigrid.admin.breaches.models import Breaches
 from threedigrid.admin.pumps.models import Pumps
 from threedigrid.admin.levees.models import Levees
@@ -112,6 +113,12 @@ class GridH5Admin(object):
         return Lines(
             self.datasource_class(
                 self.h5py_file, 'lines'), **self._grid_kwargs)
+
+    @property
+    def cross_sections(self):
+        return CrossSections(
+            self.datasource_class(
+                self.h5py_file, 'cross_sections'), **self._grid_kwargs)
 
     @property
     def pumps(self):
