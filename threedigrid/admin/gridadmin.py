@@ -109,6 +109,12 @@ class GridH5Admin(object):
                 self.h5py_file, 'nodes'), **self._grid_kwargs)
 
     @property
+    def nodes_embedded(self):
+        return Nodes(
+            self.datasource_class(
+                self.h5py_file, 'nodes_embedded'), **self._grid_kwargs)
+
+    @property
     def lines(self):
         return Lines(
             self.datasource_class(

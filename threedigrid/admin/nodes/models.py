@@ -50,6 +50,8 @@ class Nodes(Model):
     drain_level = ArrayField()
     storage_area = ArrayField()
     dmax = ArrayField()
+    s1d = ArrayField()
+    embedded_in = ArrayField()
 
     SUBSETS = NODE_SUBSETS
 
