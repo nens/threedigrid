@@ -1,7 +1,7 @@
 History
 =======
 
-1.1.7 (unreleased)
+1.1.7 (2021-10-18)
 ------------------
 
 - Fixed timeseries filtering with h5py>=3.1.x
