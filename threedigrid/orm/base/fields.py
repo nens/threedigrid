@@ -86,7 +86,8 @@ class TimeSeriesArrayField(ArrayField):
             if timeseries_filter.dtype == np.dtype(bool):
                 # Convert to integer index array
                 # to support h5py >= 3.1.0
-                timeseries_filter_to_use = np.argwhere(timeseries_filter).flatten()
+                timeseries_filter_to_use = np.argwhere(
+                    timeseries_filter).flatten()
 
         if (
             isinstance(timeseries_filter_to_use, np.ndarray)
@@ -159,7 +160,8 @@ class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
             if timeseries_filter.dtype == np.dtype(bool):
                 # Convert to integer index array
                 # to support h5py >= 3.1.0
-                timeseries_filter_to_use = np.argwhere(timeseries_filter).flatten()
+                timeseries_filter_to_use = np.argwhere(
+                    timeseries_filter).flatten()
 
         for source_name in source_names:
             if source_name not in list(datasource.keys()):
@@ -169,9 +171,11 @@ class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
                 isinstance(timeseries_filter_to_use, np.ndarray)
                 and len(datasource[source_name].shape) > 1
             ):
-                values.append(datasource[source_name][timeseries_filter_to_use, :])
+                values.append(datasource[source_name][
+                    timeseries_filter_to_use, :])
             else:
-                values.append(datasource[source_name][timeseries_filter_to_use])
+                values.append(datasource[source_name][
+                    timeseries_filter_to_use])
 
         if not values:
             return np.array([])
@@ -233,12 +237,14 @@ class TimeSeriesSubsetArrayField(TimeSeriesArrayField):
             if timeseries_filter.dtype == np.dtype(bool):
                 # Convert to integer index array
                 # to support h5py >= 3.1.0
-                timeseries_filter_to_use = np.argwhere(timeseries_filter).flatten()
+                timeseries_filter_to_use = np.argwhere(
+                    timeseries_filter).flatten()
 
         lookup_index = kwargs.get("lookup_index")
         if self._source_name not in list(datasource.keys()):
             return np.array([])
-        source_data = datasource[self._source_name][timeseries_filter_to_use, :]
+        source_data = datasource[self._source_name][
+            timeseries_filter_to_use, :]
         shp = (source_data.shape[0], self._size)
         templ = np.zeros(shp, dtype=source_data.dtype)
 
@@ -315,7 +321,8 @@ class MappedSubsetArrayField(ArrayField):
     def get_value(self, datasource, name, **kwargs):
         # Skip the whole mapping if the dataset is
         # already present on the default datasource
-        if self._skip_if_datasource_present and name in list(datasource.keys()):
+        if self._skip_if_datasource_present and name in\
+           list(datasource.keys()):
             data = datasource[name][:]
             data[data == NO_DATA_VALUE] = 0
             return data
