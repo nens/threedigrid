@@ -15,8 +15,18 @@ def test_nodes_timeseries_start_end_time_kwargs(gr):
     assert qs_s1.shape[0] == ts[0: 6 + 1].size
 
 
+def test_nodes_timeseries_start_end_time_subset(gr):
+    ts = gr.nodes.timestamps
+    qs_s1 = (
+        gr.nodes.subset("2D_OPEN_WATER").timeseries(
+            start_time=ts[0], end_time=ts[6]).s1
+    )
+    assert qs_s1.shape[0] == ts[0: 6 + 1].size
+
+
 def test_nodes_timeseries_with_subset(gr):
-    qs_s1 = gr.nodes.subset("1d_all").timeseries(start_time=0, end_time=500).s1
+    qs_s1 = gr.nodes.subset("1d_all").timeseries(
+        start_time=0, end_time=500).s1
     assert qs_s1.shape[0] == 9 and qs_s1.shape[1] > 0
 
 
@@ -29,7 +39,7 @@ def test_nodes_timeseries_start_time_only_kwarg(gr):
 def test_nodes_timeseries_end_time_only_kwarg(gr):
     ts = gr.nodes.timestamps
     qs = gr.nodes.timeseries(end_time=ts[6])
-    assert qs.s1.shape[0] == ts[: 6 + 1].size
+    assert qs.s1.shape[0] == ts[:6 + 1].size
 
 
 def test_nodes_timeseries_index_filter(gr):
@@ -152,16 +162,17 @@ def test_get_model_instance_by_field_name_raises_index_error(gr):
 
 
 def test_gr_get_subset_idx_leak(gr):
-    assert gr.nodes._get_subset_idx('leak').shape == (10748,)
+    assert gr.nodes._get_subset_idx("leak").shape == (10748,)
 
 
 def test_gr_get_subset_ids_no_composite_field(gr):
-    assert gr.nodes._get_subset_idx('s1') is None
+    assert gr.nodes._get_subset_idx("s1") is None
 
 
 def test_gr_chain_filter(gr):
-    assert gr.nodes.filter(
-        id=4).get_filtered_field_value('leak').shape == (9, 1)
+    assert gr.nodes.filter(id=4).get_filtered_field_value(
+        "leak").shape == (9, 1)
+
 
 # commented for now until the new aggregate.nc is finished
 

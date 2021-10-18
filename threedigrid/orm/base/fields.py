@@ -19,6 +19,7 @@ class ArrayField:
     Generic field that can be used to describe values
     to be retrieved from a Datasource.
     """
+
     @staticmethod
     def get_value(datasource, name, **kwargs):
         """
@@ -43,6 +44,7 @@ class BooleanArrayField(ArrayField):
     Because HDF5 does not support boolean datatype. No data fields are
     interpreted as False.
     """
+
     @staticmethod
     def get_value(datasource, name, **kwargs):
         """
@@ -66,6 +68,7 @@ class IndexArrayField(ArrayField):
     """
     Simple pointer
     """
+
     def __init__(self, to=None):
         self.to = to
 
@@ -74,15 +77,25 @@ class IndexArrayField(ArrayField):
 
 
 class TimeSeriesArrayField(ArrayField):
-
     @staticmethod
     def get_value(datasource, name, **kwargs):
-        timeseries_filter = kwargs.get('timeseries_filter', slice(None))
-        if ((isinstance(timeseries_filter, np.ndarray) and
-             len(datasource[name].shape) > 1)):
-            v = datasource[name][timeseries_filter, :]
+        timeseries_filter = kwargs.get("timeseries_filter", slice(None))
+        timeseries_filter_to_use = timeseries_filter
+
+        if isinstance(timeseries_filter, np.ndarray):
+            if timeseries_filter.dtype == np.dtype(bool):
+                # Convert to integer index array
+                # to support h5py >= 3.1.0
+                timeseries_filter_to_use = np.argwhere(
+                    timeseries_filter).flatten()
+
+        if (
+            isinstance(timeseries_filter_to_use, np.ndarray)
+            and len(datasource[name].shape) > 1
+        ):
+            v = datasource[name][timeseries_filter_to_use, :]
         else:
-            v = datasource[name][timeseries_filter]
+            v = datasource[name][timeseries_filter_to_use]
         if v.size > 0:
             return v
         return np.array([])
@@ -129,14 +142,15 @@ class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
 
         Optional transforms can be done here.
         """
-        timeseries_filter = kwargs.get('timeseries_filter', slice(None))
+        timeseries_filter = kwargs.get("timeseries_filter", slice(None))
         # timeseries_filter contains only [False, False,...]
         # (empty) slices pass the condition
         if isinstance(timeseries_filter, np.ndarray):
             if timeseries_filter.dtype == np.dtype(bool) and not np.any(
-                 timeseries_filter):
+                timeseries_filter
+            ):
                 return np.array([])
-        lookup_index = kwargs.get('lookup_index')
+        lookup_index = kwargs.get("lookup_index")
         values = []
         source_names = self._meta.composite_fields.get(name)
 
@@ -153,13 +167,15 @@ class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
             if source_name not in list(datasource.keys()):
                 continue
 
-            if ((isinstance(timeseries_filter_to_use, np.ndarray)
-                 and len(datasource[source_name].shape) > 1)):
-                values.append(
-                    datasource[source_name][timeseries_filter_to_use, :])
+            if (
+                isinstance(timeseries_filter_to_use, np.ndarray)
+                and len(datasource[source_name].shape) > 1
+            ):
+                values.append(datasource[source_name][
+                    timeseries_filter_to_use, :])
             else:
-                values.append(
-                    datasource[source_name][timeseries_filter_to_use])
+                values.append(datasource[source_name][
+                    timeseries_filter_to_use])
 
         if not values:
             return np.array([])
@@ -205,19 +221,30 @@ class TimeSeriesSubsetArrayField(TimeSeriesArrayField):
 
         Optional transforms can be done here.
         """
-        timeseries_filter = kwargs.get('timeseries_filter', slice(None))
-        subset_index = kwargs['subset_index']
+        timeseries_filter = kwargs.get("timeseries_filter", slice(None))
+        subset_index = kwargs["subset_index"]
         # timeseries_filter contains only [False, False,...]
         # (empty) slices pass the condition
         if isinstance(timeseries_filter, np.ndarray):
             if timeseries_filter.dtype == np.dtype(bool) and not np.any(
-                 timeseries_filter):
+                timeseries_filter
+            ):
                 return np.array([])
 
-        lookup_index = kwargs.get('lookup_index')
+        timeseries_filter_to_use = timeseries_filter
+
+        if isinstance(timeseries_filter, np.ndarray):
+            if timeseries_filter.dtype == np.dtype(bool):
+                # Convert to integer index array
+                # to support h5py >= 3.1.0
+                timeseries_filter_to_use = np.argwhere(
+                    timeseries_filter).flatten()
+
+        lookup_index = kwargs.get("lookup_index")
         if self._source_name not in list(datasource.keys()):
             return np.array([])
-        source_data = datasource[self._source_name][timeseries_filter, :]
+        source_data = datasource[self._source_name][
+            timeseries_filter_to_use, :]
         shp = (source_data.shape[0], self._size)
         templ = np.zeros(shp, dtype=source_data.dtype)
 
@@ -242,7 +269,7 @@ def resolve_h5py_file_datasource(h5py_file, dotted_path):
     # For example:
     #    dotted_path = 'lines.id'
     res = h5py_file
-    for key in dotted_path.split('.'):
+    for key in dotted_path.split("."):
         res = res.get(key)
     return res[:]
 
@@ -252,9 +279,15 @@ class MappedSubsetArrayField(ArrayField):
     Field for subset arrays (for example only spanning the 2d section)
     And also mapped -> using another ordering than in the hdf5 file.
     """
-    def __init__(self, array_to_map=None, map_from_array=None,
-                 map_to_array=None, subset_filter=None,
-                 skip_if_datasource_present=False):
+
+    def __init__(
+        self,
+        array_to_map=None,
+        map_from_array=None,
+        map_to_array=None,
+        subset_filter=None,
+        skip_if_datasource_present=False,
+    ):
         """
         Use map_from_array and map_to_array to map array_to_map
         onto an new array with the name as specified for this field.
@@ -288,8 +321,8 @@ class MappedSubsetArrayField(ArrayField):
     def get_value(self, datasource, name, **kwargs):
         # Skip the whole mapping if the dataset is
         # already present on the default datasource
-        if ((self._skip_if_datasource_present
-             and name in list(datasource.keys()))):
+        if self._skip_if_datasource_present and name in\
+           list(datasource.keys()):
             data = datasource[name][:]
             data[data == NO_DATA_VALUE] = 0
             return data
@@ -297,24 +330,19 @@ class MappedSubsetArrayField(ArrayField):
         # Retrieve all specified arrays from
         # the h5py_file
         array_to_map = resolve_h5py_file_datasource(
-            datasource._h5py_file,
-            self._array_to_map
+            datasource._h5py_file, self._array_to_map
         )
         map_from_array = resolve_h5py_file_datasource(
-            datasource._h5py_file,
-            self._map_from_array
+            datasource._h5py_file, self._map_from_array
         )
         map_to_array = resolve_h5py_file_datasource(
-            datasource._h5py_file,
-            self._map_to_array
+            datasource._h5py_file, self._map_to_array
         )
 
-        subset_key, subset_value = list(
-            self._subset_filter.items())[0]
+        subset_key, subset_value = list(self._subset_filter.items())[0]
 
         subset_filter_array = resolve_h5py_file_datasource(
-            datasource._h5py_file,
-            subset_key
+            datasource._h5py_file, subset_key
         )
 
         # Create a filter based on the specified subset_filter
@@ -327,14 +355,13 @@ class MappedSubsetArrayField(ArrayField):
             new_shape = (array_to_map.shape[0], new_shape[0])
 
         # Create an empty array that we are going to (partial) fill
-        data = np.full(new_shape, 0,  dtype=array_to_map.dtype)
+        data = np.full(new_shape, 0, dtype=array_to_map.dtype)
 
         # Use the PKMapper to create a mapping from:
         # 'map_from_array' to 'map_to_array'
         # and apply that mapping
         # on the 'array_to_map'
-        mapper = PKMapper(
-            map_from_array, map_to_array[boolean_filter])
+        mapper = PKMapper(map_from_array, map_to_array[boolean_filter])
 
         output = mapper.apply_on(array_to_map)
 
