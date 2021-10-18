@@ -4,7 +4,7 @@ History
 1.1.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fixed timeseries filtering with h5py>=3.1.x
 
 
 1.1.6 (2021-08-31)
