@@ -54,7 +54,7 @@ class Lines(Model):
     cross1 = IndexArrayField(to='CrossSections')
     cross2 = IndexArrayField(to='CrossSections')
     ds1d = ArrayField()
-    s1d = ArrayField()
+    s_s1d = ArrayField()
     cross_weight = ArrayField()
     invert_level_start_point = ArrayField()
     invert_level_end_point = ArrayField()
