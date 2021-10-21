@@ -120,7 +120,9 @@ def test_get_meta_fields_nodes(agg_gr):
         'storage_area',
         'dmax',
         'drain_level',
-        'calculation_type'
+        'calculation_type',
+        's_s1d',
+        'embedded_in'
     }
 
 
