@@ -15,7 +15,7 @@ import numpy as np
 from threedigrid.geo_utils import transform_bbox
 
 from threedigrid.admin.lines.models import Lines
-from threedigrid.admin.nodes.models import Nodes
+from threedigrid.admin.nodes.models import EmbeddedNodes, Nodes
 from threedigrid.admin.nodes.models import Cells
 from threedigrid.admin.nodes.models import Grid
 from threedigrid.admin.crosssections.models import CrossSections
@@ -110,7 +110,7 @@ class GridH5Admin(object):
 
     @property
     def nodes_embedded(self):
-        return Nodes(
+        return EmbeddedNodes(
             self.datasource_class(
                 self.h5py_file, 'nodes_embedded'), **self._grid_kwargs)
 
