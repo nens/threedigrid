@@ -206,7 +206,6 @@ class GridAdminNodeTest(unittest.TestCase):
             "drain_level",
             "storage_area",
             "dmax",
-            "embedded_in"
         }
 
     def test_locations_2d(self):
@@ -293,7 +292,6 @@ class GridAdminCellsTest(unittest.TestCase):
             "drain_level",
             "storage_area",
             "dmax",
-            "embedded_in"
         }
 
     def test_get_id_from_xy(self):
