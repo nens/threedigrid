@@ -4,7 +4,9 @@ History
 1.1.9 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Renamed the 's_1d' field under lines to 'ds1d_half'.
+
+- Added 'initial_waterlevel' to nodes.
 
 
 1.1.8 (2021-10-25)
