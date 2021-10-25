@@ -121,6 +121,7 @@ def test_get_meta_fields_nodes(agg_gr):
         'dmax',
         'drain_level',
         'calculation_type',
+        'initial_waterlevel',
     }
 
 

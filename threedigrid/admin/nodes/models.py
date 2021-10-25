@@ -50,6 +50,7 @@ class Nodes(Model):
     drain_level = ArrayField()
     storage_area = ArrayField()
     dmax = ArrayField()
+    initial_waterlevel = ArrayField()
 
     SUBSETS = NODE_SUBSETS
 
