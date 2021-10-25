@@ -92,6 +92,10 @@ class AddedCalculationNodes(Nodes):
     pass
 
 
+class EmbeddedNodes(Nodes):
+    embedded_in = ArrayField()
+
+
 class ConnectionNodes(Nodes):
     initial_waterlevel = ArrayField()
 

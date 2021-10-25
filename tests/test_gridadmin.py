@@ -128,6 +128,7 @@ class GridAdminLinesTest(unittest.TestCase):
             "invert_level_start_point",
             "invert_level_end_point",
             "zoom_category",
+            "s_s1d"
         }
 
     def test_exporters(self):
@@ -204,7 +205,7 @@ class GridAdminNodeTest(unittest.TestCase):
             "sumax",
             "drain_level",
             "storage_area",
-            "dmax"
+            "dmax",
         }
 
     def test_locations_2d(self):
@@ -290,7 +291,7 @@ class GridAdminCellsTest(unittest.TestCase):
             "pixel_coords",
             "drain_level",
             "storage_area",
-            "dmax"
+            "dmax",
         }
 
     def test_get_id_from_xy(self):
