@@ -4,7 +4,7 @@ History
 1.1.8 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Added 'nodes_embedded', available under gridadmin Class.
 
 
 1.1.7 (2021-10-18)
