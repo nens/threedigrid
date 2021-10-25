@@ -1,7 +1,7 @@
 History
 =======
 
-1.1.9 (unreleased)
+1.1.9 (2021-10-25)
 ------------------
 
 - Renamed the 's_1d' field under lines to 'ds1d_half'.
