@@ -4,7 +4,7 @@ History
 1.1.10 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix GeoJSON levees coordinate order.
 
 
 1.1.9 (2021-10-25)
