@@ -108,7 +108,7 @@ class GeoJsonSerializer:
                     data["coords"][i].reshape(2, -1).astype('float64'),
                     constants.LONLAT_DIGITS
                 )
-                line = geojson.LineString(zip(coords[1, :], coords[0, :]))
+                line = geojson.LineString(coords.T.tolist())
                 properties = fill_properties(
                     self.fields, data, i, model_type
                 )
