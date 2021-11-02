@@ -1,7 +1,7 @@
 History
 =======
 
-1.1.11 (unreleased)
+1.1.11 (2021-11-02)
 -------------------
 
 - Exporters now export NaN and -9999.0 float values as NULL.
