@@ -22,7 +22,6 @@ from threedigrid.admin import exporter_constants as const
 from threedigrid.admin.constants import NODE_BASE_FIELDS
 from threedigrid.admin.constants import NODE_1D_FIELDS
 from threedigrid.admin.constants import NODE_FIELD_NAME_MAP
-from threedigrid.admin.constants import TYPE_FUNC_MAP
 
 logger = logging.getLogger(__name__)
 
@@ -72,6 +71,8 @@ class NodesOgrExporter(BaseOgrExporter):
         _definition = layer.GetLayerDefn()
 
         for i in range(node_data['id'].size):
+            if node_data['id'][i] == 0:
+                continue  # skip the dummy element
             point = ogr.Geometry(ogr.wkbPoint)
             point.AddPoint(
                 node_data['coordinates'][0][i],
@@ -81,9 +82,11 @@ class NodesOgrExporter(BaseOgrExporter):
             feature.SetGeometry(point)
             for field_name, field_type in six.iteritems(fields):
                 fname = NODE_FIELD_NAME_MAP[field_name]
-                raw_value = node_data[fname][i]
-                value = TYPE_FUNC_MAP[field_type](raw_value)
-                feature.SetField(str(field_name), value)
+                try:
+                    raw_value = node_data[fname][i]
+                except IndexError:
+                    raw_value = None
+                self.set_field(feature, field_name, field_type, raw_value)
             layer.CreateFeature(feature)
 
 
@@ -136,6 +139,8 @@ class CellsOgrExporter(BaseOgrExporter):
 
         _definition = layer.GetLayerDefn()
         for i in range(cells_data['id'].size):
+            if cells_data['id'][i] == 0:
+                continue  # skip the dummy element
             feature = ogr.Feature(_definition)
             # Create ring
             ring = ogr.Geometry(ogr.wkbLinearRing)
@@ -158,8 +163,8 @@ class CellsOgrExporter(BaseOgrExporter):
             poly = ogr.Geometry(ogr.wkbPolygon)
             poly.AddGeometry(ring)
             feature.SetGeometry(poly)
-            feature.SetField(str("nod_id"), int(cells_data['id'][i]))
-            feature.SetField(
-                str("bottom_lev"), float(cells_data['z_coordinate'][i])
+            self.set_field(feature, "nod_id", "int", cells_data['id'][i])
+            self.set_field(
+                feature, "bottom_lev", "float", cells_data['z_coordinate'][i]
             )
             layer.CreateFeature(feature)

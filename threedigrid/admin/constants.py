@@ -189,10 +189,28 @@ NODE_FIELD_NAME_MAP = OrderedDict([
     ('con_nod_pk', 'content_pk'),
 ])
 
+FID_FIELDS = {"id", "nod_id", "link_id"}
+
+
+def to_string(value):
+    # special handling of bytes (else you get the string "b'something'")
+    if isinstance(value, bytes):
+        return value.decode()
+    else:
+        return str(value)
+
+
+def to_float(value):
+    value = float(value)
+    # value == value checks if it is not NaN
+    return value if (value != -9999.0) and (value == value) else None
+
+
 TYPE_FUNC_MAP = {
     'int': int,
-    'float': float,
-    'str': str}
+    'float': to_float,
+    'str': to_string,
+}
 
 
 ###############################################################################

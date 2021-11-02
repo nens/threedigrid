@@ -4,6 +4,8 @@ from abc import abstractmethod
 import os
 import logging
 import six
+from threedigrid.admin.constants import TYPE_FUNC_MAP, FID_FIELDS
+
 
 try:
     from osgeo import ogr
@@ -41,6 +43,22 @@ class BaseOgrExporter(BaseExporterObject):
             raise_import_exception('ogr')
         if gdal is None:
             raise_import_exception('gdal')
+
+    @staticmethod
+    def set_field(feature, field_name, field_type, raw_value):
+        field_name = str(field_name)
+        # Try to de-numpy the dtype
+        try:
+            raw_value = raw_value.item()
+        except AttributeError:
+            pass
+        value = TYPE_FUNC_MAP[field_type](raw_value)
+        if value is None:
+            feature.SetFieldNull(field_name)
+        else:
+            feature.SetField(field_name, value)
+        if field_name in FID_FIELDS and value is not None:
+            feature.SetFID(value)
 
     def set_driver(self, driver_name='', extension=''):
         assert any((driver_name, extension)), \

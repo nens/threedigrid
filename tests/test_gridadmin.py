@@ -142,7 +142,7 @@ class GridAdminLinesTest(unittest.TestCase):
         self.assertTrue(os.path.exists, self.f)
         s = ogr.Open(self.f)
         lyr = s.GetLayer()
-        self.assertEqual(lyr.GetFeatureCount(), self.parser.lines.id.size)
+        self.assertEqual(lyr.GetFeatureCount(), self.parser.lines.id.size - 1)
 
 
 class GridAdminGridTest(unittest.TestCase):
@@ -226,7 +226,7 @@ class GridAdminNodeTest(unittest.TestCase):
         self.assertTrue(os.path.exists, self.f)
         s = ogr.Open(self.f)
         lyr = s.GetLayer()
-        self.assertEqual(lyr.GetFeatureCount(), self.parser.nodes.id.size)
+        self.assertEqual(lyr.GetFeatureCount(), self.parser.nodes.id.size - 1)
 
 
 class GridAdminBreachTest(unittest.TestCase):
@@ -262,7 +262,9 @@ class GridAdminBreachTest(unittest.TestCase):
         self.assertTrue(os.path.exists, self.f)
         s = ogr.Open(self.f)
         lyr = s.GetLayer()
-        self.assertEqual(lyr.GetFeatureCount(), self.parser.breaches.id.size)
+        self.assertEqual(
+            lyr.GetFeatureCount(), self.parser.breaches.id.size - 1
+        )
 
 
 class GridAdminCellsTest(unittest.TestCase):

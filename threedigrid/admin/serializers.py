@@ -43,7 +43,8 @@ class GeoJsonSerializer:
         geos = []
         if self._model.count == 0:
             return geos
-        data = self._model.to_dict()
+        # Get the data, skipping the dummy element
+        data = self._model.filter(id__ne=0).to_dict()
         content_type = self._model.__contenttype__()
         model_type = type(self._model).__name__
         if content_type == "lines":
@@ -141,7 +142,7 @@ def fill_properties(fields, data, index, model_type=None):
     :param model_type: (str, optional) optionally adds the given model_type
     """
     result = OrderedDict()
-    for i, field in enumerate(fields):
+    for field in fields:
         if isinstance(field, dict):
             for key, sub_list in field.items():
                 result[key] = fill_properties(sub_list, data, index)
@@ -149,13 +150,15 @@ def fill_properties(fields, data, index, model_type=None):
             field_data = data.get(field, None)
             if field_data is not None and field_data.size > 0:
                 value = field_data[..., index]
+                # Replace NaN, Inf, -Inf, -9999.0 floats with None (null)
+                if np.issubdtype(value.dtype, np.floating):
+                    is_invalid = (~np.isfinite(value)) | (value == -9999.0)
+                else:
+                    is_invalid = False
+                if np.any(is_invalid):
+                    value = np.where(is_invalid, None, value)
                 if value.size == 1:
                     value = value.item()
-                try:
-                    if ~np.any(np.isfinite(value)):
-                        return None
-                except TypeError:  # for e.g. strings
-                    pass
             else:
                 if index == 0:
                     # only log it once

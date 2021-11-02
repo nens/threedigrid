@@ -95,18 +95,22 @@ class BreachesOgrExporter(BaseOgrExporter):
         points = reshape_flat_array(selection['coordinates']).T
 
         for i in range(selection['id'].size):
+            if selection["id"][i] == 0:
+                continue  # skip the dummy element
             feature = ogr.Feature(_definition)
             point = ogr.Geometry(ogr.wkbPoint)
             point.AddPoint(points[i][0], points[i][1])
             feature.SetGeometry(point)
-            feature.SetField(str("link_id"), int(selection['levl'][i]))
+            self.set_field(feature, "link_id", "int", selection['levl'][i])
             kcu = selection['kcu'][i]
-            feature.SetField(str("kcu"), int(kcu))
+            self.set_field(feature, "kcu", "int", kcu)
             kcu_descr = ''
             try:
                 kcu_descr = kcu_dict[kcu]
             except KeyError:
                 pass
-            feature.SetField(str("kcu_descr"), str(kcu_descr))
-            feature.SetField(str("cont_pk"), int(selection['content_pk'][i]))
+            self.set_field(feature, "kcu_descr", "str", kcu_descr)
+            self.set_field(
+                feature, "cont_pk", "int", selection['content_pk'][i]
+            )
             layer.CreateFeature(feature)

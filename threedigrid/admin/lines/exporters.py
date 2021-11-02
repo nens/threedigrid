@@ -31,7 +31,6 @@ from threedigrid.orm.base.exporters import BaseOgrExporter
 from threedigrid.admin import exporter_constants as const
 from threedigrid.admin.constants import LINE_BASE_FIELDS_ALL
 from threedigrid.admin.constants import LINE_FIELD_NAME_MAP
-from threedigrid.admin.constants import TYPE_FUNC_MAP
 
 
 logger = logging.getLogger(__name__)
@@ -96,6 +95,8 @@ class LinesOgrExporter(BaseOgrExporter):
         node_a = line_data['line'][0]
         node_b = line_data['line'][1]
         for i in range(node_a.size):
+            if line_data['id'][i] == 0:
+                continue  # skip the dummy element
             if geom_source == 'from_threedicore':
                 line = ogr.Geometry(ogr.wkbLineString)
                 line.AddPoint(line_data['line_coords'][0][i],
@@ -113,22 +114,22 @@ class LinesOgrExporter(BaseOgrExporter):
             for field_name, field_type in six.iteritems(fields):
                 fname = LINE_FIELD_NAME_MAP.get(field_name, field_name)
                 if field_name == 'kcu_descr':
-                    value = ''
+                    raw_value = ''
                     try:
-                        value = str(kcu_dict[int(line_data['kcu'][i])])
+                        raw_value = str(kcu_dict[int(line_data['kcu'][i])])
                     except KeyError:
                         pass
                 elif field_name == 'node_a':
-                    value = TYPE_FUNC_MAP[field_type](node_a[i])
+                    raw_value = node_a[i]
                 elif field_name == 'node_b':
-                    value = TYPE_FUNC_MAP[field_type](node_b[i])
+                    raw_value = node_b[i]
                 else:
                     try:
                         raw_value = line_data[fname][i]
                     except IndexError:
-                        raw_value = '-9999'
-                    value = TYPE_FUNC_MAP[field_type](raw_value)
-                feature.SetField(str(field_name), value)
+                        raw_value = None
+
+                self.set_field(feature, field_name, field_type, raw_value)
 
             layer.CreateFeature(feature)
             feature.Destroy()
