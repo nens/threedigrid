@@ -111,6 +111,16 @@ def test_export_reproject(ga, tmp_path):
         assert 52.10 < y < 52.92
 
 
+def test_export_null(ga, tmp_path):
+    path = str(tmp_path / "exporter_test_null.json")
+    ga.nodes.manholes.filter(content_pk=12).to_geojson(
+        path, use_ogr=False
+    )
+    with open(path) as file:
+        data = json.load(file)
+        assert data['features'][0]["properties"]["drain_level"] is None
+
+
 @pytest.mark.parametrize("export_method,expected_filename,works_in_v2", [
     ("2d_groundwater_lines", "lines_2D_groundwater", True),
     ("2d_openwater_lines", "lines_2D_open_water", True),
@@ -122,7 +132,7 @@ def test_export_reproject(ga, tmp_path):
     ("weirs", "weirs", True),
     ("culverts", "culverts", True),
     # ("orifices", "orifices", True),  no orifices in test file
-    ("manholes", "manholes", False),  # is_manhole flag is incorrect in v2
+    ("manholes", "manholes", True),
     ("nodes", "nodes_1D_all", True),
     ("pumps", "pumps", True),
     ("grid", "grid_2D_open_water", True),

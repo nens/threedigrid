@@ -71,6 +71,8 @@ class LeveeOgrExporter(BaseOgrExporter):
         _definition = layer.GetLayerDefn()
 
         for i in range(len(self._levees.geoms)):
+            if levee_data['id'][i] == 0:
+                continue  # skip the dummy element
             line = ogr.Geometry(ogr.wkbLineString)
             feature = ogr.Feature(_definition)
             linepoints = reshape_flat_array(levee_data['coords'][i]).T
@@ -83,13 +85,8 @@ class LeveeOgrExporter(BaseOgrExporter):
             #     value = TYPE_FUNC_MAP[field_type](raw_value)
             #     print("value  ", value)
 
-            feature.SetField(str('id'), int(levee_data['id'][i]))
-            feature.SetField(
-                str('cr_level'), float(levee_data['crest_level'][i])
-            )
-            feature.SetField(
-                str('mx_depth'), float(levee_data['max_breach_depth'][i])
-            )
-
+            self.set_field(feature, "id", "int", levee_data['id'][i])
+            self.set_field(feature, "cr_level", "float", levee_data['crest_level'][i])
+            self.set_field(feature, "mx_depth", "float", levee_data['max_breach_depth'][i])
             layer.CreateFeature(feature)
             feature.Destroy()
