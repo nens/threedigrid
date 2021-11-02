@@ -110,5 +110,7 @@ class BreachesOgrExporter(BaseOgrExporter):
             except KeyError:
                 pass
             self.set_field(feature, "kcu_descr", "str", kcu_descr)
-            self.set_field(feature, "cont_pk", "int", selection['content_pk'][i])
+            self.set_field(
+                feature, "cont_pk", "int", selection['content_pk'][i]
+            )
             layer.CreateFeature(feature)

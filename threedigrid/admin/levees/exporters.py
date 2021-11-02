@@ -86,7 +86,11 @@ class LeveeOgrExporter(BaseOgrExporter):
             #     print("value  ", value)
 
             self.set_field(feature, "id", "int", levee_data['id'][i])
-            self.set_field(feature, "cr_level", "float", levee_data['crest_level'][i])
-            self.set_field(feature, "mx_depth", "float", levee_data['max_breach_depth'][i])
+            self.set_field(
+                feature, "cr_level", "float", levee_data['crest_level'][i]
+            )
+            self.set_field(
+                feature, "mx_depth", "float", levee_data['max_breach_depth'][i]
+            )
             layer.CreateFeature(feature)
             feature.Destroy()

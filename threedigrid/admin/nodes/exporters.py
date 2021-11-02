@@ -22,7 +22,6 @@ from threedigrid.admin import exporter_constants as const
 from threedigrid.admin.constants import NODE_BASE_FIELDS
 from threedigrid.admin.constants import NODE_1D_FIELDS
 from threedigrid.admin.constants import NODE_FIELD_NAME_MAP
-from threedigrid.admin.constants import TYPE_FUNC_MAP
 
 logger = logging.getLogger(__name__)
 
@@ -165,5 +164,7 @@ class CellsOgrExporter(BaseOgrExporter):
             poly.AddGeometry(ring)
             feature.SetGeometry(poly)
             self.set_field(feature, "nod_id", "int", cells_data['id'][i])
-            self.set_field(feature, "bottom_lev", "float", cells_data['z_coordinate'][i])
+            self.set_field(
+                feature, "bottom_lev", "float", cells_data['z_coordinate'][i]
+            )
             layer.CreateFeature(feature)

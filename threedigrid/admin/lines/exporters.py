@@ -31,7 +31,6 @@ from threedigrid.orm.base.exporters import BaseOgrExporter
 from threedigrid.admin import exporter_constants as const
 from threedigrid.admin.constants import LINE_BASE_FIELDS_ALL
 from threedigrid.admin.constants import LINE_FIELD_NAME_MAP
-from threedigrid.admin.constants import TYPE_FUNC_MAP
 
 
 logger = logging.getLogger(__name__)
