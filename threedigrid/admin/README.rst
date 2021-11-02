@@ -196,24 +196,10 @@ by specifying a composition dict. Example::
 Also see :ref:`fields-label`
 
 
-Serializers
------------
-
-The API includes Geojson serializers to convert model data to
-geojson. Serializers can be used on models that have filtering/subset and reprojection,
-for example generating the geojson of all 2D open water channels in WGS84::
-
-    from threedigrid.admin.lines.serializers import ChannelsGeoJsonSerializer
-
-    channels_wgs84 = ga.lines.channels.subset('1D_ALL').reproject_to('4326')
-
-    channels_wgs84_geojson = ChannelsGeoJsonSerializer(channels_wgs84).data
-
-
 Exporters
 ---------
 
-Like serializers, exporters allow to export model data to files. For example exporting
+Exporters allow to export model data to files. For example exporting
 all 2D open water lines in WGS84 into a shape file::
 
     from threedigrid.admin.lines.exporters import LinesOgrExporter

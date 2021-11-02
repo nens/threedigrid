@@ -95,7 +95,7 @@ class BreachesOgrExporter(BaseOgrExporter):
         points = reshape_flat_array(selection['coordinates']).T
 
         for i in range(selection['id'].size):
-            if selection["id"] == 0:
+            if selection["id"][i] == 0:
                 continue  # skip the dummy element
             feature = ogr.Feature(_definition)
             point = ogr.Geometry(ogr.wkbPoint)

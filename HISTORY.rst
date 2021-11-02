@@ -4,8 +4,7 @@ History
 1.1.11 (unreleased)
 -------------------
 
-- Handling of NaN, Inf and -Inf, -9999, and empty strings in exporters.
-  These get exported as NULL.
+- Exporters now export NaN and -9999.0 float values as NULL.
 
 - Fixed exporting string dtype fields (e.g. cont_type) in OGR exporter. For instance,
   the string "b'something'" now is written as "something".
@@ -13,6 +12,9 @@ History
 - Skip the dummy element (with id=0) in all exporters.
 
 - Set the FID (feature ID) in the OGR (shapefile/geopackage/some geojson) exporters.
+
+- Deprecate specific serializers.py under threedigrid.admin.breaches, .lines, .nodes and
+  .pumps.
 
 
 1.1.10 (2021-11-01)
