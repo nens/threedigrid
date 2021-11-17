@@ -123,6 +123,8 @@ class Cells(Nodes):
     z_coordinate = ArrayField()
     pixel_width = ArrayField()
     pixel_coords = BboxArrayField()
+    has_dem_averaged = ArrayField()
+
 
     def __init__(self, *args, **kwargs):
 
