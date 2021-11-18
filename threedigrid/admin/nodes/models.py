@@ -125,7 +125,6 @@ class Cells(Nodes):
     pixel_coords = BboxArrayField()
     has_dem_averaged = ArrayField()
 
-
     def __init__(self, *args, **kwargs):
 
         super(Cells, self).__init__(*args, **kwargs)
