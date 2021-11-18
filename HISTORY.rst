@@ -1,7 +1,7 @@
 History
 =======
 
-1.1.12 (unreleased)
+1.1.12 (2021-11-18)
 -------------------
 
 - Added 'has_dem_averaged' attribute to cells.
