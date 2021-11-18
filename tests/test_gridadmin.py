@@ -296,6 +296,7 @@ class GridAdminCellsTest(unittest.TestCase):
             "storage_area",
             "dmax",
             "initial_waterlevel",
+            "has_dem_averaged",
         }
 
     def test_get_id_from_xy(self):
