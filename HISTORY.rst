@@ -1,7 +1,7 @@
 History
 =======
 
-1.1.13 (unreleased)
+1.1.13 (2021-12-09)
 -------------------
 
 - Added flod and flou attributes to lines for possible reading obstacle heights.
