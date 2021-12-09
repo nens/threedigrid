@@ -51,6 +51,8 @@ class Lines(Model):
     lik = ArrayField()
     line = IndexArrayField(to='Nodes')
     dpumax = ArrayField()
+    flod = ArrayField()
+    flou = ArrayField()
     cross1 = IndexArrayField(to='CrossSections')
     cross2 = IndexArrayField(to='CrossSections')
     ds1d = ArrayField()
