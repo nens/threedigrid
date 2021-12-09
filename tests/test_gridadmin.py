@@ -118,6 +118,8 @@ class GridAdminLinesTest(unittest.TestCase):
             "lik",
             "line",
             "dpumax",
+            "flod",
+            "flou",
             "cross1",
             "cross2",
             "ds1d",
