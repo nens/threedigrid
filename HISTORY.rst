@@ -4,7 +4,7 @@ History
 1.1.14 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Added an experimental tool to compare 2 result files (3digrid_diff).
 
 
 1.1.13 (2021-12-09)
