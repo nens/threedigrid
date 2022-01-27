@@ -144,11 +144,10 @@ def patch_lhs(lhs: xarray.Dataset, lhs_grid: Path, rhs: xarray.Dataset, rhs_grid
     lhs = lhs.sortby("Mesh2DLine_id")
     lhs = lhs.assign_coords({"time": rhs["time"].values})
 
-    # sumax, zcc and rain for BC are expected to be NaN
-    np.isin(lhs["Mesh2DLine_type"], (200, 300, 400, 500))
-    lhs["Mesh2DFace_sumax"].values[lhs["Mesh2DNode_type"] == 5] = np.nan
-    lhs["Mesh2DFace_zcc"].values[lhs["Mesh2DNode_type"] == 5] = np.nan
-    lhs["Mesh2DFace_rain"].values[lhs["Mesh2DNode_type"] == 5] = np.nan
+    # sumax & zcc for BC are expected to be NaN
+    is_bc = lhs["Mesh2DNode_type"] == 5
+    lhs["Mesh2DFace_sumax"].values[is_bc] = np.nan
+    lhs["Mesh2DFace_zcc"].values[is_bc] = np.nan
     return lhs
 
 
