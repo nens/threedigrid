@@ -59,6 +59,12 @@ rpc_requirements = [
     'asyncio-rpc>=0.1.10',
 ]
 
+diff_requirements = [
+    "recursive_diff",
+    "pygeos",
+    "h5netcdf",
+]
+
 setup_requirements = []
 
 test_requirements = ['pytest==3.4.1']
@@ -81,6 +87,7 @@ setup(
         'console_scripts': [
             '3digrid_explore=threedigrid.management.commands.kick:kick_start',
             '3digrid_export=threedigrid.management.commands.kick:export_to',
+            '3digrid_diff=threedigrid.diff.threedidiff:main'
         ],
     },
     install_requires=lightweight_requirements,
@@ -97,7 +104,8 @@ setup(
     extras_require={
         'geo': geo_requirements,
         'results': results_requirements,
-        'rpc': rpc_requirements
+        'rpc': rpc_requirements,
+        'diff': diff_requirements,
     },
     url='https://github.com/nens/threedigrid',
     version=find_version("threedigrid", "__init__.py"),
