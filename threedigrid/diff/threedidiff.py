@@ -11,6 +11,7 @@ import logging
 import sys
 from pathlib import Path
 from typing import List
+import numpy as np
 
 import xarray
 from recursive_diff import recursive_diff
@@ -128,20 +129,27 @@ def open_netcdf(fname: str, engine: str = None) -> xarray.Dataset:
 
 
 def patch_lhs(lhs: xarray.Dataset, lhs_grid: Path, rhs: xarray.Dataset, rhs_grid: Path):
+    """Patch the left hand side (old) to match the new gridadmin"""
+
+    ## NODE / LINE order
     node_mapping, line_mapping = create_grid_mapping(lhs_grid, rhs_grid)
 
     lhs["Mesh2DNode_id"].values = map_ids(
-        lhs["Mesh2DNode_id"].values, rhs["Mesh2DNode_id"].values, node_mapping
+        lhs["Mesh2DNode_id"].values, rhs["Mesh2DNode_id"].values, node_mapping, "nodes"
     )
     lhs["Mesh2DLine_id"].values = map_ids(
-        lhs["Mesh2DLine_id"].values, rhs["Mesh2DLine_id"].values, line_mapping
+        lhs["Mesh2DLine_id"].values, rhs["Mesh2DLine_id"].values, line_mapping, "lines"
     )
     lhs = lhs.sortby("Mesh2DNode_id")
     lhs = lhs.sortby("Mesh2DLine_id")
     lhs = lhs.assign_coords({"time": rhs["time"].values})
+
+    # sumax, zcc and rain for BC are expected to be NaN
+    np.isin(lhs["Mesh2DLine_type"], (200, 300, 400, 500))
+    lhs["Mesh2DFace_sumax"].values[lhs["Mesh2DNode_type"] == 5] = np.nan
+    lhs["Mesh2DFace_zcc"].values[lhs["Mesh2DNode_type"] == 5] = np.nan
+    lhs["Mesh2DFace_rain"].values[lhs["Mesh2DNode_type"] == 5] = np.nan
     return lhs
-    # node_mapping = xarray.DataArray(node_mapping, dims=["nMesh2D_nodes"])
-    # line_mapping = xarray.DataArray(line_mapping, coords={"nMesh2D_lines": range(len(line_mapping))}, name="line_mapping")
 
 
 def get_time_n(lhs, rhs, n):

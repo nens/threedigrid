@@ -122,12 +122,13 @@ def create_grid_mapping(old_path: Path, new_path: Path, max_distance: float = 0.
     return node_mapping, line_mapping
 
 
-def map_ids(lhs_ids, rhs_ids, mapping):
+def map_ids(lhs_ids, rhs_ids, mapping, name):
     new_lhs_ids = mapping[lhs_ids]
 
     # We really need all ids, else the arrays will shift and the diff will compare
     # different nodes.
     missing = sorted(set(rhs_ids) - set(new_lhs_ids))
+    print(f"IGNORE {name} {[x - 1 for x in missing]}!!!")
     n_missing = len(missing)
     if n_missing > 0:
         not_assigned = new_lhs_ids == -9999
