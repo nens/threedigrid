@@ -1,3 +1,11 @@
+"""Compare 2 3Di netcdf files, taking into account possibly reordered nodes / lines
+
+This file was adjusted from:
+
+URL: https://github.com/crusaderky/recursive_diff/blob/master/recursive_diff/ncdiff.py
+Date: January 27, 2022
+"""
+
 import argparse
 import logging
 import sys
