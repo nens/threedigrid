@@ -51,6 +51,7 @@ class Nodes(Model):
     storage_area = ArrayField()
     dmax = ArrayField()
     initial_waterlevel = ArrayField()
+    dimp = ArrayField()
 
     SUBSETS = NODE_SUBSETS
 
