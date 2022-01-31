@@ -11,8 +11,8 @@ import logging
 import sys
 from pathlib import Path
 from typing import List
-import numpy as np
 
+import numpy as np
 import xarray
 from recursive_diff import recursive_diff
 
@@ -52,24 +52,22 @@ def argparser() -> argparse.ArgumentParser:
     parser.add_argument("--quiet", "-q", action="store_true", help="Suppress logging")
 
     parser.add_argument(
-        "--match",
-        "-m",
-        default="**/*.nc",
-        help="Bash wildcard match for file names when using --recursive "
-        "(default: **/*.nc)",
-    )
-
-    parser.add_argument(
         "--rtol",
         type=float,
-        default=1e-9,
-        help="Relative comparison tolerance (default: 1e-9)",
+        default=0.01,
+        help="Relative comparison tolerance (default: 0.01)",
     )
     parser.add_argument(
         "--atol",
         type=float,
-        default=0,
-        help="Absolute comparison tolerance (default: 0)",
+        default=0.01,
+        help="Absolute comparison tolerance (default: 0.01)",
+    )
+    parser.add_argument(
+        "--dry",
+        type=float,
+        default=1e-4,
+        help="Consider cells with volume (in m3) lower than this as 'dry'",
     )
 
     brief = parser.add_mutually_exclusive_group()
@@ -88,24 +86,41 @@ def argparser() -> argparse.ArgumentParser:
         help="Just count differences for every variable instead of printing "
         "them out individually",
     )
-    brief.add_argument(
+    parser.add_argument(
         "--time",
         type=int,
         default=-1,
         help="The index along the time axis to compare",
     )
+    parser.add_argument(
+        "--save_mapping",
+        action="store_true",
+        help="Whether to update the LHS (old) gridadmin with 'new_ids'.",
+    )
 
     parser.add_argument(
-        "lhs", help="Left-hand-side NetCDF file or (if --recursive) directory"
+        "lhs",
+        nargs="?",
+        default="old/results_3di.nc",
+        help="Left-hand-side NetCDF file or (if --recursive) directory",
     )
     parser.add_argument(
-        "lhs_grid", help="Left-hand-side gridadmin file or (if --recursive) directory"
+        "lhs_grid",
+        nargs="?",
+        default="old/gridadmin.h5",
+        help="Left-hand-side gridadmin file or (if --recursive) directory",
     )
     parser.add_argument(
-        "rhs", help="Right-hand-side NetCDF file or (if --recursive) directory"
+        "rhs",
+        nargs="?",
+        default="new/results_3di.nc",
+        help="Right-hand-side NetCDF file or (if --recursive) directory",
     )
     parser.add_argument(
-        "rhs_grid", help="Right-hand-side gridadmin file or (if --recursive) directory"
+        "rhs_grid",
+        nargs="?",
+        default="new/gridadmin.h5",
+        help="Right-hand-side gridadmin file or (if --recursive) directory",
     )
 
     return parser
@@ -128,26 +143,46 @@ def open_netcdf(fname: str, engine: str = None) -> xarray.Dataset:
     return xarray.open_dataset(fname, engine=engine)
 
 
-def patch_lhs(lhs: xarray.Dataset, lhs_grid: Path, rhs: xarray.Dataset, rhs_grid: Path):
+def patch_lhs(
+    lhs: xarray.Dataset,
+    lhs_grid: Path,
+    rhs: xarray.Dataset,
+    rhs_grid: Path,
+    save_mapping: bool,
+    dry: float,
+):
     """Patch the left hand side (old) to match the new gridadmin"""
-
-    ## NODE / LINE order
-    node_mapping, line_mapping = create_grid_mapping(lhs_grid, rhs_grid)
-
-    lhs["Mesh2DNode_id"].values = map_ids(
-        lhs["Mesh2DNode_id"].values, rhs["Mesh2DNode_id"].values, node_mapping, "nodes"
+    # Node / line order
+    node_mapping, line_mapping = create_grid_mapping(
+        lhs_grid, rhs_grid, save=save_mapping
     )
-    lhs["Mesh2DLine_id"].values = map_ids(
-        lhs["Mesh2DLine_id"].values, rhs["Mesh2DLine_id"].values, line_mapping, "lines"
-    )
-    lhs = lhs.sortby("Mesh2DNode_id")
-    lhs = lhs.sortby("Mesh2DLine_id")
+
+    for name in ("Mesh2DNode_id", "Mesh2DLine_id", "Mesh1DNode_id", "Mesh1DLine_id"):
+        lhs[name].values = map_ids(
+            lhs[name].values,
+            rhs[name].values,
+            node_mapping if "Node" in name else line_mapping,
+            name,
+        )
+        lhs = lhs.sortby(name)
     lhs = lhs.assign_coords({"time": rhs["time"].values})
 
-    # sumax & zcc for BC are expected to be NaN
-    is_bc = lhs["Mesh2DNode_type"] == 5
-    lhs["Mesh2DFace_sumax"].values[is_bc] = np.nan
-    lhs["Mesh2DFace_zcc"].values[is_bc] = np.nan
+    # sumax & zcc for boundary conditions are expected to be NaN
+    is_bc_2d = lhs["Mesh2DNode_type"] == 5
+    lhs["Mesh2DFace_sumax"].values[is_bc_2d] = np.nan
+    lhs["Mesh2DFace_zcc"].values[is_bc_2d] = np.nan
+    is_bc_1d = lhs["Mesh1DNode_type"] == 7
+    lhs["Mesh1DNode_sumax"].values[is_bc_1d] = np.nan
+
+    # in the old route there is no distinction between type 3 and 4
+    rhs["Mesh1DNode_type"].values[rhs["Mesh1DNode_type"] == 4] = 3
+
+    # if nodes are dry propagate that into s1 and su
+    for ds in (lhs, rhs):
+        dry = ds["Mesh1D_vol"] < dry
+        ds["Mesh1D_vol"].values[dry] = 0.0
+        ds["Mesh1D_s1"].values[dry] = -9999.0
+        ds["Mesh1D_su"].values[dry] = 0.0
     return lhs
 
 
@@ -181,7 +216,7 @@ def main(argv: List[str] = None) -> int:
     rhs = open_netcdf(args.rhs, engine=args.engine)
 
     # Patch RHS so that nodes are in the same order as LHS
-    lhs = patch_lhs(lhs, args.lhs_grid, rhs, args.rhs_grid)
+    lhs = patch_lhs(lhs, args.lhs_grid, rhs, args.rhs_grid, args.save_mapping, args.dry)
     lhs, rhs = get_time_n(lhs, rhs, int(args.time))
 
     logging.info("Comparing...")

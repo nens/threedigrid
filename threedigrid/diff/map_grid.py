@@ -52,7 +52,9 @@ def _map_lines(old_ga, new_ga, node_mapping, **filters):
     return old_data["id"][old_idx], new_data["id"][new_idx]
 
 
-def create_grid_mapping(old_path: Path, new_path: Path, max_distance: float = 0.01):
+def create_grid_mapping(
+    old_path: Path, new_path: Path, max_distance: float = 0.01, save: bool = False
+):
     """Create a mapping for nodes and lines between two gridadmin files
 
     Args:
@@ -61,6 +63,7 @@ def create_grid_mapping(old_path: Path, new_path: Path, max_distance: float = 0.
         max_distance: The maximum distance between old and new nodes. The nearest will
           always be taken. If there are two options, a warning will be emitted and the
           first is taken.
+        save: Whether to save the new ids into the old gridadmin.
 
     Returns:
         tuple of:
@@ -81,7 +84,7 @@ def create_grid_mapping(old_path: Path, new_path: Path, max_distance: float = 0.
             "Unable to find new gridadmin to make the node/line mappings."
         )
 
-    old_ga = GridH5Admin(old_path)
+    old_ga = GridH5Admin(old_path, file_modus="r+" if save else "r")
     new_ga = GridH5Admin(new_path)
 
     # Create the node mapping by iterating over unique node_types
@@ -117,18 +120,36 @@ def create_grid_mapping(old_path: Path, new_path: Path, max_distance: float = 0.
         f"Matched {np.count_nonzero(line_mapping != -9999)} of {old_ga.lines.count} lines."
     )
 
+    if save:
+        node_id = old_ga.h5py_file["nodes"]["id"]
+        ds = old_ga.h5py_file["nodes"].require_dataset(
+            "new_ids",
+            shape=node_id.shape,
+            dtype=node_id.dtype,
+        )
+        ds[:] = node_mapping[node_id[:]]
+        line_id = old_ga.h5py_file["lines"]["id"]
+        ds = old_ga.h5py_file["lines"].require_dataset(
+            "new_ids",
+            shape=line_id.shape,
+            dtype=line_id.dtype,
+        )
+        ds[:] = line_mapping[line_id[:]]
+
     old_ga.close()
     new_ga.close()
     return node_mapping, line_mapping
 
 
 def map_ids(lhs_ids, rhs_ids, mapping, name):
+    if len(rhs_ids) == 0:
+        return np.empty(shape=(0,), dtype=mapping.dtype)
     new_lhs_ids = mapping[lhs_ids]
 
     # We really need all ids, else the arrays will shift and the diff will compare
     # different nodes.
     missing = sorted(set(rhs_ids) - set(new_lhs_ids))
-    print(f"IGNORE {name} {[x - 1 for x in missing]}!!!")
+    print(f"{name}: ADD {rhs_ids[0]} (then) IGNORE {missing}")
     n_missing = len(missing)
     if n_missing > 0:
         not_assigned = new_lhs_ids == -9999
