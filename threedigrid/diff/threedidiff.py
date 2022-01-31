@@ -67,7 +67,7 @@ def argparser() -> argparse.ArgumentParser:
         "--dry",
         type=float,
         default=1e-4,
-        help="Consider cells with volume (in m3) lower than this as 'dry'",
+        help="Don't compare vol, s1, su if cells have volume below (in m3)",
     )
 
     brief = parser.add_mutually_exclusive_group()
