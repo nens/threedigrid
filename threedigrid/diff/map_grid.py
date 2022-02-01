@@ -148,8 +148,8 @@ def map_ids(lhs_ids, rhs_ids, mapping, name):
 
     # We really need all ids, else the arrays will shift and the diff will compare
     # different nodes.
-    missing = sorted(set(rhs_ids) - set(new_lhs_ids))
-    print(f"{name}: ADD {rhs_ids[0]} (then) IGNORE {missing}")
+    missing = sorted(set(rhs_ids) - set(new_lhs_ids) - {-9999})
+    print(f"{name}: ADD {rhs_ids[0]} (then) IGNORE {missing}. MISSING (old): {sorted(set(new_lhs_ids) - set(rhs_ids) - {-9999})}")
     n_missing = len(missing)
     if n_missing > 0:
         not_assigned = new_lhs_ids == -9999
