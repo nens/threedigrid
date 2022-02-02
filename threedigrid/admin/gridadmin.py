@@ -165,6 +165,10 @@ class GridH5Admin(object):
         return self._to_str(self.h5py_file.attrs['epsg_code'])
 
     @property
+    def crs_wkt(self):
+        return self._to_str(self.h5py_file.attrs['crs_wkt'])
+
+    @property
     def model_slug(self):
         return self._to_str(self.h5py_file.attrs['model_slug'])
 

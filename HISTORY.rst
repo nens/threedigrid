@@ -6,6 +6,8 @@ History
 
 - Added dimp attribute to nodes.
 
+- Added crs_wkt attribute.
+
 
 1.1.13 (2021-12-09)
 -------------------
