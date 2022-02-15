@@ -32,11 +32,6 @@ except ImportError:
 
 NULL_VALUE = -9999.0
 
-def fill_nan_value(array: np.ndarray) -> np.ndarray:
-    array = np.copy(array)
-    array[np.isnan(array)] = NULL_VALUE
-    return array
-
 
 class GeomArrayField(ArrayField):
     """
@@ -108,10 +103,9 @@ class PointArrayField(GeomArrayField):
         if shapely is None:
             raise_import_exception('shapely')
 
-        values = fill_nan_value(values)
-
         points = []
         for i, coord in enumerate(values.T):
+            coord[np.isnan(coord)] = NULL_VALUE
             point = Point(coord[0], coord[1])
             point.index = i  # the index is used in get_mask_by_geometry
             points.append(point)
@@ -185,8 +179,7 @@ class LineArrayField(GeomArrayField):
 
         with the (horizontal) x-axis
         """
-        values = fill_nan_value(values)
-
+        values[np.isnan(values)] = NULL_VALUE
         return angle_in_degrees(
                 values[0], values[1], values[2], values[3])
 
@@ -194,10 +187,9 @@ class LineArrayField(GeomArrayField):
         if shapely is None:
             raise_import_exception('shapely')
 
-        values = fill_nan_value(values)
-
         lines = []
-        for i, coords in enumerate(values.T):
+        for i, coords in enumerate(values.T):           
+            coords[np.isnan(coords)] = NULL_VALUE
             line = asLineString(coords.reshape((2, -1)))
             line.index = i  # the index is used in get_mask_by_geometry
             lines.append(line)
@@ -243,10 +235,9 @@ class MultiLineArrayField(GeomArrayField):
         if shapely is None:
             raise_import_exception('shapely')
 
-        values = fill_nan_value(values)
-
         multilines = []
         for i, coords in enumerate(values):
+            coords[np.isnan(coords)] = NULL_VALUE
             line = asLineString(coords.reshape((2, -1)).T)
             line.index = i  # the index is used in get_mask_by_geometry
             multilines.append(line)
@@ -290,7 +281,7 @@ class PolygonArrayField(GeomArrayField):
 
         polygons = []
         for i, coords in enumerate(values):
-            coords = fill_nan_value(coords)
+            coords[np.isnan(coords)] = NULL_VALUE
             polygon = asPolygon(coords.reshape((2, -1)).T)
             polygon.index = i  # the index is used in get_mask_by_geometry
             polygons.append(polygon)
@@ -305,7 +296,8 @@ class BboxArrayField(LineArrayField):
 
         polygons = []
         for i, coord in enumerate(values.T):
-            coord = fill_nan_value(coord)
+            coord[np.isnan(coord)] = NULL_VALUE
+
             # convert the bbox bottom-left and upper-right into a polygon
             polygon = Polygon(
                 [
