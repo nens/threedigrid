@@ -30,6 +30,14 @@ except ImportError:
     shapely = None
 
 
+NULL_VALUE = -9999.0
+
+def fill_nan_value(array: np.ndarray) -> np.ndarray:
+    array = np.copy(array)
+    array[np.isnan(array)] = NULL_VALUE
+    return array
+
+
 class GeomArrayField(ArrayField):
     """
     Base geometry field
@@ -99,6 +107,8 @@ class PointArrayField(GeomArrayField):
     def _to_shapely_geom(self, values):
         if shapely is None:
             raise_import_exception('shapely')
+
+        values = fill_nan_value(values)
 
         points = []
         for i, coord in enumerate(values.T):
@@ -175,12 +185,16 @@ class LineArrayField(GeomArrayField):
 
         with the (horizontal) x-axis
         """
+        values = fill_nan_value(values)
+
         return angle_in_degrees(
                 values[0], values[1], values[2], values[3])
 
     def _to_shapely_geom(self, values):
         if shapely is None:
             raise_import_exception('shapely')
+
+        values = fill_nan_value(values)
 
         lines = []
         for i, coords in enumerate(values.T):
@@ -229,6 +243,8 @@ class MultiLineArrayField(GeomArrayField):
         if shapely is None:
             raise_import_exception('shapely')
 
+        values = fill_nan_value(values)
+
         multilines = []
         for i, coords in enumerate(values):
             line = asLineString(coords.reshape((2, -1)).T)
@@ -272,6 +288,8 @@ class PolygonArrayField(GeomArrayField):
         if shapely is None:
             raise_import_exception('shapely')
 
+        values = fill_nan_value(values)
+
         polygons = []
         for i, coords in enumerate(values):
             polygon = asPolygon(coords.reshape((2, -1)).T)
@@ -285,6 +303,8 @@ class BboxArrayField(LineArrayField):
     def _to_shapely_geom(self, values):
         if shapely is None:
             raise_import_exception('shapely')
+
+        values = fill_nan_value(values)
 
         polygons = []
         for i, coord in enumerate(values.T):
