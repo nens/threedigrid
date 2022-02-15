@@ -304,10 +304,9 @@ class BboxArrayField(LineArrayField):
         if shapely is None:
             raise_import_exception('shapely')
 
-        values = fill_nan_value(values)
-
         polygons = []
         for i, coord in enumerate(values.T):
+            coord = fill_nan_value(coord)
             # convert the bbox bottom-left and upper-right into a polygon
             polygon = Polygon(
                 [
