@@ -188,7 +188,7 @@ class LineArrayField(GeomArrayField):
             raise_import_exception('shapely')
 
         lines = []
-        for i, coords in enumerate(values.T):           
+        for i, coords in enumerate(values.T):
             coords[np.isnan(coords)] = NULL_VALUE
             line = asLineString(coords.reshape((2, -1)))
             line.index = i  # the index is used in get_mask_by_geometry
