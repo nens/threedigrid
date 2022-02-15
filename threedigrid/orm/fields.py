@@ -105,8 +105,8 @@ class PointArrayField(GeomArrayField):
 
         points = []
         for i, coord in enumerate(values.T):
-            if np.isnan(coords).all():
-                coords = np.full_like(coords, fill_value=NULL_VALUE)
+            if np.isnan(coord).all():
+                coord = np.full_like(coord, fill_value=NULL_VALUE)
 
             point = Point(coord[0], coord[1])
             point.index = i  # the index is used in get_mask_by_geometry
