@@ -288,10 +288,9 @@ class PolygonArrayField(GeomArrayField):
         if shapely is None:
             raise_import_exception('shapely')
 
-        values = fill_nan_value(values)
-
         polygons = []
         for i, coords in enumerate(values):
+            coords = fill_nan_value(coords)
             polygon = asPolygon(coords.reshape((2, -1)).T)
             polygon.index = i  # the index is used in get_mask_by_geometry
             polygons.append(polygon)
