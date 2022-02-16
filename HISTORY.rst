@@ -4,6 +4,8 @@ History
 1.1.14 (unreleased)
 -------------------
 
+- Fix geometry selection filtering, gridadmin can now contain nan values.
+
 - Added dimp attribute to nodes.
 
 
