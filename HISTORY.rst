@@ -4,7 +4,7 @@ History
 1.1.15 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Removed threedicore version check on GridH5ResultAdmin initialization.
 
 
 1.1.14 (2022-02-16)
