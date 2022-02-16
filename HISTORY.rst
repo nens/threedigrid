@@ -1,7 +1,7 @@
 History
 =======
 
-1.1.14 (unreleased)
+1.1.14 (2022-02-16)
 -------------------
 
 - Fix geometry selection filtering, gridadmin can now contain nan values.
