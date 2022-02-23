@@ -1,10 +1,20 @@
 History
 =======
 
-1.1.14 (unreleased)
+1.1.15 (unreleased)
 -------------------
 
 - Add dpumax to Channel.
+
+- Removed threedicore version check on GridH5ResultAdmin initialization.
+
+
+1.1.14 (2022-02-16)
+-------------------
+
+- Fix geometry selection filtering, gridadmin can now contain nan values.
+
+- Added dimp attribute to nodes.
 
 
 1.1.13 (2021-12-09)

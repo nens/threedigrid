@@ -142,6 +142,7 @@ class GridH5ResultAdmin(GridH5Admin):
         compare versions of grid admin and grid results file.
         Issues a warning if they differ
         """
+        return  # TODO implement a different check
 
         if self.threedicore_result_version != self.threedicore_version:
             logger.warning(

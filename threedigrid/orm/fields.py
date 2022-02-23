@@ -30,6 +30,9 @@ except ImportError:
     shapely = None
 
 
+NULL_VALUE = -9999.0
+
+
 class GeomArrayField(ArrayField):
     """
     Base geometry field
@@ -102,6 +105,9 @@ class PointArrayField(GeomArrayField):
 
         points = []
         for i, coord in enumerate(values.T):
+            if np.isnan(coord).all():
+                coord = np.full_like(coord, fill_value=NULL_VALUE)
+
             point = Point(coord[0], coord[1])
             point.index = i  # the index is used in get_mask_by_geometry
             points.append(point)
@@ -175,6 +181,9 @@ class LineArrayField(GeomArrayField):
 
         with the (horizontal) x-axis
         """
+        if np.isnan(values).all():
+            values = np.full_like(values, fill_value=NULL_VALUE)
+
         return angle_in_degrees(
                 values[0], values[1], values[2], values[3])
 
@@ -184,6 +193,8 @@ class LineArrayField(GeomArrayField):
 
         lines = []
         for i, coords in enumerate(values.T):
+            if np.isnan(coords).all():
+                coords = np.full_like(coords, fill_value=NULL_VALUE)
             line = asLineString(coords.reshape((2, -1)))
             line.index = i  # the index is used in get_mask_by_geometry
             lines.append(line)
@@ -231,6 +242,9 @@ class MultiLineArrayField(GeomArrayField):
 
         multilines = []
         for i, coords in enumerate(values):
+            if np.isnan(coords).all():
+                coords = np.full_like(coords, fill_value=NULL_VALUE)
+
             line = asLineString(coords.reshape((2, -1)).T)
             line.index = i  # the index is used in get_mask_by_geometry
             multilines.append(line)
@@ -274,6 +288,8 @@ class PolygonArrayField(GeomArrayField):
 
         polygons = []
         for i, coords in enumerate(values):
+            if np.isnan(coords).all():
+                coords = np.full_like(coords, fill_value=NULL_VALUE)
             polygon = asPolygon(coords.reshape((2, -1)).T)
             polygon.index = i  # the index is used in get_mask_by_geometry
             polygons.append(polygon)
@@ -288,6 +304,9 @@ class BboxArrayField(LineArrayField):
 
         polygons = []
         for i, coord in enumerate(values.T):
+            if np.isnan(coord).all():
+                coord = np.full_like(coord, fill_value=NULL_VALUE)
+
             # convert the bbox bottom-left and upper-right into a polygon
             polygon = Polygon(
                 [
