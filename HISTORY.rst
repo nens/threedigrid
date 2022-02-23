@@ -4,6 +4,9 @@ History
 1.1.15 (unreleased)
 -------------------
 
+- Added discharge_coefficient_positive and discharge_coefficient_negative
+  to breaches.
+
 - Removed threedicore version check on GridH5ResultAdmin initialization.
 
 
