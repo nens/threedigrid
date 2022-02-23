@@ -32,7 +32,8 @@ CHANNELS_EXPORT_FIELDS = [
     'dist_calc_points',
     'connection_node_start_pk',
     'connection_node_end_pk',
-    'discharge_coefficient'
+    'discharge_coefficient',
+    'dpumax',
 ]
 
 PIPES_EXPORT_FIELDS = [

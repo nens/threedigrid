@@ -4,7 +4,7 @@ History
 1.1.14 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Add dpumax to Channel.
 
 
 1.1.13 (2021-12-09)
