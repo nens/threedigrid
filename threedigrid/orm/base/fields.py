@@ -270,7 +270,10 @@ def resolve_h5py_file_datasource(h5py_file, dotted_path):
     #    dotted_path = 'lines.id'
     res = h5py_file
     for key in dotted_path.split("."):
-        res = res.get(key)
+        try:
+            res = res.get(key)
+        except AttributeError:
+            return np.array([])
     return res[:]
 
 
