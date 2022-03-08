@@ -23,6 +23,7 @@ from threedigrid.admin.breaches.models import Breaches
 from threedigrid.admin.pumps.models import Pumps
 from threedigrid.admin.levees.models import Levees
 from threedigrid.admin.h5py_datasource import H5pyGroup
+from pyproj import CRS
 
 try:
     import asyncio
@@ -166,7 +167,12 @@ class GridH5Admin(object):
 
     @property
     def crs_wkt(self):
-        return self._to_str(self.h5py_file.attrs['crs_wkt'])
+        try:
+            return self._to_str(self.h5py_file.attrs['crs_wkt'])
+        except KeyError:
+            # Fallback for older gridadmins without crs_wkt
+            crs = CRS.from_epsg(self.h5py_file.attrs['epsg_code'])
+            return crs.to_wkt("WKT2_2015")
 
     @property
     def model_slug(self):
