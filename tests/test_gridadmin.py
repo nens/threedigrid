@@ -20,6 +20,7 @@ from threedigrid.admin.constants import SUBSET_1D_ALL
 from threedigrid.admin.constants import SUBSET_2D_OPEN_WATER
 from threedigrid.admin.constants import NO_DATA_VALUE
 from six.moves import range
+from pyproj import CRS
 
 test_file_dir = os.path.join(os.getcwd(), "tests/test_files")
 
@@ -97,6 +98,11 @@ class GridAdminTest(unittest.TestCase):
         self.assertTrue(hasattr(self.parser, "revision_hash"))
         self.assertTrue(hasattr(self.parser, "revision_nr"))
         self.assertTrue(hasattr(self.parser, "model_slug"))
+
+    def test_crs(self):
+        crs = self.parser.crs
+        assert isinstance(crs, CRS)
+        assert crs.to_epsg() == 28992
 
 
 class GridAdminLinesTest(unittest.TestCase):

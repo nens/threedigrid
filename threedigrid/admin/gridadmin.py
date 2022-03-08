@@ -166,13 +166,12 @@ class GridH5Admin(object):
         return self._to_str(self.h5py_file.attrs['epsg_code'])
 
     @property
-    def crs_wkt(self):
+    def crs(self):
         try:
-            return self._to_str(self.h5py_file.attrs['crs_wkt'])
+            return CRS(self.h5py_file.attrs['crs_wkt'])
         except KeyError:
             # Fallback for older gridadmins without crs_wkt
-            crs = CRS.from_epsg(self.h5py_file.attrs['epsg_code'])
-            return crs.to_wkt("WKT2_2015")
+            return CRS.from_epsg(int(self.h5py_file.attrs['epsg_code']))
 
     @property
     def model_slug(self):
