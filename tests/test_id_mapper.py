@@ -1,11 +1,8 @@
 import os
-import sys
 import unittest
-
-import h5py
-
 from unittest import mock
 
+import h5py
 import numpy as np
 
 from threedigrid.admin.constants import TYPE_CODE_MAP

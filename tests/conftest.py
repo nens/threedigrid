@@ -1,12 +1,9 @@
 import os
 import shutil
-import sys
 from itertools import count
-
-import h5py
-
 from unittest import mock
 
+import h5py
 import pytest
 
 from threedigrid.admin.constants import TYPE_CODE_MAP
