@@ -1,8 +1,8 @@
 History
 =======
 
-1.1.15 (unreleased)
--------------------
+1.2.0 (2022-03-09)
+------------------
 
 - Added discharge_coefficient_positive and discharge_coefficient_negative
   to breaches.
