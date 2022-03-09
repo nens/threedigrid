@@ -9,6 +9,10 @@ History
 
 - Removed threedicore version check on GridH5ResultAdmin initialization.
 
+- Added crs attribute to GridH5Admin. Pyproj >=2.2 is required.
+
+- Drop python 2.7 support.
+
 
 1.1.14 (2022-02-16)
 -------------------
@@ -16,10 +20,6 @@ History
 - Fix geometry selection filtering, gridadmin can now contain nan values.
 
 - Added dimp attribute to nodes.
-
-- Added crs attribute to GridH5Admin. Pyproj >=2.2 is required.
-
-- Drop python 2.7 support.
 
 
 1.1.13 (2021-12-09)
