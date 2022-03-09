@@ -508,7 +508,7 @@ class Model(metaclass=ABCMeta):
                     # apply the filter_bool_mask on the boolean_mask_filter
                     # where the boolean_mask_filter is still "True".
                     boolean_mask_filter[
-                        np.equals(boolean_mask_filter, True)
+                        np.equal(boolean_mask_filter, True)
                     ] &= filter_bool_mask  # noqa
 
             self._boolean_mask_filter = boolean_mask_filter
