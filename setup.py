@@ -1,15 +1,14 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """The setup script."""
 
-from __future__ import absolute_import
-from setuptools import setup, find_packages
 
-import sys
 import codecs
-import re
 import os
+import re
+import sys
+
+from setuptools import find_packages, setup
 
 python_27 = sys.version_info <= (2, 7)
 

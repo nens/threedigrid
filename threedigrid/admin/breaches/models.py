@@ -1,5 +1,4 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
-# -*- coding: utf-8 -*-
 """
 Models
 ++++++
@@ -22,17 +21,14 @@ To query the ``Breaches`` model::
     >>> ga.breaches.filter(kcu__eq=56).data
 
 """
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import absolute_import
-import logging
-from threedigrid.admin.breaches import exporters
-from threedigrid.admin import constants
-from threedigrid.orm.models import Model
-from threedigrid.orm.fields import (
-    ArrayField, PointArrayField)
-from threedigrid.orm.base.fields import IndexArrayField
 
+import logging
+
+from threedigrid.admin import constants
+from threedigrid.admin.breaches import exporters
+from threedigrid.orm.base.fields import IndexArrayField
+from threedigrid.orm.fields import ArrayField, PointArrayField
+from threedigrid.orm.models import Model
 
 logger = logging.getLogger(__name__)
 
@@ -52,10 +48,11 @@ class Breaches(Model):
         - seq_ids (sequence ids generated during input file generation)
 
     """
+
     content_pk = ArrayField()
     seq_ids = ArrayField()
     levbr = ArrayField()
-    levl = IndexArrayField(to='Lines')
+    levl = IndexArrayField(to="Lines")
     levmat = ArrayField()
     kcu = ArrayField()
 
@@ -69,7 +66,7 @@ class Breaches(Model):
             " in the near future, "
             "please use breaches under lines (lines.breaches) instead"
         )
-        super(Breaches, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self._exporters = [
             exporters.BreachesOgrExporter(self),

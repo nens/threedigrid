@@ -1,22 +1,19 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
-# -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
-import os
+
 import logging
+import os
 from collections import OrderedDict
-import six
-from six.moves import range
 
 try:
     from osgeo import ogr
 except ImportError:
     ogr = None
 
-from threedigrid.numpy_utils import reshape_flat_array
-from threedigrid.geo_utils import get_spatial_reference
-from threedigrid.orm.base.exporters import BaseOgrExporter
 from threedigrid.admin import exporter_constants as const
+from threedigrid.geo_utils import get_spatial_reference
+from threedigrid.numpy_utils import reshape_flat_array
+from threedigrid.orm.base.exporters import BaseOgrExporter
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +23,7 @@ class LeveeOgrExporter(BaseOgrExporter):
     Exports to ogr formats. You need to set the driver explicitly
     before calling save()
     """
+
     def __init__(self, levees):
         """
         :param lines: lines.models.Lines instance
@@ -52,30 +50,28 @@ class LeveeOgrExporter(BaseOgrExporter):
 
         self.del_datasource(file_name)
         data_source = self.driver.CreateDataSource(file_name)
-        layer = data_source.CreateLayer(
-            str(os.path.basename(file_name)),
-            sr,
-            geomtype
-        )
+        layer = data_source.CreateLayer(str(os.path.basename(file_name)), sr, geomtype)
         # accounts for 2D only
-        fields = OrderedDict([
-            ('id', 'int'),
-            ('cr_level', 'float'),
-            ('mx_depth', 'float'),
-        ])
+        fields = OrderedDict(
+            [
+                ("id", "int"),
+                ("cr_level", "float"),
+                ("mx_depth", "float"),
+            ]
+        )
 
-        for field_name, field_type in six.iteritems(fields):
-            layer.CreateField(ogr.FieldDefn(
-                    field_name, const.OGR_FIELD_TYPE_MAP[field_type])
+        for field_name, field_type in fields.items():
+            layer.CreateField(
+                ogr.FieldDefn(field_name, const.OGR_FIELD_TYPE_MAP[field_type])
             )
         _definition = layer.GetLayerDefn()
 
         for i in range(len(self._levees.geoms)):
-            if levee_data['id'][i] == 0:
+            if levee_data["id"][i] == 0:
                 continue  # skip the dummy element
             line = ogr.Geometry(ogr.wkbLineString)
             feature = ogr.Feature(_definition)
-            linepoints = reshape_flat_array(levee_data['coords'][i]).T
+            linepoints = reshape_flat_array(levee_data["coords"][i]).T
             for x in linepoints:
                 line.AddPoint(x[0], x[1])
             feature.SetGeometry(line)
@@ -85,12 +81,10 @@ class LeveeOgrExporter(BaseOgrExporter):
             #     value = TYPE_FUNC_MAP[field_type](raw_value)
             #     print("value  ", value)
 
-            self.set_field(feature, "id", "int", levee_data['id'][i])
+            self.set_field(feature, "id", "int", levee_data["id"][i])
+            self.set_field(feature, "cr_level", "float", levee_data["crest_level"][i])
             self.set_field(
-                feature, "cr_level", "float", levee_data['crest_level'][i]
-            )
-            self.set_field(
-                feature, "mx_depth", "float", levee_data['max_breach_depth'][i]
+                feature, "mx_depth", "float", levee_data["max_breach_depth"][i]
             )
             layer.CreateFeature(feature)
             feature.Destroy()

@@ -1,21 +1,22 @@
 import re
 from uuid import uuid4
+
 from threedigrid.orm.base.datasource import DataSource
 
 try:
-    import asyncio_rpc # noqa
+    import asyncio_rpc  # noqa
 except ImportError:
     raise Exception(
         "asyncio_rpc needs to be installed when using this module,"
-        "install it with: pip install asyncio_rpc")
+        "install it with: pip install asyncio_rpc"
+    )
 
-from asyncio_rpc.models import RPCStack, RPCSubStack, RPCCall
 from asyncio_rpc.client import RPCClient
 from asyncio_rpc.commlayers.redis import RPCRedisCommLayer
+from asyncio_rpc.models import RPCCall, RPCStack, RPCSubStack
 from asyncio_rpc.serialization import msgpack
 
-
-NAMESPACE = 'GRIDRESULTADMIN'
+NAMESPACE = "GRIDRESULTADMIN"
 RESULT_EXPIRE_TIME = 30
 
 
@@ -24,7 +25,7 @@ async def _set_property(ga, prop):
     setattr(ga, prop, bool(value))
 
 
-class Future(object):
+class Future:
     def __init__(self, rpc_file, rpc_stack):
         self.rpc_file = rpc_file
         self.rpc_stack = rpc_stack
@@ -38,7 +39,6 @@ class Future(object):
 
 
 class FutureResult(Future):
-
     async def resolve(self):
         """
         Returns by default only NetCDF results
@@ -46,8 +46,7 @@ class FutureResult(Future):
         client = await self.rpc_file.client
         return await client.rpc_call(self.rpc_stack)
 
-    async def subscribe(
-            self, only_netcdf_results=False, max_items_per_second=None):
+    async def subscribe(self, only_netcdf_results=False, max_items_per_second=None):
         """
         :param rate_limit:
             maximum number of items returned per second. Cannot
@@ -58,12 +57,10 @@ class FutureResult(Future):
         """
         client = await self.rpc_file.client
         if only_netcdf_results:
-            self.rpc_stack.stack.append(
-                RPCCall('only_netcdf_results', [], {})
-            )
+            self.rpc_stack.stack.append(RPCCall("only_netcdf_results", [], {}))
         if max_items_per_second:
             self.rpc_stack.stack.append(
-                RPCCall('max_items_per_second', [max_items_per_second], {})
+                RPCCall("max_items_per_second", [max_items_per_second], {})
             )
         rpc_substack = RPCSubStack(**self.rpc_stack.__dict__)
         return await client.subscribe_call(rpc_substack)
@@ -76,13 +73,12 @@ class RPCAttrs:
     def get(self, key, *args, **kwargs):
         # Use nodes route for now
         stack = [
-            RPCCall('nodes', [], {}),
-            RPCCall('_datasource', [], {}),
-            RPCCall('getattr', [key], {})
+            RPCCall("nodes", [], {}),
+            RPCCall("_datasource", [], {}),
+            RPCCall("getattr", [key], {}),
         ]
 
-        rpc_stack = RPCStack(
-            uuid4().hex, NAMESPACE, RESULT_EXPIRE_TIME, stack)
+        rpc_stack = RPCStack(uuid4().hex, NAMESPACE, RESULT_EXPIRE_TIME, stack)
         return Future(self.rpc_file, rpc_stack)
 
     def __getitem__(self, key):
@@ -101,11 +97,10 @@ class RPCFile:
 
         if match:
             data = match.groupdict()
-            self._redis_host = data['host']
-            self.pubchannel = data['channel']
+            self._redis_host = data["host"]
+            self.pubchannel = data["channel"]
         else:
-            raise Exception(
-                "Could not parse path %s" % path)
+            raise Exception("Could not parse path %s" % path)
 
         self.path = path
         self.file_modus = file_modus
@@ -119,34 +114,39 @@ class RPCFile:
         if self._client is None:
             subchannel = uuid4().hex
             comm = await RPCRedisCommLayer.create(
-                subchannel, self.pubchannel,
+                subchannel,
+                self.pubchannel,
                 host=self._redis_host,
                 port=self._redis_port,
-                serialization=msgpack)
+                serialization=msgpack,
+            )
             self._client = RPCClient(comm)
         return self._client
 
-    def get_model_extent(self, target_epsg_code='', bbox=[]):
+    def get_model_extent(self, target_epsg_code="", bbox=[]):
         stack = [
-            RPCCall('get_model_extent', [],
-                    {'target_epsg_code': target_epsg_code,
-                     'bbox': bbox}),
+            RPCCall(
+                "get_model_extent",
+                [],
+                {"target_epsg_code": target_epsg_code, "bbox": bbox},
+            ),
         ]
-        rpc_stack = RPCStack(
-            uuid4().hex, NAMESPACE, RESULT_EXPIRE_TIME, stack)
+        rpc_stack = RPCStack(uuid4().hex, NAMESPACE, RESULT_EXPIRE_TIME, stack)
         return Future(self, rpc_stack)
 
-    def get_extent_subset(self, subset_name, target_espg_code=''):
+    def get_extent_subset(self, subset_name, target_espg_code=""):
         stack = [
-            RPCCall('get_extent_subset', [subset_name],
-                    {'target_espg_code': target_espg_code}),
+            RPCCall(
+                "get_extent_subset",
+                [subset_name],
+                {"target_espg_code": target_espg_code},
+            ),
         ]
-        rpc_stack = RPCStack(
-            uuid4().hex, NAMESPACE, RESULT_EXPIRE_TIME, stack)
+        rpc_stack = RPCStack(uuid4().hex, NAMESPACE, RESULT_EXPIRE_TIME, stack)
         return Future(self, rpc_stack)
 
     def __getitem__(self, key):
-        if key == 'meta':
+        if key == "meta":
             return self.meta
         else:
             raise Exception("Only [meta] is implemented")
@@ -155,13 +155,12 @@ class RPCFile:
     def meta(self):
         # Use nodes route for now
         stack = [
-            RPCCall('nodes', [], {}),
-            RPCCall('_datasource', [], {}),
-            RPCCall('getattr', ['meta'], {})
+            RPCCall("nodes", [], {}),
+            RPCCall("_datasource", [], {}),
+            RPCCall("getattr", ["meta"], {}),
         ]
 
-        rpc_stack = RPCStack(
-            uuid4().hex, NAMESPACE, RESULT_EXPIRE_TIME, stack)
+        rpc_stack = RPCStack(uuid4().hex, NAMESPACE, RESULT_EXPIRE_TIME, stack)
         return Future(self, rpc_stack)
 
     @property
@@ -174,6 +173,7 @@ class H5RPCGroup(DataSource):
     Datasource wrapper for h5py groups,
     adding meta data to all groups.
     """
+
     future_class = Future
 
     def __init__(self, rpc_file, group_name, meta=None, required=False):
@@ -183,23 +183,15 @@ class H5RPCGroup(DataSource):
     def get_rpc_actions(self, model, field_name=None):
         rpc_actions = []
         if model.reproject_to_epsg:
-            rpc_actions.append(
-                {'reproject_to': model.reproject_to_epsg}
-            )
-        rpc_actions += [
-            x.to_dict() for x in model.slice_filters if not x._filter_as]
+            rpc_actions.append({"reproject_to": model.reproject_to_epsg})
+        rpc_actions += [x.to_dict() for x in model.slice_filters if not x._filter_as]
 
         if field_name is None:
             if model.only_fields:
-                rpc_actions.append(
-                    {'only': model.only_fields}
-                )
-            rpc_actions.append(
-                {'data': {}}
-            )
+                rpc_actions.append({"only": model.only_fields})
+            rpc_actions.append({"data": {}})
         else:
-            rpc_actions.append(
-                {field_name: {}})
+            rpc_actions.append({field_name: {}})
 
         return rpc_actions
 
@@ -209,39 +201,27 @@ class H5RPCGroup(DataSource):
         stack = []
 
         # Override for cells here
-        if model_name != 'cells':
-            stack.append(
-                RPCCall(self.group_name, [], {})
-            )
+        if model_name != "cells":
+            stack.append(RPCCall(self.group_name, [], {}))
 
         if model_name != self.group_name:
-            stack.append(
-                RPCCall(model_name, [], {})
-            )
+            stack.append(RPCCall(model_name, [], {}))
 
         for action in rpc_actions:
             for key, value in action.items():
                 if isinstance(value, list):
-                    stack.append(
-                        RPCCall(key, value, {})
-                    )
+                    stack.append(RPCCall(key, value, {}))
                 elif isinstance(value, dict):
-                    stack.append(
-                        RPCCall(key, [], value)
-                    )
+                    stack.append(RPCCall(key, [], value))
                 else:
-                    stack.append(
-                        RPCCall(key, [value], {})
-                    )
+                    stack.append(RPCCall(key, [value], {}))
 
-        return RPCStack(
-            uuid4().hex, NAMESPACE, RESULT_EXPIRE_TIME, stack)
+        return RPCStack(uuid4().hex, NAMESPACE, RESULT_EXPIRE_TIME, stack)
 
     def get_filtered_field_value(
-            self, model, field_name, ts_filter=None, lookup_index=None,
-            subset_index=None):
-        rpc_actions = self.get_rpc_actions(
-            model, field_name=field_name)
+        self, model, field_name, ts_filter=None, lookup_index=None, subset_index=None
+    ):
+        rpc_actions = self.get_rpc_actions(model, field_name=field_name)
         rpc_stack = self.get_asyncio_rpc_stack(model, rpc_actions)
 
         return self.future_class(self.rpc_file, rpc_stack)
@@ -258,12 +238,11 @@ class H5RPCGroup(DataSource):
     def getattr(self, name):
         stack = [
             RPCCall(self.group_name, [], {}),
-            RPCCall('_datasource', [], {}),
-            RPCCall('getattr', [name], {})
+            RPCCall("_datasource", [], {}),
+            RPCCall("getattr", [name], {}),
         ]
 
-        rpc_stack = RPCStack(
-            uuid4().hex, NAMESPACE, RESULT_EXPIRE_TIME, stack)
+        rpc_stack = RPCStack(uuid4().hex, NAMESPACE, RESULT_EXPIRE_TIME, stack)
         return self.future_class(self.rpc_file, rpc_stack)
 
     def keys(self):
@@ -282,40 +261,32 @@ class H5RPCGroup(DataSource):
 class H5RPCResultGroup(H5RPCGroup):
     future_class = FutureResult
 
-    def __init__(self, rpc_file, group_name, netcdf_file,
-                 meta=None, required=False):
-        super(H5RPCResultGroup, self).__init__(
-            rpc_file, group_name, meta, required)
+    def __init__(self, rpc_file, group_name, netcdf_file, meta=None, required=False):
+        super().__init__(rpc_file, group_name, meta, required)
         self.netcdf_file = netcdf_file
 
     def get_timestamps(self):
         stack = [
             RPCCall(self.group_name, [], {}),
-            RPCCall('_datasource', [], {}),
-            RPCCall('get', ['time'], {}),
-            RPCCall('value', [], {})
+            RPCCall("_datasource", [], {}),
+            RPCCall("get", ["time"], {}),
+            RPCCall("value", [], {}),
         ]
 
-        rpc_stack = RPCStack(
-            uuid4().hex, NAMESPACE, RESULT_EXPIRE_TIME, stack)
+        rpc_stack = RPCStack(uuid4().hex, NAMESPACE, RESULT_EXPIRE_TIME, stack)
         return self.future_class(self.rpc_file, rpc_stack)
 
     def get_rpc_actions(self, model, field_name=None):
-        rpc_actions = super(H5RPCResultGroup, self).get_rpc_actions(
-            model, field_name)
+        rpc_actions = super().get_rpc_actions(model, field_name)
 
         # Check if we need to sample
         if model.timeseries_sample is not None:
-            rpc_actions.insert(
-                0, {'sample': model.timeseries_sample}
-            )
+            rpc_actions.insert(0, {"sample": model.timeseries_sample})
 
         # Check if we need to inject timeseries_filter
         if model.timeseries_filter is not None:
             # insert action
-            rpc_actions.insert(
-                0, {'timeseries': model.timeseries_filter}
-            )
+            rpc_actions.insert(0, {"timeseries": model.timeseries_filter})
 
         return rpc_actions
 

@@ -1,10 +1,9 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import
-from __future__ import unicode_literals
-import numpy as np
+
 import logging
 from functools import lru_cache
+
+import numpy as np
 
 try:
     import pyproj
@@ -32,7 +31,7 @@ from threedigrid.numpy_utils import select_lines_by_bbox
 
 logger = logging.getLogger(__name__)
 
-MERCANTILE_EPSG_CODE = '4326'
+MERCANTILE_EPSG_CODE = "4326"
 
 BBOX_LEFT = 0
 BBOX_TOP = 1
@@ -42,21 +41,21 @@ BBOX_BOTTOM = 3
 
 def raise_import_exception(name):
     raise ImportError(
-        'Could not import {}, you need to install threedigrid '
-        'with the extra [geo], e.g '
-        'pip install threedigrid[geo]==<version>'.format(name)
+        "Could not import {}, you need to install threedigrid "
+        "with the extra [geo], e.g "
+        "pip install threedigrid[geo]==<version>".format(name)
     )
 
 
 @lru_cache(10)
 def get_transformer(source_epsg, target_epsg):
     if pyproj is None:
-        raise_import_exception('pyproj')
+        raise_import_exception("pyproj")
 
     return pyproj.Transformer.from_crs(
         pyproj.CRS.from_epsg(int(source_epsg)),
         pyproj.CRS.from_epsg(int(target_epsg)),
-        always_xy=True
+        always_xy=True,
     )
 
 
@@ -87,7 +86,7 @@ def get_spatial_reference(epsg_code):
 
     """
     if osr is None:
-        raise_import_exception('osr')
+        raise_import_exception("osr")
 
     sr = osr.SpatialReference()
     try:
@@ -100,9 +99,7 @@ def get_spatial_reference(epsg_code):
         raise
 
 
-def transform_bbox(
-        bbox, source_epsg_code, target_epsg_code, all_coords=False
-):
+def transform_bbox(bbox, source_epsg_code, target_epsg_code, all_coords=False):
     """
     Transform bbox from source_epsg_code to target_epsg_code,
     if necessary
@@ -133,29 +130,37 @@ def transform_bbox(
             input_y += [bbox[BBOX_TOP], bbox[BBOX_BOTTOM]]
         bbox_trans = np.array(
             transform_xys(
-                np.array(input_x), np.array(input_y),
-                source_epsg_code, target_epsg_code
+                np.array(input_x), np.array(input_y), source_epsg_code, target_epsg_code
             )
         )
 
         if all_coords:
-            bbox = np.array([
-                bbox_trans[0][0], bbox_trans[1][0],  # left_top
-                bbox_trans[0][2], bbox_trans[1][2],  # right_top
-                bbox_trans[0][1], bbox_trans[1][1],  # right_bottom
-                bbox_trans[0][3], bbox_trans[1][3]  # left_bottom
-            ])
+            bbox = np.array(
+                [
+                    bbox_trans[0][0],
+                    bbox_trans[1][0],  # left_top
+                    bbox_trans[0][2],
+                    bbox_trans[1][2],  # right_top
+                    bbox_trans[0][1],
+                    bbox_trans[1][1],  # right_bottom
+                    bbox_trans[0][3],
+                    bbox_trans[1][3],  # left_bottom
+                ]
+            )
         else:
             # Transform back to [left,bottom,right,top]
             bbox = np.array(
-                [min(bbox_trans[0]), min(bbox_trans[1]),  # left_bottom
-                 max(bbox_trans[0]), max(bbox_trans[1])  # right_top
-                 ]
+                [
+                    min(bbox_trans[0]),
+                    min(bbox_trans[1]),  # left_bottom
+                    max(bbox_trans[0]),
+                    max(bbox_trans[1]),  # right_top
+                ]
             )
     return bbox
 
 
-def get_bbox_for_tile(tile_xyz=(0, 0, 0), target_epsg_code='4326'):
+def get_bbox_for_tile(tile_xyz=(0, 0, 0), target_epsg_code="4326"):
     """
     Get the bbox for a tile defined by x,y,z in epsg=target_epsg_code
 
@@ -176,12 +181,12 @@ def get_bbox_for_tile(tile_xyz=(0, 0, 0), target_epsg_code='4326'):
             5469031.60724307])
     """
     if mercantile is None:
-        raise_import_exception('mercantile')
+        raise_import_exception("mercantile")
     bbox = np.array(
         mercantile.bounds(
-            mercantile.Tile(
-                x=int(tile_xyz[0]), y=int(tile_xyz[1]), z=int(tile_xyz[2])))
+            mercantile.Tile(x=int(tile_xyz[0]), y=int(tile_xyz[1]), z=int(tile_xyz[2]))
         )
+    )
 
     if MERCANTILE_EPSG_CODE != target_epsg_code:
         bbox = transform_bbox(bbox, MERCANTILE_EPSG_CODE, target_epsg_code)
@@ -232,8 +237,7 @@ def select_points_by_bbox(points, bbox):
     return np.all((pre_sel_low & pre_sel_up), axis=1)
 
 
-def select_points_by_tile(tile_xyz=(0, 0, 0), target_epsg_code='4326',
-                          points=None):
+def select_points_by_tile(tile_xyz=(0, 0, 0), target_epsg_code="4326", points=None):
     """
     Select points by a tile
 
@@ -253,12 +257,12 @@ def select_points_by_tile(tile_xyz=(0, 0, 0), target_epsg_code='4326',
 
     assert isinstance(points, np.ndarray)
 
-    return select_points_by_bbox(
-        points, get_bbox_for_tile(tile_xyz, target_epsg_code))
+    return select_points_by_bbox(points, get_bbox_for_tile(tile_xyz, target_epsg_code))
 
 
-def select_lines_by_tile(tile_xyz=(0, 0, 0), target_epsg_code='4326',
-                         lines=None, include_intersections=False):
+def select_lines_by_tile(
+    tile_xyz=(0, 0, 0), target_epsg_code="4326", lines=None, include_intersections=False
+):
     """
     Select lines by a tile
 
@@ -277,8 +281,8 @@ def select_lines_by_tile(tile_xyz=(0, 0, 0), target_epsg_code='4326',
     assert isinstance(lines, np.ndarray)
 
     return select_lines_by_bbox(
-        lines, get_bbox_for_tile(tile_xyz, target_epsg_code),
-        include_intersections)
+        lines, get_bbox_for_tile(tile_xyz, target_epsg_code), include_intersections
+    )
 
 
 def select_geoms_by_geometry(geoms, geometry):
@@ -289,11 +293,11 @@ def select_geoms_by_geometry(geoms, geometry):
     :return: list of geoms intersecting with geometry
     """
     if shapely is None:
-        raise_import_exception('shapely')
+        raise_import_exception("shapely")
 
     if type(geometry) in (bytes, str):
         if isinstance(geometry, bytes):
-            geometry = geometry.decode('utf-8')
+            geometry = geometry.decode("utf-8")
         # assume wkt, try to load
         geometry = loads(geometry)
 
@@ -304,8 +308,7 @@ def select_geoms_by_geometry(geoms, geometry):
 
     # reverse loop because we pop elements based on index
     for i, intersected_geom in zip(
-            reversed(range(len(intersected_geoms))),
-            reversed(intersected_geoms)
+        reversed(range(len(intersected_geoms))), reversed(intersected_geoms)
     ):
         if not intersected_geom.intersects(geometry):
             intersected_geoms.pop(i)

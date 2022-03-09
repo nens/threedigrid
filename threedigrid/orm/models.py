@@ -1,18 +1,12 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-from __future__ import print_function
 
-from __future__ import absolute_import
-from .constants import SHP_DRIVER_NAME, GEO_PACKAGE_DRIVER_NAME, \
-    GEOJSON_DRIVER_NAME
-
-from threedigrid.orm.base.models import Model as BaseModel
-from threedigrid.orm.fields import LineArrayField
-from threedigrid.orm.fields import GeomArrayField
-from threedigrid.orm.filters import FILTER_MAP
 from threedigrid.admin.exporter_constants import DEFAULT_EXPORT_FIELDS
 from threedigrid.admin.serializers import GeoJsonSerializer
+from threedigrid.orm.base.models import Model as BaseModel
+from threedigrid.orm.fields import GeomArrayField, LineArrayField
+from threedigrid.orm.filters import FILTER_MAP
+
+from .constants import GEO_PACKAGE_DRIVER_NAME, GEOJSON_DRIVER_NAME, SHP_DRIVER_NAME
 
 
 class Model(BaseModel):
@@ -29,9 +23,7 @@ class Model(BaseModel):
             if isinstance(field, LineArrayField) and field_name in selection:
                 # Use the to_centroid function of the GeomArrayField
                 # to allow different geometry to be "centroided"
-                selection[field_name] =\
-                    field.to_centroid(
-                        selection[field_name])
+                selection[field_name] = field.to_centroid(selection[field_name])
         return selection
 
     def _is_coords(self, field_name):
@@ -57,11 +49,9 @@ class Model(BaseModel):
             reproject_to('28992').reproject_to('4326') == reproject_to('4326')
         """
         new_class_kwargs = dict(self.class_kwargs)
-        new_class_kwargs.update({
-            'reproject_to_epsg': target_epsg_code})
+        new_class_kwargs.update({"reproject_to_epsg": target_epsg_code})
 
-        return self.__init_class(
-            self.__class__, **new_class_kwargs)
+        return self.__init_class(self.__class__, **new_class_kwargs)
 
     def _do_reproject_value(self, value, field_name, target_epsg_code):
         if target_epsg_code == self.epsg_code:
@@ -70,8 +60,7 @@ class Model(BaseModel):
 
         field = self._get_field(field_name)
 
-        return field.reproject(
-            value, self.epsg_code, target_epsg_code)
+        return field.reproject(value, self.epsg_code, target_epsg_code)
 
     def __do_reproject(self, selection, target_epsg_code):
         """
@@ -88,30 +77,28 @@ class Model(BaseModel):
             if isinstance(field, GeomArrayField) and field_name in selection:
                 # Use the reproject function of the GeomDataField
                 # to allow different geometry to be reprojected
-                selection[field_name] =\
-                    field.reproject(
-                        selection[field_name],
-                        self.epsg_code, target_epsg_code)
+                selection[field_name] = field.reproject(
+                    selection[field_name], self.epsg_code, target_epsg_code
+                )
         return selection
 
     def to_shape(self, file_name, **kwargs):
         self._to_ogr(SHP_DRIVER_NAME, file_name, **kwargs)
 
     def to_gpkg(self, file_name, **kwargs):
-        self._to_ogr(
-            GEO_PACKAGE_DRIVER_NAME, file_name, **kwargs)
+        self._to_ogr(GEO_PACKAGE_DRIVER_NAME, file_name, **kwargs)
 
     def to_geojson(self, file_name, **kwargs):
-        if kwargs.get('use_ogr', False):
+        if kwargs.get("use_ogr", False):
             self._to_ogr(GEOJSON_DRIVER_NAME, file_name, **kwargs)
         else:
             fields = kwargs.get(
-                'fields', DEFAULT_EXPORT_FIELDS[self.__class__.__name__]
+                "fields", DEFAULT_EXPORT_FIELDS[self.__class__.__name__]
             )
-            if fields == 'ALL':
+            if fields == "ALL":
                 fields = self._field_names
 
-            indent = kwargs.get('indent', None)
+            indent = kwargs.get("indent", None)
             serializer = GeoJsonSerializer(fields, self, indent)
             serializer.save(file_name)
 
@@ -128,8 +115,7 @@ class Model(BaseModel):
         if self.reproject_to_epsg:
             epsg_code = self.reproject_to_epsg
 
-        exporter.save(file_name, filtered, epsg_code,
-                      **kwargs)
+        exporter.save(file_name, filtered, epsg_code, **kwargs)
 
     def _get_exporter(self, driver_name):
         for exporter in self._exporters:

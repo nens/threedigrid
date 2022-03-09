@@ -1,26 +1,28 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-from __future__ import print_function
 
-from __future__ import absolute_import
 import numpy as np
 
+from threedigrid.geo_utils import (
+    get_transformer,
+    raise_import_exception,
+    select_geoms_by_geometry,
+    select_lines_by_tile,
+    select_points_by_bbox,
+    select_points_by_tile,
+    transform_xys,
+)
+from threedigrid.numpy_utils import (
+    angle_in_degrees,
+    get_bbox_by_point,
+    reshape_flat_array,
+    select_lines_by_bbox,
+)
+
 from .base.fields import ArrayField
-from threedigrid.numpy_utils import angle_in_degrees
-from threedigrid.numpy_utils import get_bbox_by_point
-from threedigrid.numpy_utils import reshape_flat_array
-from threedigrid.numpy_utils import select_lines_by_bbox
-from threedigrid.geo_utils import select_points_by_tile, \
-    select_geoms_by_geometry, raise_import_exception
-from threedigrid.geo_utils import select_lines_by_tile
-from threedigrid.geo_utils import select_points_by_bbox
-from threedigrid.geo_utils import transform_xys, get_transformer
-from six.moves import map
 
 try:
     import shapely
-    from shapely.geometry import Polygon, Point, asLineString, asPolygon
+    from shapely.geometry import asLineString, asPolygon, Point, Polygon
 except ImportError:
     shapely = None
 
@@ -32,6 +34,7 @@ class GeomArrayField(ArrayField):
     """
     Base geometry field
     """
+
     def reproject(self, values, source_epsg, target_epsg):
         raise NotImplementedError()
 
@@ -64,9 +67,7 @@ class PointArrayField(GeomArrayField):
         Reproject the point coordinates: x_array=values[0], y_array=values[1]
         from source_epsg to target_epsg.
         """
-        return transform_xys(
-            values[0], values[1],
-            source_epsg, target_epsg)
+        return transform_xys(values[0], values[1], source_epsg, target_epsg)
 
     def get_mask_by_bbox(self, bbox, values, include_intersections=False):
         """
@@ -77,15 +78,15 @@ class PointArrayField(GeomArrayField):
         # For points include_intersections can be ignored
         return select_points_by_bbox(values, bbox)
 
-    def get_mask_by_tile(self, tile_xyz, target_epsg, values,
-                         include_intersections=False):
+    def get_mask_by_tile(
+        self, tile_xyz, target_epsg, values, include_intersections=False
+    ):
         """
         Return as boolean mask (np.array) for points in "values"
         within tile_xyz bbox projected to target_epsg.
         """
         # For points include_intersections can be ignored
-        return select_points_by_tile(
-            tile_xyz, target_epsg, values)
+        return select_points_by_tile(tile_xyz, target_epsg, values)
 
     def to_centroid(self, values):
         """
@@ -96,7 +97,7 @@ class PointArrayField(GeomArrayField):
 
     def _to_shapely_geom(self, values):
         if shapely is None:
-            raise_import_exception('shapely')
+            raise_import_exception("shapely")
 
         points = []
         for i, coord in enumerate(values.T):
@@ -124,19 +125,17 @@ class LineArrayField(GeomArrayField):
             x2_array=values[2], y2_array=values[3]
         from source_epsg to target_epsg.
         """
-        return np.vstack((
-                transform_xys(
-                    values[0], values[1],
-                    source_epsg, target_epsg),
-                transform_xys(
-                    values[2], values[3],
-                    source_epsg, target_epsg)))
+        return np.vstack(
+            (
+                transform_xys(values[0], values[1], source_epsg, target_epsg),
+                transform_xys(values[2], values[3], source_epsg, target_epsg),
+            )
+        )
 
     def get_mask_by_point(self, pnt, values):
         return get_bbox_by_point(pnt, values)
 
-    def get_mask_by_bbox(self, bbox, values,
-                         include_intersections=False):
+    def get_mask_by_bbox(self, bbox, values, include_intersections=False):
         """
         Return as boolean mask (np.array) for line/bbox in "values"
             x1_array=values[0], y1_array=values[1],
@@ -145,8 +144,9 @@ class LineArrayField(GeomArrayField):
         """
         return select_lines_by_bbox(values, bbox, include_intersections)
 
-    def get_mask_by_tile(self, tile_xyz, target_epsg, values,
-                         include_intersections=False):
+    def get_mask_by_tile(
+        self, tile_xyz, target_epsg, values, include_intersections=False
+    ):
         """
         Return as boolean mask (np.array) for line/bbox in "values"
             x1_array=values[0], y1_array=values[1],
@@ -154,7 +154,8 @@ class LineArrayField(GeomArrayField):
         within tile_xyz bbox projected to target_epsg.
         """
         return select_lines_by_tile(
-            tile_xyz, target_epsg, values, include_intersections)
+            tile_xyz, target_epsg, values, include_intersections
+        )
 
     def to_centroid(self, values):
         """
@@ -162,9 +163,7 @@ class LineArrayField(GeomArrayField):
                     x1_array=values[0], y1_array=values[1],
                     x2_array=values[2], y2_array=values[3]
         """
-        return np.array(
-            ((values[0] + values[2]) / 2.0,
-             (values[1] + values[3]) / 2.0))
+        return np.array(((values[0] + values[2]) / 2.0, (values[1] + values[3]) / 2.0))
 
     def get_angles_in_degrees(self, values):
         """
@@ -179,12 +178,11 @@ class LineArrayField(GeomArrayField):
         if np.isnan(values).all():
             values = np.full_like(values, fill_value=NULL_VALUE)
 
-        return angle_in_degrees(
-                values[0], values[1], values[2], values[3])
+        return angle_in_degrees(values[0], values[1], values[2], values[3])
 
     def _to_shapely_geom(self, values):
         if shapely is None:
-            raise_import_exception('shapely')
+            raise_import_exception("shapely")
 
         lines = []
         for i, coords in enumerate(values.T):
@@ -197,7 +195,6 @@ class LineArrayField(GeomArrayField):
 
 
 class MultiLineArrayField(GeomArrayField):
-
     def reproject(self, values, source_epsg, target_epsg):
         """
         Reproject the line/bbox coordinates:
@@ -216,7 +213,7 @@ class MultiLineArrayField(GeomArrayField):
 
     def _to_shapely_geom(self, values):
         if shapely is None:
-            raise_import_exception('shapely')
+            raise_import_exception("shapely")
 
         multilines = []
         for i, coords in enumerate(values):
@@ -237,6 +234,7 @@ class PolygonArrayField(GeomArrayField):
         x2_array=values[2], y2_array=values[3]
 
     """
+
     def get_mask_by_point(self, pnt, values):
 
         return get_bbox_by_point(pnt, values)
@@ -249,20 +247,16 @@ class PolygonArrayField(GeomArrayField):
             x2_array=values[2], y2_array=values[3],
         from source_epsg to target_epsg.
         """
-        return np.vstack((
-                np.array(transform_xys(
-                    values[0], values[1],
-                    source_epsg, target_epsg)
-                ),
-                np.array(transform_xys(
-                    values[2], values[3],
-                    source_epsg, target_epsg)
-                ),
-        ))
+        return np.vstack(
+            (
+                np.array(transform_xys(values[0], values[1], source_epsg, target_epsg)),
+                np.array(transform_xys(values[2], values[3], source_epsg, target_epsg)),
+            )
+        )
 
     def _to_shapely_geom(self, values):
         if shapely is None:
-            raise_import_exception('shapely')
+            raise_import_exception("shapely")
 
         polygons = []
         for i, coords in enumerate(values):
@@ -275,10 +269,9 @@ class PolygonArrayField(GeomArrayField):
 
 
 class BboxArrayField(LineArrayField):
-
     def _to_shapely_geom(self, values):
         if shapely is None:
-            raise_import_exception('shapely')
+            raise_import_exception("shapely")
 
         polygons = []
         for i, coord in enumerate(values.T):
@@ -291,7 +284,7 @@ class BboxArrayField(LineArrayField):
                     (coord[0], coord[1]),
                     (coord[0], coord[3]),
                     (coord[2], coord[3]),
-                    (coord[2], coord[1])
+                    (coord[2], coord[1]),
                 ]
             )
             polygon.index = i  # the index is used in get_mask_by_geometry

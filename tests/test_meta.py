@@ -1,16 +1,11 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
 
 import os
+
 import pytest
 
 from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
 from threedigrid.orm.base.options import ModelMeta
-import six
 
 test_file_dir = os.path.join(os.getcwd(), "tests/test_files")
 
@@ -57,8 +52,8 @@ BASE_COMPOSITE_FIELDS = {
 
 @pytest.fixture()
 def mm_composite():
-    class TestMetaComposition(object):
-        class Meta(six.with_metaclass(ModelMeta)):
+    class TestMetaComposition:
+        class Meta(metaclass=ModelMeta):
             composite_fields = {"au": ["Mesh2D_au", "Mesh1D_au"]}
 
     tmc = TestMetaComposition()
@@ -67,8 +62,8 @@ def mm_composite():
 
 @pytest.fixture()
 def mm_base_composite():
-    class TestMetaBase(object):
-        class Meta(six.with_metaclass(ModelMeta)):
+    class TestMetaBase:
+        class Meta(metaclass=ModelMeta):
             base_composition = {"q": ["Mesh2D_q", "Mesh1D_q"]}
 
             composition_vars = {"q": ["cum", "cum_positive", "cum_negative"]}
@@ -81,17 +76,15 @@ def test_meta_error():
     # must define a composite_fields dict
     with pytest.raises(AttributeError):
 
-        class TestMetaComposition(object):
-            class Meta(six.with_metaclass(ModelMeta)):
+        class TestMetaComposition:
+            class Meta(metaclass=ModelMeta):
                 pass
 
         TestMetaComposition()
 
 
 def test_meta_composite(mm_composite):
-    assert mm_composite.Meta.composite_fields == {
-        "au": ["Mesh2D_au", "Mesh1D_au"]
-    }
+    assert mm_composite.Meta.composite_fields == {"au": ["Mesh2D_au", "Mesh1D_au"]}
 
 
 def test_meta_base_composition(mm_base_composite):
@@ -101,11 +94,7 @@ def test_meta_base_composition(mm_base_composite):
     import itertools
 
     assert set(
-        list(
-            itertools.chain(
-                *list(mm_base_composite.Meta.composite_fields.values())
-            )
-        )
+        list(itertools.chain(*list(mm_base_composite.Meta.composite_fields.values())))
     ) == {
         "Mesh2D_q_cum",
         "Mesh1D_q_cum",

@@ -5,7 +5,7 @@ from collections import OrderedDict
 import numpy as np
 
 from threedigrid.admin import constants
-from threedigrid.geo_utils import transform_bbox, raise_import_exception
+from threedigrid.geo_utils import raise_import_exception, transform_bbox
 from threedigrid.orm.base.encoder import NumpyEncoder
 from threedigrid.orm.base.models import Model
 
@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 class GeoJsonSerializer:
     def __init__(self, fields, model=None, indent=None):
         if geojson is None:
-            raise_import_exception('geojson')
+            raise_import_exception("geojson")
         self.fields = fields
         if model:
             assert isinstance(model, Model)
@@ -50,69 +50,65 @@ class GeoJsonSerializer:
         if content_type == "lines":
             for i in range(data["id"].shape[-1]):
                 linepoints = np.round(
-                    data['line_geometries'][i].reshape(
-                        2, -1).T.astype('float64'),
-                    constants.LONLAT_DIGITS
+                    data["line_geometries"][i].reshape(2, -1).T.astype("float64"),
+                    constants.LONLAT_DIGITS,
                 )
                 line = geojson.LineString(linepoints.tolist())
 
-                properties = fill_properties(
-                    self.fields, data, i, model_type
-                )
+                properties = fill_properties(self.fields, data, i, model_type)
                 feat = geojson.Feature(geometry=line, properties=properties)
                 geos.append(feat)
         elif content_type in ("nodes", "breaches", "pumps"):
             for i in range(data["id"].shape[-1]):
-                coords = np.round(
-                    data["coordinates"][:, i], constants.LONLAT_DIGITS
-                )
+                coords = np.round(data["coordinates"][:, i], constants.LONLAT_DIGITS)
                 point = geojson.Point([coords[0], coords[1]])
-                properties = fill_properties(
-                    self.fields, data, i, model_type
-                )
+                properties = fill_properties(self.fields, data, i, model_type)
                 feat = geojson.Feature(geometry=point, properties=properties)
                 geos.append(feat)
         elif content_type == "cells":
-            if (self._model.reproject_to_epsg is not None and
-                    self._model.reproject_to_epsg != self._model.epsg_code):
+            if (
+                self._model.reproject_to_epsg is not None
+                and self._model.reproject_to_epsg != self._model.epsg_code
+            ):
                 cell_coords = transform_bbox(
-                    self._model.reproject_to(
-                        self._model.epsg_code
-                    ).cell_coords,
-                    self._model.epsg_code, self._model.reproject_to_epsg,
-                    all_coords=True
+                    self._model.reproject_to(self._model.epsg_code).cell_coords,
+                    self._model.epsg_code,
+                    self._model.reproject_to_epsg,
+                    all_coords=True,
                 )
             else:
-                cell_coords = np.array([
-                    data.get('cell_coords')[0], data.get('cell_coords')[3],
-                    data.get('cell_coords')[2], data.get('cell_coords')[3],
-                    data.get('cell_coords')[2], data.get('cell_coords')[1],
-                    data.get('cell_coords')[0], data.get('cell_coords')[1],
-                ])
+                cell_coords = np.array(
+                    [
+                        data.get("cell_coords")[0],
+                        data.get("cell_coords")[3],
+                        data.get("cell_coords")[2],
+                        data.get("cell_coords")[3],
+                        data.get("cell_coords")[2],
+                        data.get("cell_coords")[1],
+                        data.get("cell_coords")[0],
+                        data.get("cell_coords")[1],
+                    ]
+                )
             cell_coords = np.round(cell_coords, constants.LONLAT_DIGITS)
             for i in range(data["id"].shape[-1]):
                 left_top = (cell_coords[0][i], cell_coords[1][i])
                 right_top = (cell_coords[2][i], cell_coords[3][i])
                 right_bottom = (cell_coords[4][i], cell_coords[5][i])
                 left_bottom = (cell_coords[6][i], cell_coords[7][i])
-                polygon = geojson.Polygon([
-                    (left_top, right_top, right_bottom, left_bottom, left_top)
-                ])
-                properties = fill_properties(
-                    self.fields, data, i, model_type
+                polygon = geojson.Polygon(
+                    [(left_top, right_top, right_bottom, left_bottom, left_top)]
                 )
+                properties = fill_properties(self.fields, data, i, model_type)
                 feat = geojson.Feature(geometry=polygon, properties=properties)
                 geos.append(feat)
         elif content_type == "levees":
             for i in range(data["id"].shape[-1]):
                 coords = np.round(
-                    data["coords"][i].reshape(2, -1).astype('float64'),
-                    constants.LONLAT_DIGITS
+                    data["coords"][i].reshape(2, -1).astype("float64"),
+                    constants.LONLAT_DIGITS,
                 )
                 line = geojson.LineString(coords.T.tolist())
-                properties = fill_properties(
-                    self.fields, data, i, model_type
-                )
+                properties = fill_properties(self.fields, data, i, model_type)
                 feat = geojson.Feature(geometry=line, properties=properties)
                 geos.append(feat)
         else:
@@ -167,6 +163,6 @@ def fill_properties(fields, data, index, model_type=None):
             result[field] = value
 
     if model_type:
-        result['model_type'] = model_type
+        result["model_type"] = model_type
 
     return result

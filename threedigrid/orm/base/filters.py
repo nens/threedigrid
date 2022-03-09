@@ -1,19 +1,14 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-from __future__ import print_function
 
-from __future__ import absolute_import
 import numpy as np
-from six.moves import range
 
 
-class BaseFilter(object):
+class BaseFilter:
     def filter(self, nparray_dict):
         raise NotImplementedError()
 
     def _do_filter(self, base_filter, nparray_dict):
-        if hasattr(base_filter, 'shape'):
+        if hasattr(base_filter, "shape"):
             # base_filter is boolean array result of filtering
             # over multidimensional array, for example:
             #      [[True, False, False, True],
@@ -33,8 +28,7 @@ class BaseFilter(object):
 
         for key in nparray_dict:
             # Apply the filter on the np_array's
-            if nparray_dict[key] is not None and hasattr(
-               nparray_dict[key], 'shape'):
+            if nparray_dict[key] is not None and hasattr(nparray_dict[key], "shape"):
 
                 # Transform the base_filter by prepending slice(None) to
                 # match the dimensionality of the nparray_dict[key].shape
@@ -44,8 +38,9 @@ class BaseFilter(object):
                 #
                 #      Note: x[slice(None),[1,2,3]] == x[:,[1,2,3]]
 
-                _filter = [slice(None)] * (
-                    len(nparray_dict[key].shape) - 1) + [base_filter]
+                _filter = [slice(None)] * (len(nparray_dict[key].shape) - 1) + [
+                    base_filter
+                ]
 
                 # try both with tuple and list
                 # This solves h5py datasets indexing errors
@@ -77,8 +72,9 @@ class BaseCompareFilter(BaseFilter):
     """
     Compare filter base
     """
-    func_str = '=='
-    func_name = 'eq'
+
+    func_str = "=="
+    func_name = "eq"
 
     def __init__(self, key, field, value, filter_as=False):
         """
@@ -95,71 +91,65 @@ class BaseCompareFilter(BaseFilter):
         return self._key
 
     def __repr__(self):
-        return "{0}({1} {2} {3})".format(
-            self.__class__.__name__,
-            self.func_str,
-            self._key, self._value)
+        return "{}({} {} {})".format(
+            self.__class__.__name__, self.func_str, self._key, self._value
+        )
 
     def to_dict(self):
-        return {
-            'filter': {
-                "{0}__{1}".format(
-                    self._key, self.func_name): self._value
-            }
-        }
+        return {"filter": {"{}__{}".format(self._key, self.func_name): self._value}}
 
 
 class EqualsFilter(BaseCompareFilter):
-    func_str = '=='
-    func_name = 'eq'
+    func_str = "=="
+    func_name = "eq"
 
     def filter(self, nparray_dict):
         return nparray_dict[self._key][:] == self._value
 
 
 class NotEqualsFilter(BaseCompareFilter):
-    func_str = '!='
-    func_name = 'ne'
+    func_str = "!="
+    func_name = "ne"
 
     def filter(self, nparray_dict):
         return nparray_dict[self._key][:] != self._value
 
 
 class GtFilter(BaseCompareFilter):
-    func_str = '>'
-    func_name = 'gt'
+    func_str = ">"
+    func_name = "gt"
 
     def filter(self, nparray_dict):
         return nparray_dict[self._key][:] > self._value
 
 
 class GteFilter(BaseCompareFilter):
-    func_str = '>='
-    func_name = 'gte'
+    func_str = ">="
+    func_name = "gte"
 
     def filter(self, nparray_dict):
         return nparray_dict[self._key][:] >= self._value
 
 
 class LtFilter(BaseCompareFilter):
-    func_str = '<'
-    func_name = 'lt'
+    func_str = "<"
+    func_name = "lt"
 
     def filter(self, nparray_dict):
         return nparray_dict[self._key][:] < self._value
 
 
 class LteFilter(BaseCompareFilter):
-    func_str = '<='
-    func_name = 'lte'
+    func_str = "<="
+    func_name = "lte"
 
     def filter(self, nparray_dict):
         return nparray_dict[self._key][:] <= self._value
 
 
 class InFilter(BaseCompareFilter):
-    func_str = ' in '
-    func_name = 'in'
+    func_str = " in "
+    func_name = "in"
 
     def __init__(self, key, field, value, filter_as):
         try:
@@ -181,6 +171,7 @@ class SliceFilter(BaseFilter):
     """
     Slice filter
     """
+
     def __init__(self, _slice):
         self._slice = _slice
 
@@ -191,27 +182,24 @@ class SliceFilter(BaseFilter):
         return None
 
     def __repr__(self):
-        return "SliceFilter({0})".format(
-            self._slice)
+        return "SliceFilter({})".format(self._slice)
 
     def to_dict(self):
-        return {'slice': [
-            self._slice.start, self._slice.stop, self._slice.step]}
+        return {"slice": [self._slice.start, self._slice.stop, self._slice.step]}
 
 
 FILTER_MAP = {
-    'eq': EqualsFilter,
-    'ne': NotEqualsFilter,
-    'gt': GtFilter,
-    'gte': GteFilter,
-    'lt': LtFilter,
-    'lte': LteFilter,
-    'in': InFilter,
+    "eq": EqualsFilter,
+    "ne": NotEqualsFilter,
+    "gt": GtFilter,
+    "gte": GteFilter,
+    "lt": LtFilter,
+    "lte": LteFilter,
+    "in": InFilter,
 }
 
 
-def get_filter(
-        splitted_keys, field, value, filter_map=FILTER_MAP, filter_as=False):
+def get_filter(splitted_keys, field, value, filter_map=FILTER_MAP, filter_as=False):
     """
     Helper function for getting a filter.
 
@@ -236,7 +224,7 @@ def get_filter(
 
     len_splitted = len(splitted_keys)
     if len_splitted == 1:
-        field_name, filter_name = splitted_keys[0], 'eq'
+        field_name, filter_name = splitted_keys[0], "eq"
     elif len_splitted == 2:
         field_name, filter_name = splitted_keys
     else:

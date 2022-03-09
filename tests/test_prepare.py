@@ -4,13 +4,12 @@ import sys
 if sys.version_info >= (3, 3):  # noqa
     from unittest import mock
 else:
-    import mock
+    from unittest import mock
 
 from threedigrid.admin.idmapper import IdMapper
-from threedigrid.admin.prepare import GridAdminH5Prepare
-from threedigrid.admin.prepare import is_prepared
-from .conftest import simple_id_map
+from threedigrid.admin.prepare import GridAdminH5Prepare, is_prepared
 
+from .conftest import simple_id_map
 
 test_file_dir = os.path.join(os.path.dirname(__file__), "test_files")
 

@@ -1,19 +1,13 @@
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-
 import sys
 
 import numpy as np
 import pytest
 
+from threedigrid import numpy_utils
 from threedigrid.admin.constants import LONLAT_DIGITS
-from threedigrid.admin.utils import PKMapper
-from threedigrid.admin.utils import _get_storage_area
+from threedigrid.admin.utils import _get_storage_area, PKMapper
 from threedigrid.geo_utils import transform_bbox
 from threedigrid.numpy_utils import get_smallest_uint_dtype
-from threedigrid import numpy_utils
 from threedigrid.orm.base.utils import _flatten_dict_values
 
 
@@ -118,24 +112,18 @@ def test_flatten_nested_dict_values_as_list():
 
 
 def test_transform_bbox():
-    bbox = np.array([106314., 517472., 106474., 517632.])
+    bbox = np.array([106314.0, 517472.0, 106474.0, 517632.0])
     source_epsg = "28992"
     target_epsg = "4326"
     transformed_bbox = transform_bbox(bbox, source_epsg, target_epsg)
-    expected_result = np.array(
-        [4.66789993, 52.64256428,  4.67024022, 52.64401638]
-    )
+    expected_result = np.array([4.66789993, 52.64256428, 4.67024022, 52.64401638])
     assert transformed_bbox.shape == (4,)
-    np.testing.assert_allclose(
-        transformed_bbox, expected_result, 10**-LONLAT_DIGITS
-    )
+    np.testing.assert_allclose(transformed_bbox, expected_result, 10 ** -LONLAT_DIGITS)
 
 
 def test_transform_bbox_all_coords():
-    bbox = np.array([106314., 517472., 106474., 517632.])
+    bbox = np.array([106314.0, 517472.0, 106474.0, 517632.0])
     source_epsg = "28992"
     target_epsg = "4326"
-    transformed_bbox = transform_bbox(
-        bbox, source_epsg, target_epsg, all_coords=True
-    )
+    transformed_bbox = transform_bbox(bbox, source_epsg, target_epsg, all_coords=True)
     assert transformed_bbox.shape == (8,)
