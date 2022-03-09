@@ -155,6 +155,8 @@ BREACHES_EXPORT_FIELDS = [
     "levbr",
     "kcu",
     "levl",
+    "discharge_coefficient_positive",
+    "discharge_coefficient_negative",
 ]
 
 CELLS_EXPORT_FIELDS = [

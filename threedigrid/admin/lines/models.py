@@ -214,8 +214,17 @@ class Breaches(Lines):
         subset_filter={
             'lines.kcu': subsets.KCU__IN_SUBSETS['POTENTIAL_BREACH'][0]})
 
+    levl = MappedSubsetArrayField(
+        array_to_map='breaches.levl',
+        map_from_array='breaches.levl', map_to_array='lines.id',
+        subset_filter={
+            'lines.kcu': subsets.KCU__IN_SUBSETS['POTENTIAL_BREACH'][0]})
+
     coordinates = MappedSubsetArrayField(
         array_to_map='breaches.coordinates',
         map_from_array='breaches.levl', map_to_array='lines.id',
         subset_filter={
             'lines.kcu': subsets.KCU__IN_SUBSETS['POTENTIAL_BREACH'][0]})
+
+    discharge_coefficient_positive = ArrayField()
+    discharge_coefficient_negative = ArrayField()
