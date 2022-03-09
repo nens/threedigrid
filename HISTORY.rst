@@ -17,6 +17,10 @@ History
 
 - Added dimp attribute to nodes.
 
+- Added crs attribute to GridH5Admin. Pyproj >=2.2 is required.
+
+- Drop python 2.7 support.
+
 
 1.1.13 (2021-12-09)
 -------------------
