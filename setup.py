@@ -78,6 +78,7 @@ setup(
         ],
     },
     install_requires=lightweight_requirements,
+    python_requires=">=3.6",
     license="BSD license",
     long_description=readme + '\n\n' + history,
     include_package_data=True,
