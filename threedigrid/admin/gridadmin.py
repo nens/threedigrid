@@ -12,7 +12,7 @@ import logging
 import h5py
 import numpy as np
 
-from threedigrid.geo_utils import transform_bbox
+from threedigrid.geo_utils import transform_bbox, raise_import_exception
 
 from threedigrid.admin.lines.models import Lines
 from threedigrid.admin.nodes.models import EmbeddedNodes, Nodes
@@ -23,7 +23,11 @@ from threedigrid.admin.breaches.models import Breaches
 from threedigrid.admin.pumps.models import Pumps
 from threedigrid.admin.levees.models import Levees
 from threedigrid.admin.h5py_datasource import H5pyGroup
-from pyproj import CRS
+
+try:
+    import pyproj
+except ImportError:
+    pyproj = None
 
 try:
     import asyncio
@@ -167,11 +171,13 @@ class GridH5Admin(object):
 
     @property
     def crs(self):
+        if pyproj is None:
+            raise_import_exception('pyproj')
         try:
-            return CRS(self.h5py_file.attrs['crs_wkt'])
+            return pyproj.CRS(self.h5py_file.attrs['crs_wkt'])
         except KeyError:
             # Fallback for older gridadmins without crs_wkt
-            return CRS.from_epsg(int(self.h5py_file.attrs['epsg_code']))
+            return pyproj.CRS.from_epsg(int(self.h5py_file.attrs['epsg_code']))
 
     @property
     def model_slug(self):

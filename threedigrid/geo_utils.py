@@ -4,6 +4,7 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 import numpy as np
 import logging
+from functools import lru_cache
 
 try:
     import pyproj
@@ -47,43 +48,31 @@ def raise_import_exception(name):
     )
 
 
+@lru_cache(10)
+def get_transformer(source_epsg, target_epsg):
+    if pyproj is None:
+        raise_import_exception('pyproj')
+
+    return pyproj.Transformer.from_crs(
+        pyproj.CRS.from_epsg(int(source_epsg)),
+        pyproj.CRS.from_epsg(int(target_epsg)),
+        always_xy=True
+    )
+    
+
 def transform_xys(x_array, y_array, source_epsg, target_epsg):
     """
     Transform x_array, y_array from source_epsg_code to
     target_epsg code
     """
-    if pyproj is None:
-        raise_import_exception('pyproj')
-
-    pyproj_version = pyproj.__version__.split('.')
-    check_version = '2.2.0'.split('.')
-
+    transformer = get_transformer(source_epsg, target_epsg)
     assert isinstance(x_array, np.ndarray)
     assert isinstance(y_array, np.ndarray)
 
     if x_array.size == 0 and y_array.size == 0:
         return np.array([[], []])
-    # if threedigrid.orm.transform is None:
-    #     raise ImportError('')
-    projections = []
-    for epsg_code in (source_epsg, target_epsg):
-        if isinstance(epsg_code, bytes):
-            epsg_code = epsg_code.decode('utf-8')
-        epsg_str = u'epsg:{}'.format(epsg_code)
 
-        if pyproj_version >= check_version:
-            projection = pyproj.Proj(epsg_str)
-        else:
-            projection = pyproj.Proj(init=epsg_str)
-        projections.append(projection)
-
-    if pyproj_version >= check_version:
-        reprojected = pyproj.transform(
-            projections[0], projections[1], x_array, y_array, always_xy=True)
-    else:
-        reprojected = pyproj.transform(
-            projections[0], projections[1], x_array, y_array)
-
+    reprojected = transformer.transform(x_array, y_array)
     return np.array(reprojected)
 
 

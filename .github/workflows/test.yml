@@ -15,12 +15,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # legacy python 2.7
-          - python: 2.7
-            pins: "mock numpy==1.13.* h5py==2.7.* shapely==1.6.4 pyproj==2.0.* geojson==2.3.0 mercantile==1.0.1 cftime==1.0.1"
           # 2017
           - python: 3.6
-            pins: "numpy==1.13.* h5py==2.7.* shapely==1.6.4 pyproj==2.1.* geojson==2.3.0 mercantile==1.0.1 cftime==1.0.1"
+            pins: "numpy==1.13.* h5py==2.7.* shapely==1.6.4 pyproj==2.2.* geojson==2.3.0 mercantile==1.0.1 cftime==1.0.1"
           # 2018
           - python: 3.7
             pins: "numpy==1.15.* h5py==2.9.* shapely==1.6.4 pyproj==2.2.* geojson==2.4.* mercantile==1.0.4 cftime==1.0.3"
