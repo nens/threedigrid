@@ -4,10 +4,7 @@ import unittest
 
 import h5py
 
-if sys.version_info >= (3, 3):  # noqa
-    from unittest import mock
-else:
-    from unittest import mock
+from unittest import mock
 
 import numpy as np
 

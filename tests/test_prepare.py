@@ -1,10 +1,7 @@
 import os
 import sys
 
-if sys.version_info >= (3, 3):  # noqa
-    from unittest import mock
-else:
-    from unittest import mock
+from unittest import mock
 
 from threedigrid.admin.idmapper import IdMapper
 from threedigrid.admin.prepare import GridAdminH5Prepare, is_prepared

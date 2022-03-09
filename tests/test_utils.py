@@ -48,14 +48,12 @@ def test_get_smallest_uint_dtype_raises_value_error_exceeding_input():
         get_smallest_uint_dtype(400000000000000000000000)
 
 
-@pytest.mark.skipif(sys.version_info < (3, 0), reason="requires Python3")
 def test_get_storage_area_bytes_to_float():
     a = np.array(["2.2"], np.bytes_)
     sa_a = _get_storage_area(a)
     assert sa_a == 2.2
 
 
-@pytest.mark.skipif(sys.version_info < (3, 0), reason="requires Python3")
 def test_get_storage_area_bytes_to_string():
     b = np.array([""], np.bytes_)
     sa_b = _get_storage_area(b)
@@ -65,7 +63,6 @@ def test_get_storage_area_bytes_to_string():
     assert sa_b == "--"  # default response
 
 
-@pytest.mark.skipif(sys.version_info > (3, 0), reason="requires Python2")
 def test_get_storage_area_string_input():
     b = np.array([""], np.string_)
     sa_b = _get_storage_area(b)
@@ -75,7 +72,6 @@ def test_get_storage_area_string_input():
     assert sa_b == "--"  # default response
 
 
-@pytest.mark.skipif(sys.version_info > (3, 0), reason="requires Python2")
 def test_get_storage_area_string_to_float():
     b = np.array(["0.5"], np.string_)
     sa_b = _get_storage_area(b)

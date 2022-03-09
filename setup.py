@@ -6,11 +6,8 @@
 import codecs
 import os
 import re
-import sys
 
 from setuptools import find_packages, setup
-
-python_27 = sys.version_info <= (2, 7)
 
 here = os.path.abspath(os.path.dirname(__file__))
 
