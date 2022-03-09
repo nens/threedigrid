@@ -1,27 +1,21 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
-# -*- coding: utf-8 -*-
 """
 Models
 ++++++
 
 The ``Levees`` model.
 """
-from __future__ import unicode_literals
-from __future__ import print_function
 
-from __future__ import absolute_import
 try:
     from osgeo import ogr
 except ImportError:
     ogr = None
 
-from threedigrid.numpy_utils import reshape_flat_array
-from threedigrid.geo_utils import raise_import_exception
-from threedigrid.orm.models import Model
-from threedigrid.orm.fields import MultiLineArrayField
-from threedigrid.orm.fields import ArrayField
-
 from threedigrid.admin.levees import exporters
+from threedigrid.geo_utils import raise_import_exception
+from threedigrid.numpy_utils import reshape_flat_array
+from threedigrid.orm.fields import ArrayField, MultiLineArrayField
+from threedigrid.orm.models import Model
 
 
 class Levees(Model):
@@ -30,8 +24,8 @@ class Levees(Model):
     max_breach_depth = ArrayField()
     coords = MultiLineArrayField()
 
-    def __init__(self, *args,  **kwargs):
-        super(Levees, self).__init__(*args, **kwargs)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
         self._geoms = []
         self.current_epsg = None
@@ -53,7 +47,7 @@ class Levees(Model):
 
         # works on premise of ogr install
         if ogr is None:
-            raise_import_exception('ogr')
+            raise_import_exception("ogr")
 
         if self._geoms:
             return

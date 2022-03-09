@@ -1,5 +1,4 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
-# -*- coding: utf-8 -*-
 """
 Models
 ++++++
@@ -12,28 +11,21 @@ For examples how to query the ``Nodes`` model see :ref:`api-label`
 
 """
 
-from __future__ import unicode_literals
-from __future__ import print_function
 
-from __future__ import absolute_import
-import numpy as np
 import itertools
 
-from threedigrid.orm.models import Model
-from threedigrid.orm.fields import ArrayField
-from threedigrid.orm.base.fields import BooleanArrayField
-from threedigrid.orm.fields import PointArrayField
-from threedigrid.orm.fields import BboxArrayField
+import numpy as np
+
+from threedigrid.admin.nodes import exporters, subsets
 from threedigrid.geo_utils import transform_xys
 from threedigrid.numpy_utils import get_smallest_uint_dtype
-from threedigrid.admin.nodes import exporters
-from threedigrid.admin.nodes import subsets
-from six.moves import zip
-
+from threedigrid.orm.base.fields import BooleanArrayField
+from threedigrid.orm.fields import ArrayField, BboxArrayField, PointArrayField
+from threedigrid.orm.models import Model
 
 NODE_SUBSETS = {
-    'node_type__eq': subsets.NODE_TYPE__EQ_SUBSETS,
-    'node_type__in': subsets.NODE_TYPE__IN_SUBSETS,
+    "node_type__eq": subsets.NODE_TYPE__EQ_SUBSETS,
+    "node_type__in": subsets.NODE_TYPE__IN_SUBSETS,
 }
 
 
@@ -69,7 +61,7 @@ class Nodes(Model):
 
     def __init__(self, *args, **kwargs):
 
-        super(Nodes, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self._exporters = [
             exporters.NodesOgrExporter(self),
@@ -77,17 +69,20 @@ class Nodes(Model):
 
     @property
     def locations_2d(self):
-        data = self.subset('2D_open_water').data
+        data = self.subset("2D_open_water").data
         # x0 = 0, y0 = 0
         # Translate
         # data['coordinates'][0] += x0
         # data['coordinates'][1] += y0
 
         # Return [[node_id, coordinate_x + x0, coordinate_y + y0]]
-        return list(zip(
-            data['id'].tolist(),
-            data['coordinates'][0].tolist(),
-            data['coordinates'][1].tolist()))
+        return list(
+            zip(
+                data["id"].tolist(),
+                data["coordinates"][0].tolist(),
+                data["coordinates"][1].tolist(),
+            )
+        )
 
 
 class AddedCalculationNodes(Nodes):
@@ -128,7 +123,7 @@ class Cells(Nodes):
 
     def __init__(self, *args, **kwargs):
 
-        super(Cells, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._exporters = [
             exporters.CellsOgrExporter(self),
         ]
@@ -140,11 +135,7 @@ class Cells(Nodes):
                  minx, miny, maxx, miny, maxx, maxy, minx, maxy
         """
         minx, miny, maxx, maxy = self.cell_coords
-        return np.vstack(
-            (minx, miny,
-             maxx, miny,
-             maxx, maxy,
-             minx, maxy))
+        return np.vstack((minx, miny, maxx, miny, maxx, maxy, minx, maxy))
 
     def get_id_from_xy(self, x, y, xy_epsg_code=None, subset_name=None):
         """
@@ -157,8 +148,8 @@ class Cells(Nodes):
 
         if xy_epsg_code and xy_epsg_code != self.epsg_code:
             xy = transform_xys(
-                np.array([x]), np.array([y]),
-                xy_epsg_code, self.epsg_code).flatten()
+                np.array([x]), np.array([y]), xy_epsg_code, self.epsg_code
+            ).flatten()
         else:
             xy = [x, y]
 
@@ -168,7 +159,7 @@ class Cells(Nodes):
         id = inst.filter(cell_coords__contains_point=xy).id
         return id.tolist()
 
-    def get_ids_from_pix_bbox(self, bbox, subset_name='2D_OPEN_WATER'):
+    def get_ids_from_pix_bbox(self, bbox, subset_name="2D_OPEN_WATER"):
         """
         :param x: the x coordinate in xy_epsg_code
         :param y: the y coordinate in xy_epsg_code
@@ -183,10 +174,10 @@ class Cells(Nodes):
         id = inst.filter(pixel_coords__intersects_bbox=bbox).id
         return id.tolist()
 
-    def get_nodgrid(self, pix_bbox, subset_name='2D_OPEN_WATER'):
+    def get_nodgrid(self, pix_bbox, subset_name="2D_OPEN_WATER"):
         ids = np.array(
             self.get_ids_from_pix_bbox(pix_bbox, subset_name=subset_name),
-            dtype=np.int32
+            dtype=np.int32,
         )
         nodgrid = create_nodgrid(
             self.pixel_coords[:],
@@ -194,7 +185,7 @@ class Cells(Nodes):
             int(pix_bbox[2] - pix_bbox[0]),
             int(pix_bbox[3] - pix_bbox[1]),
             int(pix_bbox[0]),
-            int(pix_bbox[1])
+            int(pix_bbox[1]),
         )
         return nodgrid[::-1, ::]
 
@@ -262,7 +253,7 @@ class Cells(Nodes):
         return "<orm cells instance of {}>".format(self.model_name)
 
     def __contenttype__(self):
-        return 'cells'
+        return "cells"
 
 
 class Grid(Model):
@@ -285,7 +276,7 @@ class Grid(Model):
     jp = ArrayField()
 
     def __init__(self, *args, **kwargs):
-        super(Grid, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.class_kwargs["n2dtot"] = kwargs["n2dtot"]
 
     @property
@@ -294,8 +285,7 @@ class Grid(Model):
 
     @property
     def dx(self):
-        """Return size of the grid cell for each refinement level, in meters.
-        """
+        """Return size of the grid cell for each refinement level, in meters."""
         return self._datasource["dx"][:]
 
     @property
@@ -333,20 +323,20 @@ class Grid(Model):
         grid_arr = np.zeros(dem_shape, dtype=dtype)
 
         # applies for for 2D nodes only
-        _k = self.nodk[0:self.n2dtot + 1] - 1
-        _m = self.nodm[0:self.n2dtot + 1] - 1
-        _n = self.nodn[0:self.n2dtot + 1] - 1
+        _k = self.nodk[0 : self.n2dtot + 1] - 1
+        _m = self.nodm[0 : self.n2dtot + 1] - 1
+        _n = self.nodn[0 : self.n2dtot + 1] - 1
 
         # the size in pixels of each grid cell
         _size = self.dx[_k] / dem_pixelsize
         # corresponding node index
-        _ind = np.arange(0, self.n2dtot + 1, dtype='int')
+        _ind = np.arange(0, self.n2dtot + 1, dtype="int")
 
-        n_slice_start = np.array(_n * _size, dtype='int')
-        n_slice_end = np.array((_n * _size) + _size, dtype='int')
+        n_slice_start = np.array(_n * _size, dtype="int")
+        n_slice_end = np.array((_n * _size) + _size, dtype="int")
         n_slice = list(zip(n_slice_start, n_slice_end))
-        m_slice_start = np.array(_m * _size, dtype='int')
-        m_slice_end = np.array((_m * _size) + _size, dtype='int')
+        m_slice_start = np.array(_m * _size, dtype="int")
+        m_slice_end = np.array((_m * _size) + _size, dtype="int")
         m_slice = list(zip(m_slice_start, m_slice_end))
 
         for ns, ms, idx in zip(n_slice, m_slice, _ind):

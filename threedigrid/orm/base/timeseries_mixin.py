@@ -1,42 +1,44 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-from __future__ import print_function
 
-from __future__ import absolute_import
 import numpy as np
+
 # optional install results
 try:
     from cftime import num2date
 except ImportError:
     pass
 
-from threedigrid.orm.base.fields import TimeSeriesCompositeArrayField
-from threedigrid.orm.base.fields import TimeSeriesSubsetArrayField
-from threedigrid.orm.base.fields import TimeSeriesArrayField
+
+from threedigrid.orm.base.fields import (
+    TimeSeriesArrayField,
+    TimeSeriesCompositeArrayField,
+    TimeSeriesSubsetArrayField,
+)
 from threedigrid.orm.base.utils import _flatten_dict_values
 
-import six
 
-
-class ResultMixin(object):
+class ResultMixin:
     """
     Subclass this mixin and add the result
     fields as 'TimeSeriesArrayField'
     """
+
     timeseries_mask = None
     _done_composition = False
 
     def __init__(self, *args, **kwargs):
         # pop mixin specific fields and store them
         # in the class_kwargs
-        self.timeseries_filter = kwargs.pop('timeseries_filter', None)
+        self.timeseries_filter = kwargs.pop("timeseries_filter", None)
         self.timeseries_sample = kwargs.pop("timeseries_sample", None)
         self.timeseries_mask = None
-        self.class_kwargs.update({
-            'timeseries_filter': self.timeseries_filter,
-            'timeseries_sample': self.timeseries_sample})
-        if not self._done_composition and hasattr(self, 'Meta'):
+        self.class_kwargs.update(
+            {
+                "timeseries_filter": self.timeseries_filter,
+                "timeseries_sample": self.timeseries_sample,
+            }
+        )
+        if not self._done_composition and hasattr(self, "Meta"):
             self._set_composite_fields()
             self._set_subset_fields()
 
@@ -45,7 +47,7 @@ class ResultMixin(object):
         add composite fields to the instance
         """
 
-        if not hasattr(self.Meta, 'composite_fields'):
+        if not hasattr(self.Meta, "composite_fields"):
             return
 
         fields = {
@@ -59,39 +61,35 @@ class ResultMixin(object):
         """
         add subset fields to the instance
         """
-        if not hasattr(self, 'Meta'):
+        if not hasattr(self, "Meta"):
             return
 
-        if not hasattr(self.Meta, 'subset_fields'):
+        if not hasattr(self.Meta, "subset_fields"):
             return
 
         fields = {}
-        id_value = self.get_field_value('id')
+        id_value = self.get_field_value("id")
         if id_value:
-            count = self.get_field_value('id').size
+            count = self.get_field_value("id").size
         else:
             # Dummy value
             count = 1024
-        for v, k in six.iteritems(self.Meta.subset_fields):
+        for v, k in self.Meta.subset_fields.items():
             _source_name = _flatten_dict_values(k)
             if not _source_name:
                 continue
             source_name = _source_name[0]
 
-            fields[v] = TimeSeriesSubsetArrayField(
-                source_name=source_name, size=count
-            )
+            fields[v] = TimeSeriesSubsetArrayField(source_name=source_name, size=count)
 
         self._meta.add_fields(fields, hide_private=True)
 
-    def generate_timeseries_mask(
-            self, start_time=None, end_time=None, indexes=None):
+    def generate_timeseries_mask(self, start_time=None, end_time=None, indexes=None):
         timestamps = self.timestamps
         timeseries_mask = True
 
         if all((start_time is None, end_time is None, indexes is None)):
-            raise KeyError(
-                "Please provide either start_time, end_time or indexes")
+            raise KeyError("Please provide either start_time, end_time or indexes")
 
         if any((start_time is not None, end_time is not None)):
             if start_time is not None:
@@ -106,24 +104,24 @@ class ResultMixin(object):
             elif isinstance(indexes, slice):
                 self.timeseries_mask = indexes
             else:
-                raise TypeError(
-                    "indexes should either be a list/tuple or a slice")
+                raise TypeError("indexes should either be a list/tuple or a slice")
 
         if self.timeseries_sample:
-            num_points = self.timeseries_sample['num_points']
+            num_points = self.timeseries_sample["num_points"]
             # Only sample if the required num_points is smaller
             # than the available points
             timestamps_size = self.timestamps.size
             if timestamps_size > num_points:
                 if isinstance(self.timeseries_mask, slice):
-                    indexes = np.arange(
-                        timestamps_size
-                    )[self.timeseries_mask].flatten().tolist()
+                    indexes = (
+                        np.arange(timestamps_size)[self.timeseries_mask]
+                        .flatten()
+                        .tolist()
+                    )
                 else:
-                    indexes = np.argwhere(
-                        self.timeseries_mask).flatten().tolist()
+                    indexes = np.argwhere(self.timeseries_mask).flatten().tolist()
 
-                if hasattr(self._datasource, 'swmr_mode'):
+                if hasattr(self._datasource, "swmr_mode"):
                     # always exclude the last item in swmr_mode, to be sure
                     # that the datasource['time'].size is the same
                     # as of the datasource['xxx'].size datasets that
@@ -132,8 +130,9 @@ class ResultMixin(object):
 
                 self.timeseries_mask = self._get_indexes_subset(
                     indexes,
-                    limit=self.timeseries_sample['num_points'],
-                    include_end=self.timeseries_sample['include_end'])
+                    limit=self.timeseries_sample["num_points"],
+                    include_end=self.timeseries_sample["include_end"],
+                )
 
     def _get_indexes_subset(self, indexes, limit, include_end=True):
         """
@@ -174,18 +173,18 @@ class ResultMixin(object):
                             else the first point is always included.
         """
         new_class_kwargs = dict(self.class_kwargs)
-        new_class_kwargs.update({
-            'timeseries_sample': {
-                'num_points': num_points,
-                'include_end': include_end}
-        })
+        new_class_kwargs.update(
+            {
+                "timeseries_sample": {
+                    "num_points": num_points,
+                    "include_end": include_end,
+                }
+            }
+        )
 
-        return self.__class__(
-            datasource=self._datasource,
-            **new_class_kwargs)
+        return self.__class__(datasource=self._datasource, **new_class_kwargs)
 
-    def timeseries(
-            self, start_time=None, end_time=None, indexes=None):
+    def timeseries(self, start_time=None, end_time=None, indexes=None):
         """
         Allows filtering on timeseries.
 
@@ -231,16 +230,17 @@ class ResultMixin(object):
         # Create a copy of the class_kwargs
         # and update it with timeseries_mask
         new_class_kwargs = dict(self.class_kwargs)
-        new_class_kwargs.update({
-            'timeseries_filter': {
-                'start_time': start_time,
-                'end_time': end_time,
-                'indexes': indexes}
-        })
+        new_class_kwargs.update(
+            {
+                "timeseries_filter": {
+                    "start_time": start_time,
+                    "end_time": end_time,
+                    "indexes": indexes,
+                }
+            }
+        )
 
-        return self.__class__(
-            datasource=self._datasource,
-            **new_class_kwargs)
+        return self.__class__(datasource=self._datasource, **new_class_kwargs)
 
     def get_timeseries_mask_filter(self):
         """
@@ -248,12 +248,10 @@ class ResultMixin(object):
                  on timeseries
         """
         if self.timeseries_mask is None and self.timeseries_filter is not None:
-            self.generate_timeseries_mask(
-                **self.timeseries_filter
-            )
+            self.generate_timeseries_mask(**self.timeseries_filter)
         if self.timeseries_mask is not None:
             return self.timeseries_mask
-        return self.class_kwargs.get('timeseries_chunk_size')
+        return self.class_kwargs.get("timeseries_chunk_size")
 
     @property
     def timestamps(self):
@@ -262,38 +260,41 @@ class ResultMixin(object):
         """
 
         # override if datasource has get_timestamps function
-        if hasattr(self._datasource, 'get_timestamps'):
+        if hasattr(self._datasource, "get_timestamps"):
             return self._datasource.get_timestamps()
 
-        time_key = 'time'
+        time_key = "time"
         if time_key not in list(self._datasource.keys()):
             raise AttributeError(
-                'Result {} has no attribute {}'.format(
-                    self._datasource.netcdf_file.filepath(), time_key)
+                "Result {} has no attribute {}".format(
+                    self._datasource.netcdf_file.filepath(), time_key
+                )
             )
 
-        value = self._datasource['time'][:]
+        value = self._datasource["time"][:]
         if self.timeseries_mask is not None:
             value = value[self.timeseries_mask]
         return value
 
     def get_timestamps(self, timeseries_mask):
-        time_key = 'time'
+        time_key = "time"
         if time_key not in list(self._datasource.keys()):
             raise AttributeError(
-                'Result {} has no attribute {}'.format(
-                    self._datasource.netcdf_file.filepath(), time_key)
+                "Result {} has no attribute {}".format(
+                    self._datasource.netcdf_file.filepath(), time_key
+                )
             )
-        value = self._datasource['time'][:]
+        value = self._datasource["time"][:]
         return value[timeseries_mask]
 
     @property
     def dt_timestamps(self):
         return [
-            t.isoformat() for t in num2date(
+            t.isoformat()
+            for t in num2date(
                 self.timestamps,
-                units=self._datasource['time'].attrs.get(
-                    'units').decode('utf-8'))
+                units=self._datasource["time"].attrs.get("units").decode("utf-8"),
+            )
         ]
 
 
@@ -302,16 +303,16 @@ class AggregateResultMixin(ResultMixin):
     Subclass this mixin and add the result
     fields as 'TimeSeriesArrayField' or TimeSeriesCompositeArrayField
     """
+
     is_aggregate = True
 
     def __init__(self, *args, **kwargs):
-        super(AggregateResultMixin, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # Create a copy of the class_kwargs
         # and update it with timeseries_mask
         new_class_kwargs = dict(self.class_kwargs)
-        new_class_kwargs.update({
-            'timeseries_mask': self.timeseries_mask})
+        new_class_kwargs.update({"timeseries_mask": self.timeseries_mask})
 
     def get_timeseries_mask_filter(self):
         """
@@ -319,13 +320,13 @@ class AggregateResultMixin(ResultMixin):
                  on timeseries
         """
         if self.timeseries_filter is not None:
-            start_time = self.timeseries_filter['start_time']
-            end_time = self.timeseries_filter['end_time']
-            indexes = self.timeseries_filter['indexes']
+            start_time = self.timeseries_filter["start_time"]
+            end_time = self.timeseries_filter["end_time"]
+            indexes = self.timeseries_filter["indexes"]
 
             self.timeseries_mask = {}
             field_names = self._meta.get_fields()
-            for field_name, field_inst in six.iteritems(field_names):
+            for field_name, field_inst in field_names.items():
                 if not isinstance(field_inst, TimeSeriesArrayField):
                     continue
                 ts = self.get_timestamps(field_name)
@@ -366,15 +367,16 @@ class AggregateResultMixin(ResultMixin):
 
         """
         new_class_kwargs = dict(self.class_kwargs)
-        new_class_kwargs.update({
-            'timeseries_filter': {
-                'start_time': start_time,
-                'end_time': end_time,
-                'indexes': indexes}
-        })
-        return self.__class__(
-            datasource=self._datasource,
-            **new_class_kwargs)
+        new_class_kwargs.update(
+            {
+                "timeseries_filter": {
+                    "start_time": start_time,
+                    "end_time": end_time,
+                    "indexes": indexes,
+                }
+            }
+        )
+        return self.__class__(datasource=self._datasource, **new_class_kwargs)
 
     def _get_mask(self, start_time, end_time, indexes, timestamps):
         """
@@ -386,8 +388,7 @@ class AggregateResultMixin(ResultMixin):
         :return:
         """
         if all((start_time is None, end_time is None, indexes is None)):
-            raise KeyError(
-                "Please provide either start_time, end_time or indexes")
+            raise KeyError("Please provide either start_time, end_time or indexes")
 
         timeseries_mask = True
         if any((start_time is not None, end_time is not None)):
@@ -401,8 +402,7 @@ class AggregateResultMixin(ResultMixin):
             if isinstance(indexes, slice):
                 timeseries_mask = indexes
             else:
-                raise TypeError(
-                    "indexes should either be a slice")
+                raise TypeError("indexes should either be a slice")
 
         return timeseries_mask
 
@@ -413,8 +413,7 @@ class AggregateResultMixin(ResultMixin):
         for field_name, field in self._meta.get_fields().items():
             if isinstance(field, TimeSeriesArrayField):
                 try:
-                    timestamps_dict[field_name] = self.get_timestamps(
-                        field_name)
+                    timestamps_dict[field_name] = self.get_timestamps(field_name)
                 except (AttributeError, TypeError):
                     timestamps_dict[field_name] = np.array([])
 
@@ -428,19 +427,19 @@ class AggregateResultMixin(ResultMixin):
         :return: array of timestamps
         :raises AttributeError when no the field has no timestamps
         """
-        time_key = 'time_' + field_name
+        time_key = "time_" + field_name
 
         if time_key in list(self._datasource.keys()):
             field_timestamps = self._datasource[time_key][:]
             # Mask the field_timestamps with the timeseries_mask of
             # that field when available
-            if ((hasattr(self, 'timeseries_mask') and
-                 self.timeseries_mask is not None)):
+            if hasattr(self, "timeseries_mask") and self.timeseries_mask is not None:
                 if field_name in self.timeseries_mask:
                     field_timestamps = field_timestamps[
-                        self.timeseries_mask[field_name]]
+                        self.timeseries_mask[field_name]
+                    ]
             return field_timestamps
-        raise AttributeError('No timestamps found for {}'.format(field_name))
+        raise AttributeError("No timestamps found for {}".format(field_name))
 
     def get_time_unit(self, field_name):
         """
@@ -450,13 +449,13 @@ class AggregateResultMixin(ResultMixin):
         :raises AttributeError when the field has no time unit attribute
         """
 
-        time_key = 'time_' + field_name
+        time_key = "time_" + field_name
 
         if time_key in list(self._datasource.keys()):
             arr = self._datasource[time_key]
             try:
-                return arr.attrs.get('units')
+                return arr.attrs.get("units")
             except AttributeError:
                 raise AttributeError(
-                    'No time unit found for field {}'.format(field_name)
+                    "No time unit found for field {}".format(field_name)
                 )

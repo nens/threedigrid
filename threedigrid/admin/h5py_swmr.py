@@ -10,8 +10,7 @@ class H5SwmrFile(h5py.File):
 
     def __init__(self, path, file_modus):
         self._datasets = {}
-        super(H5SwmrFile, self).__init__(
-            path, file_modus, swmr=True)
+        super().__init__(path, file_modus, swmr=True)
 
         # By default register all datasets
         for key in self.keys():
@@ -31,7 +30,7 @@ class H5SwmrFile(h5py.File):
         if key in self._datasets:
             return self._datasets[key]
 
-        res = super(H5SwmrFile, self).__getitem__(key)
+        res = super().__getitem__(key)
         if isinstance(res, h5py._hl.dataset.Dataset):
             if key not in self._datasets:
                 self._datasets[key] = res

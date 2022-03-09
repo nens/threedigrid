@@ -1,22 +1,15 @@
-from itertools import count
 import os
 import shutil
-import sys
+from itertools import count
+from unittest import mock
 
 import h5py
-
-if sys.version_info >= (3, 3):  # noqa
-    from unittest import mock
-else:
-    import mock
 import pytest
-import six
 
 from threedigrid.admin.constants import TYPE_CODE_MAP
 from threedigrid.admin.gridresultadmin import GridH5Admin, GridH5ResultAdmin
-from threedigrid.admin.prepare import GridAdminH5Export
 from threedigrid.admin.idmapper import IdMapper
-
+from threedigrid.admin.prepare import GridAdminH5Export
 
 test_file_dir = os.path.join(os.path.dirname(__file__), "test_files")
 
@@ -31,8 +24,7 @@ NODE_LENGTH = 10
 
 @pytest.fixture(params=["gridadmin.h5"])  # , "gridadmin_v2.h5"])
 def gr(request):
-    gr = GridH5ResultAdmin(
-        os.path.join(test_file_dir, request.param), result_file)
+    gr = GridH5ResultAdmin(os.path.join(test_file_dir, request.param), result_file)
     yield gr
     gr.close()
 
@@ -69,7 +61,7 @@ def simple_id_map(node_length=NODE_LENGTH):
 @pytest.fixture
 def empty_hdf5_file(tmpdir):
     """Create an empty hdf5 file"""
-    hdf5_file_name = six.text_type(tmpdir.join("gridadmin.h5"))
+    hdf5_file_name = str(tmpdir.join("gridadmin.h5"))
     with h5py.File(hdf5_file_name, "w") as h5py_file:
         yield h5py_file
 
@@ -77,7 +69,7 @@ def empty_hdf5_file(tmpdir):
 @pytest.fixture
 def h5py_file(tmpdir):
     """Copy and open an unprepared h5py file, based on gridadmin.bck"""
-    tmp_file = six.text_type(tmpdir.join("gridadmin.h5"))
+    tmp_file = str(tmpdir.join("gridadmin.h5"))
     shutil.copyfile(grid_bck, tmp_file)
     with h5py.File(tmp_file, "r+") as h5py_file:
         yield h5py_file

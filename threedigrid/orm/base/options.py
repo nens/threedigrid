@@ -1,5 +1,4 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
-# -*- coding: utf-8 -*-
 """
 Options
 +++++++
@@ -16,26 +15,19 @@ Public methods primarily act on fields:
   - add a field instances to a model
 
 """
-from __future__ import unicode_literals
-from __future__ import print_function
-
-from __future__ import absolute_import
-from collections import defaultdict
-from collections import namedtuple
-from itertools import product
-
 
 import logging
+from collections import defaultdict, namedtuple
+from itertools import product
 
 from threedigrid.numpy_utils import create_np_lookup_index_for
 from threedigrid.orm.base.fields import TimeSeriesCompositeArrayField
 from threedigrid.orm.base.utils import _flatten_dict_values
-import six
 
 logger = logging.getLogger(__name__)
 
 
-class Options(object):
+class Options:
     """
     class that adds meta data to a model instance. Accessible
     through the _meta API. To retrieve meta data of a field, say ``s1``:
@@ -53,6 +45,7 @@ class Options(object):
     ``gr.nodes._meta.s1._asdict()['units']``
 
     """
+
     _lookup = None  # placeholder for lookup index array
 
     def __init__(self, inst):
@@ -71,10 +64,7 @@ class Options(object):
             the only_names flag is given a list of the models field
             names is returned
         """
-        fields = {
-            x: self.get_field(x)
-            for x in self.inst._field_names if x != 'meta'
-        }
+        fields = {x: self.get_field(x) for x in self.inst._field_names if x != "meta"}
         if only_names:
             return list(fields.keys())
         return fields
@@ -98,7 +88,7 @@ class Options(object):
             return
         setattr(self.inst, field_name, field)
         # remove private fields
-        if hide_private and field_name.startswith('_'):
+        if hide_private and field_name.startswith("_"):
             return
         _union = set(self.inst._field_names).union({field_name})
         self.inst._field_names = _union
@@ -112,7 +102,7 @@ class Options(object):
             instance but excluded from the list of field names
         """
 
-        for field_name, field in six.iteritems(fields):
+        for field_name, field in fields.items():
             self.add_field(field_name, field, hide_private)
 
     def _source_exists(self, field_name):
@@ -123,8 +113,8 @@ class Options(object):
         :param field_name: name of the source field name
         :return: True if it exists False otherwise
         """
-        _has_comp = hasattr(self.inst.Meta, 'composite_fields')
-        _has_sub = hasattr(self.inst.Meta, 'subset_fields')
+        _has_comp = hasattr(self.inst.Meta, "composite_fields")
+        _has_sub = hasattr(self.inst.Meta, "subset_fields")
         if not _has_comp and not _has_sub:
             return field_name in list(self.inst._datasource.keys())
 
@@ -165,7 +155,7 @@ class Options(object):
 
     def _set_field_attrs(self):
         # not all models must have a Meta instance
-        if not hasattr(self.inst, 'Meta'):
+        if not hasattr(self.inst, "Meta"):
             return
 
         # not all models with a Meta class must have a field_attrs attribute
@@ -177,7 +167,7 @@ class Options(object):
         # example: ``gr.nodes._meta.s1``
         for _field in self.inst._field_names:
             meta_values = self._get_meta_values(_field)
-            nt = namedtuple(_field, ','.join(self.inst.Meta.field_attrs))
+            nt = namedtuple(_field, ",".join(self.inst.Meta.field_attrs))
             setattr(self, _field, nt(*meta_values[_field]))
 
     def _get_lookup_index(self):
@@ -193,8 +183,9 @@ class Options(object):
             ``_needs_lookup`` attribute or if the attribute is False
         """
         if self._lookup is None:
-            values = [self.inst.get_field_value(x)
-                      for x in self.inst.Meta.lookup_fields]
+            values = [
+                self.inst.get_field_value(x) for x in self.inst.Meta.lookup_fields
+            ]
             self._lookup = create_np_lookup_index_for(*values)
 
         return self._lookup
@@ -212,19 +203,23 @@ class Options(object):
             datasets must have the value 'm' for the 'units' attribute
         """
         source_names = self.inst.Meta.composite_fields.get(field_name)
-        meta_attrs = [self.inst._datasource.attr(source_name, attr_name)
-                      for source_name in source_names]
+        meta_attrs = [
+            self.inst._datasource.attr(source_name, attr_name)
+            for source_name in source_names
+        ]
 
         if len(meta_attrs) < 2:
-            return ''
+            return ""
 
         try:
-            assert all(x == meta_attrs[0] for x in meta_attrs), \
-                'composite fields must have the same {}. ' \
-                'Failed to get meta info for field_name {} '.format(
-                    attr_name, field_name)
+            assert all(x == meta_attrs[0] for x in meta_attrs), (
+                "composite fields must have the same {}. "
+                "Failed to get meta info for field_name {} ".format(
+                    attr_name, field_name
+                )
+            )
         except AssertionError:
-            return ''
+            return ""
         return meta_attrs[0]
 
     def _is_type_composite_field(self, field_name):
@@ -254,15 +249,15 @@ class ModelMeta(type):
     def __new__(mcs, name, bases, namespace, **kwds):
         new_mixin = type.__new__(mcs, name, bases, dict(namespace))
         # composite_fields has been set directly, do not try to compose
-        composite_fields = namespace.get('composite_fields')
+        composite_fields = namespace.get("composite_fields")
         if composite_fields:
             return new_mixin
 
         # get base composition and vars to combine with
-        base_composition = namespace.get('base_composition')
-        composition_vars = namespace.get('composition_vars')
-        lookup_fields = namespace.get('lookup_fields')
-        base_subset_fields = namespace.get('base_subset_fields')
+        base_composition = namespace.get("base_composition")
+        composition_vars = namespace.get("composition_vars")
+        lookup_fields = namespace.get("lookup_fields")
+        base_subset_fields = namespace.get("base_subset_fields")
 
         # simple results
         if not composition_vars and base_composition:
@@ -271,31 +266,31 @@ class ModelMeta(type):
 
         if composition_vars and not base_composition:
             raise AttributeError(
-                'Missing base_composition attribute for the composition_vars'
+                "Missing base_composition attribute for the composition_vars"
             )
         # produce all possible combinations and add composite_fields
         # attribute to the class
         new_mixin.composite_fields = {}
 
-        for k, v in six.iteritems(composition_vars):
+        for k, v in composition_vars.items():
             c_field = base_composition.get(k)
             if not c_field:
                 continue
             for p in v:
-                new_key = k + '_' + p
+                new_key = k + "_" + p
                 agg_fields = ModelMeta.combine_vars(c_field, {p})
                 new_mixin.composite_fields[new_key] = agg_fields
 
         if base_subset_fields:
             new_mixin.subset_fields = {}
-            for k, v in six.iteritems(composition_vars):
+            for k, v in composition_vars.items():
                 subset_dict = base_subset_fields.get(k)
                 if not subset_dict:
                     continue
                 s_field = list(subset_dict.values())[0]
                 s_name = list(subset_dict.keys())[0]
                 for p in v:
-                    new_key = k + '_' + p
+                    new_key = k + "_" + p
                     agg_fields = ModelMeta.combine_vars({s_field}, {p})
                     new_mixin.subset_fields[new_key] = {s_name: agg_fields}
 
@@ -308,7 +303,7 @@ class ModelMeta(type):
         return new_mixin
 
     @staticmethod
-    def combine_vars(prod_a, prod_b, join_str='_'):
+    def combine_vars(prod_a, prod_b, join_str="_"):
         """Return the cartesian product of prod_a with prod_b, combined together with
         join_str.
 

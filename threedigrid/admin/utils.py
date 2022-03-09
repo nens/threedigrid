@@ -1,16 +1,10 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
-# -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
-from __future__ import print_function
-from __future__ import unicode_literals
 
 import logging
 from itertools import tee
 
 import numpy as np
-from six.moves import range
-from six.moves import zip
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +14,7 @@ BBOX_RIGHT = 2
 BBOX_BOTTOM = 3
 
 
-class PKMapper(object):
+class PKMapper:
     """
     Solves the following situation:
 
@@ -70,8 +64,8 @@ class PKMapper(object):
         # on content_pk
         sort_idx = np.argsort(pk_copy)
         self._indices = sort_idx[
-            np.searchsorted(
-                pk_copy, content_pk_copy, sorter=sort_idx)]
+            np.searchsorted(pk_copy, content_pk_copy, sorter=sort_idx)
+        ]
 
         # Note: self._indices[i] == 0 when the content_pk[i] could not
         # be found in pk
@@ -96,12 +90,10 @@ class PKMapper(object):
         if len(np_array.shape) > 1:
             to_select_from = np.insert(np_array, 0, null_value, axis=1)
         else:
-            to_select_from = np.concatenate(
-                (np.array([null_value]), np_array))
+            to_select_from = np.concatenate((np.array([null_value]), np_array))
 
         # Enable multidimensional array's.
-        _filter = [slice(None)] * (
-            len(np_array.shape) - 1) + [self._indices]
+        _filter = [slice(None)] * (len(np_array.shape) - 1) + [self._indices]
         return to_select_from[tuple(_filter)]
 
 
@@ -136,33 +128,33 @@ class KCUDescriptor(dict):
     """
 
     def __init__(self, *arg, **kw):
-        super(KCUDescriptor, self).__init__(*arg, **kw)
+        super().__init__(*arg, **kw)
         self.bound_keys_groundwater = [x for x in range(600, 1000)]
         self.bound_keys_2d = [x for x in range(200, 600)]
 
         self._descr = {
-            0: '1d embedded line',
-            1: '1d isolated line',
-            2: '1d connected line',
-            3: '1d long-crested structure',
-            4: '1d short-crested structure',
-            5: '1d double connected line',
-            51: '1d2d single connected line with storage',
-            52: '1d2d single connected line without storage',
-            53: '1d2d double connected line with storage',
-            54: '1d2d double connected line without storage',
-            55: '1d2d connected line possible breach',
-            56: '1d2d connected line active breach',
-            57: '1d2d groundwater link',
-            58: '1d2d groundwater link # diff to 57? ',
-            100: '2d line',
-            101: '2d obstacle (levee) line',
-            150: '2d vertical link',
-            -150: '2d groundwater link',
-            200: '2d boundary',
-            300: '2d boundary',
-            400: '2d boundary',
-            500: '2d boundary',
+            0: "1d embedded line",
+            1: "1d isolated line",
+            2: "1d connected line",
+            3: "1d long-crested structure",
+            4: "1d short-crested structure",
+            5: "1d double connected line",
+            51: "1d2d single connected line with storage",
+            52: "1d2d single connected line without storage",
+            53: "1d2d double connected line with storage",
+            54: "1d2d double connected line without storage",
+            55: "1d2d connected line possible breach",
+            56: "1d2d connected line active breach",
+            57: "1d2d groundwater link",
+            58: "1d2d groundwater link # diff to 57? ",
+            100: "2d line",
+            101: "2d obstacle (levee) line",
+            150: "2d vertical link",
+            -150: "2d groundwater link",
+            200: "2d boundary",
+            300: "2d boundary",
+            400: "2d boundary",
+            500: "2d boundary",
         }
 
     def get(self, item):
@@ -170,7 +162,7 @@ class KCUDescriptor(dict):
 
     def values(self):
         v = list(self._descr.values())
-        v.extend(['2d boundary', '2d groundwater boundary'])
+        v.extend(["2d boundary", "2d groundwater boundary"])
         return v
 
     def keys(self):
@@ -184,9 +176,9 @@ class KCUDescriptor(dict):
 
     def __getitem__(self, item):
         if item in self.bound_keys_2d:
-            return '2d boundary'
+            return "2d boundary"
         elif item in self.bound_keys_groundwater:
-            return '2d groundwater boundary'
+            return "2d groundwater boundary"
         v = self._descr.get(item)
         if not v:
             raise KeyError(item)
@@ -224,11 +216,11 @@ def _get_storage_area(storage_area):
         given input will be converted to a float representation
     """
 
-    default_null = '--'
+    default_null = "--"
     # case python string type
     try:
         a = float(storage_area)
-        if a > 0.:
+        if a > 0.0:
             return a
     except ValueError:
         pass

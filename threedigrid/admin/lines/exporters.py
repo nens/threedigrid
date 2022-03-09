@@ -1,17 +1,11 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
-# -*- coding: utf-8 -*-
 """
 Exporters
 ---------
 """
-from __future__ import unicode_literals
-from __future__ import print_function
 
-from __future__ import absolute_import
-import os
 import logging
-import six
-from six.moves import range
+import os
 
 try:
     from osgeo import ogr
@@ -24,14 +18,11 @@ except ImportError:
     shapely_geom = None
 
 
-from threedigrid.geo_utils import get_spatial_reference
-from threedigrid.geo_utils import raise_import_exception
-from threedigrid.admin.utils import KCUDescriptor
-from threedigrid.orm.base.exporters import BaseOgrExporter
 from threedigrid.admin import exporter_constants as const
-from threedigrid.admin.constants import LINE_BASE_FIELDS_ALL
-from threedigrid.admin.constants import LINE_FIELD_NAME_MAP
-
+from threedigrid.admin.constants import LINE_BASE_FIELDS_ALL, LINE_FIELD_NAME_MAP
+from threedigrid.admin.utils import KCUDescriptor
+from threedigrid.geo_utils import get_spatial_reference, raise_import_exception
+from threedigrid.orm.base.exporters import BaseOgrExporter
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +32,7 @@ class LinesOgrExporter(BaseOgrExporter):
     Exports to ogr formats. You need to set the driver explicitly
     before calling save()
     """
+
     def __init__(self, lines):
         """
         :param lines: lines.models.Lines instance
@@ -69,59 +61,57 @@ class LinesOgrExporter(BaseOgrExporter):
         geomtype = 0
         sr = get_spatial_reference(target_epsg_code)
 
-        geom_source = 'from_threedicore'
-        if 'geom' in kwargs:
-            geom_source = kwargs['geom']
+        geom_source = "from_threedicore"
+        if "geom" in kwargs:
+            geom_source = kwargs["geom"]
 
         # shapely is needed for the LineString creation, check if installed
-        if geom_source == 'from_spatialite' and shapely_geom is None:
-            raise_import_exception('shapely')
+        if geom_source == "from_spatialite" and shapely_geom is None:
+            raise_import_exception("shapely")
 
         self.del_datasource(file_name)
         data_source = self.driver.CreateDataSource(file_name)
-        layer = data_source.CreateLayer(
-            str(os.path.basename(file_name)),
-            sr,
-            geomtype
-        )
-        fields = kwargs.get('fields', LINE_BASE_FIELDS_ALL)
-        for field_name, field_type in six.iteritems(fields):
-            layer.CreateField(ogr.FieldDefn(
-                    str(field_name),
-                    const.OGR_FIELD_TYPE_MAP[field_type])
+        layer = data_source.CreateLayer(str(os.path.basename(file_name)), sr, geomtype)
+        fields = kwargs.get("fields", LINE_BASE_FIELDS_ALL)
+        for field_name, field_type in fields.items():
+            layer.CreateField(
+                ogr.FieldDefn(str(field_name), const.OGR_FIELD_TYPE_MAP[field_type])
             )
         _definition = layer.GetLayerDefn()
 
-        node_a = line_data['line'][0]
-        node_b = line_data['line'][1]
+        node_a = line_data["line"][0]
+        node_b = line_data["line"][1]
         for i in range(node_a.size):
-            if line_data['id'][i] == 0:
+            if line_data["id"][i] == 0:
                 continue  # skip the dummy element
-            if geom_source == 'from_threedicore':
+            if geom_source == "from_threedicore":
                 line = ogr.Geometry(ogr.wkbLineString)
-                line.AddPoint(line_data['line_coords'][0][i],
-                              line_data['line_coords'][1][i])
-                line.AddPoint(line_data['line_coords'][2][i],
-                              line_data['line_coords'][3][i])
-            elif geom_source == 'from_spatialite':
-                linepoints = line_data['line_geometries'][i].reshape(
-                    2, -1).T.astype('float64')
+                line.AddPoint(
+                    line_data["line_coords"][0][i], line_data["line_coords"][1][i]
+                )
+                line.AddPoint(
+                    line_data["line_coords"][2][i], line_data["line_coords"][3][i]
+                )
+            elif geom_source == "from_spatialite":
+                linepoints = (
+                    line_data["line_geometries"][i].reshape(2, -1).T.astype("float64")
+                )
                 line_geom = shapely_geom.LineString(linepoints)
                 line = ogr.CreateGeometryFromWkt(line_geom.wkt)
 
             feature = ogr.Feature(_definition)
             feature.SetGeometry(line)
-            for field_name, field_type in six.iteritems(fields):
+            for field_name, field_type in fields.items():
                 fname = LINE_FIELD_NAME_MAP.get(field_name, field_name)
-                if field_name == 'kcu_descr':
-                    raw_value = ''
+                if field_name == "kcu_descr":
+                    raw_value = ""
                     try:
-                        raw_value = str(kcu_dict[int(line_data['kcu'][i])])
+                        raw_value = str(kcu_dict[int(line_data["kcu"][i])])
                     except KeyError:
                         pass
-                elif field_name == 'node_a':
+                elif field_name == "node_a":
                     raw_value = node_a[i]
-                elif field_name == 'node_b':
+                elif field_name == "node_b":
                     raw_value = node_b[i]
                 else:
                     try:

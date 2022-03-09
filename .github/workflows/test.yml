@@ -57,15 +57,3 @@ jobs:
         shell: bash
         run: |
           pytest
-
-      - name: Run flake8
-        shell: bash
-        if: ${{ matrix.python != '2.7' }}
-        run: |
-          flake8
-
-      - name: Run sphinx-build
-        shell: bash
-        run: |
-          sphinx-build -nW docs docs/_build/html
-  

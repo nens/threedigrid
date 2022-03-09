@@ -1,31 +1,26 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-from __future__ import print_function
 
-from __future__ import absolute_import
 import h5py
 import numpy as np
 from shapely import wkt
 from shapely.geometry import MultiPoint, Point
+
 from threedigrid.admin import constants
 from threedigrid.admin.prepare_utils import (
-        db_objects_to_numpy_array_dict, add_or_update_datasets)
-from six.moves import range
-from six.moves import zip
+    add_or_update_datasets,
+    db_objects_to_numpy_array_dict,
+)
 
-
-DT_VARIABLE = h5py.special_dtype(vlen=np.dtype('float64'))
+DT_VARIABLE = h5py.special_dtype(vlen=np.dtype("float64"))
 
 
 def as_numpy_array(array):
-    if hasattr(array, 'value'):
+    if hasattr(array, "value"):
         return array.value
     return array[:]
 
 
-class PrepareLines(object):
-
+class PrepareLines:
     @staticmethod
     def get_1d_object_info(datasource, id_mapper):
         """
@@ -37,31 +32,34 @@ class PrepareLines(object):
 
         # TODO channel might be different
         LINE_TYPES = [
-            constants.TYPE_V2_PIPE, constants.TYPE_V2_CHANNEL,
+            constants.TYPE_V2_PIPE,
+            constants.TYPE_V2_CHANNEL,
             constants.TYPE_V2_CULVERT,
-            constants.TYPE_V2_ORIFICE, constants.TYPE_V2_WEIR]
+            constants.TYPE_V2_ORIFICE,
+            constants.TYPE_V2_WEIR,
+        ]
 
-        _tmp_kcu = datasource['kcu'][:]
+        _tmp_kcu = datasource["kcu"][:]
         filter_1d = (_tmp_kcu >= 0) & (_tmp_kcu <= 5)
 
-        lik_all = as_numpy_array(datasource['lik'])
-        lik_1d = as_numpy_array(datasource['lik'])[filter_1d]
+        lik_all = as_numpy_array(datasource["lik"])
+        lik_1d = as_numpy_array(datasource["lik"])[filter_1d]
 
-        content_pk = np.zeros(lik_all.shape, dtype='i4')
-        content_type = np.zeros(lik_all.shape, dtype='U32')
+        content_pk = np.zeros(lik_all.shape, dtype="i4")
+        content_type = np.zeros(lik_all.shape, dtype="U32")
 
-        _content_pk = np.zeros(lik_1d.shape, dtype='i4')
-        _content_type = np.zeros(lik_1d.shape, dtype='U32')
+        _content_pk = np.zeros(lik_1d.shape, dtype="i4")
+        _content_type = np.zeros(lik_1d.shape, dtype="U32")
 
         for line_type in LINE_TYPES:
             line_code = constants.TYPE_CODE_MAP[line_type]
             mapper_idx = id_mapper.obj_slices.get(line_code)
             if mapper_idx is None:
                 continue
-            seq_ids = id_mapper.id_mapping[mapper_idx]['seq_id']
+            seq_ids = id_mapper.id_mapping[mapper_idx]["seq_id"]
             for i in range(len(seq_ids)):
                 slice1 = np.where(lik_1d == seq_ids[i])
-                _content_pk[slice1] = id_mapper.id_mapping[mapper_idx]['pk'][i]
+                _content_pk[slice1] = id_mapper.id_mapping[mapper_idx]["pk"][i]
                 _content_type[slice1] = line_type
 
         content_pk[filter_1d] = _content_pk
@@ -83,23 +81,19 @@ class PrepareLines(object):
         ]
         """
 
-        DB_OBJECTS = [
-            threedi_datasource.v2_channels, threedi_datasource.v2_culverts
-        ]
+        DB_OBJECTS = [threedi_datasource.v2_channels, threedi_datasource.v2_culverts]
 
-        LINE_TYPES = [
-            constants.TYPE_V2_CHANNEL, constants.TYPE_V2_CULVERT
-        ]
+        LINE_TYPES = [constants.TYPE_V2_CHANNEL, constants.TYPE_V2_CULVERT]
 
         line_db_dict = dict(list(zip(LINE_TYPES, DB_OBJECTS)))
 
-        size_array = as_numpy_array(datasource['lik']).shape[0]
+        size_array = as_numpy_array(datasource["lik"]).shape[0]
         line_geometries = np.full(size_array, 0, dtype=DT_VARIABLE)
-        start_x = datasource['line_coords'][0][:]
-        start_y = datasource['line_coords'][1][:]
-        end_x = datasource['line_coords'][2][:]
-        end_y = datasource['line_coords'][3][:]
-        kcu = datasource['kcu'][:]
+        start_x = datasource["line_coords"][0][:]
+        start_y = datasource["line_coords"][1][:]
+        end_x = datasource["line_coords"][2][:]
+        end_y = datasource["line_coords"][3][:]
+        kcu = datasource["kcu"][:]
         xys = np.array(list(zip(start_x.T, end_x.T, start_y.T, end_y.T)))
         for i in range(len(line_geometries)):
             line_geometries[i] = np.array(xys[i])
@@ -107,14 +101,18 @@ class PrepareLines(object):
         for line_type, db_objects in line_db_dict.items():
             for db_object in db_objects:
                 line_idx = np.where(
-                    (datasource['content_pk'][:] == db_object.pk) &
-                    (datasource['content_type'][:] == line_type))[0]
+                    (datasource["content_pk"][:] == db_object.pk)
+                    & (datasource["content_type"][:] == line_type)
+                )[0]
                 geom = wkt.loads(db_object.the_geom.wkt)
                 line_geometries[line_idx] = PrepareLines._cut_geometries(
                     geom,
-                    start_x[line_idx], start_y[line_idx],
-                    end_x[line_idx], end_y[line_idx],
-                    kcu[line_idx])
+                    start_x[line_idx],
+                    start_y[line_idx],
+                    end_x[line_idx],
+                    end_y[line_idx],
+                    kcu[line_idx],
+                )
 
         return line_geometries
 
@@ -164,11 +162,12 @@ class PrepareLines(object):
             # no additional calc points
             if start_distance <= 0.0 and end_distance >= geom.length:
                 linestring = np.array(
-                    [(start_pnt.x, start_pnt.y)] +
-                    coords[1:-1] +
-                    [(end_pnt.x, end_pnt.y)])
+                    [(start_pnt.x, start_pnt.y)]
+                    + coords[1:-1]
+                    + [(end_pnt.x, end_pnt.y)]
+                )
                 # "F" means to flatten in column-major (Fortran- style) order
-                cut_geometries[piece] = linestring.flatten('F')
+                cut_geometries[piece] = linestring.flatten("F")
 
             for i, p in enumerate(coords):
                 # dist to vertex
@@ -190,255 +189,279 @@ class PrepareLines(object):
                 # should not happen but in case pd (point) and first vertex
                 # do not have the same position move pd back
                 elif (pd > start_distance) and not start_set:
-                    start_pnt = [
-                        (start_pnt.x, start_pnt.y)]
+                    start_pnt = [(start_pnt.x, start_pnt.y)]
                     start_i = i
                     start_set = True
                 if pd >= end_distance:
                     linestring = np.array(
-                        start_pnt + coords[start_i: i] +
-                        [(end_pnt.x, end_pnt.y)])
+                        start_pnt + coords[start_i:i] + [(end_pnt.x, end_pnt.y)]
+                    )
                     # "F" means to flatten in column-major (Fortran- style)
                     # order
-                    cut_geometries[piece] = linestring.flatten('F')
+                    cut_geometries[piece] = linestring.flatten("F")
                     break
 
         return cut_geometries
 
     @classmethod
-    def prepare_datasource(cls, datasource, id_mapper, threedi_datasource,
-                           node_coordinates, has_1d):
-        if 'id' not in list(datasource.keys()):
+    def prepare_datasource(
+        cls, datasource, id_mapper, threedi_datasource, node_coordinates, has_1d
+    ):
+        if "id" not in list(datasource.keys()):
+            datasource.set("id", np.arange(0, datasource["kcu"].size))
+
+        if has_1d and (
+            "content_pk" not in list(datasource.keys())
+            or "content_type" not in list(datasource.keys())
+        ):
+            content_pk, content_type = cls.get_1d_object_info(datasource, id_mapper)
+
+            if "content_pk" not in list(datasource.keys()):
+                datasource.set("content_pk", content_pk)
+            if "content_type" not in list(datasource.keys()):
+                datasource.set(
+                    "content_type", [x.encode("ascii") for x in content_type]
+                )
+
+        if "line_coords" not in list(datasource.keys()):
+            line = as_numpy_array(datasource["line"])
+            x, y = as_numpy_array(node_coordinates[0]), as_numpy_array(
+                node_coordinates[1]
+            )
             datasource.set(
-                'id', np.arange(0, datasource['kcu'].size))
+                "line_coords",
+                np.array([x[line[0]], y[line[0]], x[line[1]], y[line[1]]]),
+            )
 
-        if has_1d and ('content_pk' not in list(datasource.keys()) or
-           'content_type' not in list(datasource.keys())):
-            content_pk, content_type =\
-                cls.get_1d_object_info(datasource, id_mapper)
-
-            if 'content_pk' not in list(datasource.keys()):
-                datasource.set('content_pk', content_pk)
-            if 'content_type' not in list(datasource.keys()):
-                datasource.set('content_type',
-                               [x.encode('ascii') for x in content_type])
-
-        if 'line_coords' not in list(datasource.keys()):
-            line = as_numpy_array(datasource['line'])
-            x, y = as_numpy_array(node_coordinates[0]),\
-                as_numpy_array(node_coordinates[1])
-            datasource.set('line_coords', np.array(
-                [x[line[0]], y[line[0]], x[line[1]], y[line[1]]]))
-
-        if has_1d and 'line_geometries' not in list(datasource.keys()):
-            line_geometries = cls.make_line_geometries(datasource,
-                                                       threedi_datasource)
-            datasource.set('line_geometries', np.array(line_geometries))
+        if has_1d and "line_geometries" not in list(datasource.keys()):
+            line_geometries = cls.make_line_geometries(datasource, threedi_datasource)
+            datasource.set("line_geometries", np.array(line_geometries))
 
 
-class PrepareChannels(object):
-
+class PrepareChannels:
     @staticmethod
     def prepare_datasource(h5py_file, threedi_datasource):
-        line_group = h5py_file['lines']
+        line_group = h5py_file["lines"]
 
-        content_pk = line_group['content_pk'][:]
-        content_type = line_group['content_type'][:]
+        content_pk = line_group["content_pk"][:]
+        content_type = line_group["content_type"][:]
 
         channels_field_names = [
-            'pk', 'code', 'calculation_type', 'dist_calc_points',
-            'connection_node_start_pk', 'connection_node_end_pk',
-            'zoom_category'
+            "pk",
+            "code",
+            "calculation_type",
+            "dist_calc_points",
+            "connection_node_start_pk",
+            "connection_node_end_pk",
+            "zoom_category",
         ]
 
         channels_numpy_array_dict = db_objects_to_numpy_array_dict(
-            threedi_datasource.v2_channels, channels_field_names)
+            threedi_datasource.v2_channels, channels_field_names
+        )
 
         # discharge_coefficient defaults to 1.0 for channels
-        channels_field_names.append('discharge_coefficient')
-        channels_numpy_array_dict['discharge_coefficient'] = np.ones(
+        channels_field_names.append("discharge_coefficient")
+        channels_numpy_array_dict["discharge_coefficient"] = np.ones(
             len(content_pk), dtype=np.float32
         )
 
         add_or_update_datasets(
-            line_group, channels_numpy_array_dict,
+            line_group,
+            channels_numpy_array_dict,
             channels_field_names,
-            channels_numpy_array_dict['pk'], content_pk,
-            ignore_mask=content_type != 'v2_channel')
+            channels_numpy_array_dict["pk"],
+            content_pk,
+            ignore_mask=content_type != "v2_channel",
+        )
 
 
-class PreparePipes(object):
-
+class PreparePipes:
     @staticmethod
     def prepare_datasource(h5py_file, threedi_datasource):
-        line_group = h5py_file['lines']
-        content_pk = line_group['content_pk'][:]
-        content_type = line_group['content_type'][:]
+        line_group = h5py_file["lines"]
+        content_pk = line_group["content_pk"][:]
+        content_type = line_group["content_type"][:]
 
         pipes_field_names = [
-            'pk',
-            'display_name',
-            'invert_level_start_point_raw',
-            'invert_level_end_point_raw',
-            'friction_type',
-            'friction_value',
-            'material',
-            'sewerage_type',
-            'calculation_type',
-            'connection_node_start_pk',
-            'connection_node_end_pk',
-            'zoom_category',
-            'cross_section_definition__db_width',
-            'cross_section_definition__db_height',
-            'cross_section_definition__db_shape']
+            "pk",
+            "display_name",
+            "invert_level_start_point_raw",
+            "invert_level_end_point_raw",
+            "friction_type",
+            "friction_value",
+            "material",
+            "sewerage_type",
+            "calculation_type",
+            "connection_node_start_pk",
+            "connection_node_end_pk",
+            "zoom_category",
+            "cross_section_definition__db_width",
+            "cross_section_definition__db_height",
+            "cross_section_definition__db_shape",
+        ]
 
         pipes_field_name_override = {
-            'invert_level_start_point_raw': 'invert_level_start_point',
-            'invert_level_end_point_raw': 'invert_level_end_point',
-            'cross_section_definition__db_width': 'cross_section_width',
-            'cross_section_definition__db_height': 'cross_section_height',
-            'cross_section_definition__db_shape': 'cross_section_shape'}
+            "invert_level_start_point_raw": "invert_level_start_point",
+            "invert_level_end_point_raw": "invert_level_end_point",
+            "cross_section_definition__db_width": "cross_section_width",
+            "cross_section_definition__db_height": "cross_section_height",
+            "cross_section_definition__db_shape": "cross_section_shape",
+        }
 
         pipes_numpy_array_dict = db_objects_to_numpy_array_dict(
-            threedi_datasource.v2_pipes, pipes_field_names)
+            threedi_datasource.v2_pipes, pipes_field_names
+        )
 
         # discharge_coefficient defaults to 1.0 for pipes
-        pipes_field_names.append('discharge_coefficient')
-        pipes_numpy_array_dict['discharge_coefficient'] = np.ones(
+        pipes_field_names.append("discharge_coefficient")
+        pipes_numpy_array_dict["discharge_coefficient"] = np.ones(
             len(content_pk), dtype=np.float32
         )
 
         add_or_update_datasets(
-            line_group, pipes_numpy_array_dict,
+            line_group,
+            pipes_numpy_array_dict,
             pipes_field_names,
-            pipes_numpy_array_dict['pk'], content_pk,
-            ignore_mask=content_type != 'v2_pipe',
-            field_name_override=pipes_field_name_override)
+            pipes_numpy_array_dict["pk"],
+            content_pk,
+            ignore_mask=content_type != "v2_pipe",
+            field_name_override=pipes_field_name_override,
+        )
 
 
-class PrepareWeirs(object):
-
+class PrepareWeirs:
     @staticmethod
     def prepare_datasource(h5py_file, threedi_datasource):
-        line_group = h5py_file['lines']
-        content_pk = line_group['content_pk'][:]
-        content_type = line_group['content_type'][:]
+        line_group = h5py_file["lines"]
+        content_pk = line_group["content_pk"][:]
+        content_type = line_group["content_type"][:]
 
         weirs_field_names = [
-            'pk',
-            'code',
-            'display_name',
-            'discharge_coefficient_negative',
-            'discharge_coefficient_positive',
-            'sewerage',
-            'friction_type',
-            'friction_value',
-            'crest_type',
-            'crest_level_raw',
-            'connection_node_start_pk',
-            'connection_node_end_pk',
-            'zoom_category',
-            'cross_section_definition__db_width',
-            'cross_section_definition__db_height',
-            'cross_section_definition__db_shape']
-
-        weir_field_name_override = {
-            'crest_level_raw': 'crest_level',
-            'cross_section_definition__db_width': 'cross_section_width',
-            'cross_section_definition__db_height': 'cross_section_height',
-            'cross_section_definition__db_shape': 'cross_section_shape'}
-
-        weirs_numpy_array_dict = db_objects_to_numpy_array_dict(
-            threedi_datasource.v2_weirs, weirs_field_names)
-
-        add_or_update_datasets(
-            line_group, weirs_numpy_array_dict,
-            weirs_field_names,
-            weirs_numpy_array_dict['pk'], content_pk,
-            ignore_mask=content_type != 'v2_weir',
-            field_name_override=weir_field_name_override
-        )
-
-
-class PrepareOrifices(object):
-
-    @staticmethod
-    def prepare_datasource(h5py_file, threedi_datasource):
-        line_group = h5py_file['lines']
-        content_pk = line_group['content_pk'][:]
-        content_type = line_group['content_type'][:]
-
-        orifices_field_names = [
-            'pk',
-            'display_name',
-            'sewerage',
-            'friction_type',
-            'friction_value',
-            'discharge_coefficient_negative',
-            'discharge_coefficient_positive',
-            'crest_type',
-            'crest_level_raw',
-            'connection_node_start_pk',
-            'connection_node_end_pk',
-            'zoom_category'
+            "pk",
+            "code",
+            "display_name",
+            "discharge_coefficient_negative",
+            "discharge_coefficient_positive",
+            "sewerage",
+            "friction_type",
+            "friction_value",
+            "crest_type",
+            "crest_level_raw",
+            "connection_node_start_pk",
+            "connection_node_end_pk",
+            "zoom_category",
+            "cross_section_definition__db_width",
+            "cross_section_definition__db_height",
+            "cross_section_definition__db_shape",
         ]
 
-        orifices_field_name_override = {
-            'crest_level_raw': 'crest_level'
+        weir_field_name_override = {
+            "crest_level_raw": "crest_level",
+            "cross_section_definition__db_width": "cross_section_width",
+            "cross_section_definition__db_height": "cross_section_height",
+            "cross_section_definition__db_shape": "cross_section_shape",
         }
 
-        orifices_numpy_array_dict = db_objects_to_numpy_array_dict(
-            threedi_datasource.v2_orifices, orifices_field_names)
+        weirs_numpy_array_dict = db_objects_to_numpy_array_dict(
+            threedi_datasource.v2_weirs, weirs_field_names
+        )
 
         add_or_update_datasets(
-            line_group, orifices_numpy_array_dict,
-            orifices_field_names,
-            orifices_numpy_array_dict['pk'], content_pk,
-            ignore_mask=content_type != 'v2_orifice',
-            field_name_override=orifices_field_name_override
+            line_group,
+            weirs_numpy_array_dict,
+            weirs_field_names,
+            weirs_numpy_array_dict["pk"],
+            content_pk,
+            ignore_mask=content_type != "v2_weir",
+            field_name_override=weir_field_name_override,
         )
 
 
-class PrepareCulverts(object):
-
+class PrepareOrifices:
     @staticmethod
     def prepare_datasource(h5py_file, threedi_datasource):
-        line_group = h5py_file['lines']
-        content_pk = line_group['content_pk'][:]
-        content_type = line_group['content_type'][:]
+        line_group = h5py_file["lines"]
+        content_pk = line_group["content_pk"][:]
+        content_type = line_group["content_type"][:]
 
-        culverts_field_names = [
-            'pk',
-            'code',
-            'display_name',
-            'discharge_coefficient_negative',
-            'discharge_coefficient_positive',
-            'friction_type',
-            'friction_value',
-            'invert_level_start_point_raw',
-            'invert_level_end_point_raw',
-            'calculation_type',
-            'dist_calc_points',
-            'connection_node_start_pk',
-            'connection_node_end_pk',
-            'zoom_category',
-            'cross_section_definition__db_width',
-            'cross_section_definition__db_height',
-            'cross_section_definition__db_shape']
+        orifices_field_names = [
+            "pk",
+            "display_name",
+            "sewerage",
+            "friction_type",
+            "friction_value",
+            "discharge_coefficient_negative",
+            "discharge_coefficient_positive",
+            "crest_type",
+            "crest_level_raw",
+            "connection_node_start_pk",
+            "connection_node_end_pk",
+            "zoom_category",
+        ]
 
-        culverts_field_name_override = {
-            'invert_level_start_point_raw': 'invert_level_start_point',
-            'invert_level_end_point_raw': 'invert_level_end_point',
-            'cross_section_definition__db_width': 'cross_section_width',
-            'cross_section_definition__db_height': 'cross_section_height',
-            'cross_section_definition__db_shape': 'cross_section_shape'}
+        orifices_field_name_override = {"crest_level_raw": "crest_level"}
 
-        culverts_numpy_array_dict = db_objects_to_numpy_array_dict(
-            threedi_datasource.v2_culverts, culverts_field_names)
+        orifices_numpy_array_dict = db_objects_to_numpy_array_dict(
+            threedi_datasource.v2_orifices, orifices_field_names
+        )
 
         add_or_update_datasets(
-            line_group, culverts_numpy_array_dict,
+            line_group,
+            orifices_numpy_array_dict,
+            orifices_field_names,
+            orifices_numpy_array_dict["pk"],
+            content_pk,
+            ignore_mask=content_type != "v2_orifice",
+            field_name_override=orifices_field_name_override,
+        )
+
+
+class PrepareCulverts:
+    @staticmethod
+    def prepare_datasource(h5py_file, threedi_datasource):
+        line_group = h5py_file["lines"]
+        content_pk = line_group["content_pk"][:]
+        content_type = line_group["content_type"][:]
+
+        culverts_field_names = [
+            "pk",
+            "code",
+            "display_name",
+            "discharge_coefficient_negative",
+            "discharge_coefficient_positive",
+            "friction_type",
+            "friction_value",
+            "invert_level_start_point_raw",
+            "invert_level_end_point_raw",
+            "calculation_type",
+            "dist_calc_points",
+            "connection_node_start_pk",
+            "connection_node_end_pk",
+            "zoom_category",
+            "cross_section_definition__db_width",
+            "cross_section_definition__db_height",
+            "cross_section_definition__db_shape",
+        ]
+
+        culverts_field_name_override = {
+            "invert_level_start_point_raw": "invert_level_start_point",
+            "invert_level_end_point_raw": "invert_level_end_point",
+            "cross_section_definition__db_width": "cross_section_width",
+            "cross_section_definition__db_height": "cross_section_height",
+            "cross_section_definition__db_shape": "cross_section_shape",
+        }
+
+        culverts_numpy_array_dict = db_objects_to_numpy_array_dict(
+            threedi_datasource.v2_culverts, culverts_field_names
+        )
+
+        add_or_update_datasets(
+            line_group,
+            culverts_numpy_array_dict,
             culverts_field_names,
-            culverts_numpy_array_dict['pk'], content_pk,
-            ignore_mask=content_type != 'v2_culvert',
-            field_name_override=culverts_field_name_override)
+            culverts_numpy_array_dict["pk"],
+            content_pk,
+            ignore_mask=content_type != "v2_culvert",
+            field_name_override=culverts_field_name_override,
+        )

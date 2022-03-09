@@ -1,17 +1,13 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """The setup script."""
 
-from __future__ import absolute_import
-from setuptools import setup, find_packages
 
-import sys
 import codecs
-import re
 import os
+import re
 
-python_27 = sys.version_info <= (2, 7)
+from setuptools import find_packages, setup
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -82,6 +78,7 @@ setup(
         ],
     },
     install_requires=lightweight_requirements,
+    python_requires=">=3.6",
     license="BSD license",
     long_description=readme + '\n\n' + history,
     include_package_data=True,

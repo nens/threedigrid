@@ -1,11 +1,8 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-from __future__ import print_function
 
-from __future__ import absolute_import
-import numpy as np
 import logging
+
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -55,8 +52,7 @@ def angle_in_degrees(x0, y0, x1, y1):
     out_inf[dy < 0] = -np.inf
 
     # compute dy/dx, but use the out_inf[i] value if dx[i]==0
-    dy_divided_by_dx_with_inf = np.divide(
-        dy, dx, out=out_inf, where=dx != 0)
+    dy_divided_by_dx_with_inf = np.divide(dy, dx, out=out_inf, where=dx != 0)
 
     # Return the values of the inverse-tan in degrees
     # np.inf gives 90 and -np.inf gives -90
@@ -81,8 +77,14 @@ def lines_to_bbox_array(lines):
     # Use min/max, don't assume the x1[i] to always be left,
     # y1[i] to be top etc..
     return np.stack(
-        (np.fmin(lines[0], lines[2]), np.fmin(lines[1], lines[3]),
-         np.fmax(lines[0], lines[2]), np.fmax(lines[1], lines[3])), axis=1)
+        (
+            np.fmin(lines[0], lines[2]),
+            np.fmin(lines[1], lines[3]),
+            np.fmax(lines[0], lines[2]),
+            np.fmax(lines[1], lines[3]),
+        ),
+        axis=1,
+    )
 
 
 def select_lines_by_bbox(lines, bbox, include_intersections=False):
@@ -132,10 +134,12 @@ def get_bbox_in_bool_mask(bbox_array, bbox):
 
     assert isinstance(bbox_array, np.ndarray)
 
-    return ((bbox[BBOX_LEFT] <= bbox_array[:, BBOX_LEFT]) &
-            (bbox[BBOX_TOP] <= bbox_array[:, BBOX_TOP]) &
-            (bbox[BBOX_RIGHT] >= bbox_array[:, BBOX_RIGHT]) &
-            (bbox[BBOX_BOTTOM] >= bbox_array[:, BBOX_BOTTOM])).flatten()
+    return (
+        (bbox[BBOX_LEFT] <= bbox_array[:, BBOX_LEFT])
+        & (bbox[BBOX_TOP] <= bbox_array[:, BBOX_TOP])
+        & (bbox[BBOX_RIGHT] >= bbox_array[:, BBOX_RIGHT])
+        & (bbox[BBOX_BOTTOM] >= bbox_array[:, BBOX_BOTTOM])
+    ).flatten()
 
 
 def get_bbox_by_point(pnt, values):
@@ -198,10 +202,11 @@ def get_bbox_intersect_bool_mask(bbox_array, bbox):
     #
     # Invert the boolean array and flatten.
     return np.invert(
-            (bbox[BBOX_LEFT] > bbox_array[:, BBOX_RIGHT]) |
-            (bbox[BBOX_RIGHT] < bbox_array[:, BBOX_LEFT]) |
-            (bbox[BBOX_TOP] > bbox_array[:, BBOX_BOTTOM]) |
-            (bbox[BBOX_BOTTOM] < bbox_array[:, BBOX_TOP])).flatten()
+        (bbox[BBOX_LEFT] > bbox_array[:, BBOX_RIGHT])
+        | (bbox[BBOX_RIGHT] < bbox_array[:, BBOX_LEFT])
+        | (bbox[BBOX_TOP] > bbox_array[:, BBOX_BOTTOM])
+        | (bbox[BBOX_BOTTOM] < bbox_array[:, BBOX_TOP])
+    ).flatten()
 
 
 def get_bbox_intersections(bbox_array, bbox):
@@ -248,8 +253,12 @@ def get_bbox_intersections(bbox_array, bbox):
     #
     #      intersection left value is max of both values.
     intersections = np.concatenate(
-        (np.fmax(nodes_intersect[:, 0:2], bbox[0:2]),
-         np.fmin(nodes_intersect[:, 2:4], bbox[2:4])), axis=1)
+        (
+            np.fmax(nodes_intersect[:, 0:2], bbox[0:2]),
+            np.fmin(nodes_intersect[:, 2:4], bbox[2:4]),
+        ),
+        axis=1,
+    )
     return (intersections, np.argwhere(intersect_mask).flatten())
 
 
@@ -287,8 +296,7 @@ def create_np_lookup_index_for(search_array, index_array):
     """
 
     sort_idx = np.argsort(index_array)
-    lookup = sort_idx[np.searchsorted(
-        index_array, search_array, sorter=sort_idx)]
+    lookup = sort_idx[np.searchsorted(index_array, search_array, sorter=sort_idx)]
     return lookup
 
 
@@ -300,5 +308,4 @@ def get_smallest_uint_dtype(maxval):
     for dt in dtypes:
         if maxval <= np.iinfo(dt).max:
             return dt
-    raise ValueError(
-        "Value of %s exceeds all possible maximum dtype values." % maxval)
+    raise ValueError("Value of %s exceeds all possible maximum dtype values." % maxval)

@@ -1,24 +1,15 @@
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-
 import os
-import sys
 import unittest
+from unittest import mock
 
 import h5py
-
-if sys.version_info >= (3, 3):  # noqa
-    from unittest import mock
-else:
-    import mock
 import numpy as np
 
-from threedigrid.admin.idmapper import IdMapper
-from threedigrid.admin.h5py_datasource import H5pyGroup
 from threedigrid.admin.constants import TYPE_CODE_MAP
-from .conftest import simple_id_map, NODE_LENGTH
+from threedigrid.admin.h5py_datasource import H5pyGroup
+from threedigrid.admin.idmapper import IdMapper
+
+from .conftest import NODE_LENGTH, simple_id_map
 
 test_file_dir = os.path.join(os.path.dirname(__file__), "test_files")
 

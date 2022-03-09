@@ -1,17 +1,12 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
 
 import os
+
 import pytest
 
 from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
 from threedigrid.admin.nodes.models import Nodes
 from threedigrid.orm.base.fields import TimeSeriesCompositeArrayField
-
 from threedigrid.orm.base.options import Options
 
 test_file_dir = os.path.join(os.getcwd(), "tests/test_files")

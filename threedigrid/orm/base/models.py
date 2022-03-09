@@ -1,26 +1,20 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
-# -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import absolute_import
 
 import logging
 from abc import ABCMeta
 from collections import OrderedDict
-from itertools import chain
-from itertools import tee
+from itertools import chain, tee
 
 import numpy as np
-import six
-from six.moves import zip
 
 from threedigrid.orm.base.exceptions import OperationNotSupportedError
-from threedigrid.orm.base.fields import ArrayField
-from threedigrid.orm.base.fields import IndexArrayField
-from threedigrid.orm.base.fields import TimeSeriesArrayField
-from threedigrid.orm.base.filters import SliceFilter
-from threedigrid.orm.base.filters import get_filter
+from threedigrid.orm.base.fields import (
+    ArrayField,
+    IndexArrayField,
+    TimeSeriesArrayField,
+)
+from threedigrid.orm.base.filters import get_filter, SliceFilter
 from threedigrid.orm.base.options import Options
 
 logger = logging.getLogger(__name__)
@@ -42,7 +36,7 @@ def pairwise(iterable):
     return zip(a, b)
 
 
-class Model(six.with_metaclass(ABCMeta)):
+class Model(metaclass=ABCMeta):
     id = IndexArrayField()
 
     _field_names = []
@@ -53,10 +47,18 @@ class Model(six.with_metaclass(ABCMeta)):
 
     _datasource = None
 
-    def __init__(self, datasource=None, slice_filters=[],
-                 epsg_code=None, only_fields=[], reproject_to_epsg=None,
-                 has_1d=None, mixin=None, timeseries_chunk_size=None,
-                 **kwargs):
+    def __init__(
+        self,
+        datasource=None,
+        slice_filters=[],
+        epsg_code=None,
+        only_fields=[],
+        reproject_to_epsg=None,
+        has_1d=None,
+        mixin=None,
+        timeseries_chunk_size=None,
+        **kwargs
+    ):
         """
         Initialize a Model with a datasource, filters
         and a epsg_code.
@@ -71,19 +73,19 @@ class Model(six.with_metaclass(ABCMeta)):
         self.reproject_to_epsg = reproject_to_epsg
 
         self.class_kwargs = {
-            'slice_filters': slice_filters,
-            'only_fields': only_fields,
-            'reproject_to_epsg': reproject_to_epsg,
-            'has_1d': has_1d,
-            'mixin': mixin,
-            'timeseries_chunk_size': timeseries_chunk_size
+            "slice_filters": slice_filters,
+            "only_fields": only_fields,
+            "reproject_to_epsg": reproject_to_epsg,
+            "has_1d": has_1d,
+            "mixin": mixin,
+            "timeseries_chunk_size": timeseries_chunk_size,
         }
 
         # Extend the class with the mixin, if set
         if mixin:
             extend_instance(self, mixin)
             # pass kwargs to mixin
-            super(Model, self).__init__(**kwargs)
+            super().__init__(**kwargs)
 
         # Cache the boolean filter mask for this instance
         # after it has been computed once
@@ -93,10 +95,10 @@ class Model(six.with_metaclass(ABCMeta)):
 
         # Cache the field names
         _field_names = [
-            x for x in dir(self.__class__)
+            x
+            for x in dir(self.__class__)
             if isinstance(
-                getattr(self.__class__, x),
-                (ArrayField, TimeSeriesArrayField)
+                getattr(self.__class__, x), (ArrayField, TimeSeriesArrayField)
             )
         ]
         self._field_names = set(self._field_names).union(set(_field_names))
@@ -106,26 +108,29 @@ class Model(six.with_metaclass(ABCMeta)):
     @property
     def epsg_code(self):
         if not self._epsg_code:
-            self._epsg_code = self._datasource.getattr('epsg_code')
+            self._epsg_code = self._datasource.getattr("epsg_code")
         return self._epsg_code
 
     @property
     def count(self):
         """count of all elements (including trash element)"""
-        if self.class_kwargs.get('slice_filters'):
-            return self.get_filtered_field_value('id').size
-        return self.get_field_value('id').size
+        if self.class_kwargs.get("slice_filters"):
+            return self.get_filtered_field_value("id").size
+        return self.get_field_value("id").size
 
     @property
     def model_name(self):
         try:
-            model_name = '-'.join(
-                (self._datasource.getattr('model_name'),
-                 self._datasource.getattr('model_slug'),
-                 str(self._datasource.getattr('revision_nr')),
-                 self._datasource.getattr('revision_hash')))
+            model_name = "-".join(
+                (
+                    self._datasource.getattr("model_name"),
+                    self._datasource.getattr("model_slug"),
+                    str(self._datasource.getattr("revision_nr")),
+                    self._datasource.getattr("revision_hash"),
+                )
+            )
         except (AttributeError, KeyError, TypeError):
-            model_name = 'unknown'
+            model_name = "unknown"
             pass
         return model_name
 
@@ -133,7 +138,7 @@ class Model(six.with_metaclass(ABCMeta)):
         """
         Returns: the ArrayField with field_name on this instance.
         """
-        return super(Model, self).__getattribute__(field_name)
+        return super().__getattribute__(field_name)
 
     def get_field_value(self, field_name, **kwargs):
         """
@@ -144,12 +149,13 @@ class Model(six.with_metaclass(ABCMeta)):
         get_value method for field specific conversion, if needed.
         """
         update_dict = {
-            'model_name': self.__class__.__name__,
+            "model_name": self.__class__.__name__,
         }
 
         kwargs.update(update_dict)
         return self._meta.get_field(field_name).get_value(
-            self._datasource, field_name, **kwargs)
+            self._datasource, field_name, **kwargs
+        )
 
     def _get_subset_idx(self, field_name):
         """
@@ -158,7 +164,8 @@ class Model(six.with_metaclass(ABCMeta)):
         :param field_name: field name
         """
         new_inst = self.__init_class(
-            self.__class__, **{'mixin': self.class_kwargs.get('mixin')})
+            self.__class__, **{"mixin": self.class_kwargs.get("mixin")}
+        )
         subset_dict = new_inst.Meta.subset_fields.get(field_name)
         if not subset_dict:
             return
@@ -168,11 +175,12 @@ class Model(six.with_metaclass(ABCMeta)):
         return new_inst.subset(_subset_name[0]).id
 
     def get_filtered_field_value(
-            self, field_name, ts_filter=None, lookup_index=None,
-            subset_index=None):
+        self, field_name, ts_filter=None, lookup_index=None, subset_index=None
+    ):
         # Redirect via datasource
         return self._datasource.get_filtered_field_value(
-            self, field_name, ts_filter, lookup_index, subset_index)
+            self, field_name, ts_filter, lookup_index, subset_index
+        )
 
     def __getattribute__(self, attr_name):
         """
@@ -183,19 +191,18 @@ class Model(six.with_metaclass(ABCMeta)):
         """
         # Note: don't use getattr(self, XX) in this function,
         # it will lead to a max recursion error
-        attr = super(Model, self).__getattribute__(attr_name)
+        attr = super().__getattribute__(attr_name)
         # Override getting ArrayField attributes
         if isinstance(attr, ArrayField):
 
             # Return meta directly, we don't want it to
             # to be filtered
-            if attr_name == 'meta':
+            if attr_name == "meta":
                 return attr.get_value(self._datasource, attr_name)
 
             # Use the get function to retrieve the computed/filtered
             # value for the ArrayField with name: 'name'
-            return super(Model, self).__getattribute__(
-                'get_filtered_field_value')(attr_name)
+            return super().__getattribute__("get_filtered_field_value")(attr_name)
 
         # Default behaviour, return the attribute from superclass
         return attr
@@ -206,9 +213,7 @@ class Model(six.with_metaclass(ABCMeta)):
                  same datasource.
         """
 
-        return klass(
-            datasource=self._datasource,
-            **kwargs)
+        return klass(datasource=self._datasource, **kwargs)
 
     def __get_filters(self, **kwargs):
         """
@@ -223,18 +228,18 @@ class Model(six.with_metaclass(ABCMeta)):
 
         """
         new_slice_filters = list(self.slice_filters)  # make copy
-        filter_as = kwargs.pop('filter___as', False)
+        filter_as = kwargs.pop("filter___as", False)
 
-        for key, value in six.iteritems(kwargs):
+        for key, value in kwargs.items():
             # python2/3 combat
             if isinstance(value, str):
                 value = str.encode(value)
-            splitted_key = key.split('__')
+            splitted_key = key.split("__")
             if splitted_key[0] not in self._field_names:
                 raise ValueError(
                     "Field '{}' unknown. Choices are {}".format(
-                        splitted_key[0],
-                        self._field_names)
+                        splitted_key[0], self._field_names
+                    )
                 )
 
             new_slice_filters.append(
@@ -243,7 +248,8 @@ class Model(six.with_metaclass(ABCMeta)):
                     self._meta.get_field(splitted_key[0]),
                     value,
                     filter_map=self._filter_map,
-                    filter_as=filter_as)
+                    filter_as=filter_as,
+                )
             )
 
         return new_slice_filters
@@ -256,11 +262,10 @@ class Model(six.with_metaclass(ABCMeta)):
         # Inject filter___as, set this on the filters
         # so they can identified as filters that
         # produce submodels
-        kwargs['filter___as'] = True
+        kwargs["filter___as"] = True
         slice_filters = self.__get_filters(**kwargs)
         new_class_kwargs = dict(self.class_kwargs)
-        new_class_kwargs.update(
-            {'slice_filters': slice_filters})
+        new_class_kwargs.update({"slice_filters": slice_filters})
 
         return self.__init_class(klass, **new_class_kwargs)
 
@@ -290,11 +295,9 @@ class Model(six.with_metaclass(ABCMeta)):
         """
         slice_filters = self.__get_filters(**kwargs)
         new_class_kwargs = dict(self.class_kwargs)
-        new_class_kwargs.update(
-            {'slice_filters': slice_filters})
+        new_class_kwargs.update({"slice_filters": slice_filters})
 
-        return self.__init_class(
-            self.__class__, **new_class_kwargs)
+        return self.__init_class(self.__class__, **new_class_kwargs)
 
     def slice(self, start, stop=None, step=None, override_filter_error=False):
         """
@@ -314,7 +317,8 @@ class Model(six.with_metaclass(ABCMeta)):
         """
         if self.slice_filters and not override_filter_error:
             raise OperationNotSupportedError(
-                'You cannot use slices on a filtered dataset')
+                "You cannot use slices on a filtered dataset"
+            )
 
         if isinstance(start, slice):
             slice_filter = start
@@ -323,19 +327,16 @@ class Model(six.with_metaclass(ABCMeta)):
 
         new_class_kwargs = dict(self.class_kwargs)
         new_class_kwargs.update(
-            {'slice_filters':
-             [SliceFilter(slice_filter)] + self.slice_filters})
+            {"slice_filters": [SliceFilter(slice_filter)] + self.slice_filters}
+        )
 
-        return self.__init_class(
-            self.__class__, **new_class_kwargs)
+        return self.__init_class(self.__class__, **new_class_kwargs)
 
     @property
     def known_subset(self):
-        if not hasattr(self, 'SUBSETS'):
+        if not hasattr(self, "SUBSETS"):
             return "has no subsets defined"
-        return list(
-            chain(*[list(v.keys()) for v in six.itervalues(self.SUBSETS)])
-        )
+        return list(chain(*[list(v.keys()) for v in self.SUBSETS.values()]))
 
     def subset(self, name):
         """
@@ -352,30 +353,35 @@ class Model(six.with_metaclass(ABCMeta)):
                 OrderedDict([('content_pk', array([1, 2, 3, ...
 
         """
-        if not hasattr(self, 'SUBSETS'):
+        if not hasattr(self, "SUBSETS"):
             raise TypeError("SUBSETS not defined for this type of model")
 
-        if isinstance(name, six.string_types):
-            field_filter = [key for key in self.SUBSETS if
-                            name.upper() in self.SUBSETS[key]]
+        if isinstance(name, str):
+            field_filter = [
+                key for key in self.SUBSETS if name.upper() in self.SUBSETS[key]
+            ]
 
             if not field_filter:
-                msg = 'Invalid subset name.'
-                msg += ' Valid options are: %s ' % (
-                    [x for y in self.SUBSETS.values() for x in y], )
+                msg = "Invalid subset name."
+                msg += " Valid options are: {} ".format(
+                    [x for y in self.SUBSETS.values() for x in y],
+                )
                 logger.exception(msg)
                 raise KeyError(msg)
 
             if len(field_filter) > 1:
-                raise KeyError(
-                    'Multiple options found for subset: %s ' % name.upper())
+                raise KeyError("Multiple options found for subset: %s " % name.upper())
 
             field_filter = field_filter[0]
         else:
-            raise TypeError('Type %s not supported' % type(name,))
+            raise TypeError(
+                "Type %s not supported"
+                % type(
+                    name,
+                )
+            )
 
-        return self.filter(
-            **{field_filter: self.SUBSETS[field_filter][name.upper()]})
+        return self.filter(**{field_filter: self.SUBSETS[field_filter][name.upper()]})
 
     def only(self, *args):
         """
@@ -388,14 +394,12 @@ class Model(six.with_metaclass(ABCMeta)):
 
         for x in args:
             if x not in self._field_names:
-                raise Exception("Unknown field name: {0}".format(x))
+                raise Exception("Unknown field name: {}".format(x))
 
         new_class_kwargs = dict(self.class_kwargs)
-        new_class_kwargs.update(
-            {'only_fields': self.only_fields + list(args)})
+        new_class_kwargs.update({"only_fields": self.only_fields + list(args)})
 
-        return self.__init_class(
-            self.__class__, **new_class_kwargs)
+        return self.__init_class(self.__class__, **new_class_kwargs)
 
     def _get_values(self, selection):
         """
@@ -408,7 +412,7 @@ class Model(six.with_metaclass(ABCMeta)):
         """
 
         _tmp = OrderedDict()
-        for k, v in six.iteritems(selection):
+        for k, v in selection.items():
             try:
                 _tmp[k] = v[:]
             except TypeError:
@@ -433,9 +437,7 @@ class Model(six.with_metaclass(ABCMeta)):
         for key, value in selection.items():
             dtypes.append((key, value.dtype.name, value.shape))
 
-        return np.array(
-            [tuple([selection[x[0]] for x in dtypes])],
-            dtype=dtypes)[0]
+        return np.array([tuple(selection[x[0]] for x in dtypes)], dtype=dtypes)[0]
 
     def to_list(self):
         """
@@ -488,18 +490,17 @@ class Model(six.with_metaclass(ABCMeta)):
                 return slice(None)
 
             # Only load the fields that need to be filtered
-            filter_field_names = [
-                x.get_field_name() for x in self.slice_filters]
+            filter_field_names = [x.get_field_name() for x in self.slice_filters]
 
             for name in [x for x in filter_field_names if x]:
-                selection[name] = self.get_field_value(
-                    name)
+                selection[name] = self.get_field_value(name)
 
             boolean_mask_filter = None
             # Compute the the filter
             for filter_instance in self.slice_filters:
                 filter_bool_mask = filter_instance.get_boolean_mask_filter(
-                        selection, self)
+                    selection, self
+                )
 
                 if boolean_mask_filter is None:
                     boolean_mask_filter = filter_bool_mask
@@ -507,7 +508,8 @@ class Model(six.with_metaclass(ABCMeta)):
                     # apply the filter_bool_mask on the boolean_mask_filter
                     # where the boolean_mask_filter is still "True".
                     boolean_mask_filter[
-                        boolean_mask_filter == True] &= filter_bool_mask # noqa
+                        np.equal(boolean_mask_filter, True)
+                    ] &= filter_bool_mask  # noqa
 
             self._boolean_mask_filter = boolean_mask_filter
 
@@ -546,9 +548,7 @@ class Model(six.with_metaclass(ABCMeta)):
 
     def __repr__(self):
         """human readable representation of the instance"""
-        return "<orm {} instance of {}>".format(
-            self.__contenttype__(), self.model_name
-        )
+        return "<orm {} instance of {}>".format(self.__contenttype__(), self.model_name)
 
     def __contenttype__(self):
         """conent type, e.g. lines, nodes, cells, ..."""
