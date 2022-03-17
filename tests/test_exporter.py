@@ -118,7 +118,5 @@ def test_export_null(ga, tmp_path):
     ],
 )
 def test_export_method(ga_export, export_method, expected_filename):
-    # if ga_export.ga.grid_file.endswith("gridadmin_v2.h5") and export_method == "breaches":
-    #     pytest.skip("lines.breaches not yet supported in new gridadmin")
     getattr(ga_export, "export_" + export_method)()
     assert os.path.exists(os.path.join(ga_export._dest, expected_filename + ".json"))
