@@ -165,7 +165,7 @@ class GridH5Admin:
         if pyproj is None:
             raise_import_exception("pyproj")
         try:
-            return pyproj.CRS(self.h5py_file.attrs["crs_wkt"])
+            return pyproj.CRS(self._to_str(self.h5py_file.attrs["crs_wkt"]))
         except KeyError:
             # Fallback for older gridadmins without crs_wkt
             return pyproj.CRS.from_epsg(int(self.h5py_file.attrs["epsg_code"]))

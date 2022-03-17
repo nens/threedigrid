@@ -4,7 +4,12 @@ History
 1.2.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fixed error in crs attribute.
+
+- Removed deprecation warning on gridadmin.breaches and added it to
+  gridadmin.lines.breaches.
+
+- Fixed export_breaches for new gridadmins.
 
 
 1.2.0 (2022-03-09)

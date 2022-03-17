@@ -20,7 +20,7 @@ from threedigrid.admin.nodes.exporters import CellsOgrExporter, NodesOgrExporter
 test_file_dir = os.path.join(os.getcwd(), "tests/test_files")
 
 # the testfile is a copy of the v2_bergermeer gridadmin file
-grid_admin_h5_file = os.path.join(test_file_dir, "gridadmin.h5")
+grid_admin_h5_file = os.path.join(test_file_dir, "gridadmin_v2.h5")
 
 
 class GridAdminTest(unittest.TestCase):
@@ -59,6 +59,7 @@ class GridAdminTest(unittest.TestCase):
         np.testing.assert_almost_equal(
             model_extent,
             np.array([105427.6, 511727.0515702, 115887.0, 523463.3268483]),
+            decimal=3,
         )
 
     def test_get_model_extent_extra_extent(self):
@@ -76,7 +77,7 @@ class GridAdminTest(unittest.TestCase):
         extra_extent = {"extra_extent": [onedee_extra]}
         model_extent = self.parser.get_model_extent(**extra_extent)
         np.testing.assert_almost_equal(
-            model_extent, np.array([105427.6, 106666.6, 550000.0, 580000.0])
+            model_extent, np.array([105427.6, 106666.6, 550000.0, 580000.0]), decimal=3
         )
 
     def test_properties(self):
@@ -93,7 +94,7 @@ class GridAdminTest(unittest.TestCase):
     def test_crs(self):
         crs = self.parser.crs
         assert isinstance(crs, CRS)
-        assert crs.to_epsg() == 28992
+        assert crs.to_epsg() == 28992 or "28992" in crs.srs
 
 
 class GridAdminLinesTest(unittest.TestCase):
@@ -410,37 +411,37 @@ class NodeFilterTests(unittest.TestCase):
         filtered = self.parser.nodes.filter(id=3).data["coordinates"]
         (trues,) = np.where(self.parser.nodes.data["id"] == 3)
         expected = self.parser.nodes.data["coordinates"][:, trues]
-        self.assertTrue((filtered == expected).all())
+        np.testing.assert_equal(filtered, expected)
 
     def test_nodes_filter_id_ne(self):
         filtered = self.parser.nodes.filter(id__ne=3).data["coordinates"]
         (trues,) = np.where(self.parser.nodes.data["id"] != 3)
         expected = self.parser.nodes.data["coordinates"][:, trues]
-        self.assertTrue((filtered == expected).all())
+        np.testing.assert_equal(filtered, expected)
 
     def test_nodes_filter_id_gt(self):
         filtered = self.parser.nodes.filter(id__gt=3).data["coordinates"]
         (trues,) = np.where(self.parser.nodes.data["id"] > 3)
         expected = self.parser.nodes.data["coordinates"][:, trues]
-        self.assertTrue((filtered == expected).all())
+        np.testing.assert_equal(filtered, expected)
 
     def test_nodes_filter_id_gte(self):
         filtered = self.parser.nodes.filter(id__gte=3).data["coordinates"]
         (trues,) = np.where(self.parser.nodes.data["id"] >= 3)
         expected = self.parser.nodes.data["coordinates"][:, trues]
-        self.assertTrue((filtered == expected).all())
+        np.testing.assert_equal(filtered, expected)
 
     def test_nodes_filter_id_lt(self):
         filtered = self.parser.nodes.filter(id__lt=3).data["coordinates"]
         (trues,) = np.where(self.parser.nodes.data["id"] < 3)
         expected = self.parser.nodes.data["coordinates"][:, trues]
-        self.assertTrue((filtered == expected).all())
+        np.testing.assert_equal(filtered, expected)
 
     def test_nodes_filter_id_lte(self):
         filtered = self.parser.nodes.filter(id__lte=3).data["coordinates"]
         (trues,) = np.where(self.parser.nodes.data["id"] <= 3)
         expected = self.parser.nodes.data["coordinates"][:, trues]
-        self.assertTrue((filtered == expected).all())
+        np.testing.assert_equal(filtered, expected)
 
     def test_nodes_filter_id_in(self):
         """Verify that 'in' filter returns the correct data."""
@@ -451,7 +452,7 @@ class NodeFilterTests(unittest.TestCase):
             (self.parser.nodes.data["id"] >= 3) & (self.parser.nodes.data["id"] < 7)
         )
         expected = self.parser.nodes.data["coordinates"][:, trues]
-        self.assertTrue((filtered == expected).all())
+        np.testing.assert_equal(filtered, expected)
 
     # TODO: fix this
     @unittest.skip(
@@ -463,7 +464,7 @@ class NodeFilterTests(unittest.TestCase):
         filtered = self.parser.nodes.filter(coordinates__in_tile=[0, 0, 0]).data["id"]
         expected = self.parser.nodes.data["id"]
         self.assertTrue(len(filtered) != 0)
-        self.assertTrue((filtered == expected).all())
+        np.testing.assert_equal(filtered, expected)
 
     # some special cases
 
@@ -472,7 +473,7 @@ class NodeFilterTests(unittest.TestCase):
         filtered = self.parser.nodes.filter(id=3).filter(id=3).data["coordinates"]
         (trues,) = np.where(self.parser.nodes.data["id"] == 3)
         expected = self.parser.nodes.data["coordinates"][:, trues]
-        self.assertTrue((filtered == expected).all())
+        np.testing.assert_equal(filtered, expected)
 
     def test_nodes_chained_same_filter_id_in(self):
         """In filters can be chained."""
@@ -485,7 +486,7 @@ class NodeFilterTests(unittest.TestCase):
         expected = self.parser.nodes.filter(id__in=list(range(1, 10))).data[
             "coordinates"
         ]
-        self.assertTrue((filtered == expected).all())
+        np.testing.assert_equal(filtered, expected)
 
     def test_nodes_chained_filter_id_in(self):
         filtered = (
@@ -496,7 +497,7 @@ class NodeFilterTests(unittest.TestCase):
         expected = self.parser.nodes.filter(id__in=list(range(3, 7))).data[
             "coordinates"
         ]
-        self.assertTrue((filtered == expected).all())
+        np.testing.assert_equal(filtered, expected)
 
     def test_nodes_chained_filter_id_in_2(self):
         filtered = (
@@ -507,7 +508,7 @@ class NodeFilterTests(unittest.TestCase):
         expected = self.parser.nodes.filter(id__in=list(range(5, 10))).data[
             "coordinates"
         ]
-        self.assertTrue((filtered == expected).all())
+        np.testing.assert_equal(filtered, expected)
 
     def test_manhole_filter(self):
         non_manholes1 = self.parser.nodes.filter(is_manhole=False).count
@@ -552,7 +553,7 @@ class LineFilterTests(unittest.TestCase):
         filtered = self.parser.lines.filter(id=3).data["line_coords"]
         (trues,) = np.where(self.parser.lines.data["id"] == 3)
         expected = self.parser.lines.data["line_coords"][:, trues]
-        self.assertTrue((filtered == expected).all())
+        np.testing.assert_equal(filtered, expected)
 
     def test_lines_filter_id_in(self):
         filtered = self.parser.lines.filter(id__in=list(range(3, 7))).data[
@@ -562,4 +563,4 @@ class LineFilterTests(unittest.TestCase):
             (self.parser.lines.data["id"] >= 3) & (self.parser.lines.data["id"] < 7)
         )
         expected = self.parser.lines.data["line_coords"][:, trues]
-        self.assertTrue((filtered == expected).all())
+        np.testing.assert_equal(filtered, expected)
