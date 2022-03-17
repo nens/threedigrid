@@ -117,8 +117,8 @@ def test_export_null(ga, tmp_path):
         ("grid", "grid_2D_groundwater"),
     ],
 )
-def test_export_method(ga_export, export_method, expected_filename, works_in_v2):
-    if ga_export.ga.grid_file.endswith("gridadmin_v2.h5") and not works_in_v2:
-        pytest.skip("Export to %s yet supported in new gridadmin" % expected_filename)
+def test_export_method(ga_export, export_method, expected_filename):
+    # if ga_export.ga.grid_file.endswith("gridadmin_v2.h5") and export_method == "breaches":
+    #     pytest.skip("lines.breaches not yet supported in new gridadmin")
     getattr(ga_export, "export_" + export_method)()
     assert os.path.exists(os.path.join(ga_export._dest, expected_filename + ".json"))

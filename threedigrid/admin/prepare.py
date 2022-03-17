@@ -423,14 +423,14 @@ class GridAdminH5Export:
         )(dest, indent=self._indent)
 
     def export_breaches(self):
-        if self.ga.lines.breaches.id.size == 0:
+        if self.ga.breaches.id.size == 0:
             logger.info(
                 "[*] Model {} does not have 1D, "
                 "skipping export breaches...".format(self.ga.model_name)
             )
             return
         dest = os.path.join(self._dest, "breaches" + self._extension)
-        getattr(self.ga.lines.breaches.reproject_to(self._epsg), self._export_method)(
+        getattr(self.ga.breaches.reproject_to(self._epsg), self._export_method)(
             dest, indent=self._indent
         )
 

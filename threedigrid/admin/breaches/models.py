@@ -61,11 +61,6 @@ class Breaches(Model):
     OBJECT_TYPE = constants.TYPE_V2_BREACH
 
     def __init__(self, *args, **kwargs):
-        logger.warning(
-            "Deprecation warning: This model is going to be removed "
-            " in the near future, "
-            "please use breaches under lines (lines.breaches) instead"
-        )
         super().__init__(*args, **kwargs)
 
         self._exporters = [

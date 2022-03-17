@@ -9,6 +9,8 @@ For an overview of the kcu types see :ref:`kcu-label`.
 """
 
 
+import warnings
+
 import numpy as np
 
 from threedigrid.admin.lines import exporters, subsets
@@ -89,7 +91,13 @@ class Lines(Model):
 
     @property
     def breaches(self):
-        return self._filter_as(Breaches, kcu=55)
+        warnings.warn(
+            "lines.breaches is going to be removed "
+            " in the near future, please use the root breaches instead",
+            UserWarning,
+        )
+        breaches = self._filter_as(Breaches)
+        return breaches._filter_as(Breaches, breach_id__gt=0)
 
     @property
     def line_nodes(self):
