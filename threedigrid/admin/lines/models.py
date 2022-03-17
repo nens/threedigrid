@@ -96,8 +96,7 @@ class Lines(Model):
             " in the near future, please use the root breaches instead",
             UserWarning,
         )
-        breaches = self._filter_as(Breaches)
-        return breaches._filter_as(Breaches, breach_id__gt=0)
+        return self._filter_as(Breaches, kcu=55)
 
     @property
     def line_nodes(self):
