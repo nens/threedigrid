@@ -20,7 +20,7 @@ from threedigrid.admin.nodes.exporters import CellsOgrExporter, NodesOgrExporter
 test_file_dir = os.path.join(os.getcwd(), "tests/test_files")
 
 # the testfile is a copy of the v2_bergermeer gridadmin file
-grid_admin_h5_file = os.path.join(test_file_dir, "gridadmin.h5")
+grid_admin_h5_file = os.path.join(test_file_dir, "gridadmin_v2.h5")
 
 
 class GridAdminTest(unittest.TestCase):
@@ -93,7 +93,7 @@ class GridAdminTest(unittest.TestCase):
     def test_crs(self):
         crs = self.parser.crs
         assert isinstance(crs, CRS)
-        assert crs.to_epsg() == 28992
+        assert "28992" in crs.srs
 
 
 class GridAdminLinesTest(unittest.TestCase):

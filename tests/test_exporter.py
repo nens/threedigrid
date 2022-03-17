@@ -98,23 +98,23 @@ def test_export_null(ga, tmp_path):
 
 
 @pytest.mark.parametrize(
-    "export_method,expected_filename,works_in_v2",
+    "export_method,expected_filename",
     [
-        ("2d_groundwater_lines", "lines_2D_groundwater", True),
-        ("2d_openwater_lines", "lines_2D_open_water", True),
-        ("2d_vertical_infiltration_lines", "lines_2D_vertical_infiltration", True),
-        ("levees", "levees", False),  # levees are not implemented in v2
-        ("breaches", "breaches", False),  # breaches are not implemented in v2
-        ("channels", "channels", True),
-        ("pipes", "pipes", True),
-        ("weirs", "weirs", True),
-        ("culverts", "culverts", True),
-        # ("orifices", "orifices", True),  no orifices in test file
-        ("manholes", "manholes", True),
-        ("nodes", "nodes_1D_all", True),
-        ("pumps", "pumps", True),
-        ("grid", "grid_2D_open_water", True),
-        ("grid", "grid_2D_groundwater", True),
+        ("2d_groundwater_lines", "lines_2D_groundwater"),
+        ("2d_openwater_lines", "lines_2D_open_water"),
+        ("2d_vertical_infiltration_lines", "lines_2D_vertical_infiltration"),
+        ("levees", "levees"),
+        ("breaches", "breaches"),
+        ("channels", "channels"),
+        ("pipes", "pipes"),
+        ("weirs", "weirs"),
+        ("culverts", "culverts"),
+        # ("orifices", "orifices"),  no orifices in test file
+        ("manholes", "manholes"),
+        ("nodes", "nodes_1D_all"),
+        ("pumps", "pumps"),
+        ("grid", "grid_2D_open_water"),
+        ("grid", "grid_2D_groundwater"),
     ],
 )
 def test_export_method(ga_export, export_method, expected_filename, works_in_v2):
