@@ -69,9 +69,12 @@ class LinesOgrExporter(BaseOgrExporter):
         if geom_source == "from_spatialite" and shapely_geom is None:
             raise_import_exception("shapely")
 
-        self.del_datasource(file_name)
-        data_source = self.driver.CreateDataSource(file_name)
-        layer = data_source.CreateLayer(str(os.path.basename(file_name)), sr, geomtype)
+        if os.path.exists(file_name):
+            data_source = self.driver.Open(file_name, update=1)
+            print("UPDATING!!!")
+        else:
+            data_source = self.driver.CreateDataSource(file_name)
+        layer = data_source.CreateLayer("Lines", sr, geomtype)
         fields = kwargs.get("fields", LINE_BASE_FIELDS_ALL)
         for field_name, field_type in fields.items():
             layer.CreateField(
@@ -81,6 +84,9 @@ class LinesOgrExporter(BaseOgrExporter):
 
         node_a = line_data["line"][0]
         node_b = line_data["line"][1]
+
+        data_source.StartTransaction()
+
         for i in range(node_a.size):
             if line_data["id"][i] == 0:
                 continue  # skip the dummy element
@@ -122,4 +128,7 @@ class LinesOgrExporter(BaseOgrExporter):
                 self.set_field(feature, field_name, field_type, raw_value)
 
             layer.CreateFeature(feature)
-            feature.Destroy()
+            feature = None
+
+        data_source.CommitTransaction()
+        data_source = None

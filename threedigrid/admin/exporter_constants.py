@@ -17,6 +17,10 @@ if ogr is not None:
         "float": ogr.OFTReal,
     }
 
+    OGR_GEOM_TYPE_MAP = {
+        "point": ogr.wkbPoint
+    }
+
 SHP_DRIVER_NAME = "ESRI Shapefile"
 GEO_PACKAGE_DRIVER_NAME = "GPKG"
 GEOJSON_DRIVER_NAME = "GeoJSON"

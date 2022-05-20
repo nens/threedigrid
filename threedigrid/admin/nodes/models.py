@@ -23,6 +23,8 @@ from threedigrid.orm.base.fields import BooleanArrayField
 from threedigrid.orm.fields import ArrayField, BboxArrayField, PointArrayField
 from threedigrid.orm.models import Model
 
+from threedigrid.admin.exporters.geopackage.exporter import OgrExporter
+
 NODE_SUBSETS = {
     "node_type__eq": subsets.NODE_TYPE__EQ_SUBSETS,
     "node_type__in": subsets.NODE_TYPE__IN_SUBSETS,
@@ -60,11 +62,9 @@ class Nodes(Model):
         return self._filter_as(AddedCalculationNodes, content_pk=0)
 
     def __init__(self, *args, **kwargs):
-
         super().__init__(*args, **kwargs)
-
         self._exporters = [
-            exporters.NodesOgrExporter(self),
+            OgrExporter(self)
         ]
 
     @property

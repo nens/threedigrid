@@ -82,11 +82,11 @@ class Model(BaseModel):
                 )
         return selection
 
-    def to_shape(self, file_name, **kwargs):
-        self._to_ogr(SHP_DRIVER_NAME, file_name, **kwargs)
+    def to_shape(self, file_name, layer_name=None, field_definitions=None, **kwargs):
+        self._to_ogr(SHP_DRIVER_NAME, file_name, layer_name, field_definitions, **kwargs)
 
-    def to_gpkg(self, file_name, **kwargs):
-        self._to_ogr(GEO_PACKAGE_DRIVER_NAME, file_name, **kwargs)
+    def to_gpkg(self, file_name, layer_name=None, field_definitions=None, **kwargs):
+        self._to_ogr(GEO_PACKAGE_DRIVER_NAME, file_name, layer_name, field_definitions, **kwargs)
 
     def to_geojson(self, file_name, **kwargs):
         if kwargs.get("use_ogr", False):
@@ -102,20 +102,18 @@ class Model(BaseModel):
             serializer = GeoJsonSerializer(fields, self, indent)
             serializer.save(file_name)
 
-    def _to_ogr(self, driver_name, file_name, **kwargs):
+    def _to_ogr(self, driver_name, file_name, layer_name=None, field_definitions=None, **kwargs):
+        # By default use class name in lowercase as layer_name
+        if layer_name is None:
+            layer_name = self.__class__.__name__.lower()
+
         exporter = self._get_exporter(driver_name)
         if not exporter:
             raise AttributeError(
                 "Instance {} has no {} exporter".format(self, driver_name)
             )
-        filtered = self.data
         exporter.set_driver(driver_name=driver_name)
-
-        epsg_code = self.epsg_code
-        if self.reproject_to_epsg:
-            epsg_code = self.reproject_to_epsg
-
-        exporter.save(file_name, filtered, epsg_code, **kwargs)
+        exporter.save(file_name, layer_name=layer_name, field_definitions=field_definitions, **kwargs)
 
     def _get_exporter(self, driver_name):
         for exporter in self._exporters:
