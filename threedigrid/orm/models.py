@@ -85,8 +85,8 @@ class Model(BaseModel):
     def to_shape(self, file_name, layer_name=None, field_definitions=None, **kwargs):
         self._to_ogr(SHP_DRIVER_NAME, file_name, layer_name, field_definitions, **kwargs)
 
-    def to_gpkg(self, file_name, layer_name=None, field_definitions=None, **kwargs):
-        self._to_ogr(GEO_PACKAGE_DRIVER_NAME, file_name, layer_name, field_definitions, **kwargs)
+    def to_gpkg(self, file_name, layer_name=None, field_definitions=None, progress_func=None, **kwargs):
+        self._to_ogr(GEO_PACKAGE_DRIVER_NAME, file_name, layer_name, field_definitions, progress_func=progress_func, **kwargs)
 
     def to_geojson(self, file_name, **kwargs):
         if kwargs.get("use_ogr", False):
@@ -102,7 +102,7 @@ class Model(BaseModel):
             serializer = GeoJsonSerializer(fields, self, indent)
             serializer.save(file_name)
 
-    def _to_ogr(self, driver_name, file_name, layer_name=None, field_map=None, **kwargs):
+    def _to_ogr(self, driver_name, file_name, layer_name=None, field_map=None, progress_func=None,**kwargs):
         # By default use class name in lowercase as layer_name
         if layer_name is None:
             layer_name = self.__class__.__name__.lower()
@@ -119,7 +119,7 @@ class Model(BaseModel):
                 "Instance {} has no {} exporter".format(self, driver_name)
             )
         exporter.set_driver(driver_name=driver_name)
-        exporter.save(file_name, layer_name=layer_name, field_map=field_map, **kwargs)
+        exporter.save(file_name, layer_name=layer_name, field_map=field_map, progress_func=progress_func, **kwargs)
 
     def _get_exporter(self, driver_name):
         for exporter in self._exporters:

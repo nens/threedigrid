@@ -79,7 +79,7 @@ class OgrExporter(BaseOgrExporter):
             const.GEOJSON_DRIVER_NAME,
         }
 
-    def save(self, file_name, layer_name, field_map,  **kwargs):
+    def save(self, file_name, layer_name, field_map, progress_func=None,  **kwargs):
         """
         save to file format specified by the driver, e.g. shapefile
 
@@ -87,6 +87,11 @@ class OgrExporter(BaseOgrExporter):
         """
 
         data = self.model.data
+
+        total = data["id"].size
+
+        if progress_func:
+            progress_func(0, total)
 
         if self.driver is None:
             self.set_driver(extension=os.path.splitext(file_name)[1])
@@ -131,8 +136,7 @@ class OgrExporter(BaseOgrExporter):
         else:
             geom_def = None
         
-
-        for i in range(data["id"].size):
+        for i in range(total):
             if data["id"][i] == 0:
                 continue  # skip the dummy element
 
@@ -165,5 +169,8 @@ class OgrExporter(BaseOgrExporter):
 
             layer.CreateFeature(feature)
             feature = None
+            if progress_func:
+                progress_func(i+1, total)
+
         data_source.CommitTransaction()
         data_source = None
