@@ -48,7 +48,9 @@ class BaseOgrExporter(BaseExporterObject):
             raw_value = raw_value.item()
         except AttributeError:
             pass
+
         value = TYPE_FUNC_MAP[field_type](raw_value)
+
         if value is None:
             feature.SetFieldNull(field_name)
         else:

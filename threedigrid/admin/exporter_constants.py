@@ -12,13 +12,20 @@ except ImportError:
 if ogr is not None:
     OGR_FIELD_TYPE_MAP = {
         "int": ogr.OFTInteger,
+        int: ogr.OFTInteger,
         "str": ogr.OFTString,
+        str: ogr.OFTString,
         "real": ogr.OFTReal,
         "float": ogr.OFTReal,
+        float: ogr.OFTReal,
+        bool: ogr.OFTInteger,
     }
 
     OGR_GEOM_TYPE_MAP = {
-        "point": ogr.wkbPoint
+        "point": ogr.wkbPoint,
+        "line": ogr.wkbLineString,
+        "multiline": ogr.wkbLineString,
+        "bbox": ogr.wkbPolygon
     }
 
 SHP_DRIVER_NAME = "ESRI Shapefile"

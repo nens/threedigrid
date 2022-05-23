@@ -32,22 +32,33 @@ NODE_SUBSETS = {
 
 
 class Nodes(Model):
-    content_pk = ArrayField()
-    seq_id = ArrayField()
-    calculation_type = ArrayField()
+    content_pk = ArrayField(type=int)
+    seq_id = ArrayField(type=int)
+    calculation_type = ArrayField(type=float)
     coordinates = PointArrayField()
     cell_coords = BboxArrayField()
-    zoom_category = ArrayField()
-    node_type = ArrayField()
+    zoom_category = ArrayField(type=float)
+    node_type = ArrayField(type=int)
     is_manhole = BooleanArrayField()
-    sumax = ArrayField()
-    drain_level = ArrayField()
-    storage_area = ArrayField()
-    dmax = ArrayField()
-    initial_waterlevel = ArrayField()
-    dimp = ArrayField()
+    sumax = ArrayField(type=float)
+    drain_level = ArrayField(type=float)
+    storage_area = ArrayField(type=float)
+    dmax = ArrayField(type=float)
+    initial_waterlevel = ArrayField(type=float)
+    dimp = ArrayField(type=float)
 
     SUBSETS = NODE_SUBSETS
+
+    GPKG_DEFAULT_FIELD_MAP = {
+        "id": "id",
+        "content_pk": "connection_node_id",
+        "node_type": "node_type",
+        "calculation_type": "calculation_type",
+        "is_manhole": "is_manhole",
+        "storage_area": "connection_node_storage_are",
+        "sumax": "max_surface_area",
+        "coordinates": "the_geom",
+    }
 
     @property
     def connectionnodes(self):
@@ -115,18 +126,23 @@ class Cells(Nodes):
     of the cells extent.
 
     """
-
-    z_coordinate = ArrayField()
-    pixel_width = ArrayField()
+    z_coordinate = ArrayField(type=float)
+    pixel_width = ArrayField(type=int)
     pixel_coords = BboxArrayField()
-    has_dem_averaged = ArrayField()
+    has_dem_averaged = ArrayField(type=float)
+
+    GPKG_DEFAULT_FIELD_MAP = {
+        "id": "id",
+        "node_type": "node_type",
+        "has_dem_averaged": "has_dem_averaged",
+        "sumax": "sumax",
+        "dmax": "bottom_level",
+        "dimp": "impervious_layer_elevation",
+        "cell_coords": "the_geom",
+    }
 
     def __init__(self, *args, **kwargs):
-
         super().__init__(*args, **kwargs)
-        self._exporters = [
-            exporters.CellsOgrExporter(self),
-        ]
 
     @property
     def bounds(self):

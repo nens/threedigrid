@@ -102,10 +102,16 @@ class Model(BaseModel):
             serializer = GeoJsonSerializer(fields, self, indent)
             serializer.save(file_name)
 
-    def _to_ogr(self, driver_name, file_name, layer_name=None, field_definitions=None, **kwargs):
+    def _to_ogr(self, driver_name, file_name, layer_name=None, field_map=None, **kwargs):
         # By default use class name in lowercase as layer_name
         if layer_name is None:
             layer_name = self.__class__.__name__.lower()
+
+        if field_map is None:
+            if not hasattr(self, "GPKG_DEFAULT_FIELD_MAP"):
+                raise Exception("field_map is not defined and no default field map present")
+
+            field_map = self.GPKG_DEFAULT_FIELD_MAP
 
         exporter = self._get_exporter(driver_name)
         if not exporter:
@@ -113,7 +119,7 @@ class Model(BaseModel):
                 "Instance {} has no {} exporter".format(self, driver_name)
             )
         exporter.set_driver(driver_name=driver_name)
-        exporter.save(file_name, layer_name=layer_name, field_definitions=field_definitions, **kwargs)
+        exporter.save(file_name, layer_name=layer_name, field_map=field_map, **kwargs)
 
     def _get_exporter(self, driver_name):
         for exporter in self._exporters:

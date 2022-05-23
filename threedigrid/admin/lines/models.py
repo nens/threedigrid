@@ -17,6 +17,7 @@ from threedigrid.admin.lines import exporters, subsets
 from threedigrid.orm.base.fields import IndexArrayField, MappedSubsetArrayField
 from threedigrid.orm.fields import ArrayField, LineArrayField, MultiLineArrayField
 from threedigrid.orm.models import Model
+from threedigrid.admin.exporters.geopackage.exporter import OgrExporter
 
 LINE_SUBSETS = {"kcu__in": subsets.KCU__IN_SUBSETS}
 
@@ -41,32 +42,47 @@ class Lines(Model):
 
     """
 
-    kcu = ArrayField()
-    lik = ArrayField()
+    kcu = ArrayField(type=int)
+    lik = ArrayField(type=int)
     line = IndexArrayField(to="Nodes")
-    dpumax = ArrayField()
-    flod = ArrayField()
-    flou = ArrayField()
+    dpumax = ArrayField(type=float)
+    flod = ArrayField(type=float)
+    flou = ArrayField(type=float)
     cross1 = IndexArrayField(to="CrossSections")
     cross2 = IndexArrayField(to="CrossSections")
-    ds1d = ArrayField()
-    ds1d_half = ArrayField()
-    cross_weight = ArrayField()
-    invert_level_start_point = ArrayField()
-    invert_level_end_point = ArrayField()
-    content_pk = ArrayField()
-    content_type = ArrayField()
-    zoom_category = ArrayField()
-    cross_pix_coords = LineArrayField()
+    ds1d = ArrayField(type=float)
+    ds1d_half = ArrayField(type=float)
+    cross_weight = ArrayField(type=float)
+    invert_level_start_point = ArrayField(type=float)
+    invert_level_end_point = ArrayField(type=float)
+    content_pk = ArrayField(type=int)
+    content_type = ArrayField(type=str)
+    zoom_category = ArrayField(type=int)
+    cross_pix_coords = LineArrayField(type=float)
     line_coords = LineArrayField()
     line_geometries = MultiLineArrayField()
     SUBSETS = LINE_SUBSETS
+
+    GPKG_DEFAULT_FIELD_MAP = {
+        "id": "id",
+        "flou": "discharge_coefficient_positive",
+        "flod": "discharge_coefficient_negative",
+        "kcu": "line_type",
+        "content_type": "source_table",
+        "content_pk": "source_table_id",
+        "invert_level_start_point": "invert_level_start_point",
+        "invert_level_end_point": "invert_level_end_point",
+        "dpumax": "exchange_level",
+        "line__0": "calculation_node_id_start",
+        "line__1": "calculation_node_id_end",
+        "line_geometries": "the_geom"
+    }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self._exporters = [
-            exporters.LinesOgrExporter(self),
+            OgrExporter(self),
         ]
 
     @property
