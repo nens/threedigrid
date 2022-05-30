@@ -54,8 +54,8 @@ Not so surprisingly, these data structures are described in form of models which
 container for structured, annotated data. The basic definition of a model looks like this::
 
     class Lines(Model):
-        kcu = ArrayField()
-        lik = ArrayField()
+        kcu = ArrayField(type=int)
+        lik = ArrayField(type=int)
         line = IndexArrayField(to='Nodes')
         line_geometries = MultiLineArrayField()
 

@@ -49,12 +49,12 @@ class Breaches(Model):
 
     """
 
-    content_pk = ArrayField()
-    seq_ids = ArrayField()
-    levbr = ArrayField()
+    content_pk = ArrayField(type=int)
+    seq_ids = ArrayField(type=int)
+    levbr = ArrayField(type=float)
     levl = IndexArrayField(to="Lines")
-    levmat = ArrayField()
-    kcu = ArrayField()
+    levmat = ArrayField(type=int)
+    kcu = ArrayField(type=int)
 
     coordinates = PointArrayField()
 

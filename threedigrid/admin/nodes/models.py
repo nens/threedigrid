@@ -99,20 +99,20 @@ class AddedCalculationNodes(Nodes):
 
 
 class EmbeddedNodes(Nodes):
-    embedded_in = ArrayField()
+    embedded_in = ArrayField(type=int)
 
 
 class ConnectionNodes(Nodes):
-    initial_waterlevel = ArrayField()
+    initial_waterlevel = ArrayField(type=float)
 
 
 class Manholes(ConnectionNodes):
-    bottom_level = ArrayField()
-    display_name = ArrayField()
-    surface_level = ArrayField()
-    shape = ArrayField()
-    width = ArrayField()
-    manhole_indicator = ArrayField()
+    bottom_level = ArrayField(type=float)
+    display_name = ArrayField(type=str)
+    surface_level = ArrayField(type=float)
+    shape = ArrayField(type=float)
+    width = ArrayField(type=float)
+    manhole_indicator = ArrayField(type=float)
 
 
 class Cells(Nodes):
@@ -287,11 +287,11 @@ class Grid(Model):
     of the cell coordinates
     """
 
-    nodm = ArrayField()
-    nodn = ArrayField()
-    nodk = ArrayField()
-    ip = ArrayField()
-    jp = ArrayField()
+    nodm = ArrayField(type=int)
+    nodn = ArrayField(type=int)
+    nodk = ArrayField(type=int)
+    ip = ArrayField(type=int)
+    jp = ArrayField(type=int)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
