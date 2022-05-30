@@ -1,6 +1,5 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
 
-from threedigrid.admin.exporters.geopackage.exporter import OgrExporter
 from threedigrid.orm.fields import ArrayField, LineArrayField, PointArrayField
 from threedigrid.orm.models import Model
 
@@ -41,4 +40,3 @@ class Pumps(Model):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._exporters = [OgrExporter(self)]

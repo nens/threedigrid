@@ -13,8 +13,7 @@ import warnings
 
 import numpy as np
 
-from threedigrid.admin.exporters.geopackage.exporter import OgrExporter
-from threedigrid.admin.lines import subsets
+from threedigrid.admin.lines import exporters, subsets
 from threedigrid.orm.base.fields import IndexArrayField, MappedSubsetArrayField
 from threedigrid.orm.fields import ArrayField, LineArrayField, MultiLineArrayField
 from threedigrid.orm.models import Model
@@ -82,7 +81,7 @@ class Lines(Model):
         super().__init__(*args, **kwargs)
 
         self._exporters = [
-            OgrExporter(self),
+            exporters.LinesOgrExporter(self),
         ]
 
     @property

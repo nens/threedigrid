@@ -16,8 +16,7 @@ import itertools
 
 import numpy as np
 
-from threedigrid.admin.exporters.geopackage.exporter import OgrExporter
-from threedigrid.admin.nodes import subsets
+from threedigrid.admin.nodes import exporters, subsets
 from threedigrid.geo_utils import transform_xys
 from threedigrid.numpy_utils import get_smallest_uint_dtype
 from threedigrid.orm.base.fields import BooleanArrayField
@@ -73,7 +72,9 @@ class Nodes(Model):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._exporters = [OgrExporter(self)]
+        self._exporters = [
+            exporters.NodesOgrExporter(self),
+        ]
 
     @property
     def locations_2d(self):
@@ -141,6 +142,9 @@ class Cells(Nodes):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._exporters = [
+            exporters.CellsOgrExporter(self),
+        ]
 
     @property
     def bounds(self):

@@ -52,7 +52,7 @@ def get_field_type(model, field_name):
     return model._get_field(field_name).type
 
 
-class OgrExporter(BaseOgrExporter):
+class GpkgExporter(BaseOgrExporter):
     def __init__(self, model):
         """
         :param model: model instance (filtered or not)
@@ -60,17 +60,18 @@ class OgrExporter(BaseOgrExporter):
         self.model = model
         self.supported_drivers = {
             const.GEO_PACKAGE_DRIVER_NAME,
-            const.SHP_DRIVER_NAME,
-            const.GEOJSON_DRIVER_NAME,
         }
+        self.set_driver(const.GEO_PACKAGE_DRIVER_NAME)
 
-    def save(self, file_name, layer_name, field_map, progress_func=None, **kwargs):
+    def save(
+        self, file_name, layer_name, field_definitions, progress_func=None, **kwargs
+    ):
         """
         save to file format specified by the driver, e.g. shapefile
 
         :param file_name: name of the outputfile
         """
-
+        field_map = field_definitions
         data = self.model.data
 
         total = data["id"].size
