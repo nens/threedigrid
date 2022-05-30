@@ -17,7 +17,7 @@ def test_export_by_extension(ga, tmp_path, extension):
     path = str(tmp_path / ("exporter_test_lines" + extension))
     line_2d_open_water_wgs84 = ga.lines.subset("2D_OPEN_WATER").reproject_to("4326")
     exporter = OgrExporter(line_2d_open_water_wgs84)
-    exporter.save(path)
+    exporter.save(path, "lines", ga.lines.GPKG_DEFAULT_FIELD_MAP)
     assert os.path.exists(path)
     s = ogr.Open(path)
     layer = s.GetLayer("lines")

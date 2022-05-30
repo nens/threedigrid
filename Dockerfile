@@ -23,10 +23,12 @@ RUN apt-get update && apt-get install -y \
     libgdal-dev \
     libhdf5-serial-dev \
     python3-dev \
+    g++ \
 && rm -rf /var/lib/apt/lists/*
 
 # Avoid issues with upgrading an apt-managed pip.
 RUN curl -s https://bootstrap.pypa.io/get-pip.py | python3
+RUN pip install -U pip
 
 WORKDIR /code
 COPY requirements_docker.txt /code/
