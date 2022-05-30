@@ -1,8 +1,8 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
 
+from threedigrid.admin.exporters.geopackage.exporter import OgrExporter
 from threedigrid.orm.fields import ArrayField, LineArrayField, PointArrayField
 from threedigrid.orm.models import Model
-from threedigrid.admin.exporters.geopackage.exporter import OgrExporter
 
 
 class Pumps(Model):
@@ -34,7 +34,7 @@ class Pumps(Model):
         "bottom_level": "bottom_level",
         "start_level": "start_level",
         "lower_stop_level": "lower_stop_level",
-        "start_level": "upper_stop_level",
+        # "start_level": "upper_stop_level",
         "capacity": "capacity",
         "coordinates": "the_geom",
     }

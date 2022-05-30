@@ -13,11 +13,11 @@ import warnings
 
 import numpy as np
 
-from threedigrid.admin.lines import exporters, subsets
+from threedigrid.admin.exporters.geopackage.exporter import OgrExporter
+from threedigrid.admin.lines import subsets
 from threedigrid.orm.base.fields import IndexArrayField, MappedSubsetArrayField
 from threedigrid.orm.fields import ArrayField, LineArrayField, MultiLineArrayField
 from threedigrid.orm.models import Model
-from threedigrid.admin.exporters.geopackage.exporter import OgrExporter
 
 LINE_SUBSETS = {"kcu__in": subsets.KCU__IN_SUBSETS}
 

@@ -10,11 +10,6 @@ except ImportError:
 
 
 from threedigrid.admin import exporter_constants as const
-from threedigrid.admin.constants import (
-    NODE_1D_FIELDS,
-    NODE_BASE_FIELDS,
-    NODE_FIELD_NAME_MAP,
-)
 from threedigrid.geo_utils import get_spatial_reference
 from threedigrid.orm.base.exporters import BaseOgrExporter
 

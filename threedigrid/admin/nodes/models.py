@@ -16,14 +16,13 @@ import itertools
 
 import numpy as np
 
-from threedigrid.admin.nodes import exporters, subsets
+from threedigrid.admin.exporters.geopackage.exporter import OgrExporter
+from threedigrid.admin.nodes import subsets
 from threedigrid.geo_utils import transform_xys
 from threedigrid.numpy_utils import get_smallest_uint_dtype
 from threedigrid.orm.base.fields import BooleanArrayField
 from threedigrid.orm.fields import ArrayField, BboxArrayField, PointArrayField
 from threedigrid.orm.models import Model
-
-from threedigrid.admin.exporters.geopackage.exporter import OgrExporter
 
 NODE_SUBSETS = {
     "node_type__eq": subsets.NODE_TYPE__EQ_SUBSETS,

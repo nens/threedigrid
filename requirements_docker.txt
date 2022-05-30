@@ -1,6 +1,6 @@
 h5py==3.4.0
 ipython==5.8.0
-numpy==1.16.5
+numpy==1.17.5
 cftime==1.0.3.4
 pygdal==2.2.2.3
 pyproj==2.2.2

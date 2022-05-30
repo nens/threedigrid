@@ -1,4 +1,4 @@
-FROM ubuntu:xenial
+FROM ubuntu:focal
 
 LABEL maintainer='lars.claussen <lars.claussen@nelen-schuurmans.nl>'
 LABEL py_version='3.x'
