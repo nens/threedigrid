@@ -1,7 +1,5 @@
 import numpy as np
 
-from threedigrid.admin.gridadmin import GridH5Admin
-
 # Obstacle export field definitions/mapping
 OBSTACLES_FIELD_DEFINITIONS = {
     "id": "line_id",
@@ -45,6 +43,8 @@ class GeopackageExporter:
                 # total = total feature
                 pass
         """
+        from threedigrid.admin.gridadmin import GridH5Admin
+
         with GridH5Admin(self.gridadmin_filename) as ga:
             cells = ga.cells.subset("2D_OPEN_WATER")
             pumps = ga.pumps.filter(id__gte=1)
