@@ -24,34 +24,25 @@ logger = logging.getLogger(__name__)
 def get_geometry(field_name, field_type, data, index):
     geom = ogr.Geometry(const.OGR_GEOM_TYPE_MAP[field_type])
 
-    if field_type == 'point':
-        geom.AddPoint(
-            data[field_name][0][index], data[field_name][1][index]
-        )
-    elif field_type == 'bbox':
+    if field_type == "point":
+        geom.AddPoint(data[field_name][0][index], data[field_name][1][index])
+    elif field_type == "bbox":
         ring = ogr.Geometry(ogr.wkbLinearRing)
-        ring.AddPoint(
-            data[field_name][0][index], data[field_name][1][index]
-        )
-        ring.AddPoint(
-            data[field_name][2][index], data[field_name][1][index]
-        )
+        ring.AddPoint(data[field_name][0][index], data[field_name][1][index])
+        ring.AddPoint(data[field_name][2][index], data[field_name][1][index])
 
-        ring.AddPoint(
-            data[field_name][2][index], data[field_name][3][index]
-        )
+        ring.AddPoint(data[field_name][2][index], data[field_name][3][index])
 
-        ring.AddPoint(
-            data[field_name][0][index], data[field_name][3][index]
-        )
+        ring.AddPoint(data[field_name][0][index], data[field_name][3][index])
 
-        ring.AddPoint(
-            data[field_name][0][index], data[field_name][1][index]
-        )
+        ring.AddPoint(data[field_name][0][index], data[field_name][1][index])
 
         # Create polygon from ring
         geom.AddGeometry(ring)
-    elif field_type == 'multiline':
+    elif field_type == "line":
+        geom.AddPoint(data[field_name][0][index], data[field_name][1][index])
+        geom.AddPoint(data[field_name][2][index], data[field_name][3][index])
+    elif field_type == "multiline":
         for x, y in data[field_name][index].reshape(2, -1).T:
             geom.AddPoint_2D(x, y)
     else:
@@ -60,14 +51,13 @@ def get_geometry(field_name, field_type, data, index):
 
 
 def get_field_type(model, field_name):
-    if '__' in field_name:
-        field_name, _ = field_name.split('__')                
+    if "__" in field_name:
+        field_name, _ = field_name.split("__")
 
     return model._get_field(field_name).type
 
 
 class OgrExporter(BaseOgrExporter):
-
     def __init__(self, model):
         """
         :param model: model instance (filtered or not)
@@ -79,7 +69,7 @@ class OgrExporter(BaseOgrExporter):
             const.GEOJSON_DRIVER_NAME,
         }
 
-    def save(self, file_name, layer_name, field_map, progress_func=None,  **kwargs):
+    def save(self, file_name, layer_name, field_map, progress_func=None, **kwargs):
         """
         save to file format specified by the driver, e.g. shapefile
 
@@ -109,10 +99,10 @@ class OgrExporter(BaseOgrExporter):
         else:
             data_source = self.driver.CreateDataSource(file_name)
 
-        layer = data_source.CreateLayer(layer_name, sr, geomtype, ['OVERWRITE=YES'])
+        layer = data_source.CreateLayer(layer_name, sr, geomtype, ["OVERWRITE=YES"])
 
         for field_name, ogr_field_name in field_map.items():
-            if ogr_field_name == 'the_geom':
+            if ogr_field_name == "the_geom":
                 continue
 
             field_type = get_field_type(self.model, field_name)
@@ -122,26 +112,27 @@ class OgrExporter(BaseOgrExporter):
                     ogr.FieldDefn(ogr_field_name, const.OGR_FIELD_TYPE_MAP[field_type])
                 )
             else:
-                raise Exception("Could not find type for %s with type %s", field_name, field_type)
+                raise Exception(
+                    "Could not find type for %s with type %s", field_name, field_type
+                )
 
         _definition = layer.GetLayerDefn()
 
         data_source.StartTransaction()
 
-        geom_def = [
-            (x, field_map[x]) for x in field_map if field_map[x] == 'the_geom']
-        
+        geom_def = [(x, field_map[x]) for x in field_map if field_map[x] == "the_geom"]
+
         if geom_def:
             geom_def = geom_def[0]
         else:
             geom_def = None
-        
+
         for i in range(total):
             if data["id"][i] == 0:
                 continue  # skip the dummy element
 
             feature = ogr.Feature(_definition)
-           
+
             if geom_def:
                 field_name, ogr_field_name = geom_def
                 field_type = get_field_type(self.model, field_name)
@@ -151,11 +142,11 @@ class OgrExporter(BaseOgrExporter):
             for field_name, ogr_field_name in field_map.items():
                 field_type = get_field_type(self.model, field_name)
 
-                if ogr_field_name == 'the_geom':
+                if ogr_field_name == "the_geom":
                     continue
 
-                if '__' in field_name:
-                    field_name, index = field_name.split('__')
+                if "__" in field_name:
+                    field_name, index = field_name.split("__")
                     try:
                         raw_value = data[field_name][:, i][int(index)]
                     except IndexError:
@@ -164,13 +155,13 @@ class OgrExporter(BaseOgrExporter):
                     try:
                         raw_value = data[field_name][i]
                     except IndexError:
-                        raw_value = None 
+                        raw_value = None
                 self.set_field(feature, ogr_field_name, field_type, raw_value)
 
             layer.CreateFeature(feature)
             feature = None
             if progress_func:
-                progress_func(i+1, total)
+                progress_func(i + 1, total)
 
         data_source.CommitTransaction()
         data_source = None

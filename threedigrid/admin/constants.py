@@ -216,6 +216,7 @@ def to_float(value):
     # value == value checks if it is not NaN
     return value if (value != -9999.0) and (value == value) else None
 
+
 def to_int(value):
     if value is None:
         return None

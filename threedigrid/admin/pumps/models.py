@@ -31,17 +31,14 @@ class Pumps(Model):
         "node2_id": "calculation_node_id_end",
         "content_pk": "source_table_id",
         "type": "type",
-        "bottom_level" : "bottom_level",
+        "bottom_level": "bottom_level",
         "start_level": "start_level",
         "lower_stop_level": "lower_stop_level",
         "start_level": "upper_stop_level",
         "capacity": "capacity",
-        "coordinates": "the_geom"
+        "coordinates": "the_geom",
     }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._exporters = [
-            OgrExporter(self)
-        ]        
-        
+        self._exporters = [OgrExporter(self)]

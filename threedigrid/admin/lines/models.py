@@ -75,7 +75,7 @@ class Lines(Model):
         "dpumax": "exchange_level",
         "line__0": "calculation_node_id_start",
         "line__1": "calculation_node_id_end",
-        "line_geometries": "the_geom"
+        "line_geometries": "the_geom",
     }
 
     def __init__(self, *args, **kwargs):

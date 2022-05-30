@@ -240,6 +240,7 @@ class PolygonArrayField(GeomArrayField):
         x2_array=values[2], y2_array=values[3]
 
     """
+
     type = "polygon"
 
     def get_mask_by_point(self, pnt, values):
@@ -276,7 +277,8 @@ class PolygonArrayField(GeomArrayField):
 
 
 class BboxArrayField(LineArrayField):
-    type = "bbox" 
+    type = "bbox"
+
     def _to_shapely_geom(self, values):
         if shapely is None:
             raise_import_exception("shapely")

@@ -74,9 +74,7 @@ class Nodes(Model):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._exporters = [
-            OgrExporter(self)
-        ]
+        self._exporters = [OgrExporter(self)]
 
     @property
     def locations_2d(self):
@@ -126,6 +124,7 @@ class Cells(Nodes):
     of the cells extent.
 
     """
+
     z_coordinate = ArrayField(type=float)
     pixel_width = ArrayField(type=int)
     pixel_coords = BboxArrayField()

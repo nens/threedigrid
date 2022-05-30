@@ -54,7 +54,6 @@ class NodesOgrExporter(BaseOgrExporter):
         # self.del_datasource(file_name)
         if os.path.exists(file_name):
             data_source = self.driver.Open(file_name, update=1)
-            print("UPDATING!!")
         else:
             data_source = self.driver.CreateDataSource(file_name)
         layer = data_source.CreateLayer("Nodes", sr, geomtype)
