@@ -4,7 +4,7 @@ import os
 import pytest
 from osgeo import ogr
 
-from threedigrid.admin.lines.exporters import LinesOgrExporter
+from threedigrid.admin.exporters.geopackage.exporter import OgrExporter
 
 test_file_dir = os.path.join(os.getcwd(), "tests/test_files")
 
@@ -16,11 +16,11 @@ grid_admin_h5_file = os.path.join(test_file_dir, "gridadmin.h5")
 def test_export_by_extension(ga, tmp_path, extension):
     path = str(tmp_path / ("exporter_test_lines" + extension))
     line_2d_open_water_wgs84 = ga.lines.subset("2D_OPEN_WATER").reproject_to("4326")
-    exporter = LinesOgrExporter(line_2d_open_water_wgs84)
-    exporter.save(path, line_2d_open_water_wgs84.data, "4326")
+    exporter = OgrExporter(line_2d_open_water_wgs84)
+    exporter.save(path)
     assert os.path.exists(path)
     s = ogr.Open(path)
-    layer = s.GetLayer()
+    layer = s.GetLayer("lines")
     assert layer.GetFeatureCount() == line_2d_open_water_wgs84.id.size
 
 

@@ -13,9 +13,8 @@ from threedigrid.admin.constants import (
     SUBSET_1D_ALL,
     SUBSET_2D_OPEN_WATER,
 )
+from threedigrid.admin.exporters.geopackage.exporter import OgrExporter
 from threedigrid.admin.gridadmin import GridH5Admin
-from threedigrid.admin.lines.exporters import LinesOgrExporter
-from threedigrid.admin.nodes.exporters import CellsOgrExporter, NodesOgrExporter
 
 test_file_dir = os.path.join(os.getcwd(), "tests/test_files")
 
@@ -133,7 +132,7 @@ class GridAdminLinesTest(unittest.TestCase):
 
     def test_exporters(self):
         self.assertEqual(len(self.parser.lines._exporters), 1)
-        self.assertIsInstance(self.parser.lines._exporters[0], LinesOgrExporter)
+        self.assertIsInstance(self.parser.lines._exporters[0], OgrExporter)
 
     def test_export_to_shape(self):
         self.parser.lines.to_shape(self.f)
@@ -213,7 +212,7 @@ class GridAdminNodeTest(unittest.TestCase):
 
     def test_exporters(self):
         self.assertEqual(len(self.parser.nodes._exporters), 1)
-        self.assertIsInstance(self.parser.nodes._exporters[0], NodesOgrExporter)
+        self.assertIsInstance(self.parser.nodes._exporters[0], OgrExporter)
 
     def test_export_to_shape(self):
         self.parser.nodes.to_shape(self.f)
@@ -373,7 +372,7 @@ class GridAdminCellsTest(unittest.TestCase):
 
     def test_exporters(self):
         self.assertEqual(len(self.parser.cells._exporters), 1)
-        self.assertIsInstance(self.parser.cells._exporters[0], CellsOgrExporter)
+        self.assertIsInstance(self.parser.cells._exporters[0], OgrExporter)
 
     def test_export_to_shape(self):
         self.parser.cells.to_shape(self.f)
