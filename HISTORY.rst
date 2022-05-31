@@ -1,7 +1,7 @@
 History
 =======
 
-1.2.1 (unreleased)
+1.2.1 (2022-05-31)
 ------------------
 
 - Added new OGR based exporter for Geopackage exports.
