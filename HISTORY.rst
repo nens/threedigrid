@@ -4,6 +4,9 @@ History
 1.2.1 (unreleased)
 ------------------
 
+- Added new OGR based exporter for Geopackage exports.
+  Currently only has default export settings for lines, cells, nodes and pumps.
+
 - Fixed error in crs attribute.
 
 - Removed deprecation warning on gridadmin.breaches and added it to
