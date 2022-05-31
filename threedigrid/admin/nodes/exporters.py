@@ -45,18 +45,12 @@ class NodesOgrExporter(BaseOgrExporter):
         :param file_name: name of the outputfile
         :param node_data: dict of node data
         """
-        if self.driver is None:
-            self.set_driver(extension=os.path.splitext(file_name)[1])
-
         assert self.driver is not None
         geomtype = 0
         sr = get_spatial_reference(target_epsg_code)
-        # self.del_datasource(file_name)
-        if os.path.exists(file_name):
-            data_source = self.driver.Open(file_name, update=1)
-        else:
-            data_source = self.driver.CreateDataSource(file_name)
-        layer = data_source.CreateLayer("Nodes", sr, geomtype)
+        self.del_datasource(file_name)
+        data_source = self.driver.CreateDataSource(file_name)
+        layer = data_source.CreateLayer(str(os.path.basename(file_name)), sr, geomtype)
         fields = NODE_BASE_FIELDS
         if self._nodes.has_1d:
             fields.update(NODE_1D_FIELDS)
@@ -66,8 +60,6 @@ class NodesOgrExporter(BaseOgrExporter):
                 ogr.FieldDefn(str(field_name), const.OGR_FIELD_TYPE_MAP[field_type])
             )
         _definition = layer.GetLayerDefn()
-
-        data_source.StartTransaction()
 
         for i in range(node_data["id"].size):
             if node_data["id"][i] == 0:
@@ -85,11 +77,7 @@ class NodesOgrExporter(BaseOgrExporter):
                 except IndexError:
                     raw_value = None
                 self.set_field(feature, field_name, field_type, raw_value)
-
             layer.CreateFeature(feature)
-            feature = None
-        data_source.CommitTransaction()
-        data_source = None
 
 
 class CellsOgrExporter(BaseOgrExporter):
