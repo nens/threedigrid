@@ -1,13 +1,14 @@
+from copy import deepcopy
+
 import numpy as np
 
 # Obstacle export field definitions/mapping
 OBSTACLES_FIELD_DEFINITIONS = {
     "id": "line_id",
     "dpumax": "exchange_level",
-    "cross_pix_coords": "the_geom",
+    # special field, not part of the model data but given as extra kwargs
+    "cross_pix_coords__transformed": "the_geom",
 }
-
-PUMPS_LINESTRING_FIELD_DEFINITIONS = {"id": "id", "node_coordinates": "the_geom"}
 
 
 class GeopackageExporter:
@@ -46,6 +47,13 @@ class GeopackageExporter:
         from threedigrid.admin.gridadmin import GridH5Admin
 
         with GridH5Admin(self.gridadmin_filename) as ga:
+            # Replace 'coordinates' with 'node_coordinates'
+            PUMPS_LINESTRING_FIELD_DEFINITIONS = deepcopy(
+                ga.pumps.GPKG_DEFAULT_FIELD_MAP
+            )
+            del PUMPS_LINESTRING_FIELD_DEFINITIONS["coordinates"]
+            PUMPS_LINESTRING_FIELD_DEFINITIONS.update({"node_coordinates": "the_geom"})
+
             cells = ga.cells.subset("2D_OPEN_WATER")
             pumps = ga.pumps.filter(id__gte=1)
             lines = ga.lines.filter(id__gte=1)
@@ -94,11 +102,17 @@ class GeopackageExporter:
             cells.to_gpkg(self.gpkg_filename, progress_func=internal_func)
 
             if obstacles_count > 0:
+                # override the value for 'cross_pixel_coords'
+                cross_pix_coords__transformed = obstacles.cross_pix_coords_transformed(
+                    ga.grid.transform
+                )
+
                 obstacles.to_gpkg(
                     self.gpkg_filename,
                     "obstacles",
                     OBSTACLES_FIELD_DEFINITIONS,
                     progress_func=internal_func,
+                    cross_pix_coords__transformed=cross_pix_coords__transformed,
                 )
 
             assert self.total_items == self.calculated_items
