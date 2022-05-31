@@ -4,7 +4,7 @@ History
 1.2.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- New release since 1.2.1 was already present at PyPi.
 
 
 1.2.1 (2022-05-31)
