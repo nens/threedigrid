@@ -112,7 +112,7 @@ def test_transform_bbox():
     transformed_bbox = transform_bbox(bbox, source_epsg, target_epsg)
     expected_result = np.array([4.66789993, 52.64256428, 4.67024022, 52.64401638])
     assert transformed_bbox.shape == (4,)
-    np.testing.assert_allclose(transformed_bbox, expected_result, 10 ** -LONLAT_DIGITS)
+    np.testing.assert_allclose(transformed_bbox, expected_result, 10**-LONLAT_DIGITS)
 
 
 def test_transform_bbox_all_coords():

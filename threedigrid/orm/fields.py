@@ -62,6 +62,8 @@ class GeomArrayField(ArrayField):
 
 
 class PointArrayField(GeomArrayField):
+    type = "point"
+
     def reproject(self, values, source_epsg, target_epsg):
         """
         Reproject the point coordinates: x_array=values[0], y_array=values[1]
@@ -111,6 +113,8 @@ class PointArrayField(GeomArrayField):
 
 
 class LineArrayField(GeomArrayField):
+    type = "line"
+
     """
     Field which handles line/bbox geoms values:
 
@@ -195,6 +199,8 @@ class LineArrayField(GeomArrayField):
 
 
 class MultiLineArrayField(GeomArrayField):
+    type = "multiline"
+
     def reproject(self, values, source_epsg, target_epsg):
         """
         Reproject the line/bbox coordinates:
@@ -235,6 +241,8 @@ class PolygonArrayField(GeomArrayField):
 
     """
 
+    type = "polygon"
+
     def get_mask_by_point(self, pnt, values):
 
         return get_bbox_by_point(pnt, values)
@@ -269,6 +277,8 @@ class PolygonArrayField(GeomArrayField):
 
 
 class BboxArrayField(LineArrayField):
+    type = "bbox"
+
     def _to_shapely_geom(self, values):
         if shapely is None:
             raise_import_exception("shapely")

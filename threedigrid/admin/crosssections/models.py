@@ -14,10 +14,10 @@ from threedigrid.orm.models import Model
 
 
 class CrossSections(Model):
-    code = ArrayField()
-    shape = ArrayField()
-    content_pk = ArrayField()
-    width_1d = ArrayField()
-    offset = ArrayField()
-    count = ArrayField()
-    tables = ArrayField()
+    code = ArrayField(type=int)
+    shape = ArrayField(type=int)
+    content_pk = ArrayField(type=int)
+    width_1d = ArrayField(type=float)
+    offset = ArrayField(type=float)
+    count = ArrayField(type=float)
+    tables = ArrayField(type=float)

@@ -207,13 +207,32 @@ def to_string(value):
 
 
 def to_float(value):
-    value = float(value)
+    if value is None:
+        return None
+    try:
+        value = float(value)
+    except ValueError:
+        return None
     # value == value checks if it is not NaN
     return value if (value != -9999.0) and (value == value) else None
 
 
+def to_int(value):
+    if value is None:
+        return None
+    try:
+        value = int(value)
+    except ValueError:
+        return None
+    return value
+
+
 TYPE_FUNC_MAP = {
     "int": int,
+    int: to_int,
+    float: to_float,
+    str: to_string,
+    bool: bool,
     "float": to_float,
     "str": to_string,
 }

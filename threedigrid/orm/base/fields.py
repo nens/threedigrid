@@ -15,6 +15,11 @@ class ArrayField:
     to be retrieved from a Datasource.
     """
 
+    def __init__(self, type=None):
+        if not hasattr(self, "type"):
+            # Optional type that can be used for serializing
+            self.type = type
+
     @staticmethod
     def get_value(datasource, name, **kwargs):
         """
@@ -39,6 +44,9 @@ class BooleanArrayField(ArrayField):
     Because HDF5 does not support boolean datatype. No data fields are
     interpreted as False.
     """
+
+    def __init__(self):
+        self.type = bool
 
     @staticmethod
     def get_value(datasource, name, **kwargs):
@@ -66,6 +74,7 @@ class IndexArrayField(ArrayField):
 
     def __init__(self, to=None):
         self.to = to
+        self.type = int
 
     def __repr__(self):
         return self.__class__.__name__

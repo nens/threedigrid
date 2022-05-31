@@ -4,6 +4,7 @@ import os
 import pytest
 from osgeo import ogr
 
+from threedigrid.admin.exporters.geopackage.exporter import GpkgExporter
 from threedigrid.admin.lines.exporters import LinesOgrExporter
 
 test_file_dir = os.path.join(os.getcwd(), "tests/test_files")
@@ -12,7 +13,7 @@ test_file_dir = os.path.join(os.getcwd(), "tests/test_files")
 grid_admin_h5_file = os.path.join(test_file_dir, "gridadmin.h5")
 
 
-@pytest.mark.parametrize("extension", [".shp", ".gpkg", ".json"])
+@pytest.mark.parametrize("extension", [".shp", ".json"])
 def test_export_by_extension(ga, tmp_path, extension):
     path = str(tmp_path / ("exporter_test_lines" + extension))
     line_2d_open_water_wgs84 = ga.lines.subset("2D_OPEN_WATER").reproject_to("4326")
@@ -22,6 +23,17 @@ def test_export_by_extension(ga, tmp_path, extension):
     s = ogr.Open(path)
     layer = s.GetLayer()
     assert layer.GetFeatureCount() == line_2d_open_water_wgs84.id.size
+
+
+def test_nodes_gpgk_export(ga, tmp_path):
+    path = str(tmp_path / ("exporter_test_lines.gpkg"))
+    nodes_2d_open_water = ga.nodes.subset("2D_OPEN_WATER")
+    exporter = GpkgExporter(nodes_2d_open_water)
+    exporter.save(path, "nodes", ga.nodes.GPKG_DEFAULT_FIELD_MAP)
+    assert os.path.exists(path)
+    s = ogr.Open(path)
+    layer = s.GetLayer("nodes")
+    assert layer.GetFeatureCount() == nodes_2d_open_water.id.size
 
 
 def test_export_specify_fields_as_dict(ga, tmp_path):

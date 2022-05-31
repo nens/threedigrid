@@ -43,6 +43,9 @@ class LeveeOgrExporter(BaseOgrExporter):
         :param file_name: name of the outputfile
         :param line_data: dict of line data
         """
+        if self.driver is None:
+            self.set_driver(extension=os.path.splitext(file_name)[1])
+
         assert self.driver is not None
 
         geomtype = 0

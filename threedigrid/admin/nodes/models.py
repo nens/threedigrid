@@ -30,22 +30,33 @@ NODE_SUBSETS = {
 
 
 class Nodes(Model):
-    content_pk = ArrayField()
-    seq_id = ArrayField()
-    calculation_type = ArrayField()
+    content_pk = ArrayField(type=int)
+    seq_id = ArrayField(type=int)
+    calculation_type = ArrayField(type=float)
     coordinates = PointArrayField()
     cell_coords = BboxArrayField()
-    zoom_category = ArrayField()
-    node_type = ArrayField()
+    zoom_category = ArrayField(type=float)
+    node_type = ArrayField(type=int)
     is_manhole = BooleanArrayField()
-    sumax = ArrayField()
-    drain_level = ArrayField()
-    storage_area = ArrayField()
-    dmax = ArrayField()
-    initial_waterlevel = ArrayField()
-    dimp = ArrayField()
+    sumax = ArrayField(type=float)
+    drain_level = ArrayField(type=float)
+    storage_area = ArrayField(type=float)
+    dmax = ArrayField(type=float)
+    initial_waterlevel = ArrayField(type=float)
+    dimp = ArrayField(type=float)
 
     SUBSETS = NODE_SUBSETS
+
+    GPKG_DEFAULT_FIELD_MAP = {
+        "id": "id",
+        "content_pk": "connection_node_id",
+        "node_type": "node_type",
+        "calculation_type": "calculation_type",
+        "is_manhole": "is_manhole",
+        "storage_area": "connection_node_storage_are",
+        "sumax": "max_surface_area",
+        "coordinates": "the_geom",
+    }
 
     @property
     def connectionnodes(self):
@@ -60,9 +71,7 @@ class Nodes(Model):
         return self._filter_as(AddedCalculationNodes, content_pk=0)
 
     def __init__(self, *args, **kwargs):
-
         super().__init__(*args, **kwargs)
-
         self._exporters = [
             exporters.NodesOgrExporter(self),
         ]
@@ -90,20 +99,20 @@ class AddedCalculationNodes(Nodes):
 
 
 class EmbeddedNodes(Nodes):
-    embedded_in = ArrayField()
+    embedded_in = ArrayField(type=int)
 
 
 class ConnectionNodes(Nodes):
-    initial_waterlevel = ArrayField()
+    initial_waterlevel = ArrayField(type=float)
 
 
 class Manholes(ConnectionNodes):
-    bottom_level = ArrayField()
-    display_name = ArrayField()
-    surface_level = ArrayField()
-    shape = ArrayField()
-    width = ArrayField()
-    manhole_indicator = ArrayField()
+    bottom_level = ArrayField(type=float)
+    display_name = ArrayField(type=str)
+    surface_level = ArrayField(type=float)
+    shape = ArrayField(type=float)
+    width = ArrayField(type=float)
+    manhole_indicator = ArrayField(type=float)
 
 
 class Cells(Nodes):
@@ -116,13 +125,22 @@ class Cells(Nodes):
 
     """
 
-    z_coordinate = ArrayField()
-    pixel_width = ArrayField()
+    z_coordinate = ArrayField(type=float)
+    pixel_width = ArrayField(type=int)
     pixel_coords = BboxArrayField()
-    has_dem_averaged = ArrayField()
+    has_dem_averaged = ArrayField(type=float)
+
+    GPKG_DEFAULT_FIELD_MAP = {
+        "id": "id",
+        "node_type": "node_type",
+        "has_dem_averaged": "has_dem_averaged",
+        "sumax": "sumax",
+        "dmax": "bottom_level",
+        "dimp": "impervious_layer_elevation",
+        "cell_coords": "the_geom",
+    }
 
     def __init__(self, *args, **kwargs):
-
         super().__init__(*args, **kwargs)
         self._exporters = [
             exporters.CellsOgrExporter(self),
@@ -269,11 +287,11 @@ class Grid(Model):
     of the cell coordinates
     """
 
-    nodm = ArrayField()
-    nodn = ArrayField()
-    nodk = ArrayField()
-    ip = ArrayField()
-    jp = ArrayField()
+    nodm = ArrayField(type=int)
+    nodn = ArrayField(type=int)
+    nodk = ArrayField(type=int)
+    ip = ArrayField(type=int)
+    jp = ArrayField(type=int)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
