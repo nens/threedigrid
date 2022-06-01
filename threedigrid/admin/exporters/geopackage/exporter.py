@@ -117,6 +117,8 @@ class GpkgExporter(BaseOgrExporter):
                 )
                 if field_type in ("str", str):
                     field.SetWidth(32)
+                elif field_type in ("bool", bool):
+                    field.SetSubType(ogr.OFSTBoolean)
 
                 layer.CreateField(field)
 

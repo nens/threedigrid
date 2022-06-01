@@ -97,7 +97,9 @@ class GeopackageExporter:
             )
 
             # Other layers
-            lines.to_gpkg(self.gpkg_filename, progress_func=internal_func)
+            lines.to_gpkg(
+                self.gpkg_filename, layer_name="flowline", progress_func=internal_func
+            )
             nodes.to_gpkg(self.gpkg_filename, progress_func=internal_func)
             cells.to_gpkg(self.gpkg_filename, progress_func=internal_func)
 
