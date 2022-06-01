@@ -124,6 +124,8 @@ class GridAdminLinesTest(unittest.TestCase):
             "line_coords",
             "cross_pix_coords",
             "cross_weight",
+            "discharge_coefficient_negative",
+            "discharge_coefficient_positive",
             "line_geometries",
             "invert_level_start_point",
             "invert_level_end_point",

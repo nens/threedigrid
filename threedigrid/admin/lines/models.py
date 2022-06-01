@@ -171,8 +171,6 @@ class Channels(Lines):
 class Weirs(Lines):
     code = ArrayField(type=str)
     display_name = ArrayField(type=str)
-    discharge_coefficient_negative = ArrayField(type=float)
-    discharge_coefficient_positive = ArrayField(type=float)
     sewerage = ArrayField(type=int)
     friction_type = ArrayField(type=int)
     friction_value = ArrayField(type=float)
@@ -210,8 +208,6 @@ class Culverts(Lines):
     cross_section_shape = ArrayField(type=float)
     friction_type = ArrayField(type=int)
     friction_value = ArrayField(type=float)
-    discharge_coefficient_negative = ArrayField(type=float)
-    discharge_coefficient_positive = ArrayField(type=float)
     connection_node_start_pk = ArrayField(type=int)
     connection_node_end_pk = ArrayField(type=int)
 
@@ -223,8 +219,6 @@ class Orifices(Lines):
     friction_value = ArrayField(type=float)
     crest_type = ArrayField(type=int)
     crest_level = ArrayField(type=float)
-    discharge_coefficient_negative = ArrayField(type=float)
-    discharge_coefficient_positive = ArrayField(type=float)
     connection_node_start_pk = ArrayField(type=int)
     connection_node_end_pk = ArrayField(type=int)
 
@@ -271,6 +265,3 @@ class Breaches(Lines):
         map_to_array="lines.id",
         subset_filter={"lines.kcu": subsets.KCU__IN_SUBSETS["POTENTIAL_BREACH"][0]},
     )
-
-    discharge_coefficient_positive = ArrayField(type=float)
-    discharge_coefficient_negative = ArrayField(type=float)
