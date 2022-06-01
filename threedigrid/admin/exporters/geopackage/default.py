@@ -91,7 +91,7 @@ class GeopackageExporter:
             pumps.to_gpkg(self.gpkg_filename, progress_func=internal_func)
             pumps_linestring.to_gpkg(
                 self.gpkg_filename,
-                "pumps_linestring",
+                "pump_linestring",
                 PUMPS_LINESTRING_FIELD_DEFINITIONS,
                 progress_func=internal_func,
             )
@@ -111,7 +111,7 @@ class GeopackageExporter:
 
                 obstacles.to_gpkg(
                     self.gpkg_filename,
-                    "obstacles",
+                    "obstacle",
                     OBSTACLES_FIELD_DEFINITIONS,
                     progress_func=internal_func,
                     cross_pix_coords__transformed=cross_pix_coords__transformed,
