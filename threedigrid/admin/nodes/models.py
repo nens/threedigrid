@@ -128,13 +128,13 @@ class Cells(Nodes):
     z_coordinate = ArrayField(type=float)
     pixel_width = ArrayField(type=int)
     pixel_coords = BboxArrayField()
-    has_dem_averaged = ArrayField(type=float)
+    has_dem_averaged = BooleanArrayField()
 
     GPKG_DEFAULT_FIELD_MAP = {
         "id": "id",
         "node_type": "node_type",
         "has_dem_averaged": "has_dem_averaged",
-        "sumax": "sumax",
+        "sumax": "max_surface_area",
         "dmax": "bottom_level",
         "dimp": "impervious_layer_elevation",
         "cell_coords": "the_geom",

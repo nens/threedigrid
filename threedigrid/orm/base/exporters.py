@@ -51,7 +51,7 @@ class BaseOgrExporter(BaseExporterObject):
 
         value = TYPE_FUNC_MAP[field_type](raw_value)
 
-        if value is None:
+        if value is None or value == -9999:
             feature.SetFieldNull(field_name)
         else:
             feature.SetField(field_name, value)

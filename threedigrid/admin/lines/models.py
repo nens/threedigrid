@@ -21,6 +21,13 @@ from threedigrid.orm.models import Model
 LINE_SUBSETS = {"kcu__in": subsets.KCU__IN_SUBSETS}
 
 
+def convert_pixel_coords(i, j, geo_transform):
+    a, b, c, d, e, f = geo_transform
+    x = a * i + b * j + c
+    y = d * i + e * j + f
+    return (x, y)
+
+
 class Lines(Model):
     """
     fields originating from threedicore:
@@ -60,12 +67,15 @@ class Lines(Model):
     cross_pix_coords = LineArrayField()
     line_coords = LineArrayField()
     line_geometries = MultiLineArrayField()
+    discharge_coefficient_negative = ArrayField(type=float)
+    discharge_coefficient_positive = ArrayField(type=float)
+
     SUBSETS = LINE_SUBSETS
 
     GPKG_DEFAULT_FIELD_MAP = {
         "id": "id",
-        "flou": "discharge_coefficient_positive",
-        "flod": "discharge_coefficient_negative",
+        "discharge_coefficient_positive": "discharge_coefficient_positive",
+        "discharge_coefficient_negative": "discharge_coefficient_negative",
         "kcu": "line_type",
         "content_type": "source_table",
         "content_pk": "source_table_id",
@@ -83,6 +93,22 @@ class Lines(Model):
         self._exporters = [
             exporters.LinesOgrExporter(self),
         ]
+
+    def cross_pix_coords_transformed(self, geo_transform):
+        """
+        Get pix_coords transformed by geo_transform (=ga.grid.transform)
+
+        >>> x = a * i + b * j + c
+        >>> y = d * i + e * j + f
+
+        """
+        x, y = convert_pixel_coords(
+            self.cross_pix_coords[0], self.cross_pix_coords[1], geo_transform
+        )
+        x2, y2 = convert_pixel_coords(
+            self.cross_pix_coords[2], self.cross_pix_coords[3], geo_transform
+        )
+        return np.vstack([x, y, x2, y2])
 
     @property
     def pipes(self):
@@ -145,8 +171,6 @@ class Channels(Lines):
 class Weirs(Lines):
     code = ArrayField(type=str)
     display_name = ArrayField(type=str)
-    discharge_coefficient_negative = ArrayField(type=float)
-    discharge_coefficient_positive = ArrayField(type=float)
     sewerage = ArrayField(type=int)
     friction_type = ArrayField(type=int)
     friction_value = ArrayField(type=float)
@@ -184,8 +208,6 @@ class Culverts(Lines):
     cross_section_shape = ArrayField(type=float)
     friction_type = ArrayField(type=int)
     friction_value = ArrayField(type=float)
-    discharge_coefficient_negative = ArrayField(type=float)
-    discharge_coefficient_positive = ArrayField(type=float)
     connection_node_start_pk = ArrayField(type=int)
     connection_node_end_pk = ArrayField(type=int)
 
@@ -197,8 +219,6 @@ class Orifices(Lines):
     friction_value = ArrayField(type=float)
     crest_type = ArrayField(type=int)
     crest_level = ArrayField(type=float)
-    discharge_coefficient_negative = ArrayField(type=float)
-    discharge_coefficient_positive = ArrayField(type=float)
     connection_node_start_pk = ArrayField(type=int)
     connection_node_end_pk = ArrayField(type=int)
 
@@ -245,6 +265,3 @@ class Breaches(Lines):
         map_to_array="lines.id",
         subset_filter={"lines.kcu": subsets.KCU__IN_SUBSETS["POTENTIAL_BREACH"][0]},
     )
-
-    discharge_coefficient_positive = ArrayField(type=float)
-    discharge_coefficient_negative = ArrayField(type=float)

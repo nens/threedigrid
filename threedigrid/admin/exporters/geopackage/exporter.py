@@ -3,6 +3,8 @@
 import logging
 import os
 
+import numpy as np
+
 try:
     from osgeo import ogr
 except ImportError:
@@ -16,8 +18,11 @@ from threedigrid.orm.base.exporters import BaseOgrExporter
 logger = logging.getLogger(__name__)
 
 
-def get_geometry(field_name, field_type, data, index):
+def get_geometry(field_name, field_type, data, index, **kwargs):
     geom = ogr.Geometry(const.OGR_GEOM_TYPE_MAP[field_type])
+
+    if "__" in field_name:
+        data[field_name] = kwargs.get(field_name, np.array([]))
 
     if field_type == "point":
         geom.AddPoint(data[field_name][0][index], data[field_name][1][index])
@@ -35,8 +40,10 @@ def get_geometry(field_name, field_type, data, index):
         # Create polygon from ring
         geom.AddGeometry(ring)
     elif field_type == "line":
-        geom.AddPoint(data[field_name][0][index], data[field_name][1][index])
-        geom.AddPoint(data[field_name][2][index], data[field_name][3][index])
+        view = data[field_name].astype("float64")
+        # print(data[field_name][:, index], data[field_name][:, index].dtype)
+        geom.AddPoint(view[0][index], view[1][index])
+        geom.AddPoint(view[2][index], view[3][index])
     elif field_type == "multiline":
         for x, y in data[field_name][index].reshape(2, -1).T:
             geom.AddPoint_2D(x, y)
@@ -48,7 +55,6 @@ def get_geometry(field_name, field_type, data, index):
 def get_field_type(model, field_name):
     if "__" in field_name:
         field_name, _ = field_name.split("__")
-
     return model._get_field(field_name).type
 
 
@@ -70,6 +76,8 @@ class GpkgExporter(BaseOgrExporter):
         save to file format specified by the driver, e.g. shapefile
 
         :param file_name: name of the outputfile
+
+        :param kwargs: allows to override what's is used as values, see default.py for an example
         """
         field_map = field_definitions
         data = self.model.data
@@ -104,9 +112,16 @@ class GpkgExporter(BaseOgrExporter):
             field_type = get_field_type(self.model, field_name)
 
             if field_type in const.OGR_FIELD_TYPE_MAP:
-                layer.CreateField(
-                    ogr.FieldDefn(ogr_field_name, const.OGR_FIELD_TYPE_MAP[field_type])
+                field = ogr.FieldDefn(
+                    ogr_field_name, const.OGR_FIELD_TYPE_MAP[field_type]
                 )
+                if field_type in ("str", str):
+                    field.SetWidth(32)
+                elif field_type in ("bool", bool):
+                    field.SetSubType(ogr.OFSTBoolean)
+
+                layer.CreateField(field)
+
             else:
                 raise Exception(
                     "Could not find type for %s with type %s", field_name, field_type
@@ -132,7 +147,7 @@ class GpkgExporter(BaseOgrExporter):
             if geom_def:
                 field_name, ogr_field_name = geom_def
                 field_type = get_field_type(self.model, field_name)
-                geom = get_geometry(field_name, field_type, data, i)
+                geom = get_geometry(field_name, field_type, data, i, **kwargs)
                 feature.SetGeometry(geom)
 
             for field_name, ogr_field_name in field_map.items():
@@ -142,16 +157,18 @@ class GpkgExporter(BaseOgrExporter):
                     continue
 
                 if "__" in field_name:
-                    field_name, index = field_name.split("__")
+                    field_name_split, attribute = field_name.split("__")
+
                     try:
-                        raw_value = data[field_name][:, i][int(index)]
-                    except IndexError:
-                        raw_value = None
+                        raw_value = data[field_name_split][:, i][int(attribute)]
+                    except (IndexError, ValueError):
+                        raw_value = kwargs.get(field_name, None)
                 else:
                     try:
                         raw_value = data[field_name][i]
                     except IndexError:
-                        raw_value = None
+                        # Try kwargs else None
+                        raw_value = kwargs.get(field_name, None)
                 self.set_field(feature, ogr_field_name, field_type, raw_value)
 
             layer.CreateFeature(feature)

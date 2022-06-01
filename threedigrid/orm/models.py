@@ -98,6 +98,8 @@ class Model(BaseModel):
         # By default use class name in lowercase as layer_name
         if layer_name is None:
             layer_name = self.__class__.__name__.lower()
+            if layer_name.endswith("s"):
+                layer_name = layer_name[:-1]
 
         if field_definitions is None:
             if not hasattr(self, "GPKG_DEFAULT_FIELD_MAP"):
