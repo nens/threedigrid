@@ -4,7 +4,7 @@ History
 1.2.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Divers Geopackage exports improvements.
 
 
 1.2.2 (2022-05-31)
