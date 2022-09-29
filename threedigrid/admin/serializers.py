@@ -145,7 +145,11 @@ def fill_properties(fields, data, index, model_type=None):
         else:
             field_data = data.get(field, None)
             if field_data is not None and field_data.size > 0:
-                value = field_data[..., index]
+                if field == "line_geometries" and len(field_data.shape) > 1:
+                    # Indexing for reprojected line_geometries
+                    value = field_data[index]
+                else:
+                    value = field_data[..., index]
                 # Replace NaN, Inf, -Inf, -9999.0 floats with None (null)
                 if np.issubdtype(value.dtype, np.floating):
                     is_invalid = (~np.isfinite(value)) | (value == -9999.0)
