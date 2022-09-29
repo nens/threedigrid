@@ -329,6 +329,7 @@ class GridAdminH5Export:
         self.export_nodes()
         self.export_pumps()
         self.export_levees()
+        self.export_flowlines()
         self.export_grid()
         self._combine(
             output_name="all",
@@ -389,6 +390,18 @@ class GridAdminH5Export:
         self.export_nodes()
         self.export_lines()
         self.export_levees()
+
+    def export_flowlines(self):
+        """
+        writes shapefile of all 1D2D flowlines
+        """
+        dest = os.path.join(self._dest, constants.FLOWLINES + self._extension)
+        getattr(
+            self.ga.lines.filter(
+                kcu__in=self.ga.lines.SUBSETS["kcu__in"]["1D2D"] + [100, 101]
+            ).reproject_to(self._epsg),
+            self._export_method,
+        )(dest, indent=self._indent)
 
     def export_nodes(self):
         """

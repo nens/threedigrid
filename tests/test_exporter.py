@@ -127,6 +127,7 @@ def test_export_null(ga, tmp_path):
         ("pumps", "pumps"),
         ("grid", "grid_2D_open_water"),
         ("grid", "grid_2D_groundwater"),
+        ("flowlines", "flowlines"),
     ],
 )
 def test_export_method(ga_export, export_method, expected_filename):
