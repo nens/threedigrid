@@ -4,7 +4,7 @@ History
 1.2.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Allow exporting flowlines (1D2D) to geojson or shapefile.
 
 
 1.2.3 (2022-06-01)

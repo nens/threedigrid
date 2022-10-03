@@ -264,6 +264,8 @@ VERTICAL_INFILTRATION_LINES = _LINES_BASE + SUBSET_2D_VERTICAL_INFILTRATION
 # levees
 LEVEES = "levees"
 
+# Flow (1d2d) lines
+FLOWLINES = "flowlines"
 
 ###############################################################################
 # for extent calculations
