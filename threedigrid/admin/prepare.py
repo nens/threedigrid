@@ -398,7 +398,7 @@ class GridAdminH5Export:
         dest = os.path.join(self._dest, constants.FLOWLINES + self._extension)
         getattr(
             self.ga.lines.filter(
-                kcu__in=self.ga.lines.SUBSETS["kcu__in"]["1D2D"]
+                kcu__in=self.ga.lines.SUBSETS["kcu__in"]["1D2D"] + [100, 101]
             ).reproject_to(self._epsg),
             self._export_method,
         )(dest, indent=self._indent)
