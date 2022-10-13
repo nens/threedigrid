@@ -4,7 +4,9 @@ History
 1.2.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Optimized geojson export memory usage.
+
+- Removed majority of properties from the flowlines (1D2D) export.
 
 
 1.2.4 (2022-10-03)

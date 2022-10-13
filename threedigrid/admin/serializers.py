@@ -30,19 +30,22 @@ class GeoJsonSerializer:
 
     def save(self, filename, **kwargs):
         with open(filename, "w") as file:
-            json.dump(
-                {"type": "FeatureCollection", "features": self.geos},
-                file,
-                indent=self._indent,
-                allow_nan=False,
-                cls=NumpyEncoder,
-            )
+            file.write('{"type": "FeatureCollection", "features": [')
+            first = True
+            for geo in self.geos_iter():
+                if not first:
+                    file.write(", ")
+                else:
+                    first = False
+                json.dump(
+                    geo, file, indent=self._indent, allow_nan=False, cls=NumpyEncoder
+                )
+            file.write("]}")
 
-    @property
-    def geos(self):
-        geos = []
+    def geos_iter(self):
         if self._model.count == 0:
-            return geos
+            return []
+
         # Get the data, skipping the dummy element
         data = self._model.filter(id__ne=0).to_dict()
         content_type = self._model.__contenttype__()
@@ -56,15 +59,13 @@ class GeoJsonSerializer:
                 line = geojson.LineString(linepoints.tolist())
 
                 properties = fill_properties(self.fields, data, i, model_type)
-                feat = geojson.Feature(geometry=line, properties=properties)
-                geos.append(feat)
+                yield geojson.Feature(geometry=line, properties=properties)
         elif content_type in ("nodes", "breaches", "pumps"):
             for i in range(data["id"].shape[-1]):
                 coords = np.round(data["coordinates"][:, i], constants.LONLAT_DIGITS)
                 point = geojson.Point([coords[0], coords[1]])
                 properties = fill_properties(self.fields, data, i, model_type)
-                feat = geojson.Feature(geometry=point, properties=properties)
-                geos.append(feat)
+                yield geojson.Feature(geometry=point, properties=properties)
         elif content_type == "cells":
             if (
                 self._model.reproject_to_epsg is not None
@@ -99,8 +100,7 @@ class GeoJsonSerializer:
                     [(left_top, right_top, right_bottom, left_bottom, left_top)]
                 )
                 properties = fill_properties(self.fields, data, i, model_type)
-                feat = geojson.Feature(geometry=polygon, properties=properties)
-                geos.append(feat)
+                yield geojson.Feature(geometry=polygon, properties=properties)
         elif content_type == "levees":
             for i in range(data["id"].shape[-1]):
                 coords = np.round(
@@ -109,12 +109,13 @@ class GeoJsonSerializer:
                 )
                 line = geojson.LineString(coords.T.tolist())
                 properties = fill_properties(self.fields, data, i, model_type)
-                feat = geojson.Feature(geometry=line, properties=properties)
-                geos.append(feat)
+                yield geojson.Feature(geometry=line, properties=properties)
         else:
             raise ValueError("Unknown content type for %s" % self._model)
 
-        return geos
+    @property
+    def geos(self):
+        return [x for x in self.geos_iter()]
 
     @property
     def data(self):
