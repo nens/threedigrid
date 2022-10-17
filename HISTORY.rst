@@ -1,7 +1,7 @@
 History
 =======
 
-1.2.5 (unreleased)
+1.2.5 (2022-10-17)
 ------------------
 
 - Optimized geojson export memory usage.
