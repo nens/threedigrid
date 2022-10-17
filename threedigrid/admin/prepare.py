@@ -399,9 +399,11 @@ class GridAdminH5Export:
         getattr(
             self.ga.lines.filter(
                 kcu__in=self.ga.lines.SUBSETS["kcu__in"]["1D2D"] + [100, 101]
-            ).reproject_to(self._epsg),
+            )
+            .only("id", "line_geometries", "line")
+            .reproject_to(self._epsg),
             self._export_method,
-        )(dest, indent=self._indent)
+        )(dest, indent=self._indent, fields={"id", "line_geometries", "line"})
 
     def export_nodes(self):
         """
