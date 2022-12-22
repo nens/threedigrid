@@ -286,11 +286,12 @@ def select_lines_by_tile(
 
 
 def select_geoms_by_geometry(geoms, geometry):
-    """Build a STRtree from geoms and returns intersection with geometry
+    """Build an STRtree from geoms and returns indices into 'geoms'
+    where geometry intersects.
 
     :param geoms: list of geometries you want to search from
     :param geometry: intersection geometry
-    :return: list of geoms intersecting with geometry
+    :return: ndarray of indices into 'geoms'
     """
     if shapely is None:
         raise_import_exception("shapely")
@@ -304,12 +305,14 @@ def select_geoms_by_geometry(geoms, geometry):
     tree = STRtree(geoms)
     # STRtree checks intersection based on bbox of the geometry only:
     # https://github.com/Toblerity/Shapely/issues/558
-    intersected_geoms = tree.query(geometry)
 
-    # reverse loop because we pop elements based on index
-    for i, intersected_geom in zip(
-        reversed(range(len(intersected_geoms))), reversed(intersected_geoms)
-    ):
-        if not intersected_geom.intersects(geometry):
-            intersected_geoms.pop(i)
-    return intersected_geoms
+    
+    if shapely.__version__.startswith("1."):
+        result = []
+        intersected_geoms = tree.query(geometry)
+        for i, intersected_geom in enumerate(intersected_geoms):
+            if geometry.intersects(intersected_geom):
+                result.append(i)
+        return np.array(result, dtype=int)
+    else:
+        return tree.query(geometry, predicate="intersects")
