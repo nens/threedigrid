@@ -69,6 +69,8 @@ def test_breach_options_get_fields(opt_breaches):
         "seq_ids",
         "content_pk",
         "id",
+        "code",
+        "display_name"
     }
 
 

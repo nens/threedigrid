@@ -1,10 +1,14 @@
 History
 =======
 
-1.2.6 (unreleased)
+2.0.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Removed gridadmin.lines.breaches.
+
+- Removed MappedSubsetArrayField.
+
+- Added 'code' and 'display_name' to breaches.
 
 
 1.2.5 (2022-10-17)
@@ -237,7 +241,7 @@ History
 - Added `Breaches` model under lines with specific breach fields
   mapped from the 'breaches' h5py datagroup.
 
-- Added `MappedSubsetArrayField` allowing to map arrays from other
+- MappedSubsetArrayField allowing to map arrays from other
   h5py datagroups to a model on another datagroup subset. Breaches
   uses this to map the array's under 'breaches' to 'lines'
 

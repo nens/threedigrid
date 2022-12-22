@@ -160,13 +160,13 @@ LEVEES_EXPORT_FIELDS = [
 
 BREACHES_EXPORT_FIELDS = [
     "id",
+    "code",
+    "display_name",
     "content_pk",
     "levmat",
     "levbr",
     "kcu",
     "levl",
-    "discharge_coefficient_positive",
-    "discharge_coefficient_negative",
 ]
 
 CELLS_EXPORT_FIELDS = [

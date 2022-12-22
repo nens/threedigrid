@@ -44,7 +44,7 @@ geo_requirements = [
     "Click>=6.0",
     "mercantile>=1.0.1",
     "pyproj>=2.2",
-    "Shapely>=1.6.4",
+    "Shapely>=1.6.4,<2",
     "geojson>=2.3.0",
 ]
 
