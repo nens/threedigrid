@@ -306,7 +306,6 @@ def select_geoms_by_geometry(geoms, geometry):
     # STRtree checks intersection based on bbox of the geometry only:
     # https://github.com/Toblerity/Shapely/issues/558
 
-    
     if shapely.__version__.startswith("1."):
         result = []
         intersected_geoms = tree.query(geometry)
