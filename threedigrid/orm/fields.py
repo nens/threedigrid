@@ -22,7 +22,7 @@ from .base.fields import ArrayField
 
 try:
     import shapely
-    from shapely.geometry import asLineString, asPolygon, Point, Polygon
+    from shapely.geometry import LineString, Point, Polygon
 except ImportError:
     shapely = None
 
@@ -192,7 +192,7 @@ class LineArrayField(GeomArrayField):
         for i, coords in enumerate(values.T):
             if np.isnan(coords).all():
                 coords = np.full_like(coords, fill_value=NULL_VALUE)
-            line = asLineString(coords.reshape((2, -1)))
+            line = LineString(coords.reshape((2, -1)))
             line.index = i  # the index is used in get_mask_by_geometry
             lines.append(line)
         return lines
@@ -226,7 +226,7 @@ class MultiLineArrayField(GeomArrayField):
             if np.isnan(coords).all():
                 coords = np.full_like(coords, fill_value=NULL_VALUE)
 
-            line = asLineString(coords.reshape((2, -1)).T)
+            line = LineString(coords.reshape((2, -1)).T)
             line.index = i  # the index is used in get_mask_by_geometry
             multilines.append(line)
         return multilines
@@ -270,7 +270,7 @@ class PolygonArrayField(GeomArrayField):
         for i, coords in enumerate(values):
             if np.isnan(coords).all():
                 coords = np.full_like(coords, fill_value=NULL_VALUE)
-            polygon = asPolygon(coords.reshape((2, -1)).T)
+            polygon = Polygon(coords.reshape((2, -1)).T)
             polygon.index = i  # the index is used in get_mask_by_geometry
             polygons.append(polygon)
         return polygons
