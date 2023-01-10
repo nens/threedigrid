@@ -4,7 +4,9 @@ History
 1.2.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Dropped python 3.6 support.
+
+- Fixed compatibility with shapely 2.*.
 
 
 1.2.5 (2022-10-17)

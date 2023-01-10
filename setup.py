@@ -32,8 +32,8 @@ with open("HISTORY.rst") as history_file:
     history = history_file.read()
 
 lightweight_requirements = [
-    "numpy>=1.13",
-    "h5py>=2.7.1",
+    "numpy>=1.15",
+    "h5py>=2.9",
     "six",
 ]
 
@@ -42,10 +42,10 @@ results_requirements = ["cftime>=1.0.1"]
 # for extra 'geo'
 geo_requirements = [
     "Click>=6.0",
-    "mercantile>=1.0.1",
+    "mercantile>=1.0.4",
     "pyproj>=2.2",
-    "Shapely>=1.6.4",
-    "geojson>=2.3.0",
+    "Shapely>=1.6",
+    "geojson>=2.4",
 ]
 
 rpc_requirements = [
@@ -58,7 +58,7 @@ test_requirements = ["pytest==3.4.1"]
 
 setup(
     author="Lars Claussen",
-    author_email="lars.claussen@nelen-schuurmans.nl",
+    author_email="info@nelen-schuurmans.nl",
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
@@ -75,7 +75,7 @@ setup(
         ],
     },
     install_requires=lightweight_requirements,
-    python_requires=">=3.6",
+    python_requires=">=3.7",
     license="BSD license",
     long_description=readme + "\n\n" + history,
     include_package_data=True,

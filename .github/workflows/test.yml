@@ -9,27 +9,36 @@ on:
 
 jobs:
   TestLinux:
-    name: Python ${{ matrix.python }} ${{ matrix.display_name }}
-    runs-on: ubuntu-18.04
+    name: Test {{ matrix.display_name }}
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          # 2017
-          - python: 3.6
-            pins: "numpy==1.13.* h5py==2.7.* shapely==1.6.4 pyproj==2.2.* geojson==2.3.0 mercantile==1.0.1 cftime==1.0.1"
-          # 2018
-          - python: 3.7
+          - display_name: "2018"
+            python: 3.7
+            os: ubuntu-18.04
             pins: "numpy==1.15.* h5py==2.9.* shapely==1.6.4 pyproj==2.2.* geojson==2.4.* mercantile==1.0.4 cftime==1.0.3"
-          # 2019
-          - python: 3.8
+          - display_name: "2019"
+            python: 3.8
+            os: ubuntu-18.04
             pins: "numpy==1.17.* h5py==2.10.* shapely==1.6.4 pyproj==2.4.* geojson==2.5.* mercantile==1.1.2 cftime==1.0.4"
-          # 2020
-          - python: 3.9
+            display_name: "2018"
+          - display_name: "2020"
+            python: 3.9
+            os: ubuntu-20.04
             pins: "numpy==1.19.* h5py==3.1.* shapely==1.7.1 pyproj==3.0.* geojson==2.5.* mercantile==1.1.6 cftime==1.2.1"
-          # current
-          - python: 3.9
-            display_name: "latest"
+          - display_name: "2021"
+            python: 3.9
+            os: ubuntu-20.04
+            pins: "numpy==1.21.* h5py==3.3.* shapely==1.8.0 pyproj==3.2.* geojson==2.5.* mercantile==1.2.1 cftime==1.4.1"
+          - display_name: "2022"
+            python: '3.10'
+            os: ubuntu-22.04
+            pins: "numpy==1.23.* h5py==3.7.* shapely==1.8.* pyproj==3.4.* geojson==2.5.* mercantile==1.2.1 cftime==1.6.2"
+          - display_name: "latest"
+            python: '3.10'
+            os: ubuntu-latest
             pins: ""
 
     steps:
@@ -50,7 +59,7 @@ jobs:
         shell: bash
         run: |
           pip install --disable-pip-version-check --upgrade pip setuptools wheel
-          pip install -e .[geo,results] ${{ matrix.pins }} pygdal==2.2.3.* ipython pytest flake8 sphinx==1.8.5 docutils==0.17.*
+          pip install -e .[geo,results] ${{ matrix.pins }} pygdal==$(gdal-config --version).* ipython pytest flake8 sphinx==1.8.5 docutils==0.17.*
           pip list
 
       - name: Run tests
