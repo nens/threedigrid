@@ -56,7 +56,7 @@ class Nodes(Model):
         "storage_area": "connection_node_storage_area",
         "sumax": "max_surface_area",
         "coordinates": "the_geom",
-        "bottom_level": "dmax",
+        "dmax": "bottom_level",
         "drain_level": "drain_level"
     }
 
