@@ -53,9 +53,11 @@ class Nodes(Model):
         "node_type": "node_type",
         "calculation_type": "calculation_type",
         "is_manhole": "is_manhole",
-        "storage_area": "connection_node_storage_are",
+        "storage_area": "connection_node_storage_area",
         "sumax": "max_surface_area",
         "coordinates": "the_geom",
+        "bottom_level": "dmax",
+        "drain_level": "drain_level"
     }
 
     @property
