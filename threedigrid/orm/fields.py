@@ -42,15 +42,15 @@ class GeomArrayField(ArrayField):
         raise NotImplementedError()
 
     def get_mask_by_geometry(self, geometry, values):
-        geoms, index = self._to_shapely_geom(values, return_index=True)
+        geoms = self._to_shapely_geom(values)
 
         intersects_i = select_geoms_by_geometry(geoms, geometry)
 
         mask = np.zeros((len(values.T),), dtype=bool)
-        mask[np.array(index, dtype=int)[intersects_i]] = True
+        mask[np.array(intersects_i, dtype=int)] = True
         return mask
 
-    def _to_shapely_geom(self, values, return_index=False):
+    def _to_shapely_geom(self, values):
         """Returns a list of shapely geometries created from values
 
         :param values: coordinates
@@ -95,21 +95,19 @@ class PointArrayField(GeomArrayField):
         """
         return values
 
-    def _to_shapely_geom(self, values, return_index=False):
+    def _to_shapely_geom(self, values):
         if shapely is None:
             raise_import_exception("shapely")
 
         points = []
-        indices = []
-        for i, coord in enumerate(values.T):
+        for coord in values.T:
             if np.isnan(coord).all():
                 coord = np.full_like(coord, fill_value=NULL_VALUE)
 
             point = Point(coord[0], coord[1])
-            indices.append(i)
             points.append(point)
 
-        return (points, indices) if return_index else points
+        return points
 
 
 class LineArrayField(GeomArrayField):
@@ -184,19 +182,17 @@ class LineArrayField(GeomArrayField):
 
         return angle_in_degrees(values[0], values[1], values[2], values[3])
 
-    def _to_shapely_geom(self, values, return_index=False):
+    def _to_shapely_geom(self, values):
         if shapely is None:
             raise_import_exception("shapely")
 
         lines = []
-        indices = []
-        for i, coords in enumerate(values.T):
+        for coords in values.T:
             if np.isnan(coords).all():
                 coords = np.full_like(coords, fill_value=NULL_VALUE)
             line = LineString(coords.reshape((2, -1)))
-            indices.append(i)
             lines.append(line)
-        return (lines, indices) if return_index else lines
+        return lines
 
 
 class MultiLineArrayField(GeomArrayField):
@@ -218,20 +214,18 @@ class MultiLineArrayField(GeomArrayField):
         ]
         return np.array(transform_values, dtype=object)
 
-    def _to_shapely_geom(self, values, return_index=False):
+    def _to_shapely_geom(self, values):
         if shapely is None:
             raise_import_exception("shapely")
 
         multilines = []
-        indices = []
-        for i, coords in enumerate(values):
+        for coords in values:
             if np.isnan(coords).all():
                 coords = np.full_like(coords, fill_value=NULL_VALUE)
 
             line = LineString(coords.reshape((2, -1)).T)
-            indices.append(i)
             multilines.append(line)
-        return (multilines, indices) if return_index else multilines
+        return multilines
 
 
 class PolygonArrayField(GeomArrayField):
@@ -264,31 +258,28 @@ class PolygonArrayField(GeomArrayField):
             )
         )
 
-    def _to_shapely_geom(self, values, return_index=False):
+    def _to_shapely_geom(self, values):
         if shapely is None:
             raise_import_exception("shapely")
 
         polygons = []
-        indices = []
-        for i, coords in enumerate(values):
+        for coords in values:
             if np.isnan(coords).all():
                 coords = np.full_like(coords, fill_value=NULL_VALUE)
             polygon = Polygon(coords.reshape((2, -1)).T)
-            indices.append(i)
             polygons.append(polygon)
-        return (polygons, indices) if return_index else polygons
+        return polygons
 
 
 class BboxArrayField(LineArrayField):
     type = "bbox"
 
-    def _to_shapely_geom(self, values, return_index=False):
+    def _to_shapely_geom(self, values):
         if shapely is None:
             raise_import_exception("shapely")
 
         polygons = []
-        indices = []
-        for i, coord in enumerate(values.T):
+        for coord in values.T:
             if np.isnan(coord).all():
                 coord = np.full_like(coord, fill_value=NULL_VALUE)
 
@@ -301,6 +292,5 @@ class BboxArrayField(LineArrayField):
                     (coord[2], coord[1]),
                 ]
             )
-            indices.append(i)
             polygons.append(polygon)
-        return (polygons, indices) if return_index else polygons
+        return polygons

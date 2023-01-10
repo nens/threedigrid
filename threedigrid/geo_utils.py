@@ -308,10 +308,13 @@ def select_geoms_by_geometry(geoms, geometry):
 
     if shapely.__version__.startswith("1."):
         result = []
-        intersected_geoms = tree.query(geometry)
-        for i, intersected_geom in enumerate(intersected_geoms):
+
+        for i, g in enumerate(geoms):
+            g.index = i
+
+        for intersected_geom in tree.query(geometry):
             if geometry.intersects(intersected_geom):
-                result.append(i)
+                result.append(intersected_geom.index)
         return np.array(result, dtype=int)
     else:
         return tree.query(geometry, predicate="intersects")

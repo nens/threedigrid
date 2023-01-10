@@ -9,7 +9,7 @@ on:
 
 jobs:
   TestLinux:
-    name: Test {{ matrix.display_name }}
+    name: Python ${{ matrix.python }} ${{ matrix.display_name }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
