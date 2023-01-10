@@ -10,6 +10,10 @@ History
 
 - Added 'code' and 'display_name' to breaches.
 
+- Dropped python 3.6 support.
+
+- Fixed compatibility with shapely 2.*.
+
 
 1.2.5 (2022-10-17)
 ------------------
