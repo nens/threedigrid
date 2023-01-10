@@ -57,7 +57,7 @@ class Nodes(Model):
         "sumax": "max_surface_area",
         "coordinates": "the_geom",
         "dmax": "bottom_level",
-        "drain_level": "drain_level"
+        "drain_level": "drain_level",
     }
 
     @property
