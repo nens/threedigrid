@@ -246,7 +246,7 @@ class GridAdminBreachTest(unittest.TestCase):
             "levmat",
             "seq_ids",
             "code",
-            "display_name"
+            "display_name",
         }
 
     def test_exporters(self):

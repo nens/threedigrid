@@ -6,7 +6,6 @@ Base fields
 import numpy as np
 
 from threedigrid.admin.constants import NO_DATA_VALUE
-from threedigrid.admin.utils import PKMapper
 
 
 class ArrayField:

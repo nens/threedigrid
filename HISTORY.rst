@@ -245,7 +245,7 @@ History
 - Added `Breaches` model under lines with specific breach fields
   mapped from the 'breaches' h5py datagroup.
 
-- MappedSubsetArrayField allowing to map arrays from other
+- Added `MappedSubsetArrayField` allowing to map arrays from other
   h5py datagroups to a model on another datagroup subset. Breaches
   uses this to map the array's under 'breaches' to 'lines'
 

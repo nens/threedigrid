@@ -70,7 +70,7 @@ def test_breach_options_get_fields(opt_breaches):
         "content_pk",
         "id",
         "code",
-        "display_name"
+        "display_name",
     }
 
 
