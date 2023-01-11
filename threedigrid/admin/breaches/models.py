@@ -57,6 +57,8 @@ class Breaches(Model):
     kcu = ArrayField(type=int)
 
     coordinates = PointArrayField()
+    code = ArrayField(type=str)
+    display_name = ArrayField(type=str)
 
     OBJECT_TYPE = constants.TYPE_V2_BREACH
 
