@@ -1,7 +1,7 @@
 History
 =======
 
-2.0.0 (unreleased)
+2.0.0 (2023-01-11)
 ------------------
 
 - Removed gridadmin.lines.breaches.
