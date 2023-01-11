@@ -10,6 +10,8 @@ History
 
 - Added 'code' and 'display_name' to breaches.
 
+- Added missing Geopackage fields `bottom_level` and `drain_level` for nodes. Renamed `connection_node_storage_are` to `connection_node_storage_area`.
+
 - Dropped python 3.6 support.
 
 - Fixed compatibility with shapely 2.*.
