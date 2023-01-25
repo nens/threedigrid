@@ -124,13 +124,17 @@ class KCUDescriptor(dict):
             300: '2d boundary',
             400: '2d boundary',
             500: '2d boundary',
+            600: '2d groundwater boundary',
+            700: '2d groundwater boundary',
+            800: '2d groundwater boundary',
+            900: '2d groundwater boundary',
 
     """
 
     def __init__(self, *arg, **kw):
         super().__init__(*arg, **kw)
-        self.bound_keys_groundwater = [x for x in range(600, 1000)]
-        self.bound_keys_2d = [x for x in range(200, 600)]
+        self.bound_keys_groundwater = [600, 700, 800, 900]
+        self.bound_keys_2d = [200, 300, 400, 500]
 
         self._descr = {
             0: "1d embedded line",
@@ -155,6 +159,10 @@ class KCUDescriptor(dict):
             300: "2d boundary",
             400: "2d boundary",
             500: "2d boundary",
+            600: "2d groundwater boundary",
+            700: "2d groundwater boundary",
+            800: "2d groundwater boundary",
+            900: "2d groundwater boundary",
         }
 
     def get(self, item):
