@@ -4,7 +4,8 @@ History
 2.0.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Added 2D groundwater boundary line types 600, 700, 800, 900. 
+  Eextended the '2D_GROUNDWATER' subset.
 
 
 2.0.0 (2023-01-11)
