@@ -4,6 +4,8 @@ History
 2.0.1 (unreleased)
 ------------------
 
+- Added `meta` table to Geokpackage export with meta information about 3Di model.
+
 - Added 2D groundwater boundary line types 600, 700, 800, 900. 
   Eextended the '2D_GROUNDWATER' subset.
 
