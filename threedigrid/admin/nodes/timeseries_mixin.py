@@ -25,7 +25,6 @@ BASE_SUBSET_FIELDS = {
 
 class NodesResultsMixin(ResultMixin):
     class Meta:
-
         # attributes for the given fields
         field_attrs = ["units", "long_name", "standard_name"]
 

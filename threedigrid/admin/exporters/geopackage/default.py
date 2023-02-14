@@ -1,6 +1,8 @@
 from copy import deepcopy
 
 import numpy as np
+from threedigrid.admin.exporters.geopackage.exporter import GpkgExporter
+
 
 # Obstacle export field definitions/mapping
 OBSTACLES_FIELD_DEFINITIONS = {
@@ -116,5 +118,9 @@ class GeopackageExporter:
                     progress_func=internal_func,
                     cross_pix_coords__transformed=cross_pix_coords__transformed,
                 )
+
+            # Write meta info
+            exporter = GpkgExporter(ga)
+            exporter.add_meta_data(self.gpkg_filename, "meta")
 
             assert self.total_items == self.calculated_items

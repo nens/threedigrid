@@ -53,7 +53,6 @@ def add_or_update_datasets(
     ignore_mask=None,
     field_name_override=None,
 ):
-
     # map pk onto content_pk
     pk_mapper = PKMapper(pk, content_pk, ignore_mask)
     for field_name in field_names:

@@ -31,7 +31,6 @@ def get_id_map(objs_for_id_map, breach_dict):
 
 
 class IdMapper:
-
     LINE_TYPES = [
         constants.TYPE_V2_PIPE,
         constants.TYPE_V2_CHANNEL,

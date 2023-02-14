@@ -194,7 +194,6 @@ class Model(metaclass=ABCMeta):
         attr = super().__getattribute__(attr_name)
         # Override getting ArrayField attributes
         if isinstance(attr, ArrayField):
-
             # Return meta directly, we don't want it to
             # to be filtered
             if attr_name == "meta":
@@ -483,7 +482,6 @@ class Model(metaclass=ABCMeta):
         # based on the specified filters
 
         if self._boolean_mask_filter is None:
-
             # If no filters are defined
             if not self.slice_filters:
                 # Select everything

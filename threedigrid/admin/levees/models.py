@@ -19,7 +19,6 @@ from threedigrid.orm.models import Model
 
 
 class Levees(Model):
-
     crest_level = ArrayField(type=float)
     max_breach_depth = ArrayField(type=float)
     coords = MultiLineArrayField()

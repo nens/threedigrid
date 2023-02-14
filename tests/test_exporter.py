@@ -36,6 +36,16 @@ def test_nodes_gpgk_export(ga, tmp_path):
     assert layer.GetFeatureCount() == nodes_2d_open_water.id.size
 
 
+def test_meta_data_gpgk_export(ga, tmp_path):
+    path = str(tmp_path / ("exporter_meta.gpkg"))
+    exporter = GpkgExporter(ga)
+    exporter.add_meta_data()
+    assert os.path.exists(path)
+    s = ogr.Open(path)
+    layer = s.GetLayer("meta")
+    assert layer.GetFeatureCount() == 1
+
+
 def test_export_specify_fields_as_dict(ga, tmp_path):
     path = str(tmp_path / "exporter_test_lines.json")
 
