@@ -39,7 +39,7 @@ def test_nodes_gpgk_export(ga, tmp_path):
 def test_meta_data_gpgk_export(ga, tmp_path):
     path = str(tmp_path / ("exporter_meta.gpkg"))
     exporter = GpkgExporter(ga)
-    exporter.add_meta_data()
+    exporter.add_meta_data(path, "meta")
     assert os.path.exists(path)
     s = ogr.Open(path)
     layer = s.GetLayer("meta")
