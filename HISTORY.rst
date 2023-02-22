@@ -1,7 +1,7 @@
 History
 =======
 
-2.0.1 (unreleased)
+2.0.1 (2023-02-22)
 ------------------
 
 - Added `meta` table to Geokpackage export with meta information about 3Di model.
