@@ -24,7 +24,6 @@ class H5pyGroup(DataSource):
     def get_filtered_field_value(
         self, model, field_name, ts_filter=None, lookup_index=None, subset_index=None
     ):
-
         kwargs = {}
         if ts_filter is None:
             if hasattr(model, "get_timeseries_mask_filter"):

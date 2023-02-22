@@ -240,7 +240,6 @@ class PolygonArrayField(GeomArrayField):
     type = "polygon"
 
     def get_mask_by_point(self, pnt, values):
-
         return get_bbox_by_point(pnt, values)
 
     def reproject(self, values, source_epsg, target_epsg):

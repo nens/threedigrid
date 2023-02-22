@@ -303,7 +303,6 @@ class GridAdminCellsTest(unittest.TestCase):
         self.assertListEqual(self.parser.cells.get_id_from_xy(x, y), [1, 5375])
 
     def test_get_id_from_xy_2d_open_water(self):
-
         self.assertListEqual(
             self.parser.cells.get_id_from_xy(1.0, 2.0, subset_name="2d_open_water"),
             [],
@@ -317,7 +316,6 @@ class GridAdminCellsTest(unittest.TestCase):
         )
 
     def test_get_id_from_xy_groundwater(self):
-
         self.assertListEqual(
             self.parser.cells.get_id_from_xy(1.0, 2.0, subset_name="groundwater_all"),
             [],

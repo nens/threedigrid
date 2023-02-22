@@ -69,6 +69,53 @@ class GpkgExporter(BaseOgrExporter):
         }
         self.set_driver(const.GEO_PACKAGE_DRIVER_NAME)
 
+    def add_meta_data(self, file_name, layer_name):
+        """
+        Note: assumes self.model to be gridadmin root object.
+        """
+        meta_data = dict(self.model.h5py_file.attrs.items())
+
+        if os.path.exists(file_name):
+            data_source = self.driver.Open(file_name, update=1)
+        else:
+            data_source = self.driver.CreateDataSource(file_name)
+
+        layer = data_source.CreateLayer(
+            layer_name, geom_type=ogr.wkbNone, options=["OVERWRITE=YES"]
+        )
+
+        usable_fields = []
+        for key in meta_data.keys():
+            field_type = type(meta_data[key].tolist())
+            value = meta_data[key]
+
+            if field_type == bytes:
+                field_type = str
+            if field_type == list:
+                field_type = str
+                value = ",".join([str(x) for x in value])
+
+            if field_type in const.OGR_FIELD_TYPE_MAP:
+                usable_fields.append((key, field_type, value))
+                field = ogr.FieldDefn(key, const.OGR_FIELD_TYPE_MAP[field_type])
+                if field_type in ("str", str):
+                    field.SetWidth(2048)
+                elif field_type in ("bool", bool):
+                    field.SetSubType(ogr.OFSTBoolean)
+                layer.CreateField(field)
+
+        _definition = layer.GetLayerDefn()
+        data_source.StartTransaction()
+
+        feature = ogr.Feature(_definition)
+
+        for key, field_type, value in usable_fields:
+            self.set_field(feature, key, field_type, value)
+
+        layer.CreateFeature(feature)
+        data_source.CommitTransaction()
+        data_source = None
+
     def save(
         self, file_name, layer_name, field_definitions, progress_func=None, **kwargs
     ):

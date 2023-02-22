@@ -94,7 +94,6 @@ class Model(BaseModel):
         progress_func=None,
         **kwargs
     ):
-
         # By default use class name in lowercase as layer_name
         if layer_name is None:
             layer_name = self.__class__.__name__.lower()

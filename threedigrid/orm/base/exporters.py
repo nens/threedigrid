@@ -31,7 +31,6 @@ class BaseExporterObject(metaclass=ABCMeta):
 
 
 class BaseOgrExporter(BaseExporterObject):
-
     driver = None
 
     def __init__(self):

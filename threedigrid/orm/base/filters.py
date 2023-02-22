@@ -29,7 +29,6 @@ class BaseFilter:
         for key in nparray_dict:
             # Apply the filter on the np_array's
             if nparray_dict[key] is not None and hasattr(nparray_dict[key], "shape"):
-
                 # Transform the base_filter by prepending slice(None) to
                 # match the dimensionality of the nparray_dict[key].shape
                 #

@@ -49,7 +49,6 @@ def skip_prepare(h5py_file, group_name, attr_name, overwrite):
 def prepare_lines_onedee(
     h5py_file, threedi_datasource, klass, attr_name, overwrite=False
 ):
-
     if skip_prepare(h5py_file, "lines", attr_name, overwrite):
         return
 
