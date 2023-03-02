@@ -115,7 +115,7 @@ The ``intersects_geometry`` expects a shapely geometry for which the intersectio
     polygon = Polygon([
         [109300.0, 518201.2], [108926.5, 518201.2], [108935.6, 517871.7], [109300.0, 518201.2]
     ])
-    ga.cells.filter(cell_coords__intersects_geometry=geometry)
+    ga.cells.filter(cell_coords__intersects_geometry=polygon)
 
 Spatial filtering works only on GeomArrayField subclasses.
 
