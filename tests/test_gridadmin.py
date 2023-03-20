@@ -244,6 +244,7 @@ class GridAdminBreachTest(unittest.TestCase):
             "levbr",
             "levl",
             "levmat",
+            "line_coords",
             "seq_ids",
             "code",
             "display_name",
