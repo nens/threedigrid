@@ -148,11 +148,13 @@ class H5pyGroup(DataSource):
 
         return selection
 
-    def __init__(self, h5py_file, group_name, meta=None, required=False, gridadmin=None):
+    def __init__(
+        self, h5py_file, group_name, meta=None, required=False, gridadmin=None
+    ):
         self.group_name = group_name
         self._h5py_file = h5py_file
         self._gridadmin = gridadmin
-        
+
         if group_name not in list(h5py_file.keys()) and not required:
             logger.info(
                 "[*] {} not found in file {}, not required...".format(

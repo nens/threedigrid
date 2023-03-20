@@ -26,10 +26,11 @@ import logging
 
 from threedigrid.admin import constants
 from threedigrid.admin.breaches import exporters
-from threedigrid.orm.base.fields import IndexArrayField
-from threedigrid.orm.fields import ArrayField, PointArrayField, LineArrayField
-from threedigrid.orm.models import Model
 from threedigrid.admin.utils import PKMapper
+from threedigrid.orm.base.fields import IndexArrayField
+from threedigrid.orm.fields import ArrayField, LineArrayField, PointArrayField
+from threedigrid.orm.models import Model
+
 logger = logging.getLogger(__name__)
 
 
@@ -40,11 +41,12 @@ class LineCoords(LineArrayField):
     def get_value(self, datasource, name, **kwargs):
         if name in list(datasource.keys()):
             return datasource[name]
-        
+
         if datasource._gridadmin is not None:
-            levl = datasource['levl'][:]
-            data = datasource._gridadmin.lines.filter(
-                id__in=levl).only('id', 'line_coords')
+            levl = datasource["levl"][:]
+            data = datasource._gridadmin.lines.filter(id__in=levl).only(
+                "id", "line_coords"
+            )
             return PKMapper(data.id, levl).apply_on(data.line_coords)
 
         return ArrayField.get_value(datasource, name)
