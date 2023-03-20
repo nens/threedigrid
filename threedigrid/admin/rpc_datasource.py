@@ -176,7 +176,7 @@ class H5RPCGroup(DataSource):
 
     future_class = Future
 
-    def __init__(self, rpc_file, group_name, meta=None, required=False):
+    def __init__(self, rpc_file, group_name, meta=None, required=False, gridadmin=None):
         self.rpc_file = rpc_file
         self.group_name = group_name
 

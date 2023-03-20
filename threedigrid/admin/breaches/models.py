@@ -27,10 +27,27 @@ import logging
 from threedigrid.admin import constants
 from threedigrid.admin.breaches import exporters
 from threedigrid.orm.base.fields import IndexArrayField
-from threedigrid.orm.fields import ArrayField, PointArrayField
+from threedigrid.orm.fields import ArrayField, PointArrayField, LineArrayField
 from threedigrid.orm.models import Model
-
+from threedigrid.admin.utils import PKMapper
 logger = logging.getLogger(__name__)
+
+
+class LineCoords(LineArrayField):
+    def __init__(self):
+        super().__init__(None)
+
+    def get_value(self, datasource, name, **kwargs):
+        if name in list(datasource.keys()):
+            return datasource[name]
+        
+        if datasource._gridadmin is not None:
+            levl = datasource['levl'][:]
+            data = datasource._gridadmin.lines.filter(
+                id__in=levl).only('id', 'line_coords')
+            return PKMapper(data.id, levl).apply_on(data.line_coords)
+
+        return ArrayField.get_value(datasource, name)
 
 
 class Breaches(Model):
@@ -55,7 +72,7 @@ class Breaches(Model):
     levl = IndexArrayField(to="Lines")
     levmat = ArrayField(type=int)
     kcu = ArrayField(type=int)
-
+    line_coords = LineCoords()
     coordinates = PointArrayField()
     code = ArrayField(type=str)
     display_name = ArrayField(type=str)
