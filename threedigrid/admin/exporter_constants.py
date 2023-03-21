@@ -167,6 +167,7 @@ BREACHES_EXPORT_FIELDS = [
     "levbr",
     "kcu",
     "levl",
+    "line_coords",
 ]
 
 CELLS_EXPORT_FIELDS = [

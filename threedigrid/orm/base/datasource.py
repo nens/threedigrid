@@ -11,9 +11,10 @@ class DataSource:
     meta = None
     _source = None
 
-    def __init__(self, source, meta=None):
+    def __init__(self, source, meta=None, gridadmin=None):
         self.meta = meta
         self._source = source
+        self._gridadmin = gridadmin
 
     def keys(self):
         keys = list(self._source.keys())

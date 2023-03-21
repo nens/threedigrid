@@ -66,6 +66,7 @@ def test_breach_options_get_fields(opt_breaches):
         "coordinates",
         "kcu",
         "levmat",
+        "line_coords",
         "seq_ids",
         "content_pk",
         "id",

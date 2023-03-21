@@ -131,7 +131,8 @@ class GridH5Admin:
     @property
     def breaches(self):
         return Breaches(
-            self.datasource_class(self.h5py_file, "breaches"), **self._grid_kwargs
+            self.datasource_class(self.h5py_file, "breaches", gridadmin=self),
+            **self._grid_kwargs
         )
 
     @property
