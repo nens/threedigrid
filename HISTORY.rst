@@ -1,7 +1,7 @@
 History
 =======
 
-2.0.2 (unreleased)
+2.0.2 (2023-03-21)
 ------------------
 
 - Added 'line_coords' to Breaches model and default export fields.
