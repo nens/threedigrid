@@ -117,7 +117,15 @@ The ``intersects_geometry`` expects a shapely geometry for which the intersectio
     ])
     ga.cells.filter(cell_coords__intersects_geometry=polygon)
 
-Spatial filtering works only on GeomArrayField subclasses.
+Spatial filtering works only on GeomArrayField subclasses. The spatial filter on grid cells will not 
+for calculation nodes. A spatial filter on the calculation nodes and its coordinates can
+be applied to retrieve the 1D elements::
+
+    from shapely.geometry import Polygon
+    polygon = Polygon([
+        [109300.0, 518201.2], [108926.5, 518201.2], [108935.6, 517871.7], [109300.0, 518201.2]
+    ])
+    ga.nodes.filter(coordinates__intersects_geometry=polygon)
 
 
 Subsets
