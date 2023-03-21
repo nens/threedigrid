@@ -35,6 +35,11 @@ logger = logging.getLogger(__name__)
 
 
 class LineCoords(LineArrayField):
+    """
+    Used for setting `line_coords` (field in 'lines' h5 group) on the
+    Breaches model.
+    """
+
     def __init__(self):
         super().__init__(None)
 
@@ -43,6 +48,7 @@ class LineCoords(LineArrayField):
             return datasource[name]
 
         if datasource._gridadmin is not None:
+            # Return mapped line_coords, based on levl
             levl = datasource["levl"][:]
             data = datasource._gridadmin.lines.filter(id__in=levl).only(
                 "id", "line_coords"
@@ -66,6 +72,9 @@ class Breaches(Model):
         - content_pk (primary key database)
         - seq_ids (sequence ids generated during input file generation)
 
+    fields from `lines` h5 group:
+
+        - line_coords
     """
 
     content_pk = ArrayField(type=int)
