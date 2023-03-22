@@ -31,7 +31,7 @@ class H5SwmrFile(h5py.File):
             return self._datasets[key]
 
         res = super().__getitem__(key)
-        if isinstance(res, h5py._hl.dataset.Dataset):
+        if isinstance(res, h5py.Dataset):
             if key not in self._datasets:
                 self._datasets[key] = res
         return res

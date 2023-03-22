@@ -4,7 +4,7 @@ import logging
 from collections import OrderedDict
 
 import numpy as np
-from h5py._hl.dataset import Dataset
+from h5py import Dataset
 
 from threedigrid.admin.h5py_swmr import H5SwmrFile
 from threedigrid.orm.base.datasource import DataSource
