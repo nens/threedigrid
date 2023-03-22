@@ -1,7 +1,7 @@
 History
 =======
 
-2.0.3 (unreleased)
+2.0.3 (2023-03-22)
 ------------------
 
 - Bugfix: Dataset instance check is not generic.
