@@ -4,7 +4,7 @@ History
 2.0.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Make 'line_coords' the geometry on breaches geojson output.
 
 
 2.0.3 (2023-03-22)

@@ -15,6 +15,8 @@ except ImportError:
     geojson = None
 
 
+TO_LINESTRING_INDEX = np.array([[0, 1], [2, 3]])
+
 logger = logging.getLogger(__name__)
 
 
@@ -60,12 +62,21 @@ class GeoJsonSerializer:
 
                 properties = fill_properties(self.fields, data, i, model_type)
                 yield geojson.Feature(geometry=line, properties=properties)
-        elif content_type in ("nodes", "breaches", "pumps"):
+        elif content_type in ("nodes", "pumps"):
             for i in range(data["id"].shape[-1]):
                 coords = np.round(data["coordinates"][:, i], constants.LONLAT_DIGITS)
                 point = geojson.Point([coords[0], coords[1]])
                 properties = fill_properties(self.fields, data, i, model_type)
                 yield geojson.Feature(geometry=point, properties=properties)
+        elif content_type == "breaches":
+            for i in range(data["id"].shape[-1]):
+                linepoints = np.round(
+                    data["line_coords"][:, i][TO_LINESTRING_INDEX].astype("float64"),
+                    constants.LONLAT_DIGITS,
+                )
+                line = geojson.LineString(linepoints.tolist())
+                properties = fill_properties(self.fields, data, i, model_type)
+                yield geojson.Feature(geometry=line, properties=properties)
         elif content_type == "cells":
             if (
                 self._model.reproject_to_epsg is not None
