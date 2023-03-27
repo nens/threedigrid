@@ -15,8 +15,6 @@ except ImportError:
     geojson = None
 
 
-TO_LINESTRING_INDEX = np.array([[0, 1], [2, 3]])
-
 logger = logging.getLogger(__name__)
 
 
@@ -71,7 +69,7 @@ class GeoJsonSerializer:
         elif content_type == "breaches":
             for i in range(data["id"].shape[-1]):
                 linepoints = np.round(
-                    data["line_coords"][:, i][TO_LINESTRING_INDEX].astype("float64"),
+                    data["line_geometries"][i].reshape(2, -1).T.astype("float64"),
                     constants.LONLAT_DIGITS,
                 )
                 line = geojson.LineString(linepoints.tolist())
