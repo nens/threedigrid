@@ -28,15 +28,15 @@ from threedigrid.admin import constants
 from threedigrid.admin.breaches import exporters
 from threedigrid.admin.utils import PKMapper
 from threedigrid.orm.base.fields import IndexArrayField
-from threedigrid.orm.fields import ArrayField, LineArrayField, PointArrayField
+from threedigrid.orm.fields import ArrayField, MultiLineArrayField, PointArrayField
 from threedigrid.orm.models import Model
 
 logger = logging.getLogger(__name__)
 
 
-class LineCoords(LineArrayField):
+class LineGeometries(MultiLineArrayField):
     """
-    Used for setting `line_coords` (field in 'lines' h5 group) on the
+    Used for setting `line_geometries` (field in 'lines' h5 group) on the
     Breaches model.
     """
 
@@ -51,9 +51,9 @@ class LineCoords(LineArrayField):
             # Return mapped line_coords, based on levl
             levl = datasource["levl"][:]
             data = datasource._gridadmin.lines.filter(id__in=levl).only(
-                "id", "line_coords"
+                "id", "line_geometries"
             )
-            return PKMapper(data.id, levl).apply_on(data.line_coords)
+            return PKMapper(data.id, levl).apply_on(data.line_geometries)
 
         return ArrayField.get_value(datasource, name)
 
@@ -74,7 +74,7 @@ class Breaches(Model):
 
     fields from `lines` h5 group:
 
-        - line_coords
+        - line_geometries
     """
 
     content_pk = ArrayField(type=int)
@@ -83,7 +83,7 @@ class Breaches(Model):
     levl = IndexArrayField(to="Lines")
     levmat = ArrayField(type=int)
     kcu = ArrayField(type=int)
-    line_coords = LineCoords()
+    line_geometries = LineGeometries()
     coordinates = PointArrayField()
     code = ArrayField(type=str)
     display_name = ArrayField(type=str)
