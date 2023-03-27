@@ -1,7 +1,7 @@
 History
 =======
 
-2.0.5 (unreleased)
+2.0.5 (2023-03-27)
 ------------------
 
 - Switch to using 'line_geometries' for Breaches model.
