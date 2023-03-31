@@ -32,7 +32,7 @@ NODE_SUBSETS = {
 class Nodes(Model):
     content_pk = ArrayField(type=int)
     seq_id = ArrayField(type=int)
-    calculation_type = ArrayField(type=float)
+    calculation_type = ArrayField(type=int)
     coordinates = PointArrayField()
     cell_coords = BboxArrayField()
     zoom_category = ArrayField(type=float)
