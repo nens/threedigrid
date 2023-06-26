@@ -4,7 +4,7 @@ History
 2.0.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Added `sewerage` and `sewerage_type` fields to Line model.
 
 
 2.0.5 (2023-03-27)

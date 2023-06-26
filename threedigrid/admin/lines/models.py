@@ -67,6 +67,8 @@ class Lines(Model):
     line_geometries = MultiLineArrayField()
     discharge_coefficient_negative = ArrayField(type=float)
     discharge_coefficient_positive = ArrayField(type=float)
+    sewerage = ArrayField(type=bool)
+    sewerage_type = ArrayField(type=int)
 
     SUBSETS = LINE_SUBSETS
 
@@ -83,6 +85,8 @@ class Lines(Model):
         "line__0": "calculation_node_id_start",
         "line__1": "calculation_node_id_end",
         "line_geometries": "the_geom",
+        "sewerage": "sewerage",
+        "sewerage_type": "sewerage_type",
     }
 
     def __init__(self, *args, **kwargs):
