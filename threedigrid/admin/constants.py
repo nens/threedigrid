@@ -232,7 +232,7 @@ TYPE_FUNC_MAP = {
     int: to_int,
     float: to_float,
     str: to_string,
-    bool: bool,
+    bool: lambda x: None if x in (-9999, "-9999") else bool(x),
     "float": to_float,
     "str": to_string,
 }

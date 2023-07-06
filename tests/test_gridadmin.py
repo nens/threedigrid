@@ -127,6 +127,8 @@ class GridAdminLinesTest(unittest.TestCase):
             "discharge_coefficient_negative",
             "discharge_coefficient_positive",
             "line_geometries",
+            "sewerage",
+            "sewerage_type",
             "invert_level_start_point",
             "invert_level_end_point",
             "zoom_category",
