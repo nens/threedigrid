@@ -17,11 +17,11 @@ jobs:
         include:
           - display_name: "2018"
             python: 3.7
-            os: ubuntu-18.04
+            os: ubuntu-20.04
             pins: "numpy==1.15.* h5py==2.9.* shapely==1.6.4 pyproj==2.2.* geojson==2.4.* mercantile==1.0.4 cftime==1.0.3"
           - display_name: "2019"
             python: 3.8
-            os: ubuntu-18.04
+            os: ubuntu-20.04
             pins: "numpy==1.17.* h5py==2.10.* shapely==1.6.4 pyproj==2.4.* geojson==2.5.* mercantile==1.1.2 cftime==1.0.4"
           - display_name: "2020"
             python: 3.9
