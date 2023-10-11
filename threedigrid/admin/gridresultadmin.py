@@ -5,6 +5,7 @@ import logging
 from collections import defaultdict
 
 import h5py
+import numpy as np
 
 from threedigrid.admin.breaches.models import Breaches
 from threedigrid.admin.breaches.timeseries_mixin import (
@@ -30,7 +31,12 @@ from threedigrid.admin.pumps.timeseries_mixin import (
     PumpsAggregateResultsMixin,
     PumpsResultsMixin,
 )
+from threedigrid.admin.structure_controls.models import (
+    StructureControl,
+    STRUCTURE_CONTROL_TYPES,
+)
 from threedigrid.orm.models import Model
+from typing import List, Union
 
 logger = logging.getLogger(__name__)
 
@@ -103,14 +109,14 @@ class GridH5ResultAdmin(GridH5Admin):
     def lines(self):
         return Lines(
             self.result_datasource_class(self.h5py_file, "lines", self.netcdf_file),
-            **dict(self._grid_kwargs, **{"mixin": LinesResultsMixin})
+            **dict(self._grid_kwargs, **{"mixin": LinesResultsMixin}),
         )
 
     @property
     def nodes(self):
         return Nodes(
             self.result_datasource_class(self.h5py_file, "nodes", self.netcdf_file),
-            **dict(self._grid_kwargs, **{"mixin": NodesResultsMixin})
+            **dict(self._grid_kwargs, **{"mixin": NodesResultsMixin}),
         )
 
     @property
@@ -120,7 +126,7 @@ class GridH5ResultAdmin(GridH5Admin):
             return
         return Breaches(
             self.result_datasource_class(self.h5py_file, "breaches", self.netcdf_file),
-            **dict(self._grid_kwargs, **{"mixin": BreachesResultsMixin})
+            **dict(self._grid_kwargs, **{"mixin": BreachesResultsMixin}),
         )
 
     @property
@@ -130,7 +136,7 @@ class GridH5ResultAdmin(GridH5Admin):
             return
         return Pumps(
             self.result_datasource_class(self.h5py_file, "pumps", self.netcdf_file),
-            **dict(self._grid_kwargs, **{"mixin": PumpsResultsMixin})
+            **dict(self._grid_kwargs, **{"mixin": PumpsResultsMixin}),
         )
 
     def version_check(self):
@@ -232,14 +238,14 @@ class GridH5AggregateResultAdmin(GridH5ResultAdmin):
         model_name = "lines"
         return Lines(
             H5pyResultGroup(self.h5py_file, model_name, self.netcdf_file),
-            **dict(self._grid_kwargs, **{"mixin": LinesAggregateResultsMixin})
+            **dict(self._grid_kwargs, **{"mixin": LinesAggregateResultsMixin}),
         )
 
     @property
     def nodes(self):
         return Nodes(
             H5pyResultGroup(self.h5py_file, "nodes", self.netcdf_file),
-            **dict(self._grid_kwargs, **{"mixin": NodesAggregateResultsMixin})
+            **dict(self._grid_kwargs, **{"mixin": NodesAggregateResultsMixin}),
         )
 
     @property
@@ -250,7 +256,7 @@ class GridH5AggregateResultAdmin(GridH5ResultAdmin):
         model_name = "breaches"
         return Breaches(
             H5pyResultGroup(self.h5py_file, model_name, self.netcdf_file),
-            **dict(self._grid_kwargs, **{"mixin": BreachesAggregateResultsMixin})
+            **dict(self._grid_kwargs, **{"mixin": BreachesAggregateResultsMixin}),
         )
 
     @property
@@ -261,10 +267,189 @@ class GridH5AggregateResultAdmin(GridH5ResultAdmin):
         model_name = "pumps"
         return Pumps(
             H5pyResultGroup(self.h5py_file, model_name, self.netcdf_file),
-            **dict(self._grid_kwargs, **{"mixin": PumpsAggregateResultsMixin})
+            **dict(self._grid_kwargs, **{"mixin": PumpsAggregateResultsMixin}),
         )
 
     @property
     def time_units(self):
         logger.info("Time units are not defined globally for aggregated results")
         return None
+
+
+class GridH5StructureControl(GridH5Admin):
+    """Interface for structure control netcdf"""
+
+    def __init__(
+        self,
+        h5_file_path: str,
+        netcdf_file_path: str,
+        file_modus: str = "r",
+        swmr: bool = False,
+    ):
+        """
+        :param h5_file_path: path to the hdf5 gridadmin file
+        :param netcdf_file_path: path to the netcdf structure control result file
+            (usually structure_control_actions_3di.nc)
+        :param file_modus: modus in which to open the files
+        """
+        self._netcdf_file_path: str = netcdf_file_path
+        super().__init__(h5_file_path, file_modus)
+
+        if h5_file_path.startswith("rpc://"):
+            if not asyncio_rpc_support:
+                raise Exception("Please reinstall this package with threedigrid[rpc]")
+
+            from threedigrid.admin.rpc_datasource import RPCFile
+
+            self.netcdf_file = RPCFile(h5_file_path, file_modus)
+        else:
+            if swmr:
+                self.netcdf_file = H5SwmrFile(netcdf_file_path, file_modus)
+            else:
+                self.netcdf_file = h5py.File(netcdf_file_path, file_modus)
+
+    @property
+    def table_control(self) -> "_GridH5NestedStructureControl":
+        return _GridH5NestedStructureControl(self, "table_control")
+
+    @property
+    def memory_control(self) -> "_GridH5NestedStructureControl":
+        return _GridH5NestedStructureControl(self, "memory_control")
+
+    @property
+    def timed_control(self) -> "_GridH5NestedStructureControl":
+        return _GridH5NestedStructureControl(self, "timed_control")
+
+    def get_source_table(self, action_type, grid_id):
+        """Get source_table and source_table_id based on action_type and grid_id"""
+        if action_type == "set_pump_capacity":
+            source_table = "v2_pumpstation"
+            source_table_id = grid_id
+        else:
+            source_table = self.lines.content_type[grid_id].decode("utf-8")
+            source_table_id = self.lines.content_pk[grid_id]
+
+        return source_table, source_table_id
+
+
+class _GridH5NestedStructureControl:
+    def __init__(self, structure_control: GridH5StructureControl, control_type: str):
+        """
+        :param structure_control: GridH5StructureControl(GridH5ResultAdmin)
+        :param control_type: str [table_control, memory_control, timed_control]
+        :param h5_file_path: path to the hdf5 gridadmin file
+        :param netcdf_file_path: path to the netcdf structure control result file
+            (usually structure_control_actions_3di.nc)
+        :param file_modus: modus in which to open the files
+        """
+        if control_type not in STRUCTURE_CONTROL_TYPES:
+            raise ValueError(f"Unknown control type {control_type}")
+
+        self.struct_control = structure_control
+        self.control_type = control_type
+
+    @property
+    def action_type(self) -> np.ndarray:
+        "binary character arrays from Netcdf Fortran to numpy object arrays"
+        return np.array(
+            [
+                action_type.tobytes().decode("utf-8").strip()
+                for action_type in self.struct_control.netcdf_file[
+                    f"{self.control_type}_action_type"
+                ]
+            ],
+            dtype=object,
+        )
+
+    @property
+    def action_value_1(self) -> np.ndarray:
+        return self.struct_control.netcdf_file[f"{self.control_type}_action_value_1"][:]
+
+    @property
+    def action_value_2(self) -> np.ndarray:
+        return self.struct_control.netcdf_file[f"{self.control_type}_action_value_2"][:]
+
+    @property
+    def grid_id(self) -> np.ndarray:
+        return self.struct_control.netcdf_file[f"{self.control_type}_grid_id"][:]
+
+    @property
+    def id(self) -> np.ndarray:
+        "binary character arrays from Netcdf Fortran to numpy object arrays"
+        return np.array(
+            [
+                id.tobytes().decode("utf-8").strip()
+                for id in self.struct_control.netcdf_file[f"{self.control_type}_id"]
+            ],
+            dtype=object,
+        )
+
+    @property
+    def is_active(self) -> np.ndarray:
+        return self.struct_control.netcdf_file[f"{self.control_type}_is_active"][:]
+
+    @property
+    def time(self) -> np.ndarray:
+        return self.struct_control.netcdf_file[f"{self.control_type}_time"][:]
+
+    def group_by_id(self, id: str):
+        """id is unique. Get content_type and content_pk from gridadmin. All controls are
+        on lines except set_pump_capacity"""
+        mask = np.isin(self.id, id)
+        if np.all(mask == False):
+            return
+
+        grid_id = self.grid_id[mask][0]
+        action_type = self.action_type[mask][0]
+        source_table, source_table_id = self.struct_control.get_source_table(
+            action_type, grid_id
+        )
+
+        return StructureControl(
+            id=id,
+            source_table=source_table,
+            source_table_id=source_table_id,
+            time=self.time[mask],
+            action_type=action_type,
+            action_value_1=self.action_value_1[mask],
+            action_value_2=self.action_value_2[mask],
+            is_active=self.is_active[mask],
+        )
+
+    def group_by_action_type(self, value: str):
+        return self._group_by("action_type", value)
+
+    def group_by_action_value_1(self, value: float):
+        return self._group_by("action_value_1", value)
+
+    def group_by_action_value_2(self, value: float):
+        return self._group_by("action_value_2", value)
+
+    def group_by_grid_id(self, value: int):
+        return self._group_by("grid_id", value)
+
+    def group_by_is_active(self, value: int):
+        return self._group_by("is_active", value)
+
+    def group_by_time(self, value: float):
+        return self._group_by("time", value)
+
+    def _group_by(
+        self, type: str, value: Union[int, float, str]
+    ) -> List[StructureControl]:
+        """Group control action by a type, and sort them by unique id
+
+        Args:
+            type (str): is_active, action_type, ...
+            value (Union[int, float, str]): corresponding value for type
+
+        Returns:
+            List[StructureControl]: unique structures found from type, value combination
+        """
+        if not hasattr(self, type):
+            return []
+
+        values = getattr(self, type)
+        mask = np.isin(values, value)
+        ids = np.unique(self.id[mask])
+        return [self.group_by_id(id) for id in ids]
