@@ -1,15 +1,16 @@
+import csv
+
 from threedigrid.admin.gridresultadmin import (
-    GridH5StructureControl,
     _GridH5NestedStructureControl,
+    GridH5StructureControl,
 )
 from threedigrid.admin.structure_controls.models import STRUCTURE_CONTROL_TYPES
-
-import csv
 
 
 def structure_control_actions_to_csv(
     structure_control: GridH5StructureControl, out_path: str
 ):
+    """Set place table, timed, and memory controls after each other in one file."""
     with open(out_path, "w", newline="") as csvfile:
         csv_writer = csv.writer(csvfile, delimiter=",")
         csv_writer.writerow(

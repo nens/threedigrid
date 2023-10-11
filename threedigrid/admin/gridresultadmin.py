@@ -3,6 +3,7 @@
 
 import logging
 from collections import defaultdict
+from typing import List, Optional, Union
 
 import h5py
 import numpy as np
@@ -32,11 +33,10 @@ from threedigrid.admin.pumps.timeseries_mixin import (
     PumpsResultsMixin,
 )
 from threedigrid.admin.structure_controls.models import (
-    StructureControl,
     STRUCTURE_CONTROL_TYPES,
+    StructureControl,
 )
 from threedigrid.orm.models import Model
-from typing import List, Union
 
 logger = logging.getLogger(__name__)
 
@@ -392,11 +392,11 @@ class _GridH5NestedStructureControl:
     def time(self) -> np.ndarray:
         return self.struct_control.netcdf_file[f"{self.control_type}_time"][:]
 
-    def group_by_id(self, id: str):
+    def group_by_id(self, id: str) -> Optional[StructureControl]:
         """id is unique. Get content_type and content_pk from gridadmin. All controls are
         on lines except set_pump_capacity"""
         mask = np.isin(self.id, id)
-        if np.all(mask == False):
+        if np.all(~mask):
             return
 
         grid_id = self.grid_id[mask][0]
@@ -453,7 +453,7 @@ class _GridH5NestedStructureControl:
 
     def _group_by_in_between(
         self, type: str, min: Union[int, float], max: Union[int, float]
-    ):
+    ) -> List[StructureControl]:
         """Find values between min and max
 
         Args:

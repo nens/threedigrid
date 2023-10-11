@@ -1,6 +1,10 @@
 from typing import List
 
-STRUCTURE_CONTROL_TYPES: List[str] = ["table_control", "memory_control", "timed_control"]
+STRUCTURE_CONTROL_TYPES: List[str] = [
+    "table_control",
+    "memory_control",
+    "timed_control",
+]
 
 
 class StructureControl:
