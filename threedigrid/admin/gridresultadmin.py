@@ -356,7 +356,7 @@ class _GridH5NestedStructureControl:
                 action_type.tobytes().decode("utf-8").strip()
                 for action_type in self.struct_control.netcdf_file[
                     f"{self.control_type}_action_type"
-                ]
+                ][:]
             ],
             dtype=object,
         )
@@ -379,7 +379,7 @@ class _GridH5NestedStructureControl:
         return np.array(
             [
                 id.tobytes().decode("utf-8").strip()
-                for id in self.struct_control.netcdf_file[f"{self.control_type}_id"]
+                for id in self.struct_control.netcdf_file[f"{self.control_type}_id"][:]
             ],
             dtype=object,
         )
@@ -416,23 +416,20 @@ class _GridH5NestedStructureControl:
             is_active=self.is_active[mask],
         )
 
-    def group_by_action_type(self, value: str):
+    def group_by_action_type(self, value: str) -> List[StructureControl]:
         return self._group_by("action_type", value)
 
-    def group_by_action_value_1(self, value: float):
-        return self._group_by("action_value_1", value)
-
-    def group_by_action_value_2(self, value: float):
-        return self._group_by("action_value_2", value)
-
-    def group_by_grid_id(self, value: int):
-        return self._group_by("grid_id", value)
-
-    def group_by_is_active(self, value: int):
+    def group_by_is_active(self, value: int) -> List[StructureControl]:
         return self._group_by("is_active", value)
 
-    def group_by_time(self, value: float):
-        return self._group_by("time", value)
+    def group_by_time(self, min: float, max: float) -> List[StructureControl]:
+        return self._group_by_in_between("time", min, max)
+
+    def group_by_action_value_1(self, min: float, max: float) -> List[StructureControl]:
+        return self._group_by_in_between("action_value_1", min, max)
+
+    def group_by_action_value_2(self, min: float, max: float) -> List[StructureControl]:
+        return self._group_by_in_between("action_value_2", min, max)
 
     def _group_by(
         self, type: str, value: Union[int, float, str]
@@ -440,7 +437,7 @@ class _GridH5NestedStructureControl:
         """Group control action by a type, and sort them by unique id
 
         Args:
-            type (str): is_active, action_type, ...
+            type (str): is_active, action_type, id
             value (Union[int, float, str]): corresponding value for type
 
         Returns:
@@ -451,5 +448,25 @@ class _GridH5NestedStructureControl:
 
         values = getattr(self, type)
         mask = np.isin(values, value)
+        ids = np.unique(self.id[mask])
+        return [self.group_by_id(id) for id in ids]
+
+    def _group_by_in_between(
+        self, type: str, min: Union[int, float], max: Union[int, float]
+    ):
+        """Find values between min and max
+
+        Args:
+            type (str): time, action_value_1, action_value_2
+            value (Union[int, float, str]): corresponding value for type
+
+        Returns:
+            List[StructureControl]: unique structures found from type, value combination
+        """
+        if not hasattr(self, type):
+            return []
+
+        values = getattr(self, type)
+        mask = (values >= min) & (values <= max)
         ids = np.unique(self.id[mask])
         return [self.group_by_id(id) for id in ids]
