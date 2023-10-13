@@ -277,7 +277,25 @@ class GridH5AggregateResultAdmin(GridH5ResultAdmin):
 
 
 class GridH5StructureControl(GridH5Admin):
-    """Interface for structure control netcdf"""
+    """Interface for structure control netcdf
+
+    This interface is different from the GridH5ResultAdmin and
+    GridH5AggregateResultAdmin, as it resembles less the Nodes and Lines data compared
+    to those interfaces. This interface should be viewed as a CSV file interface
+    which can be used to extract the different control structures by control type and
+    output data. It supplies interfaces to Nodes, Lines, Weirs, etc but does not
+    provide the same timeseries filter capabilities as the GridH5ResultAdmin and
+    GridH5AggregateResultAdmin.
+
+        >>> gst = GridH5StructureControl(gridadmin_path, struct_control_actions_3di.nc)
+        >>> gst.table_control
+        >>> gst.timed_control
+        >>> gst.memory_control
+        >>> gst.table_control.id
+        >>> struct_control = gst.table_control.group_by_id(ga.table_control.id[0])
+        >>> struct_control.time
+        >>> struct_control.action_value_1
+    """
 
     def __init__(
         self,
@@ -295,18 +313,10 @@ class GridH5StructureControl(GridH5Admin):
         self._netcdf_file_path: str = netcdf_file_path
         super().__init__(h5_file_path, file_modus)
 
-        if h5_file_path.startswith("rpc://"):
-            if not asyncio_rpc_support:
-                raise Exception("Please reinstall this package with threedigrid[rpc]")
-
-            from threedigrid.admin.rpc_datasource import RPCFile
-
-            self.netcdf_file = RPCFile(h5_file_path, file_modus)
+        if swmr:
+            self.netcdf_file = H5SwmrFile(netcdf_file_path, file_modus)
         else:
-            if swmr:
-                self.netcdf_file = H5SwmrFile(netcdf_file_path, file_modus)
-            else:
-                self.netcdf_file = h5py.File(netcdf_file_path, file_modus)
+            self.netcdf_file = h5py.File(netcdf_file_path, file_modus)
 
     @property
     def table_control(self) -> "_GridH5NestedStructureControl":
