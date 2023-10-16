@@ -1,10 +1,10 @@
 History
 =======
 
-2.0.7 (unreleased)
+2.1.0 (unreleased)
 ------------------
 
-- Added structure control actions netcdf interface and csv exporter.
+- Added structure control actions NetCDF interface and CSV exporter.
 
 
 2.0.6 (2023-07-07)
