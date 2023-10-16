@@ -4,7 +4,7 @@ History
 2.0.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Added structure control actions netcdf interface and csv exporter.
 
 
 2.0.6 (2023-07-07)
