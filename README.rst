@@ -113,6 +113,16 @@ The filtering is lazy, that is, to retrieve data you have to call data explicitl
 
     ga.lines.filter(lik__eq=4).data  # will return an ordered dict
 
+
+The structure control actions netcdf can also be analyzed and exported using threedigrid::
+
+    from threedigrid.admin.gridresultadmin import GridH5StructureControl
+    from threedigrid.admin.structure_controls.exporters import structure_control_actions_to_csv
+
+    gst = GridH5StructureControl("gridadmin.h5", "structure_control_actions_3di.nc")
+    gst.table_control
+    structure_control_actions_to_csv(gst, "test.csv")
+
 Remote procedure calls
 ----------------------
 
