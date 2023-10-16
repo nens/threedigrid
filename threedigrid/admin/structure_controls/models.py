@@ -1,10 +1,11 @@
+from enum import Enum
 from typing import List
 
-STRUCTURE_CONTROL_TYPES: List[str] = [
-    "table_control",
-    "memory_control",
-    "timed_control",
-]
+
+class StructureControlTypes(Enum):
+    table_control = "table_control"
+    memory_control = "memory_control"
+    timed_control = "timed_control"
 
 
 class StructureControl:

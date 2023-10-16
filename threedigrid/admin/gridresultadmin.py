@@ -33,8 +33,8 @@ from threedigrid.admin.pumps.timeseries_mixin import (
     PumpsResultsMixin,
 )
 from threedigrid.admin.structure_controls.models import (
-    STRUCTURE_CONTROL_TYPES,
     StructureControl,
+    StructureControlTypes,
 )
 from threedigrid.orm.models import Model
 
@@ -320,15 +320,15 @@ class GridH5StructureControl(GridH5Admin):
 
     @property
     def table_control(self) -> "_GridH5NestedStructureControl":
-        return _GridH5NestedStructureControl(self, "table_control")
+        return _GridH5NestedStructureControl(self, StructureControlTypes.table_control)
 
     @property
     def memory_control(self) -> "_GridH5NestedStructureControl":
-        return _GridH5NestedStructureControl(self, "memory_control")
+        return _GridH5NestedStructureControl(self, StructureControlTypes.memory_control)
 
     @property
     def timed_control(self) -> "_GridH5NestedStructureControl":
-        return _GridH5NestedStructureControl(self, "timed_control")
+        return _GridH5NestedStructureControl(self, StructureControlTypes.timed_control)
 
     def get_source_table(self, action_type, grid_id):
         """Get source_table and source_table_id based on action_type and grid_id"""
@@ -343,7 +343,11 @@ class GridH5StructureControl(GridH5Admin):
 
 
 class _GridH5NestedStructureControl:
-    def __init__(self, structure_control: GridH5StructureControl, control_type: str):
+    def __init__(
+        self,
+        structure_control: GridH5StructureControl,
+        control_type: StructureControlTypes,
+    ):
         """
         :param structure_control: GridH5StructureControl(GridH5ResultAdmin)
         :param control_type: str [table_control, memory_control, timed_control]
@@ -352,11 +356,11 @@ class _GridH5NestedStructureControl:
             (usually structure_control_actions_3di.nc)
         :param file_modus: modus in which to open the files
         """
-        if control_type not in STRUCTURE_CONTROL_TYPES:
-            raise ValueError(f"Unknown control type {control_type}")
+        if control_type not in StructureControlTypes.__members__.values():
+            raise ValueError(f"Unknown control type: {control_type}")
 
         self.struct_control = structure_control
-        self.control_type = control_type
+        self.control_type: str = control_type.value
 
     @property
     def action_type(self) -> np.ndarray:

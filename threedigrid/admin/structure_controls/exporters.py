@@ -4,7 +4,7 @@ from threedigrid.admin.gridresultadmin import (
     _GridH5NestedStructureControl,
     GridH5StructureControl,
 )
-from threedigrid.admin.structure_controls.models import STRUCTURE_CONTROL_TYPES
+from threedigrid.admin.structure_controls.models import StructureControlTypes
 
 
 def structure_control_actions_to_csv(
@@ -26,9 +26,9 @@ def structure_control_actions_to_csv(
                 "is_active",
             ]
         )
-        for control_type in STRUCTURE_CONTROL_TYPES:
+        for control_type in StructureControlTypes.__members__.values():
             control_type_data: _GridH5NestedStructureControl = getattr(
-                structure_control, control_type
+                structure_control, control_type.name
             )
             for (
                 id,
@@ -52,7 +52,7 @@ def structure_control_actions_to_csv(
                 )
                 csv_writer.writerow(
                     [
-                        control_type,
+                        control_type.value,
                         id,
                         source_table,
                         source_table_id,
