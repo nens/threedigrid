@@ -4,7 +4,7 @@ History
 2.1.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add manholes layer to gpkg export.
 
 
 2.1.0 (2023-10-16)
