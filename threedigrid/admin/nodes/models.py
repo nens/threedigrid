@@ -112,9 +112,17 @@ class Manholes(ConnectionNodes):
     bottom_level = ArrayField(type=float)
     display_name = ArrayField(type=str)
     surface_level = ArrayField(type=float)
-    shape = ArrayField(type=float)
+    shape = ArrayField(type=int)
     width = ArrayField(type=float)
-    manhole_indicator = ArrayField(type=float)
+    manhole_indicator = ArrayField(type=int)
+
+    GPKG_DEFAULT_FIELD_MAP = {
+        "id": "id",
+        "content_pk": "connection_node_id",
+        "display_name": "display_name",
+        "manhole_indicator": "manhole_indicator",
+        "coordinates": "the_geom",
+    }
 
 
 class Cells(Nodes):
