@@ -109,15 +109,16 @@ class ConnectionNodes(Nodes):
 
 
 class Manholes(ConnectionNodes):
+    manhole_id = ArrayField(type=int)
     bottom_level = ArrayField(type=float)
     display_name = ArrayField(type=str)
     surface_level = ArrayField(type=float)
     shape = ArrayField(type=int)
     width = ArrayField(type=float)
-    manhole_indicator = ArrayField(type=int)
+    manhole_indicator = ArrayField(type=float)
 
     GPKG_DEFAULT_FIELD_MAP = {
-        "id": "id",
+        "manhole_id": "manhole_id",
         "content_pk": "connection_node_id",
         "display_name": "display_name",
         "manhole_indicator": "manhole_indicator",
