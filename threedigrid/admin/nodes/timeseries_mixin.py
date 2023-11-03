@@ -1,6 +1,4 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
-
-
 from threedigrid.orm.base.options import ModelMeta
 from threedigrid.orm.base.timeseries_mixin import AggregateResultMixin, ResultMixin
 
@@ -97,3 +95,40 @@ class NodesAggregateResultsMixin(AggregateResultMixin):
         :param kwargs:
         """
         super().__init__(**kwargs)
+
+
+class NodeSubstanceResultMixinBase(ResultMixin):
+    def __init__(self, **kwargs):
+        """Instantiate a node with netcdf results.
+
+        Variables stored in the netcdf and related to nodes are dynamically
+        added as attributes as TimeSeriesCompositeArrayField.
+
+        :param netcdf_keys: list of netcdf variables
+        :param kwargs:
+        """
+        super().__init__(**kwargs)
+
+
+def get_substance_result_mixin(substance_name):
+    class NodeSubstanceResultMixin(NodeSubstanceResultMixinBase):
+        class Meta:
+            # attributes for the given fields
+            field_attrs = ["long_name"]
+
+            # values of *_COMPOSITE_FIELDS are the variables names as known in
+            # the result netCDF file. They are split into 1D and 2D subsets.
+            # As threedigrid has its own subsection ecosystem they are merged
+            # into a single field (e.g. the keys of *_COMPOSITE_FIELDS).
+
+            # N.B. # fields starting with '_' are private and will not be added to
+            # fields property
+            composite_fields = {
+                "concentration": [f"{substance_name}_1D", f"{substance_name}_2D"],
+                "_mesh_id": ["Mesh2DNode_id", "Mesh1DNode_id"],
+            }
+            subset_fields = {}
+
+            lookup_fields = ("id", "_mesh_id")
+
+    return NodeSubstanceResultMixin

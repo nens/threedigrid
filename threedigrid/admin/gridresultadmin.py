@@ -2,6 +2,7 @@
 
 
 import logging
+import re
 from collections import defaultdict
 from typing import List, Optional, Union
 
@@ -24,6 +25,7 @@ from threedigrid.admin.lines.timeseries_mixin import (
 )
 from threedigrid.admin.nodes.models import Nodes
 from threedigrid.admin.nodes.timeseries_mixin import (
+    get_substance_result_mixin,
     NodesAggregateResultsMixin,
     NodesResultsMixin,
 )
@@ -275,6 +277,10 @@ class GridH5AggregateResultAdmin(GridH5ResultAdmin):
         logger.info("Time units are not defined globally for aggregated results")
         return None
 
+    def close(self) -> None:
+        super().close()
+        self.netcdf_file.close()
+
 
 class GridH5StructureControl(GridH5Admin):
     """Interface for structure control netcdf
@@ -484,3 +490,65 @@ class _GridH5NestedStructureControl:
         mask = (values >= min) & (values <= max)
         ids = np.unique(self.id[mask])
         return [self.group_by_id(id) for id in ids]
+
+
+class GridH5WaterQualityResultAdmin(GridH5Admin):
+    def __init__(
+        self,
+        h5_file_path: str,
+        netcdf_file_path: str,
+        file_modus: str = "r",
+        swmr: bool = False,
+    ) -> None:
+        """
+        :param h5_file_path: path to the hdf5 gridadmin file
+        :param netcdf_file_path: path to the water quality result file
+            (usually structure_control_actions_3di.nc)
+        :param file_modus: modus in which to open the files
+        """
+        self._netcdf_file_path: str = netcdf_file_path
+        super().__init__(h5_file_path, file_modus)
+
+        if swmr:
+            self.netcdf_file = H5SwmrFile(netcdf_file_path, file_modus)
+        else:
+            self.netcdf_file = h5py.File(netcdf_file_path, file_modus)
+
+        self.set_timeseries_chunk_size(DEFAULT_CHUNK_TIMESERIES.stop)
+
+        # Set substances as attributes
+        substance_names = set()
+        for key in self.netcdf_file.keys():
+            regex_match = re.search(r"substance\d", key)
+            if regex_match:
+                substance_name = regex_match.group()
+                if substance_name not in substance_names:
+                    substance_names.add(substance_name)
+                    self.__setattr__(
+                        substance_name,
+                        Nodes(
+                            H5pyResultGroup(self.h5py_file, "nodes", self.netcdf_file),
+                            **dict(
+                                self._grid_kwargs,
+                                **{"mixin": get_substance_result_mixin(substance_name)},
+                            ),
+                        ),
+                    )
+
+    def set_timeseries_chunk_size(self, new_chunk_size: int) -> None:
+        """
+        overwrite the default chunk size for timeseries queries.
+        :param new_chunk_size <int>: new chunk size for
+            timeseries queries
+        :raises ValueError when the given value is less than 1
+        """
+        _chunk_size = int(new_chunk_size)
+        if _chunk_size < 1:
+            raise ValueError("Chunk size must be greater than 0")
+        self._timeseries_chunk_size = slice(0, _chunk_size)
+        logger.info("New chunk for timeseries size has been set to %d", new_chunk_size)
+        self._grid_kwargs.update({"timeseries_chunk_size": self._timeseries_chunk_size})
+
+    def close(self) -> None:
+        super().close()
+        self.netcdf_file.close()
