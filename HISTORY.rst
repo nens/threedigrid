@@ -6,6 +6,8 @@ History
 
 - Add water quality results NetCDF interface.
 
+- Drop Python 3.7 support
+
 
 2.1.0 (2023-10-16)
 ------------------
