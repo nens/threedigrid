@@ -1,7 +1,7 @@
 History
 =======
 
-2.1.2 (unreleased)
+2.1.2 (2023-11-03)
 ------------------
 
 - Retry PyPi release.
