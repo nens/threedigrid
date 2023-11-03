@@ -1,7 +1,7 @@
 History
 =======
 
-2.1.1 (unreleased)
+2.1.1 (2023-11-03)
 ------------------
 
 - Add missing init file to structure control folder
