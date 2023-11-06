@@ -4,7 +4,9 @@ History
 2.1.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add water quality results NetCDF interface.
+
+- Drop Python 3.7 support
 
 
 2.1.2 (2023-11-03)
