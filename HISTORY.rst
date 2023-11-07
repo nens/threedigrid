@@ -1,7 +1,7 @@
 History
 =======
 
-2.1.3 (unreleased)
+2.2.0 (unreleased)
 ------------------
 
 - Add water quality results NetCDF interface.
