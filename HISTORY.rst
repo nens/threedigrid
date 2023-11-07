@@ -1,7 +1,7 @@
 History
 =======
 
-2.2.0 (unreleased)
+2.2.0 (2023-11-07)
 ------------------
 
 - Add water quality results NetCDF interface.
