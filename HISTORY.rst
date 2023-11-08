@@ -4,7 +4,7 @@ History
 2.2.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Substance count regex fix
 
 
 2.2.0 (2023-11-07)

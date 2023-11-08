@@ -519,7 +519,7 @@ class GridH5WaterQualityResultAdmin(GridH5Admin):
         # Set substances as attributes
         substance_names = set()
         for key in self.netcdf_file.keys():
-            regex_match = re.search(r"substance\d", key)
+            regex_match = re.search(r"substance\d+", key)
             if regex_match:
                 substance_name = regex_match.group()
                 if substance_name not in substance_names:
