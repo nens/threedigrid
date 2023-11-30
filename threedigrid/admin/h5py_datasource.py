@@ -106,7 +106,10 @@ class H5pyGroup(DataSource):
             timeseries_filter = model.get_timeseries_mask_filter()
 
         if model._mixin and hasattr(model.Meta, "lookup_fields"):
-            lookup_index = model._meta._get_lookup_index()
+            try:  # Single cell models don't have Lines
+                lookup_index = model._meta._get_lookup_index()
+            except AttributeError:
+                return np.array([])
 
         if model._mixin and hasattr(model.Meta, "subset_fields"):
             has_subsets = True
