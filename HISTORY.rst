@@ -4,8 +4,6 @@ History
 2.2.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
-
 - Fix Lines lookup index bug for single cell models
 
 
