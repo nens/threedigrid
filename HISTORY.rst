@@ -6,6 +6,8 @@ History
 
 - Nothing changed yet.
 
+- Fix Lines lookup index bug for single cell models
+
 
 2.2.0 (2023-11-07)
 ------------------
