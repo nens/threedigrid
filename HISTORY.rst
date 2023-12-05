@@ -1,7 +1,7 @@
 History
 =======
 
-2.2.1 (unreleased)
+2.2.1 (2023-12-05)
 ------------------
 
 - Fix Lines lookup index bug for single cell models
