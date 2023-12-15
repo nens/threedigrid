@@ -4,8 +4,9 @@ History
 2.2.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
-
+- Bugfix: correct sorting of timeseries in all `TimeSeriesSubsetArrayField`. This
+  affected: Nodes [infiltration_rate_simple, ucx, ucy, leak, intercepted_volume, q_sss]
+  Lines: [qp, up1, breach_depth, breach_width]
 
 2.2.1 (2023-12-05)
 ------------------

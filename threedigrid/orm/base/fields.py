@@ -238,7 +238,6 @@ class TimeSeriesSubsetArrayField(TimeSeriesArrayField):
                 # to support h5py >= 3.1.0
                 timeseries_filter_to_use = np.argwhere(timeseries_filter).flatten()
 
-        lookup_index = kwargs.get("lookup_index")
         if self._source_name not in list(datasource.keys()):
             return np.array([])
         source_data = datasource[self._source_name][timeseries_filter_to_use, :]
@@ -249,11 +248,10 @@ class TimeSeriesSubsetArrayField(TimeSeriesArrayField):
         if source_data.shape[1] == subset_index.shape[0] - 1:
             subset_index = subset_index[1:]
 
+        # Note: subset_index already contains correct sorting
+        # that matches with the NetCDF timeseries.
         templ[:, subset_index] = source_data
 
-        # sort the stacked array by lookup
-        if lookup_index is not None:
-            return templ[:, lookup_index]
         return templ
 
     def __repr__(self):
