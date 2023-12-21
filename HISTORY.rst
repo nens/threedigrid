@@ -1,7 +1,7 @@
 History
 =======
 
-2.2.2 (unreleased)
+2.2.2 (2023-12-21)
 ------------------
 
 - Bugfix: **only** in case of **boundaries**: correct sorting of timeseries in all `TimeSeriesSubsetArrayField`. This
