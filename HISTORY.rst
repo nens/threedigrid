@@ -4,9 +4,13 @@ History
 2.2.2 (unreleased)
 ------------------
 
-- Bugfix: correct sorting of timeseries in all `TimeSeriesSubsetArrayField`. This
+- Bugfix: **only** in case of **boundaries**: correct sorting of timeseries in all `TimeSeriesSubsetArrayField`. This
   affected: Nodes [infiltration_rate_simple, ucx, ucy, leak, intercepted_volume, q_sss]
   Lines: [qp, up1, breach_depth, breach_width]
+
+- Note: The `depth` and `width` field are broken for `breaches` object. 
+  Please use `breach_depth` and `breach_width` on the `lines` object instead.
+
 
 2.2.1 (2023-12-05)
 ------------------
