@@ -35,6 +35,20 @@ def ga(request):
         yield ga
 
 
+@pytest.fixture
+def gr_bergermeer_with_boundaries():
+    """
+    Bergermeer including boundaries which results in node_id not to be continous(step 1)
+    for `Mesh2D_node_id`
+    """
+    gr = GridH5ResultAdmin(
+        os.path.join(test_file_dir, "bergermeer_with_boundaries/", "gridadmin.h5"),
+        os.path.join(test_file_dir, "bergermeer_with_boundaries/", "results_3di.nc"),
+    )
+    yield gr
+    gr.close()
+
+
 @pytest.fixture(params=["gridadmin.h5", "gridadmin_v2.h5"])
 def ga_export(request, tmp_path):
     exporter = GridAdminH5Export(
