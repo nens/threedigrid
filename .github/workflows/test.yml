@@ -5,7 +5,13 @@ on:
   push:
     branches:
       - master
+    paths:
+      - 'threedigrid/**.py'
+      - './github/workflows/test.yml'
   pull_request:
+    paths:  
+      - 'threedigrid/**.py'
+      - './github/workflows/test.yml'
 
 jobs:
   TestLinux:

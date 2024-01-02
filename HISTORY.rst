@@ -4,7 +4,7 @@ History
 2.2.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Added build/release Github action.
 
 
 2.2.2 (2023-12-21)
