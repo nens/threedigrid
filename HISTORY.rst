@@ -1,7 +1,7 @@
 History
 =======
 
-2.2.3b (unreleased)
+2.2.3b (2024-01-02)
 -------------------
 
 - Added build/release Github action.
