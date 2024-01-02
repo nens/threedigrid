@@ -1,8 +1,8 @@
 History
 =======
 
-2.2.3 (unreleased)
-------------------
+2.2.3b (unreleased)
+-------------------
 
 - Added build/release Github action.
 
