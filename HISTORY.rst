@@ -4,7 +4,7 @@ History
 2.2.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix 1D/2D data swap for water quality results
 
 
 2.2.3b (2024-01-02)
