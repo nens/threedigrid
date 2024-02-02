@@ -2,16 +2,21 @@ Welcome to threedigrid's documentation!
 =======================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
 
-   introduction
-   functionalities
-   files
-   misc
+   readme
+   installation
+   api
+   api_reference
+   console
+   miscellaneous
+   contributing
+   authors
+   history
 
-Find what you are looking for
-=============================
+Indices and tables
+==================
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
