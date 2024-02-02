@@ -28,7 +28,7 @@ The filters and subsets are 'lazy', i.e. they are not executed until data is ret
 
     ga.nodes.filter(node_type__eq=5)  # will not return all data
     ga.nodes.filter(node_type__eq=5).data  # returns all data as an OrderedDict
-	gr.nodes.s1.timeseries(0, 3600) # time series of the water levels of the first hour of the simulation
+	gr.nodes.timeseries(0, 3600).s1 # time series of the water levels of the first hour of the simulation
 
 
 .. _spatial_filters:
@@ -174,6 +174,8 @@ Example:
 
 	ga.nodes.filter(coordinates__intersects_tile=[0, 0, 0])
 
+.. _non_spatial_filters:
+
 Non-spatial filters
 ^^^^^^^^^^^^^^^^^^^
 
@@ -200,6 +202,8 @@ The following non-spatial filters are available:
 - in: In collection
 
 You combine them with the field name by adding a double underscore ``__`` in between, e.g. ``crest_level`` must be greater than 4.33: ``crest_level__gt=4.33``.
+
+.. _subsets:
 
 Subsets
 -------
@@ -240,6 +244,17 @@ You can also define your own subsets.
 
 .. todo::
     Describe how you can define your own subsets
+
+Select attributes using ``only``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you only need a few attributes, you can use ``only()``.
+
+Example:
+
+.. code:: python
+
+    ga.nodes.only('id', 'coordinates').data
 
 Exporters
 ---------	

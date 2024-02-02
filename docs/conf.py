@@ -7,8 +7,8 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'threedigrid'
-copyright = '2024, Leendert van Wolfswinkel'
-author = 'Leendert van Wolfswinkel'
+copyright = '2024, Nelen & Schuurmans'
+author = 'Nelen & Schuurmans'
 release = '2.2.3'
 
 # -- General configuration ---------------------------------------------------
@@ -16,6 +16,9 @@ release = '2.2.3'
 
 extensions = [
     'sphinx_rtd_theme',
+    'sphinx.ext.todo', 
+#    'sphinx.ext.viewcode', 
+    'sphinx.ext.autodoc',
 ]
 
 

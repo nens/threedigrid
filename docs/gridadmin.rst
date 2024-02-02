@@ -1,15 +1,31 @@
-gridadmin.h5: GridH5Admin
-=========================
+gridadmin.h5
+============
 
 The gridadmin.h5 file contains the computational grid. This is all static data, i.e. the file contains no time series. It is the basis for interfacing with all of the other files.
+
+The file is accessed through the class ``GridH5Admin``.
 
 Minimal example
 ---------------
 
-.. todo::
-    Write this
+.. code-block:: python
 
-
+    from threedigrid.admin.gridadmin import GridH5Admin
+    
+    # Instantiate GridH5Admin objects
+    gridadmin_filename = r"C:\3Di\My Model\gridadmin.h5"
+    ga = GridH5Admin(gridadmin_filename)
+    
+    # Query some model meta data
+    ga.has_groundwater
+    >>> False
+    ga.has_1d
+    >>> True
+    
+    # Get flowlines with KCU value 100 and 101 (2D line / 2D line that crosses an obstacle)  
+    ga.lines.filter(kcu__in=[100, 101])
+    
+    
 Functionalities
 ---------------
 
@@ -124,7 +140,7 @@ Levees
 
 .. todo::
     
-	Is this still used or Deprecated?
+    Is this still used or Deprecated?
   
 ``Levees`` have the following attributes:
     
@@ -145,11 +161,11 @@ Lines
 
 The ``Lines`` class is parent to a number of child classes:
 
-- ``Pipes``
-- ``Channels``
-- ``Weirs``
-- ``Culverts``
-- ``Orifices``
+- :ref:`channels`
+- :ref:`culverts`
+- :ref:`orifices`
+- :ref:`pipes`
+- :ref:`weirs`
 
 ``Lines`` and its child classes have the following attributes:
 
@@ -203,6 +219,10 @@ The ``Lines`` class is parent to a number of child classes:
 | zoom_category                   | Zoom category                                                                                                     |
 +---------------------------------+-------------------------------------------------------------------------------------------------------------------+
 
+.. _channels:
+
+Channels
+""""""""
 
 ``Channels`` have the following attributes, additional to the ones inherited from ``Lines``:
 
@@ -221,6 +241,13 @@ The ``Lines`` class is parent to a number of child classes:
 +--------------------------+-----------------------------------+
 | dist_calc_points         | Calculation point distance        |
 +--------------------------+-----------------------------------+
+
+
+.. _culverts:
+
+Culverts
+""""""""
+
 
 ``Culverts`` have the following attributes, additional to the ones inherited from ``Lines``:
 
@@ -251,6 +278,11 @@ The ``Lines`` class is parent to a number of child classes:
 +--------------------------+-----------------------------------------------+
 
 
+.. _orifices:
+
+Orifices
+""""""""
+
 ``Orifices`` have the following attributes, additional to the ones inherited from ``Lines``:
 
 +--------------------------+-----------------------------------------------+
@@ -270,9 +302,14 @@ The ``Lines`` class is parent to a number of child classes:
 +--------------------------+-----------------------------------------------+
 | friction_value           | Friction value                                |
 +--------------------------+-----------------------------------------------+
-| sewerage                 | Code as set in the schematisation             |
+| sewerage                 | Is this orifice part of the sewer system?     |
 +--------------------------+-----------------------------------------------+
 
+
+.. _pipes:
+
+Pipes
+"""""
 
 ``Pipes`` have the following attributes, additional to the ones inherited from ``Lines``:
 
@@ -304,6 +341,11 @@ The ``Lines`` class is parent to a number of child classes:
 | sewerage_type            | Sewerage type                                 |
 +--------------------------+-----------------------------------------------+
 
+
+.. _weirs:
+
+Weirs
+"""""
 
 ``Weirs`` have the following attributes, additional to the ones inherited from ``Lines``:
 
@@ -342,11 +384,11 @@ Nodes
 
 The ``Nodes`` class is parent to a number of child classes:
 
-- ``Cells``
-- ``ConnectionNodes``
-- ``Manholes`` (child class of ``ConnectionNodes``)
+- :ref:`cells`
+- :ref:`connection_nodes`
+- :ref:`manholes`
 
-``Nodes`` have the following attributes, additional to the ones inherited from ``Lines``:
+``Nodes`` have the following attributes:
 
 +------------------------+----------------------------------------------------------------------------------------------------------------+
 | Variable Name          | Description                                                                                                    |
@@ -383,8 +425,12 @@ The ``Nodes`` class is parent to a number of child classes:
 | zoom_category          | Zoom category                                                                                                  |
 +------------------------+----------------------------------------------------------------------------------------------------------------+
 
+.. _cells:
 
-``Cells`` have the following attributes, additional to the ones inherited from ``Nodes``:
+Cells
+"""""
+
+``Cells`` are 2D nodes. They have the following attributes, additional to the ones inherited from ``Nodes``:
 
 +-------------------+------------------------------------------------------------------------------------------------------------------+
 | Variable Name     | Description                                                                                                      |
@@ -398,8 +444,18 @@ The ``Nodes`` class is parent to a number of child classes:
 | z_coordinate      | Elevation of lowest pixel in the cell. Equal to Node.dmax                                                        |
 +-------------------+------------------------------------------------------------------------------------------------------------------+
 
+.. _connection_nodes:
 
-``ConnectionNodes`` have the same attributes as ``Nodes``.
+ConnectionNodes
+"""""""""""""""
+
+``ConnectionNodes`` have the same attributes as ``Nodes``. They are Nodes at locations where a Connection node is present in the schematisation (as opposed to 2D nodes or nodes that are added e.g. along a channel with a smaller calculation point distance than length.
+
+
+.. _manholes:
+
+Manholes
+""""""""
 
 ``Manholes`` have the following attributes, additional to the ones inherited from ``Nodes``:
 
