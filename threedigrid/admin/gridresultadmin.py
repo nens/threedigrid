@@ -377,7 +377,7 @@ class _GridH5NestedStructureControl:
 
     @property
     def action_type(self) -> np.ndarray:
-        """Get a numpy array of action types"""
+        """Get the action types"""
         # binary character arrays from Netcdf Fortran to numpy object arrays
         return np.array(
             [
@@ -391,22 +391,22 @@ class _GridH5NestedStructureControl:
 
     @property
     def action_value_1(self) -> np.ndarray:
-        """Get a numpy array of action values"""
+        """Get the action values"""
         return self.struct_control.netcdf_file[f"{self.control_type}_action_value_1"][:]
 
     @property
     def action_value_2(self) -> np.ndarray:
-        """Get a numpy array of second action values (negative discharge for action_type = set_discharge_coefficients)"""
+        """Get the second action values (negative discharge for ``action_type == 'set_discharge_coefficients'``)"""
         return self.struct_control.netcdf_file[f"{self.control_type}_action_value_2"][:]
 
     @property
     def grid_id(self) -> np.ndarray:
-        """Get a numpy array of the grid ID, i.e. the ID of the Node or Line upon which the structure control action acts"""
+        """Get the grid ID's, i.e. the ID of the Node or Line upon which the structure control action acts"""
         return self.struct_control.netcdf_file[f"{self.control_type}_grid_id"][:]
 
     @property
     def id(self) -> np.ndarray:
-        """Get a numpy array of the ID's of the structure control action"""
+        """Get the ID's of the structure control action"""
         # binary character arrays from Netcdf Fortran to numpy object arrays"
         return np.array(
             [
@@ -418,16 +418,18 @@ class _GridH5NestedStructureControl:
 
     @property
     def is_active(self) -> np.ndarray:
-        """Get a numpy array of boolean values indicating if the structure control action is active"""
+        """Get the boolean values indicating if the structure control action is active"""
         return self.struct_control.netcdf_file[f"{self.control_type}_is_active"][:]
 
     @property
     def time(self) -> np.ndarray:
-        """Get a numpy array of the time (in s since start of simulation) at which the structure control acted"""
+        """Get the times (in s since start of simulation) at which the structure controls acted"""
         return self.struct_control.netcdf_file[f"{self.control_type}_time"][:]
 
     def group_by_id(self, id: str) -> Optional[StructureControl]:
         """
+        Get the structure control action with given ``id``.
+        
         ID is unique. Get content_type and content_pk from gridadmin. All controls are
         on lines except set_pump_capacity
         """
@@ -469,7 +471,7 @@ class _GridH5NestedStructureControl:
         return self._group_by_in_between("time", min, max)
 
     def group_by_action_value_1(self, min: float, max: float) -> List[StructureControl]:
-        """Get all structure control actions with ``action_value_1 == value``"""
+        """Get all structure control actions with ``action_value_1 == value``"""
         return self._group_by_in_between("action_value_1", min, max)
 
     def group_by_action_value_2(self, min: float, max: float) -> List[StructureControl]:

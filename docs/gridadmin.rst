@@ -116,15 +116,20 @@ CrossSections
 Grid
 ^^^^
 
+.. autoproperty:: threedigrid.admin.nodes.models.Grid.n2dtot
+.. autoproperty:: threedigrid.admin.nodes.models.Grid.dx
+.. autoproperty:: threedigrid.admin.nodes.models.Grid.transform
+.. autoproperty:: threedigrid.admin.nodes.models.Grid.get_pixel_map
+
 ``Grid`` has the following attributes.
 
 +----------+----------------------------------------------------------+
 | Variable | Description                                              |
 | Name     |                                                          |
 +==========+==========================================================+
-| ip       | Deprecated                                               |
+| ip       | *Deprecated*                                             |
 +----------+----------------------------------------------------------+
-| jp       | Deprecated                                               |
+| jp       | *Deprecated*                                             |
 +----------+----------------------------------------------------------+
 | nodk     | Refinement level, 1 being the smallest cell              |
 +----------+----------------------------------------------------------+
@@ -141,6 +146,10 @@ Levees
 .. todo::
     
     Is this still used or Deprecated?
+
+.. autoproperty:: threedigrid.admin.levees.models.Levees.geoms
+.. automethod:: threedigrid.admin.levees.models.Levees.load_geoms
+
   
 ``Levees`` have the following attributes:
     
@@ -158,6 +167,14 @@ Levees
 
 Lines
 ^^^^^
+
+.. autoproperty:: threedigrid.admin.lines.models.Lines.channels
+.. autoproperty:: threedigrid.admin.lines.models.Lines.culverts
+.. autoproperty:: threedigrid.admin.lines.models.Lines.orifices
+.. autoproperty:: threedigrid.admin.lines.models.Lines.pipes
+.. autoproperty:: threedigrid.admin.lines.models.Lines.weirs
+.. autoproperty:: threedigrid.admin.lines.models.Lines.line_nodes
+.. automethod:: threedigrid.admin.lines.models.Lines.cross_pix_coords_transformed
 
 The ``Lines`` class is parent to a number of child classes:
 
@@ -347,6 +364,9 @@ Pipes
 Weirs
 """""
 
+.. autoproperty:: threedigrid.admin.lines.models.Weirs.line_coord_angles
+
+
 ``Weirs`` have the following attributes, additional to the ones inherited from ``Lines``:
 
 +--------------------------+------------------------------------------------+
@@ -382,11 +402,21 @@ Weirs
 Nodes
 ^^^^^
 
+.. autoproperty:: threedigrid.admin.nodes.models.Nodes.added_calculationnodes
+.. autoproperty:: threedigrid.admin.nodes.models.Nodes.locations_2d
+.. autoproperty:: threedigrid.admin.nodes.models.Nodes.connectionnodes
+.. autoproperty:: threedigrid.admin.nodes.models.Nodes.manholes
+
 The ``Nodes`` class is parent to a number of child classes:
 
+- :ref:`added_calculationnodes`
 - :ref:`cells`
 - :ref:`connection_nodes`
 - :ref:`manholes`
+
+.. note::
+    The ``Nodes`` child class ``EmbeddedNodes`` is intended for internal use only.
+
 
 ``Nodes`` have the following attributes:
 
@@ -425,12 +455,31 @@ The ``Nodes`` class is parent to a number of child classes:
 | zoom_category          | Zoom category                                                                                                  |
 +------------------------+----------------------------------------------------------------------------------------------------------------+
 
+.. _added_calculationnodes:
+
+AddedCalculationNodes
+"""""""""""""""""""""
+
+``AddedCalculationNodes`` are 1D nodes that are created in between connection nodes if the schematisation object (e.g. Channel) is longer than the calculation point distance.
+
+They have the same attributes as ``Nodes``.
+
+
 .. _cells:
 
 Cells
 """""
 
-``Cells`` are 2D nodes. They have the following attributes, additional to the ones inherited from ``Nodes``:
+``Cells`` are 2D nodes. 
+
+.. autoproperty:: threedigrid.admin.nodes.models.Cells.bounds
+.. automethod:: threedigrid.admin.nodes.models.Cells.get_id_from_xy
+.. automethod:: threedigrid.admin.nodes.models.Cells.get_ids_from_pix_bbox
+.. automethod:: threedigrid.admin.nodes.models.Cells.get_nodgrid
+.. automethod:: threedigrid.admin.nodes.models.Cells.get_extent_pixels
+.. automethod:: threedigrid.admin.nodes.models.Cells.iter_by_tile
+
+Cells have the following attributes, additional to the ones inherited from ``Nodes``:
 
 +-------------------+------------------------------------------------------------------------------------------------------------------+
 | Variable Name     | Description                                                                                                      |
@@ -475,9 +524,6 @@ Manholes
 +-------------------+----------------------------------------------------------------------------------+
 | width             | Manhole width as defined in the schematisation                                   |
 +-------------------+----------------------------------------------------------------------------------+
-
-.. note::
-    The ``Nodes`` child class ``EmbeddedNodes`` is intended for internal use only.
 
 Pumps
 ^^^^^

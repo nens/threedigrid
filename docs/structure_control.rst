@@ -43,9 +43,9 @@ Attribute names
 +================+=============================================================================================+
 | action_type    | Action type                                                                                 |
 +----------------+---------------------------------------------------------------------------------------------+
-| action_value_1 | Action value 1, e.g. crest_level is action_type = set_crest_level                           |
+| action_value_1 | Action value 1, e.g. crest_level if action_type = set_crest_level                           |
 +----------------+---------------------------------------------------------------------------------------------+
-| action_value_2 | Action value 2 (relevant if action_type = set_discharge_coefficients                        |
+| action_value_2 | Action value 2 (relevant if action_type = set_discharge_coefficients)                       |
 +----------------+---------------------------------------------------------------------------------------------+
 | id             | ID of the structure control action                                                          |
 +----------------+---------------------------------------------------------------------------------------------+

@@ -9,6 +9,7 @@ Welcome to threedigrid's documentation!
    functionalities
    files
    misc
+   history
 
 Find what you are looking for
 =============================

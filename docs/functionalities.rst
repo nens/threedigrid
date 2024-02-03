@@ -9,14 +9,23 @@ Functionalities
 Accessing 3Di model components
 ------------------------------
 
-``threedigrid`` uses a limited number of main classes to access 3Di model components: ``Breaches``, ``CrossSections``, ``Levees``, ``Lines``, ``Nodes``, and ``Pumps``. The ``Lines`` and ``Nodes`` classes have several child classes (e.g. ``Manholes`` or ``Weirs``) that allow access to attributes specific to those 3Di model components.
+``threedigrid`` uses a limited number of main classes to access 3Di model components: 
 
-``Breaches``, ``Nodes``, ``Lines``, and ``Pumps`` have time series connected to them through the ``GridH5ResultAdmin``, ``GridH5AggregateResultAdmin``, or ``GridH5WaterQualityResultAdmin``.
+- :ref:`breaches`
+- :ref:`crosssections`
+- :ref:`grid`
+- :ref:`levees`
+- :ref:`lines`
+- :ref:`nodes`
+
+The :ref:`lines` and :ref:`nodes` classes have several child classes (e.g. :ref:`manholes` or :ref:`weirs`) that allow access to attributes specific to those 3Di model components.
+
+``Breaches``, ``Nodes``, ``Lines``, and ``Pumps`` have time series connected to them through the :ref:`GridH5ResultAdmin<results3di>`, :ref:`GridH5AggregateResultAdmin<aggregate_results3di>`, or :ref:`GridH5WaterQualityResultAdmin<wq_results3di>`.
 
 Filters and subsets
 -------------------
 
-To make selections of data, you can use :ref:`spatial_filters`, :ref:`non_spatial_filters`, and :ref:`subsets`. You can chain these in any way you like. The example below returns all 1D nodes with a storage area >= 1.0 within a specific area.
+To make selections of data, you can use :ref:`spatial_filters`, :ref:`non_spatial_filters`, :ref:`subsets`, and :ref:`only`. You can chain these in any way you like. The example below returns all 1D nodes with a storage area >= 1.0 within a specific area.
 
 .. code:: python
 
@@ -206,7 +215,7 @@ You combine them with the field name by adding a double underscore ``__`` in bet
 .. _subsets:
 
 Subsets
--------
+^^^^^^^
 
 Subsets are an easy way to retrieve categorized sub parts of the data.
 
@@ -245,8 +254,10 @@ You can also define your own subsets.
 .. todo::
     Describe how you can define your own subsets
 
-Select attributes using ``only``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. _only:
+
+Selecting attributes using ``only``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If you only need a few attributes, you can use ``only()``.
 
@@ -287,4 +298,13 @@ Most models have shortcut methods for exporting their data for shapefiles and ge
 
     # Geopackage
     ga.lines.subset('2D_OPEN_WATER').reproject_to('4326').to_gpkg('/tmp/line.gpkg')
+
+Console scripts
+---------------
+
+.. include:: ../threedigrid/management/README.rst
+
+
+
+
 
