@@ -17,8 +17,23 @@ Minimal example
 Functionalities
 ---------------
 
-.. todo::
-    Write this
+The main class ``GridH5StructureControl`` is documented below. 
+
+This class' ``table_control``, ``memory_control``, or ``timed_control`` properties return instances of ``_GridH5NestedStructureControl``, also documented below.
+
+.. autoclass:: threedigrid.admin.gridresultadmin.GridH5StructureControl
+    :members:
+	
+.. autoclass:: threedigrid.admin.gridresultadmin._GridH5NestedStructureControl
+	:members:
+
+Exporters
+^^^^^^^^^
+
+.. automodule:: threedigrid.admin.structure_controls.exporters
+    :members: structure_control_actions_to_csv
+
+
 
 Attribute names
 ---------------
