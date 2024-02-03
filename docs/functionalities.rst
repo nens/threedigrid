@@ -299,9 +299,6 @@ Most models have shortcut methods for exporting their data for shapefiles and ge
     # Geopackage
     ga.lines.subset('2D_OPEN_WATER').reproject_to('4326').to_gpkg('/tmp/line.gpkg')
 
-Console scripts
----------------
-
 .. include:: ../threedigrid/management/README.rst
 
 
