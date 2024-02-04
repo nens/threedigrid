@@ -1,5 +1,5 @@
-Console scripts
----------------
+Command line interfaces
+-----------------------
 
 3digrid_explore
 ^^^^^^^^^^^^^^^

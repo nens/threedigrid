@@ -8,11 +8,5 @@ Welcome to threedigrid's documentation!
    introduction
    functionalities
    files
-   misc
+   genindex
    history
-
-Find what you are looking for
-=============================
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
