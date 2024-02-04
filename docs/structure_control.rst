@@ -1,3 +1,6 @@
+
+.. _structure_control_actions3di:
+
 structure_control_actions_3di.nc
 ================================
 

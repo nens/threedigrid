@@ -8,15 +8,15 @@ What is ``threedigrid``
 
 It allows you to efficiently read from the following files:
 
-- Computational grid (gridadmin.h5)
+- Computational grid (:ref:`gridadmin`)
 
-- 3Di Results (results_3di.nc)
+- 3Di Results (:ref:`results3di`)
 
-- Aggregate 3Di Results (aggregate_results_3di.nc)
+- Aggregate 3Di Results (:ref:`aggregate_results3di`)
 
-- Structure control actions logging (structure_control_actions_3di.nc)
+- Structure control actions logging (:ref:`structure_control_actions3di`)
 
-- Water quality results (water_quality_results_3di.nc)
+- Water quality results (:ref:`wq_results3di`)
 
 With threedigrid, you can query these files using pre-defined subsets, and spatial and non-spatial filters. You can also export model data to GIS formats like shapefile, geopackage, and geojson.
 
