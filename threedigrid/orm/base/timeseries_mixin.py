@@ -422,10 +422,10 @@ class AggregateResultMixin(ResultMixin):
     def get_timestamps(self, field_name):
         """
         Get the array of timestamps for a result field
-        
+
         :param field_name: name of the field
         :return: array of timestamps
-        
+
         Raises ``AttributeError`` when the field has no timestamps
         """
         time_key = "time_" + field_name
@@ -445,10 +445,10 @@ class AggregateResultMixin(ResultMixin):
     def get_time_unit(self, field_name) -> str:
         """
         Get the time unit for a result field
-        
+
         :param field_name: name of the field
         :return: time unit
-        
+
         Raises ``AttributeError`` when the field has no time unit attribute
         """
 

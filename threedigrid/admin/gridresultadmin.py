@@ -358,10 +358,10 @@ class _GridH5NestedStructureControl:
         control_type: StructureControlTypes,
     ):
         """
-        This class is not to be instantiated seperately. 
-        Calling the ``GridH5StructureControl`` properties ``table_control``, ``memory_control``, 
+        This class is not to be instantiated seperately.
+        Calling the ``GridH5StructureControl`` properties ``table_control``, ``memory_control``,
         or ``timed_control`` returns a ``_GridH5NestedStructureControl`` instance.
-        
+
         :param structure_control: GridH5StructureControl(GridH5ResultAdmin)
         :param control_type: str [table_control, memory_control, timed_control]
         :param h5_file_path: path to the hdf5 gridadmin file
@@ -429,7 +429,7 @@ class _GridH5NestedStructureControl:
     def group_by_id(self, id: str) -> Optional[StructureControl]:
         """
         Get the structure control action with given ``id``.
-        
+
         ID is unique. Get content_type and content_pk from gridadmin. All controls are
         on lines except set_pump_capacity
         """

@@ -8,7 +8,6 @@ threedicore with shape, width and height information.
 
 """
 
-
 from threedigrid.orm.fields import ArrayField
 from threedigrid.orm.models import Model
 
