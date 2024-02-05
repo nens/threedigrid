@@ -2,7 +2,7 @@ Functionalities
 ===============
 
 .. todo::
-	Include inheritance diagrams: https://www.sphinx-doc.org/en/master/usage/extensions/inheritance.html
+    Include inheritance diagrams: https://www.sphinx-doc.org/en/master/usage/extensions/inheritance.html
 
 .. _threedimodel_components:
 
@@ -29,7 +29,7 @@ To make selections of data, you can use :ref:`spatial_filters`, :ref:`non_spatia
 
 .. code:: python
 
-	ga.nodes.subset("1D_ALL").filter(storage_area__gte=1.0).filter(coordinates__intersects_geometry=my_polygon)
+    ga.nodes.subset("1D_ALL").filter(storage_area__gte=1.0).filter(coordinates__intersects_geometry=my_polygon)
 
 The filters and subsets are 'lazy', i.e. they are not executed until data is retrieved. To retrieve data you have to call ``data`` or ``timeseries()`` explicitly:
 
@@ -37,7 +37,7 @@ The filters and subsets are 'lazy', i.e. they are not executed until data is ret
 
     ga.nodes.filter(node_type__eq=5)  # will not return all data
     ga.nodes.filter(node_type__eq=5).data  # returns all data as an OrderedDict
-	gr.nodes.timeseries(0, 3600).s1 # time series of the water levels of the first hour of the simulation
+    gr.nodes.timeseries(0, 3600).s1 # time series of the water levels of the first hour of the simulation
 
 
 .. _spatial_filters:
@@ -66,9 +66,9 @@ The spatial filters can be used on ``GeomArrayField`` subclasses:
 - Nodes: `coordinates`
 
 
-	
+    
 .. warning::
-	Spatial filters only work on data in *projected* coordinate reference systems.
+    Spatial filters only work on data in *projected* coordinate reference systems.
 
 .. _contains_point:
 
@@ -90,7 +90,7 @@ The ``contains_point`` filter can be used to, e.g., identify a grid cell in whic
 
 
 .. _in_bbox:
-	
+    
 in_bbox
 """""""
 
@@ -100,32 +100,32 @@ Example:
 
 .. code-block:: python
 
-	from shapely.geometry import Polygon
-	polygon = Polygon([
-		[109300.0, 518201.2], [108926.5, 518201.2], [108935.6, 517871.7], [109300.0, 518201.2]
-	])
-	gr.lines.filter(
-	    line_coords__in_bbox=polygon.bounds
-	)
+    from shapely.geometry import Polygon
+    polygon = Polygon([
+        [109300.0, 518201.2], [108926.5, 518201.2], [108935.6, 517871.7], [109300.0, 518201.2]
+    ])
+    gr.lines.filter(
+        line_coords__in_bbox=polygon.bounds
+    )
 
 
 .. _in_tile:
-	
+    
 in_tile
 """""""
 
 .. todo::
     How does this work? What defines the tiles?
-	
+    
 Example:
 
 .. code:: python
 
-	ga.nodes.filter(coordinates__in_tile=[0, 0, 0])
+    ga.nodes.filter(coordinates__in_tile=[0, 0, 0])
 
 
 .. _intersects_bbox:
-	
+    
 intersects_bbox
 """""""""""""""
 
@@ -135,17 +135,17 @@ Example:
 
 .. code-block:: python
 
-	from shapely.geometry import Polygon
-	polygon = Polygon([
-		[109300.0, 518201.2], [108926.5, 518201.2], [108935.6, 517871.7], [109300.0, 518201.2]
-	])
-	gr.lines.filter(
-	    line_coords__intersects_bbox=polygon.bounds
-	)
+    from shapely.geometry import Polygon
+    polygon = Polygon([
+        [109300.0, 518201.2], [108926.5, 518201.2], [108935.6, 517871.7], [109300.0, 518201.2]
+    ])
+    gr.lines.filter(
+        line_coords__intersects_bbox=polygon.bounds
+    )
 
 
 .. _intersects_geometry:
-	
+    
 intersects_geometry
 """""""""""""""""""
 
@@ -163,25 +163,25 @@ To improve performance, it is recommended to always combine ``intersects_geometr
 
 .. code-block:: python
 
-	gr.lines.filter(
-	    line_coords__intersects_bbox=polygon.bounds
-	).filter(
-	    line_coords__intersects_geometry=polygon
-	)
+    gr.lines.filter(
+        line_coords__intersects_bbox=polygon.bounds
+    ).filter(
+        line_coords__intersects_geometry=polygon
+    )
     
 .. _intersects_tile:
-	
+
 intersects_tile
 """""""""""""""
 
 .. todo::
     How does this work? What defines the tiles?
-	
+    
 Example:
 
 .. code:: python
 
-	ga.nodes.filter(coordinates__intersects_tile=[0, 0, 0])
+    ga.nodes.filter(coordinates__intersects_tile=[0, 0, 0])
 
 .. _non_spatial_filters:
 
@@ -268,7 +268,7 @@ Example:
     ga.nodes.only('id', 'coordinates').data
 
 Exporters
----------	
+---------
 
 Exporters allow you to export model data to files. For example exporting
 all 2D open water lines to a Shapefile with EPSG code 4326 (WGS84):
