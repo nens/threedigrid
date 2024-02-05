@@ -61,7 +61,7 @@ jobs:
         shell: bash
         run: |
           pip install --disable-pip-version-check --upgrade pip setuptools wheel
-          pip install -e .[geo,results] ${{ matrix.pins }} pygdal==$(gdal-config --version).* ipython pytest flake8 sphinx==1.8.5 docutils==0.17.*
+          pip install -e .[geo,results] ${{ matrix.pins }} pygdal==$(gdal-config --version).* ipython pytest flake8 sphinx==1.8.5 docutils==0.17.* sphinx_rtd_theme>=0.4.3
           pip list
 
       - name: Run tests
