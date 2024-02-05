@@ -24,4 +24,5 @@ python:
   install:
     - method: pip
       path: .
-    - requirements: "requirements_docker.txt"
+      extra_requirements:
+        - sphinx_rtd_theme>=0.4.3
