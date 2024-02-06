@@ -1,7 +1,7 @@
 History
 =======
 
-2.2.4 (unreleased)
+2.2.4 (2024-02-06)
 ------------------
 
 - Substance count regex fix
