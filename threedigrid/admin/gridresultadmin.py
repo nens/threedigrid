@@ -544,22 +544,26 @@ class GridH5WaterQualityResultAdmin(GridH5Admin):
         self.set_timeseries_chunk_size(DEFAULT_CHUNK_TIMESERIES.stop)
 
         # Set substances as attributes
-        substance_names = set()
+        substances = set()
         for key in self.netcdf_file.keys():
-            regex_match = re.search(r"substance\d", key)
+            regex_match = re.search(r"substance\d+", key)
             if regex_match:
-                substance_name = regex_match.group()
-                if substance_name not in substance_names:
-                    substance_names.add(substance_name)
+                substance = regex_match.group()
+                if substance not in substances:
+                    substances.add(substance)
                     self.__setattr__(
-                        substance_name,
+                        substance,
                         Nodes(
                             H5pyResultGroup(self.h5py_file, "nodes", self.netcdf_file),
                             **dict(
                                 self._grid_kwargs,
-                                **{"mixin": get_substance_result_mixin(substance_name)},
+                                **{"mixin": get_substance_result_mixin(substance)},
                             ),
                         ),
+                    )
+                    # Set substance name on Nodes
+                    self.__getattribute__(substance).__setattr__(
+                        "name", self.netcdf_file[key].attrs.get("substance_name")
                     )
 
     def set_timeseries_chunk_size(self, new_chunk_size: int) -> None:

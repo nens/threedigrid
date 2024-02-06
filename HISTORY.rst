@@ -4,7 +4,9 @@ History
 2.2.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Substance count regex fix
+
+- Set substance name on Nodes
 
 
 2.2.3 (2024-01-12)
