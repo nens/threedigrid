@@ -6,6 +6,8 @@ History
 
 - Substance count regex fix
 
+- Set substance name on Nodes
+
 
 2.2.3 (2024-01-12)
 ------------------
