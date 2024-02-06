@@ -1,10 +1,39 @@
 History
 =======
 
-2.2.1 (unreleased)
+2.2.4 (unreleased)
 ------------------
 
 - Substance count regex fix
+
+
+2.2.3 (2024-01-12)
+------------------
+
+- Fix 1D/2D data swap for water quality results
+
+
+2.2.3b (2024-01-02)
+-------------------
+
+- Added build/release Github action.
+
+
+2.2.2 (2023-12-21)
+------------------
+
+- Bugfix: **only** in case of **boundaries**: correct sorting of timeseries in all `TimeSeriesSubsetArrayField`. This
+  affected: Nodes [infiltration_rate_simple, ucx, ucy, leak, intercepted_volume, q_sss]
+  Lines: [qp, up1, breach_depth, breach_width]
+
+- Note: The `depth` and `width` field are broken for `breaches` object. 
+  Please use `breach_depth` and `breach_width` on the `lines` object instead.
+
+
+2.2.1 (2023-12-05)
+------------------
+
+- Fix Lines lookup index bug for single cell models
 
 
 2.2.0 (2023-11-07)

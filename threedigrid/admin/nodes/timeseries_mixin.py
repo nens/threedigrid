@@ -110,7 +110,7 @@ class NodeSubstanceResultMixinBase(ResultMixin):
         super().__init__(**kwargs)
 
 
-def get_substance_result_mixin(substance_name):
+def get_substance_result_mixin(substance_name: str):
     class NodeSubstanceResultMixin(NodeSubstanceResultMixinBase):
         class Meta:
             # attributes for the given fields
@@ -124,7 +124,7 @@ def get_substance_result_mixin(substance_name):
             # N.B. # fields starting with '_' are private and will not be added to
             # fields property
             composite_fields = {
-                "concentration": [f"{substance_name}_1D", f"{substance_name}_2D"],
+                "concentration": [f"{substance_name}_2D", f"{substance_name}_1D"],
                 "_mesh_id": ["Mesh2DNode_id", "Mesh1DNode_id"],
             }
             subset_fields = {}

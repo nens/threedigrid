@@ -1,6 +1,5 @@
 """Console scripts for threedigrid."""
 
-
 import click
 from IPython.terminal.embed import InteractiveShellEmbed
 

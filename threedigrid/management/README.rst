@@ -1,8 +1,8 @@
-Console scripts
-===============
+Command line interfaces
+-----------------------
 
 3digrid_explore
----------------
+^^^^^^^^^^^^^^^
 
 Using the 3digrid_explore shortcut, simply run::
 
@@ -32,7 +32,7 @@ This will give you output like this::
 
 
 3digrid_export
---------------
+^^^^^^^^^^^^^^
 
 To quickly export data of a model (or a models subset) you can use the 3digrid_export
 shortcut. To get an overview of the options run::

@@ -35,6 +35,7 @@ lightweight_requirements = [
     "numpy>=1.15",
     "h5py>=2.9",
     "six",
+    "sphinx_rtd_theme>=0.4.3",
 ]
 
 results_requirements = ["cftime>=1.0.1"]
