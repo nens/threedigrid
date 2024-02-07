@@ -27,8 +27,6 @@ Attribute names
 
 The attribute names inherited from the :ref:`nodes` class and an attribute ``concentration`` is added.
 
-<<<<<<< Updated upstream
-=======
 The following additional attributes are available:
 
 +---------------+---------------------------------------------------------------------------------------------+
@@ -38,4 +36,3 @@ The following additional attributes are available:
 +---------------+---------------------------------------------------------------------------------------------+
 | concentration | Time series of the concentrations of this substance for each node, for each output time step|
 +---------------+---------------------------------------------------------------------------------------------+
->>>>>>> Stashed changes
