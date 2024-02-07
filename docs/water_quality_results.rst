@@ -18,6 +18,9 @@ Minimal example
     water_quality_results_filename = r"C:\3Di\My Simulation\water_quality_results_3di.nc"
     gwq = GridH5WaterQualityResultAdmin(gridadmin_filename, water_quality_results_filename)
 
+    # Get the name of the first substance
+    gwq.substance1.name
+
     # Get the concentrations of all 2D open water nodes for substance1 during the first 4 hours of the simulation
     gwq.substance1.subset('2d_open_water').timeseries(0, 4*60*60).concentration
 
