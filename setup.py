@@ -35,7 +35,6 @@ lightweight_requirements = [
     "numpy>=1.15",
     "h5py>=2.9",
     "six",
-    "sphinx_rtd_theme>=0.4.3",
 ]
 
 results_requirements = ["cftime>=1.0.1"]
@@ -56,6 +55,11 @@ rpc_requirements = [
 setup_requirements = []
 
 test_requirements = ["pytest==3.4.1"]
+
+docs_requirements = [
+    "sphinx~=7.2.6",
+    "sphinx_rtd_theme>=2.0.0",
+]
 
 setup(
     author="Lars Claussen",
@@ -90,6 +94,7 @@ setup(
         "geo": geo_requirements,
         "results": results_requirements,
         "rpc": rpc_requirements,
+        "docs": docs_requirements,
     },
     url="https://github.com/nens/threedigrid",
     version=find_version("threedigrid", "__init__.py"),

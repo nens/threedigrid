@@ -9,6 +9,6 @@ pygdal==3.3.2.10
 ipython
 pytest
 flake8
-sphinx==1.8.5
-sphinx_rtd_theme>=0.4.3
+sphinx~=7.2.6
+sphinx_rtd_theme>=2.0.0
 docutils==0.17.*
