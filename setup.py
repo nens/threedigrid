@@ -57,8 +57,8 @@ setup_requirements = []
 test_requirements = ["pytest==3.4.1"]
 
 docs_requirements = [
-    "sphinx==1.8.5",
-    "sphinx_rtd_theme>=0.4.3",
+    "sphinx~=7.2.6",
+    "sphinx_rtd_theme>=2.0.0",
 ]
 
 setup(
