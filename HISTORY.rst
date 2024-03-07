@@ -4,7 +4,7 @@ History
 2.2.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Removed sphinx_rtd_theme from code dependencies. (#221)
 
 
 2.2.4 (2024-02-06)
