@@ -56,6 +56,11 @@ setup_requirements = []
 
 test_requirements = ["pytest==3.4.1"]
 
+docs_requirements = [
+    "sphinx==1.8.5",
+    "sphinx_rtd_theme>=0.4.3",
+]
+
 setup(
     author="Lars Claussen",
     author_email="info@nelen-schuurmans.nl",
@@ -89,6 +94,7 @@ setup(
         "geo": geo_requirements,
         "results": results_requirements,
         "rpc": rpc_requirements,
+        "docs": docs_requirements,
     },
     url="https://github.com/nens/threedigrid",
     version=find_version("threedigrid", "__init__.py"),
