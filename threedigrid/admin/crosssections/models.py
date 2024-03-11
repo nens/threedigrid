@@ -21,19 +21,19 @@ class CrossSections(Model):
     count = ArrayField(type=float)
     tables = ArrayField(type=float)
 
-    def get_tabulated_cross_section_width_and_height(self, cross_section_pk):
+    def get_tabulated_cross_section_height_and_width(self, cross_section_pk):
         """
-        Returns the width and height of a cross-section.
+        Returns the height and width of a cross-section.
 
         Args:
             cross_section_pk: (int) the cross-section primary key
 
         Returns:
-            (tuple) the width and height of the cross-section
+            (tuple) the height and width of the cross-section
         """
         offset = self.offset[cross_section_pk]
         count = self.count[cross_section_pk]
         return (
-            self.tables[1, offset : offset + count],
             self.tables[0, offset : offset + count],
+            self.tables[1, offset : offset + count],
         )

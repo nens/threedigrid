@@ -155,7 +155,7 @@ class GeoJsonSerializer:
                 (
                     width,
                     height,
-                ) = self._coupled_model.get_tabulated_cross_section_width_and_height(
+                ) = self._coupled_model.get_tabulated_cross_section_height_and_width(
                     cross1
                 )
                 properties["cross_section_type_1"] = self._coupled_model.shape[cross1]
@@ -171,7 +171,7 @@ class GeoJsonSerializer:
                 (
                     width,
                     height,
-                ) = self._coupled_model.get_tabulated_cross_section_width_and_height(
+                ) = self._coupled_model.get_tabulated_cross_section_height_and_width(
                     cross2
                 )
                 properties["cross_section_type_2"] = self._coupled_model.shape[cross2]
