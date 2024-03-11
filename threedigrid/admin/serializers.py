@@ -19,12 +19,16 @@ logger = logging.getLogger(__name__)
 
 
 class GeoJsonSerializer:
-    def __init__(self, fields, model=None, indent=None):
+    def __init__(self, fields, model=None, indent=None, coupled_model=None):
         if geojson is None:
             raise_import_exception("geojson")
-        self.fields = fields
         if model:
             assert isinstance(model, Model)
+        if coupled_model:
+            assert isinstance(coupled_model, Model)
+
+        self.fields = fields
+        self._coupled_model = coupled_model
         self._model = model
         self._indent = indent
 
@@ -57,8 +61,8 @@ class GeoJsonSerializer:
                     constants.LONLAT_DIGITS,
                 )
                 line = geojson.LineString(linepoints.tolist())
-
                 properties = fill_properties(self.fields, data, i, model_type)
+                self._set_tabulated_cross_section_information(data, i, properties)
                 yield geojson.Feature(geometry=line, properties=properties)
         elif content_type in ("nodes", "pumps"):
             for i in range(data["id"].shape[-1]):
@@ -134,6 +138,34 @@ class GeoJsonSerializer:
             indent=self._indent,
             cls=NumpyEncoder,
         )
+
+    def _set_tabulated_cross_section_information(self, lines_data, i, properties):
+        """Add cross section information to line properties
+
+        Args:
+            line_data (Dict): lines data
+            i (int): index into the lines data
+            properties (Dict): to be exported line data
+        """
+        from threedigrid.admin.crosssections.models import CrossSections
+
+        if isinstance(self._coupled_model, CrossSections):
+            cross1 = lines_data["cross1"][i]
+            (
+                width,
+                height,
+            ) = self._coupled_model.get_tabulated_cross_section_width_and_height(cross1)
+            properties["cross_section_type_1"] = self._coupled_model.shape[cross1]
+            properties["cross_section_table_1"] = [width, height]
+
+            cross2 = lines_data["cross2"][i]
+            (
+                width,
+                height,
+            ) = self._coupled_model.get_tabulated_cross_section_width_and_height(cross2)
+            properties["cross_section_type_2"] = self._coupled_model.shape[cross2]
+            properties["cross_section_table_2"] = [width, height]
+            properties["cross_section_weight"] = lines_data["cross_weight"][i]
 
 
 def fill_properties(fields, data, index, model_type=None):
