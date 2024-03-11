@@ -150,22 +150,35 @@ class GeoJsonSerializer:
         from threedigrid.admin.crosssections.models import CrossSections
 
         if isinstance(self._coupled_model, CrossSections):
-            cross1 = lines_data["cross1"][i]
-            (
-                width,
-                height,
-            ) = self._coupled_model.get_tabulated_cross_section_width_and_height(cross1)
-            properties["cross_section_type_1"] = self._coupled_model.shape[cross1]
-            properties["cross_section_table_1"] = [width, height]
+            try:
+                cross1 = lines_data["cross1"][i]
+                (
+                    width,
+                    height,
+                ) = self._coupled_model.get_tabulated_cross_section_width_and_height(
+                    cross1
+                )
+                properties["cross_section_type_1"] = self._coupled_model.shape[cross1]
+                properties["cross_section_table_1"] = [width, height]
+                properties["cross_section_weight"] = lines_data["cross_weight"][i]
+            except IndexError:
+                properties["cross_section_type_1"] = None
+                properties["cross_section_table_1"] = [[], []]
+                properties["cross_section_weight"] = None
 
-            cross2 = lines_data["cross2"][i]
-            (
-                width,
-                height,
-            ) = self._coupled_model.get_tabulated_cross_section_width_and_height(cross2)
-            properties["cross_section_type_2"] = self._coupled_model.shape[cross2]
-            properties["cross_section_table_2"] = [width, height]
-            properties["cross_section_weight"] = lines_data["cross_weight"][i]
+            try:
+                cross2 = lines_data["cross2"][i]
+                (
+                    width,
+                    height,
+                ) = self._coupled_model.get_tabulated_cross_section_width_and_height(
+                    cross2
+                )
+                properties["cross_section_type_2"] = self._coupled_model.shape[cross2]
+                properties["cross_section_table_2"] = [width, height]
+            except IndexError:
+                properties["cross_section_type_2"] = None
+                properties["cross_section_table_2"] = [[], []]
 
 
 def fill_properties(fields, data, index, model_type=None):
