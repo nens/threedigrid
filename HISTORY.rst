@@ -4,7 +4,8 @@ History
 2.2.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add cross section type and tabulated data to geojson export for:
+  channels, pipes, weirs, culverts, and orifices
 
 
 2.2.5 (2024-03-07)

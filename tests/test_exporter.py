@@ -143,3 +143,14 @@ def test_export_null(ga, tmp_path):
 def test_export_method(ga_export, export_method, expected_filename):
     getattr(ga_export, "export_" + export_method)()
     assert os.path.exists(os.path.join(ga_export._dest, expected_filename + ".json"))
+
+
+def test_cross_section_export(ga_export):
+    ga_export.export_channels()
+    data = json.load(open(os.path.join(ga_export._dest, "channels.json"), "r"))
+
+    assert data["features"][0]["properties"]["cross_section_type_1"] is None
+    assert data["features"][0]["properties"]["cross_section_table_1"] == [[], []]
+    assert data["features"][0]["properties"]["cross_section_type_2"] is None
+    assert data["features"][0]["properties"]["cross_section_table_2"] == [[], []]
+    assert data["features"][0]["properties"]["cross_section_weight"] is None

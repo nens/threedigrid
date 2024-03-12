@@ -127,7 +127,10 @@ class Model(BaseModel):
                 fields = self._field_names
 
             indent = kwargs.get("indent", None)
-            serializer = GeoJsonSerializer(fields, self, indent)
+            coupled_model = kwargs.get("coupled_model", None)
+            serializer = GeoJsonSerializer(
+                fields=fields, model=self, indent=indent, coupled_model=coupled_model
+            )
             serializer.save(file_name)
 
     def _to_ogr(self, driver_name, file_name, **kwargs):
