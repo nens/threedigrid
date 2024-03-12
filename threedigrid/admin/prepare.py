@@ -436,6 +436,27 @@ class GridAdminH5Export:
             self._export_method,
         )(dest, indent=self._indent)
 
+    def _export_line_object(self, object_str, coupled_model=None):
+        """Export a line object to a shapefile, geopackage or geojson depending on the
+        `export_method`.
+
+        Args:
+            object_str (str): name of line object
+            coupled_model (Model, optional): coupled model to line object which is used
+            to extract additional data. Defaults to None.
+        """
+        line_object = getattr(self.ga.lines, object_str)
+        if line_object.id.size == 0:
+            logger.info(
+                f"[*] Model {self.ga.model_name} does not have 1D, "
+                f"skipping export of {object_str}..."
+            )
+            return
+        dest = os.path.join(self._dest, f"{object_str}{self._extension}")
+        getattr(line_object.reproject_to(self._epsg), self._export_method)(
+            dest, indent=self._indent, coupled_model=coupled_model
+        )
+
     def export_breaches(self):
         if self.ga.breaches.id.size == 0:
             logger.info(
@@ -449,69 +470,19 @@ class GridAdminH5Export:
         )
 
     def export_channels(self):
-        channels = self.ga.lines.channels
-        if channels.id.size == 0:
-            logger.info(
-                "[*] Model {} does not have 1D, "
-                "skipping export channels...".format(self.ga.model_name)
-            )
-            return
-        dest = os.path.join(self._dest, "channels" + self._extension)
-        getattr(channels.reproject_to(self._epsg), self._export_method)(
-            dest, indent=self._indent, coupled_model=self.ga.cross_sections
-        )
+        self._export_line_object("channels", coupled_model=self.ga.cross_sections)
 
     def export_pipes(self):
-        pipes = self.ga.lines.pipes
-        if pipes.id.size == 0:
-            logger.info(
-                "[*] Model {} does not have 1D, "
-                "skipping export pipes...".format(self.ga.model_name)
-            )
-            return
-        dest = os.path.join(self._dest, "pipes" + self._extension)
-        getattr(pipes.reproject_to(self._epsg), self._export_method)(
-            dest, indent=self._indent, coupled_model=self.ga.cross_sections
-        )
+        self._export_line_object("pipes", coupled_model=self.ga.cross_sections)
 
     def export_weirs(self):
-        weirs = self.ga.lines.weirs
-        if weirs.id.size == 0:
-            logger.info(
-                "[*] Model {} does not have 1D, "
-                "skipping export weirs...".format(self.ga.model_name)
-            )
-            return
-        dest = os.path.join(self._dest, "weirs" + self._extension)
-        getattr(weirs.reproject_to(self._epsg), self._export_method)(
-            dest, indent=self._indent, coupled_model=self.ga.cross_sections
-        )
+        self._export_line_object("weirs", coupled_model=self.ga.cross_sections)
 
     def export_culverts(self):
-        culverts = self.ga.lines.culverts
-        if culverts.id.size == 0:
-            logger.info(
-                "[*] Model {} does not have 1D, "
-                "skipping export culverts...".format(self.ga.model_name)
-            )
-            return
-        dest = os.path.join(self._dest, "culverts" + self._extension)
-        getattr(culverts.reproject_to(self._epsg), self._export_method)(
-            dest, indent=self._indent, coupled_model=self.ga.cross_sections
-        )
+        self._export_line_object("culverts", coupled_model=self.ga.cross_sections)
 
     def export_orifices(self):
-        orifices = self.ga.lines.orifices
-        if orifices.id.size == 0:
-            logger.info(
-                "[*] Model {} does not have 1D, "
-                "skipping export orifices...".format(self.ga.model_name)
-            )
-            return
-        dest = os.path.join(self._dest, "orifices" + self._extension)
-        getattr(orifices.reproject_to(self._epsg), self._export_method)(
-            dest, indent=self._indent, coupled_model=self.ga.cross_sections
-        )
+        self._export_line_object("orifices", coupled_model=self.ga.cross_sections)
 
     def export_manholes(self):
         if self.ga.nodes.manholes.id.size == 0:
