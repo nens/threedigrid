@@ -1,7 +1,7 @@
 History
 =======
 
-2.2.6 (unreleased)
+2.2.6 (2024-03-13)
 ------------------
 
 - Add cross section type and tabulated data to geojson export for:
