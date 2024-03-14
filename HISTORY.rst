@@ -4,7 +4,7 @@ History
 2.2.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Set substance units on Nodes.
 
 
 2.2.6 (2024-03-13)

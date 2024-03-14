@@ -561,10 +561,14 @@ class GridH5WaterQualityResultAdmin(GridH5Admin):
                             ),
                         ),
                     )
-                    # Set substance name on Nodes
-                    self.__getattribute__(substance).__setattr__(
-                        "name", self.netcdf_file[key].attrs.get("substance_name")
-                    )
+
+                    # Set substance attributes on Nodes object
+                    attrs_map = [("name", "substance_name"), ("units", "units")]
+                    for attr, name in attrs_map:
+                        value = self.netcdf_file[key].attrs.get(name)
+                        if isinstance(value, bytes):
+                            value = value.decode("utf-8")
+                        self.__getattribute__(substance).__setattr__(attr, value)
 
     def set_timeseries_chunk_size(self, new_chunk_size: int) -> None:
         """
