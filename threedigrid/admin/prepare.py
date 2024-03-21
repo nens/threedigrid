@@ -466,7 +466,7 @@ class GridAdminH5Export:
             return
         dest = os.path.join(self._dest, "breaches" + self._extension)
         getattr(self.ga.breaches.reproject_to(self._epsg), self._export_method)(
-            dest, indent=self._indent
+            dest, indent=self._indent, coupled_model=self.ga.lines
         )
 
     def export_channels(self):
