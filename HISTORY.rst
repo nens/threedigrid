@@ -6,6 +6,8 @@ History
 
 - Set substance units on Nodes.
 
+- Set exchange level on levl attribute on breach geojson export.
+
 
 2.2.6 (2024-03-13)
 ------------------
