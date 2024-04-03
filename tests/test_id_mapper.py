@@ -1,52 +1,9 @@
-import os
-import unittest
 from unittest import mock
 
-import h5py
-import numpy as np
-
 from threedigrid.admin.constants import TYPE_CODE_MAP
-from threedigrid.admin.h5py_datasource import H5pyGroup
 from threedigrid.admin.idmapper import IdMapper
 
 from .conftest import NODE_LENGTH, simple_id_map
-
-test_file_dir = os.path.join(os.path.dirname(__file__), "test_files")
-
-# the testfile is a copy of the v2_bergermeer gridadmin file
-grid_file = os.path.join(test_file_dir, "gridadmin.h5")
-
-
-class TestIdMapperByCode(unittest.TestCase):
-    def setUp(self):
-        h5py_file = h5py.File(grid_file, "r")
-        self.id_mapper = IdMapper(H5pyGroup(h5py_file, "mappings")["id_map"])
-
-    def test_get_channels_by_code(self):
-        tc = TYPE_CODE_MAP["v2_channel"]
-        qs = self.id_mapper.get_by_code(tc)
-        assert np.all(qs["obj_code"] == tc)
-
-    def test_get_culvert_by_code(self):
-        tc = TYPE_CODE_MAP["v2_culvert"]
-        qs = self.id_mapper.get_by_code(tc)
-        assert np.all(qs["obj_code"] == tc)
-
-
-class TestIdMapperByName(unittest.TestCase):
-    def setUp(self):
-        h5py_file = h5py.File(grid_file, "r")
-        self.id_mapper = IdMapper(H5pyGroup(h5py_file, "mappings")["id_map"])
-
-    def test_get_channels_by_code(self):
-        tc = TYPE_CODE_MAP["v2_channel"]
-        qs = self.id_mapper.get_by_name("v2_channel")
-        assert np.all(qs["obj_code"] == tc)
-
-    def test_get_culvert_by_code(self):
-        tc = TYPE_CODE_MAP["v2_culvert"]
-        qs = self.id_mapper.get_by_name("v2_culvert")
-        assert np.all(qs["obj_code"] == tc)
 
 
 @mock.patch("threedigrid.admin.idmapper.get_id_map")

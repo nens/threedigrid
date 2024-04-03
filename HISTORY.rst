@@ -8,6 +8,8 @@ History
 
 - Set exchange level on levl attribute on breach geojson export.
 
+- Removed old gridadmin file from tests.
+
 
 2.2.6 (2024-03-13)
 ------------------
