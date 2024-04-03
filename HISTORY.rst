@@ -10,6 +10,8 @@ History
 
 - Removed old gridadmin file from tests.
 
+- Set pumps on start node and add line geometry in geojson export.
+
 
 2.2.6 (2024-03-13)
 ------------------

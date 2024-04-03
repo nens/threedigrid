@@ -64,12 +64,24 @@ class GeoJsonSerializer:
                 properties = fill_properties(self.fields, data, i, model_type)
                 self._set_tabulated_cross_section_information(data, i, properties)
                 yield geojson.Feature(geometry=line, properties=properties)
-        elif content_type in ("nodes", "pumps"):
+        elif content_type == "nodes":
             for i in range(data["id"].shape[-1]):
                 coords = np.round(data["coordinates"][:, i], constants.LONLAT_DIGITS)
                 point = geojson.Point([coords[0], coords[1]])
                 properties = fill_properties(self.fields, data, i, model_type)
                 yield geojson.Feature(geometry=point, properties=properties)
+        elif content_type == "pumps":
+            for i in range(data["id"].shape[-1]):
+                # Pump is defined on start node, add line geom if end node is defined
+                coords = np.round(
+                    data["node_coordinates"][:, i], constants.LONLAT_DIGITS
+                )
+                geometry = geojson.Point([coords[0], coords[1]])
+                properties = fill_properties(self.fields, data, i, model_type)
+                if data["node2_id"][i] != -9999:
+                    line_geometry = geojson.LineString(coords.tolist())
+                    properties["line_geometry"] = line_geometry
+                yield geojson.Feature(geometry=geometry, properties=properties)
         elif content_type == "breaches":
             for i in range(data["id"].shape[-1]):
                 linepoints = np.round(
