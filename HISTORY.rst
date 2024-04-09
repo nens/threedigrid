@@ -6,6 +6,10 @@ History
 
 - Set substance units on Nodes.
 
+- Set exchange level on levl attribute on breach geojson export.
+
+- Removed old gridadmin file from tests.
+
 - Set pumps on start node and add line geometry in geojson export.
 
 

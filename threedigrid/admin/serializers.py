@@ -90,6 +90,7 @@ class GeoJsonSerializer:
                 )
                 line = geojson.LineString(linepoints.tolist())
                 properties = fill_properties(self.fields, data, i, model_type)
+                properties["levl"] = self._coupled_model.dpumax[data["levl"][i]]
                 yield geojson.Feature(geometry=line, properties=properties)
         elif content_type == "cells":
             if (

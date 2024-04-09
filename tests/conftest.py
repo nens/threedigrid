@@ -22,14 +22,14 @@ result_file = os.path.join(test_file_dir, "results_3di.nc")
 NODE_LENGTH = 10
 
 
-@pytest.fixture(params=["gridadmin.h5"])  # , "gridadmin_v2.h5"])
+@pytest.fixture(params=["gridadmin.h5"])
 def gr(request):
     gr = GridH5ResultAdmin(os.path.join(test_file_dir, request.param), result_file)
     yield gr
     gr.close()
 
 
-@pytest.fixture(params=["gridadmin.h5", "gridadmin_v2.h5"])
+@pytest.fixture(params=["gridadmin.h5"])
 def ga(request):
     with GridH5Admin(os.path.join(test_file_dir, request.param)) as ga:
         yield ga
@@ -49,7 +49,7 @@ def gr_bergermeer_with_boundaries():
     gr.close()
 
 
-@pytest.fixture(params=["gridadmin.h5", "gridadmin_v2.h5"])
+@pytest.fixture(params=["gridadmin.h5"])
 def ga_export(request, tmp_path):
     exporter = GridAdminH5Export(
         os.path.join(test_file_dir, request.param),
