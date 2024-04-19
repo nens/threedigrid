@@ -12,6 +12,8 @@ History
 
 - Set pumps on start node and add line geometry in geojson export.
 
+- Return YZ tabulated data in geojson export if YZ profile.
+
 
 2.2.6 (2024-03-13)
 ------------------

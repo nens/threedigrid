@@ -7,9 +7,22 @@ threedicore with shape, width and height information.
 
 
 """
+from enum import IntEnum, unique
 
 from threedigrid.orm.fields import ArrayField
 from threedigrid.orm.models import Model
+
+
+@unique
+class CrossSectionShape(IntEnum):
+    CLOSED_RECTANGLE = 0
+    RECTANGLE = 1
+    CIRCLE = 2
+    EGG = 3
+    TABULATED_RECTANGLE = 5
+    TABULATED_TRAPEZIUM = 6
+    TABULATED_YZ = 7
+    INVERTED_EGG = 8
 
 
 class CrossSections(Model):
@@ -20,6 +33,9 @@ class CrossSections(Model):
     offset = ArrayField(type=float)
     count = ArrayField(type=float)
     tables = ArrayField(type=float)
+    offset_yz = ArrayField(type=float)
+    count_yz = ArrayField(type=float)
+    tables_yz = ArrayField(type=float)
 
     def get_tabulated_cross_section_height_and_width(self, cross_section_pk):
         """
@@ -31,9 +47,17 @@ class CrossSections(Model):
         Returns:
             (tuple([heights], [widths])) the heights and widths of the cross-section
         """
-        offset = self.offset[cross_section_pk]
-        count = self.count[cross_section_pk]
+
+        if self.shape[cross_section_pk] == CrossSectionShape.TABULATED_YZ:
+            offset = self.offset_yz[cross_section_pk]
+            count = self.count_yz[cross_section_pk]
+            table = self.tables_yz
+        else:
+            offset = self.offset[cross_section_pk]
+            count = self.count[cross_section_pk]
+            table = self.tables
+
         return (
-            self.tables[0, offset : offset + count],
-            self.tables[1, offset : offset + count],
+            table[1, offset : offset + count],
+            table[0, offset : offset + count],
         )
