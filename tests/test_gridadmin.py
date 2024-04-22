@@ -405,6 +405,9 @@ class GridAdminCrossSectionsTest(unittest.TestCase):
             "offset",
             "count",
             "tables",
+            "tables_yz",
+            "offset_yz",
+            "count_yz",
         }
 
 
