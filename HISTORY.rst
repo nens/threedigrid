@@ -1,7 +1,7 @@
 History
 =======
 
-2.2.7 (unreleased)
+2.2.7 (2024-04-22)
 ------------------
 
 - Set substance units on Nodes.
