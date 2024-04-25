@@ -445,6 +445,7 @@ class _GridH5NestedStructureControl:
 
         return StructureControl(
             id=id,
+            grid_id=grid_id,
             source_table=source_table,
             source_table_id=source_table_id,
             time=self.time[mask],
@@ -453,6 +454,12 @@ class _GridH5NestedStructureControl:
             action_value_2=self.action_value_2[mask],
             is_active=self.is_active[mask],
         )
+
+    def group_by_grid_id(self, value: int) -> List[StructureControl]:
+        """
+        Get all structure control actions with ``grid_id == value``
+        """
+        return self._group_by("grid_id", value)
 
     def group_by_action_type(self, value: str) -> List[StructureControl]:
         """
@@ -471,11 +478,11 @@ class _GridH5NestedStructureControl:
         return self._group_by_in_between("time", min, max)
 
     def group_by_action_value_1(self, min: float, max: float) -> List[StructureControl]:
-        """Get all structure control actions with ``action_value_1 == value``"""
+        """Get all structure control actions where ``min <= action_value_1 <= max``"""
         return self._group_by_in_between("action_value_1", min, max)
 
     def group_by_action_value_2(self, min: float, max: float) -> List[StructureControl]:
-        """Get all structure control actions with ``action_value_2 == value``"""
+        """Get all structure control actions where ``min <= action_value_2 <= max``"""
         return self._group_by_in_between("action_value_2", min, max)
 
     def _group_by(

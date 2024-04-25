@@ -12,6 +12,7 @@ class StructureControl:
     def __init__(
         self,
         id: str,
+        grid_id: int,
         source_table: str,
         source_table_id: int,
         time: List[float],
@@ -21,6 +22,7 @@ class StructureControl:
         is_active: List[int],
     ) -> None:
         self.id = id
+        self.grid_id = grid_id
         self.source_table = source_table
         self.source_table_id = source_table_id
         self.time = time
