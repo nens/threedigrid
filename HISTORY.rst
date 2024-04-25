@@ -1,7 +1,7 @@
 History
 =======
 
-2.2.8 (unreleased)
+2.2.8 (2024-04-25)
 ------------------
 
 - Add `group_by_grid_id` to structure control interface.
