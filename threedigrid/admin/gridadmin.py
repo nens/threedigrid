@@ -4,6 +4,7 @@ Main entry point for threedigrid applications.
 """
 
 import logging
+from collections import defaultdict
 
 import h5py
 import numpy as np
@@ -16,6 +17,7 @@ from threedigrid.admin.lines.models import Lines
 from threedigrid.admin.nodes.models import Cells, EmbeddedNodes, Grid, Nodes
 from threedigrid.admin.pumps.models import Pumps
 from threedigrid.geo_utils import raise_import_exception, transform_bbox
+from threedigrid.orm.models import Model
 
 try:
     import pyproj
@@ -53,7 +55,7 @@ class GridH5Admin:
         :param file_modus: mode with which to open the file
             (defaults to r=READ)
         """
-
+        self._field_model_dict = defaultdict(list)
         self.grid_file = h5_file_path
         self.datasource_class = H5pyGroup
         self.is_rpc = False
@@ -188,6 +190,50 @@ class GridH5Admin:
         if not hasattr(self, "levees"):
             return False
         return bool(self.levees.id.size)
+
+    @property
+    def _field_model_map(self):
+        """
+        :return: a dict of {<field name>: [model name, ...]}
+        """
+        if self._field_model_dict:
+            return self._field_model_dict
+
+        model_names = set()
+        for attr_name in dir(self):
+            # skip private attrs
+            if any([attr_name.startswith("__"), attr_name.startswith("_")]):
+                continue
+            try:
+                attr = getattr(self, attr_name)
+            except AttributeError:
+                logger.warning(
+                    "Attribute: '{}' does not " "exist in h5py_file.".format(attr_name)
+                )
+                continue
+            if not issubclass(type(attr), Model):
+                continue
+            model_names.add(attr_name)
+
+        for model_name in model_names:
+            for x in getattr(self, model_name)._field_names:
+                self._field_model_dict[x].append(model_name)
+        return self._field_model_dict
+
+    def get_model_instance_by_field_name(self, field_name):
+        """
+        :param field_name: name of a models field
+        :return: instance of the model the field belongs to
+        :raises IndexError if the field name is not unique across models
+        """
+        model_name = self._field_model_map.get(field_name)
+        if not model_name or len(model_name) != 1:
+            raise IndexError(
+                "Ambiguous result. Field name {} yields {} model(s)".format(
+                    field_name, len(model_name) if model_name else 0
+                )
+            )
+        return getattr(self, model_name[0])
 
     def get_extent_subset(self, subset_name, target_epsg_code=""):
         """

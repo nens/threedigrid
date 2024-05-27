@@ -3,7 +3,6 @@
 
 import logging
 import re
-from collections import defaultdict
 from typing import List, Optional, Union
 
 import h5py
@@ -38,7 +37,6 @@ from threedigrid.admin.structure_controls.models import (
     StructureControl,
     StructureControlTypes,
 )
-from threedigrid.orm.models import Model
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +61,6 @@ class GridH5ResultAdmin(GridH5Admin):
             called subgrid_map.nc)
         :param file_modus: modus in which to open the files
         """
-        self._field_model_dict = defaultdict(list)
         self._netcdf_file_path = netcdf_file_path
         super().__init__(h5_file_path, file_modus)
 
@@ -156,50 +153,6 @@ class GridH5ResultAdmin(GridH5Admin):
                 self.threedicore_result_version,
                 self.threedicore_version,
             )
-
-    @property
-    def _field_model_map(self):
-        """
-        :return: a dict of {<field name>: [model name, ...]}
-        """
-        if self._field_model_dict:
-            return self._field_model_dict
-
-        model_names = set()
-        for attr_name in dir(self):
-            # skip private attrs
-            if any([attr_name.startswith("__"), attr_name.startswith("_")]):
-                continue
-            try:
-                attr = getattr(self, attr_name)
-            except AttributeError:
-                logger.warning(
-                    "Attribute: '{}' does not " "exist in h5py_file.".format(attr_name)
-                )
-                continue
-            if not issubclass(type(attr), Model):
-                continue
-            model_names.add(attr_name)
-
-        for model_name in model_names:
-            for x in getattr(self, model_name)._field_names:
-                self._field_model_dict[x].append(model_name)
-        return self._field_model_dict
-
-    def get_model_instance_by_field_name(self, field_name):
-        """
-        :param field_name: name of a models field
-        :return: instance of the model the field belongs to
-        :raises IndexError if the field name is not unique across models
-        """
-        model_name = self._field_model_map.get(field_name)
-        if not model_name or len(model_name) != 1:
-            raise IndexError(
-                "Ambiguous result. Field name {} yields {} model(s)".format(
-                    field_name, len(model_name) if model_name else 0
-                )
-            )
-        return getattr(self, model_name[0])
 
     @property
     def threedicore_result_version(self):

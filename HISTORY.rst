@@ -4,7 +4,7 @@ History
 2.2.9 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Move _field_model_dict and its methods from GridH5ResultAdmin to GridH5Admin.
 
 
 2.2.8 (2024-04-25)
