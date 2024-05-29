@@ -581,7 +581,6 @@ class GridH5WaterQualityResultAdmin(GridH5Admin):
 
     def get_model_instance_by_field_name(self, field_name):
         """
-        overwire the default implementation of get_model_instance_by_field_name
         :param field_name: name of a models field
         :return: instance of the model the field belongs to
         :raises AttributeError if the model instance cannot be found
