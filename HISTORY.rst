@@ -4,7 +4,7 @@ History
 2.2.10 (unreleased)
 -------------------
 
-- Add `substances` and overwrite get_model_instance_by_field_name method
+- Add `substances` and overwrite `get_model_instance_by_field_name` method
   in GridH5WaterQualityResultAdmin.
 
 
