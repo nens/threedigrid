@@ -530,6 +530,26 @@ class GridH5WaterQualityResultAdmin(GridH5Admin):
                             value = value.decode("utf-8")
                         self.__getattribute__(substance).__setattr__(attr, value)
 
+    @property
+    def substances(self) -> List[str]:
+        """
+        :return: List of substances in the water quality result file
+        """
+        return [key for key in self.netcdf_file.keys() if "substance" in key]
+
+    def get_model_instance_by_field_name(self, field_name):
+        """
+        overwire the default implementation of get_model_instance_by_field_name
+        :param field_name: name of a models field
+        :return: instance of the model the field belongs to
+        :raises AttributeError if the model instance cannot be found
+        """
+        try:
+            model_instance = self.__getattribute__(field_name)
+            return model_instance
+        except AttributeError:
+            raise AttributeError(f"Model instance with field name {field_name} not found")
+
     def set_timeseries_chunk_size(self, new_chunk_size: int) -> None:
         """
         overwrite the default chunk size for timeseries queries.
