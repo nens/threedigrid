@@ -486,6 +486,7 @@ class GridH5WaterQualityResultAdmin(GridH5Admin):
         netcdf_file_path: str,
         file_modus: str = "r",
         swmr: bool = False,
+        substances: List[str] = [],
     ) -> None:
         """
         :param h5_file_path: path to the hdf5 gridadmin file
@@ -529,13 +530,7 @@ class GridH5WaterQualityResultAdmin(GridH5Admin):
                         if isinstance(value, bytes):
                             value = value.decode("utf-8")
                         self.__getattribute__(substance).__setattr__(attr, value)
-
-    @property
-    def substances(self) -> List[str]:
-        """
-        :return: List of substances in the water quality result file
-        """
-        return [key for key in self.netcdf_file.keys() if "substance" in key]
+        self.substances = list(substances)
 
     def get_model_instance_by_field_name(self, field_name):
         """
@@ -548,7 +543,9 @@ class GridH5WaterQualityResultAdmin(GridH5Admin):
             model_instance = self.__getattribute__(field_name)
             return model_instance
         except AttributeError:
-            raise AttributeError(f"Model instance with field name {field_name} not found")
+            raise AttributeError(
+                f"Model instance with field name {field_name} not found"
+            )
 
     def set_timeseries_chunk_size(self, new_chunk_size: int) -> None:
         """
