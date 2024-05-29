@@ -4,6 +4,7 @@ History
 2.2.10 (unreleased)
 -------------------
 
+- Move _field_model_dict and its methods back to GridH5ResultAdmin.
 - Add `substances` and overwrite `get_model_instance_by_field_name` method
   in GridH5WaterQualityResultAdmin.
 
