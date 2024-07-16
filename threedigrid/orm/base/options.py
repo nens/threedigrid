@@ -20,6 +20,8 @@ import logging
 from collections import defaultdict, namedtuple
 from itertools import product
 
+import numpy as np
+
 from threedigrid.numpy_utils import create_np_lookup_index_for
 from threedigrid.orm.base.fields import TimeSeriesCompositeArrayField
 from threedigrid.orm.base.utils import _flatten_dict_values
@@ -186,6 +188,9 @@ class Options:
             values = [
                 self.inst.get_field_value(x) for x in self.inst.Meta.lookup_fields
             ]
+            for index, value in enumerate(values):
+                if not isinstance(value, np.ndarray):
+                    values[index] = np.array(value)
             self._lookup = create_np_lookup_index_for(*values)
 
         return self._lookup
