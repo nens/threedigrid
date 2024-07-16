@@ -225,16 +225,18 @@ def _get_storage_area(storage_area):
     """
 
     default_null = "--"
-    # case python string type
+
+    if storage_area is None:
+        return default_null
+
+    if isinstance(storage_area, np.ndarray):
+        if storage_area.size != 1:
+            return default_null
+        storage_area = storage_area.item()
+
     try:
         a = float(storage_area)
-        if a > 0.0:
-            return a
-    except ValueError:
-        pass
-    except TypeError:
-        if storage_area is None:
-            return default_null
-        return _get_storage_area(np.asscalar(storage_area))
-
-    return default_null
+        return a if a > 0.0 else default_null
+    # empty strings raise a ValueError, returning default_null
+    except (ValueError, TypeError):
+        return default_null
