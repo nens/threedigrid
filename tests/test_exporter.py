@@ -147,7 +147,8 @@ def test_export_method(ga_export, export_method, expected_filename):
 
 def test_cross_section_export(ga_export):
     ga_export.export_channels()
-    data = json.load(open(os.path.join(ga_export._dest, "channels.json"), "r"))
+    with open(os.path.join(ga_export._dest, "channels.json"), "r") as file:
+        data = json.load(file)
 
     assert data["features"][0]["properties"]["cross_section_type_1"] is None
     assert data["features"][0]["properties"]["cross_section_table_1"] == [[], []]
