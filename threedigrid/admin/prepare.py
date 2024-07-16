@@ -66,7 +66,7 @@ class GridAdminH5Prepare:
         if extra_attrs:
             for key, value in extra_attrs.items():
                 if isinstance(value, str):
-                    value = np.string_(value)
+                    value = np.bytes_(value)
                 h5py_file.attrs[key] = value
 
         # Step 3: prepare the ID mapper

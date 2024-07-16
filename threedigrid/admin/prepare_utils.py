@@ -74,7 +74,7 @@ def add_or_update_datasets(
 
         if dataset_name not in list(h5py_group.keys()):
             dt = None
-            if data.dtype.type is np.string_:
+            if data.dtype.type is np.bytes_:
                 if dataset_name == "code":
                     dt = "S32"
                 elif dataset_name == "display_name":
