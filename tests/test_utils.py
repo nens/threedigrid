@@ -62,16 +62,16 @@ def test_get_storage_area_bytes_to_string():
 
 
 def test_get_storage_area_string_input():
-    b = np.array([""], np.string_)
+    b = np.array([""], np.bytes_)
     sa_b = _get_storage_area(b)
     assert sa_b == "--"  # default response
-    b = np.array(["0"], np.string_)
+    b = np.array(["0"], np.bytes_)
     sa_b = _get_storage_area(b)
     assert sa_b == "--"  # default response
 
 
 def test_get_storage_area_string_to_float():
-    b = np.array(["0.5"], np.string_)
+    b = np.array(["0.5"], np.bytes_)
     sa_b = _get_storage_area(b)
     assert sa_b == 0.5
 
