@@ -1,7 +1,7 @@
 History
 =======
 
-2.2.11 (unreleased)
+2.2.11 (2024-07-25)
 -------------------
 
 - Fix NumPy 2.0 incompatibilities.
