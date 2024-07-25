@@ -1,4 +1,6 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
+from typing import List
+
 from threedigrid.orm.base.options import ModelMeta
 from threedigrid.orm.base.timeseries_mixin import AggregateResultMixin, ResultMixin
 
@@ -19,6 +21,40 @@ BASE_SUBSET_FIELDS = {
     "intercepted_volume": {"2d_all": "Mesh2D_intercepted_volume"},
     "q_sss": {"2d_all": "Mesh2D_q_sss"},
 }
+
+
+def construct_node_customized_base_composite_fields(fields: List[str], area: str):
+    """ID is added as a composite field as it is not equal to the grid ids"""
+    composite_fields = {}
+    for field in fields:
+        for key, values in BASE_COMPOSITE_FIELDS.items():
+            if field in values:
+                if key not in composite_fields:
+                    composite_fields[key] = [field]
+                else:
+                    # Sort just to be sure 2D is before 1D
+                    composite_fields[key].insert(0, field)
+                    composite_fields[key].sort(reverse=True)
+
+    if "_mesh_id" in composite_fields:
+        for i, v in enumerate(composite_fields["_mesh_id"]):
+            composite_fields["_mesh_id"][i] = f"{v}{area}"
+        composite_fields["id"] = composite_fields["_mesh_id"]
+
+    return composite_fields
+
+
+# def construct_node_customized_base_subset_fields(fields: List[str]):
+#     subset_fields = {
+#         "infiltration_rate_simple": {"2d_all": "Mesh2D_infiltration_rate_simple"},
+#         "ucx": {"2d_all": "Mesh2D_ucx"},
+#         "ucy": {"2d_all": "Mesh2D_ucy"},
+#         "leak": {"2d_all": "Mesh2D_leak"},
+#         "intercepted_volume": {"2d_all": "Mesh2D_intercepted_volume"},
+#         "q_sss": {"2d_all": "Mesh2D_q_sss"},
+#     }
+
+#     return subset_fields
 
 
 class NodesResultsMixin(ResultMixin):
@@ -129,6 +165,22 @@ def get_substance_result_mixin(substance_name: str):
             }
             subset_fields = {}
 
-            lookup_fields = ("id", "_mesh_id")
+            lookup_fields = ("_mesh_id",)
 
     return NodeSubstanceResultMixin
+
+
+def get_customized_nodes_results_mixin(composites: dict, lookup: List[int]):
+    class CustomizedNodesResultsMixin(ResultMixin):
+        class Meta:
+            field_attrs = ["units", "long_name", "standard_name"]
+
+            composite_fields = composites
+            subset_fields = {}
+            # lookup_values = lookup
+            lookup_fields = ("id", "_mesh_id")
+
+        def __init__(self, **kwargs):
+            super().__init__(**kwargs)
+
+    return CustomizedNodesResultsMixin

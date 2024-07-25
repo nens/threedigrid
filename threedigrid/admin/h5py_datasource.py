@@ -38,6 +38,8 @@ class H5pyGroup(DataSource):
         if lookup_index is None:
             if model._mixin and hasattr(model.Meta, "lookup_fields"):
                 lookup_index = model._meta._get_lookup_index()
+            if model._mixin and hasattr(model.Meta, "lookup_values"):
+                lookup_index = model.Meta.lookup_values
 
         if lookup_index is not None:
             kwargs.update({"lookup_index": lookup_index})

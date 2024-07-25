@@ -185,7 +185,9 @@ class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
         del values
         # sort the stacked array by lookup
         if lookup_index is not None:
-            return hs[:, lookup_index]
+            if len(hs.shape) > 1:
+                return hs[:, lookup_index]
+            return hs[lookup_index]
         return hs
 
     def __repr__(self):

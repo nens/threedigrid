@@ -1,5 +1,7 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
 
+from typing import List
+
 from threedigrid.orm.base.options import ModelMeta
 from threedigrid.orm.base.timeseries_mixin import AggregateResultMixin, ResultMixin
 
@@ -18,6 +20,24 @@ BASE_SUBSET_FIELDS = {
     "breach_depth": {"1d_all": "Mesh1D_breach_depth"},
     "breach_width": {"1d_all": "Mesh1D_breach_width"},
 }
+
+
+def construct_line_base_composite_fields(fields: List[str]):
+    composite_fields = {
+        "au": [],
+        "u1": [],
+        "q": [],
+        "qp": [],
+        "up1": [],
+        "_mesh_id": [],
+    }
+
+    for field in fields:
+        for key, values in BASE_COMPOSITE_FIELDS.items():
+            if field in values:
+                composite_fields[key].append(field)
+
+    return composite_fields
 
 
 class LinesResultsMixin(ResultMixin):
@@ -69,3 +89,27 @@ class LinesAggregateResultsMixin(AggregateResultMixin):
         :param kwargs:
         """
         super().__init__(**kwargs)
+
+
+def get_customized_lines_result_mixin(composites: dict, area_ids: List[int]):
+    class CustomLinesResultsMixin(LinesResultsMixin):
+        class Meta:
+            field_attrs = ["units", "long_name", "standard_name"]
+
+            composite_fields = composites
+            subset_fields = BASE_SUBSET_FIELDS
+            lookup_fields = ("_mesh_id", "_mesh_id")
+            subset_ids = area_ids
+
+        def __init__(self, **kwargs):
+            """Instantiate a line with netcdf results.
+
+            Variables stored in the netcdf and related to lines are dynamically
+            added as attributes as TimeSeriesArrayField.
+
+            :param netcdf_keys: list of netcdf variables
+            :param kwargs:
+            """
+            super().__init__(**kwargs)
+
+    return CustomLinesResultsMixin

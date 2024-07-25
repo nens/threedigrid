@@ -20,11 +20,15 @@ from threedigrid.admin.h5py_datasource import H5pyResultGroup
 from threedigrid.admin.h5py_swmr import H5SwmrFile
 from threedigrid.admin.lines.models import Lines
 from threedigrid.admin.lines.timeseries_mixin import (
+    construct_line_base_composite_fields,
+    get_customized_lines_result_mixin,
     LinesAggregateResultsMixin,
     LinesResultsMixin,
 )
 from threedigrid.admin.nodes.models import Nodes
 from threedigrid.admin.nodes.timeseries_mixin import (
+    construct_node_customized_base_composite_fields,
+    get_customized_nodes_results_mixin,
     get_substance_result_mixin,
     NodesAggregateResultsMixin,
     NodesResultsMixin,
@@ -38,6 +42,7 @@ from threedigrid.admin.structure_controls.models import (
     StructureControl,
     StructureControlTypes,
 )
+from threedigrid.numpy_utils import create_np_lookup_index_for
 from threedigrid.orm.models import Model
 
 logger = logging.getLogger(__name__)
@@ -64,8 +69,8 @@ class GridH5ResultAdmin(GridH5Admin):
         :param file_modus: modus in which to open the files
         """
         self._field_model_dict = defaultdict(list)
-        self._netcdf_file_path = netcdf_file_path
-        super().__init__(h5_file_path, file_modus)
+        self._netcdf_file_path = str(netcdf_file_path)
+        super().__init__(str(h5_file_path), file_modus)
 
         self.result_datasource_class = H5pyResultGroup
 
@@ -610,3 +615,140 @@ class GridH5WaterQualityResultAdmin(GridH5Admin):
     def close(self) -> None:
         super().close()
         self.netcdf_file.close()
+
+
+class CustomizedResultsAdmin(GridH5Admin):
+    def __init__(
+        self,
+        h5_file_path: str,
+        netcdf_file_path: str,
+        file_modus: str = "r",
+        swmr: bool = False,
+    ) -> None:
+        """
+        :param h5_file_path: path to the hdf5 gridadmin file
+        :param netcdf_file_path: path to the water quality result file
+            (usually structure_control_actions_3di.nc)
+        :param file_modus: modus in which to open the files
+        """
+        super().__init__(h5_file_path, file_modus)
+
+        self._netcdf_file_path: str = netcdf_file_path
+        if swmr:
+            self.netcdf_file = H5SwmrFile(netcdf_file_path, file_modus)
+        else:
+            self.netcdf_file = h5py.File(netcdf_file_path, file_modus)
+
+        # ids
+        self._node_ids = self._get_ids("Mesh2DNode_id", "Mesh1DNode_id")
+        self._node_lookup_values = np.arange(self._node_ids.size)
+        self._lines_ids = self._get_ids("Mesh2DLine_id", "Mesh1DLine_id")
+        self._lines_lookup_values = np.arange(self._lines_ids.size)
+
+        # composite fields
+        self.node_composite_fields = construct_node_customized_base_composite_fields(
+            self.netcdf_file.keys(), ""
+        )
+        self.lines_composite_fields = construct_line_base_composite_fields(
+            self.netcdf_file.keys()
+        )
+
+        for key in self.netcdf_file.keys():
+            regex_match = re.search(r"Mesh\d{1,2}D(Node|Line|Pump)_id_area\d+", key)
+            if regex_match:
+                area_name = regex_match.group().split("_")[-1]
+                if not hasattr(self, area_name):
+                    self.__setattr__(
+                        area_name, _CustomizedAreaResultAdmin(self, area_name)
+                    )
+
+    def close(self) -> None:
+        super().close()
+        self.netcdf_file.close()
+
+    @property
+    def nodes(self):
+        """Build nodes interface if there are nodes present in the result file."""
+        if not hasattr(self, "_nodes"):
+            self._nodes = self._build_nodes_result_group("")
+        return self._nodes
+
+    @property
+    def lines(self):
+        """Build lines interface if there are lines present in the result file."""
+        if not hasattr(self, "_lines"):
+            self._lines = self._build_lines_result_group("")
+        return self._lines
+
+    def _build_nodes_result_group(self, area: str) -> Optional[Nodes]:
+        node_ids = self._get_ids(f"Mesh2DNode_id{area}", f"Mesh1DNode_id{area}")
+        if node_ids.size == 0:
+            return None
+
+        return Nodes(
+            H5pyResultGroup(self.h5py_file, "nodes", self.netcdf_file),
+            **dict(
+                self._grid_kwargs,
+                **{
+                    "mixin": get_customized_nodes_results_mixin(
+                        construct_node_customized_base_composite_fields(
+                            self.netcdf_file.keys(), area
+                        ),
+                        create_np_lookup_index_for(node_ids, self._node_ids),
+                    )
+                },
+            ),
+        )
+
+    def _build_lines_result_group(self, area: str) -> Optional[Lines]:
+        line_ids = self._get_ids(f"Mesh2DLine_id{area}", f"Mesh1DLine_id{area}")
+        if line_ids.size == 0:
+            return None
+
+        return Lines(
+            H5pyResultGroup(self.h5py_file, "lines", self.netcdf_file),
+            **dict(
+                self._grid_kwargs,
+                **{
+                    "mixin": get_customized_lines_result_mixin(
+                        self.lines_composite_fields,
+                        create_np_lookup_index_for(line_ids, self._lines_ids),
+                    )
+                },
+            ),
+        )
+
+    def _get_ids(self, field_name_2d: str, field_name_1d) -> np.ndarray:
+        node_ids_2d = (
+            self.netcdf_file.get(field_name_2d)[:]
+            if field_name_2d in self.netcdf_file.keys()
+            else np.array([], dtype=np.int32)
+        )
+        node_ids_1d = (
+            self.netcdf_file.get(field_name_1d)[:]
+            if field_name_1d in self.netcdf_file.keys()
+            else np.array([], dtype=np.int32)
+        )
+        return np.sort(np.concatenate([[0], node_ids_2d, node_ids_1d], dtype=np.int32))
+
+
+class _CustomizedAreaResultAdmin:
+    def __init__(
+        self, customized_result_admin: CustomizedResultsAdmin, area_name: str
+    ) -> None:
+        self.cra = customized_result_admin
+        self.area_name = area_name
+
+    @property
+    def nodes(self):
+        """Build nodes interface if there are nodes present in the result file."""
+        if not hasattr(self, "_nodes"):
+            self._nodes = self.cra._build_nodes_result_group(f"_{self.area_name}")
+        return self._nodes
+
+    @property
+    def lines(self):
+        """Build lines interface if there are lines present in the result file."""
+        if not hasattr(self, "_lines"):
+            self._lines = self.cra._build_lines_result_group(f"_{self.area_name}")
+        return self._lines

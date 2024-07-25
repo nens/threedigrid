@@ -69,7 +69,7 @@ class ResultMixin:
 
         fields = {}
         id_value = self.get_field_value("id")
-        if id_value:
+        if id_value is not None and hasattr(id_value, "size"):
             count = self.get_field_value("id").size
         else:
             # Dummy value

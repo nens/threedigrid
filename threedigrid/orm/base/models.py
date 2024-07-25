@@ -151,6 +151,8 @@ class Model(metaclass=ABCMeta):
         update_dict = {
             "model_name": self.__class__.__name__,
         }
+        # if hasattr(self._meta, "subset_ids"):
+        #     update_dict.update({"subset_ids": self._meta.subset_ids})
 
         kwargs.update(update_dict)
         return self._meta.get_field(field_name).get_value(
@@ -201,7 +203,9 @@ class Model(metaclass=ABCMeta):
 
             # Use the get function to retrieve the computed/filtered
             # value for the ArrayField with name: 'name'
-            return super().__getattribute__("get_filtered_field_value")(attr_name)
+            x = super().__getattribute__("get_filtered_field_value")(attr_name)
+
+            return x
 
         # Default behaviour, return the attribute from superclass
         return attr
