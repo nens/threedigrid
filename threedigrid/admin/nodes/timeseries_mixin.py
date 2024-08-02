@@ -23,40 +23,6 @@ BASE_SUBSET_FIELDS = {
 }
 
 
-def construct_node_customized_base_composite_fields(fields: List[str], area: str):
-    """ID is added as a composite field as it is not equal to the grid ids"""
-    composite_fields = {}
-    for field in fields:
-        for key, values in BASE_COMPOSITE_FIELDS.items():
-            if field in values:
-                if key not in composite_fields:
-                    composite_fields[key] = [field]
-                else:
-                    # Sort just to be sure 2D is before 1D
-                    composite_fields[key].insert(0, field)
-                    composite_fields[key].sort(reverse=True)
-
-    if "_mesh_id" in composite_fields:
-        for i, v in enumerate(composite_fields["_mesh_id"]):
-            composite_fields["_mesh_id"][i] = f"{v}{area}"
-        composite_fields["id"] = composite_fields["_mesh_id"]
-
-    return composite_fields
-
-
-# def construct_node_customized_base_subset_fields(fields: List[str]):
-#     subset_fields = {
-#         "infiltration_rate_simple": {"2d_all": "Mesh2D_infiltration_rate_simple"},
-#         "ucx": {"2d_all": "Mesh2D_ucx"},
-#         "ucy": {"2d_all": "Mesh2D_ucy"},
-#         "leak": {"2d_all": "Mesh2D_leak"},
-#         "intercepted_volume": {"2d_all": "Mesh2D_intercepted_volume"},
-#         "q_sss": {"2d_all": "Mesh2D_q_sss"},
-#     }
-
-#     return subset_fields
-
-
 class NodesResultsMixin(ResultMixin):
     class Meta:
         # attributes for the given fields
@@ -170,15 +136,57 @@ def get_substance_result_mixin(substance_name: str):
     return NodeSubstanceResultMixin
 
 
-def get_customized_nodes_results_mixin(composites: dict, lookup: List[int]):
+def get_customized_nodes_results_mixin(fields: List[str], area: str):
+    def construct_node_customized_base_composite_fields(fields: List[str], area: str):
+        """ID is added as a composite field as it is not equal to the grid ids"""
+        composite_fields = {}
+        for field in fields:
+            for key, values in BASE_COMPOSITE_FIELDS.items():
+                if field in values:
+                    if key not in composite_fields:
+                        composite_fields[key] = [field]
+                    else:
+                        # Sort just to be sure 2D is before 1D
+                        composite_fields[key].insert(0, field)
+                        composite_fields[key].sort(reverse=True)
+
+        if "_mesh_id" in composite_fields:
+            for i, v in enumerate(composite_fields["_mesh_id"]):
+                composite_fields["_mesh_id"][i] = f"{v}{area}"
+
+        composite_fields["id"] = []
+        if "Mesh2DNode_id" in fields:
+            composite_fields["id"].insert(0, "Mesh2DNode_id")
+        if "Mesh1DNode_id" in fields:
+            composite_fields["id"].append("Mesh1DNode_id")
+
+        composite_fields["node_type"] = []
+        if "Mesh2DNode_type" in fields:
+            composite_fields["node_type"].insert(0, "Mesh2DNode_type")
+        if "Mesh1DNode_type" in fields:
+            composite_fields["node_type"].append("Mesh1DNode_type")
+
+        return composite_fields
+
+    def construct_node_customized_base_subset_fields(fields: List[str]):
+        subset_fields = {}
+        for key, value in BASE_SUBSET_FIELDS.items():
+            if value["2d_all"] in fields:
+                subset_fields[key] = {"2d_all": value["2d_all"]}
+
+        return subset_fields
+
+    composites = construct_node_customized_base_composite_fields(fields, area)
+    subsets = construct_node_customized_base_subset_fields(fields)
+
     class CustomizedNodesResultsMixin(ResultMixin):
         class Meta:
             field_attrs = ["units", "long_name", "standard_name"]
 
             composite_fields = composites
-            subset_fields = {}
-            # lookup_values = lookup
-            lookup_fields = ("id", "_mesh_id")
+            subset_fields = subsets
+            lookup_fields = ("_mesh_id", "id")
+            is_customized_mixin = True
 
         def __init__(self, **kwargs):
             super().__init__(**kwargs)

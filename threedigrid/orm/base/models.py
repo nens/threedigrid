@@ -8,11 +8,13 @@ from itertools import chain, tee
 
 import numpy as np
 
+from threedigrid.numpy_utils import create_np_lookup_index_for
 from threedigrid.orm.base.exceptions import OperationNotSupportedError
 from threedigrid.orm.base.fields import (
     ArrayField,
     IndexArrayField,
     TimeSeriesArrayField,
+    TimeSeriesCompositeArrayField,
 )
 from threedigrid.orm.base.filters import get_filter, SliceFilter
 from threedigrid.orm.base.options import Options
@@ -148,13 +150,22 @@ class Model(metaclass=ABCMeta):
         With this in place we can later override the ArrayField
         get_value method for field specific conversion, if needed.
         """
+        field = self._get_field(field_name)
         update_dict = {
             "model_name": self.__class__.__name__,
         }
-        # if hasattr(self._meta, "subset_ids"):
-        #     update_dict.update({"subset_ids": self._meta.subset_ids})
+        if isinstance(field, TimeSeriesCompositeArrayField):
+            if (
+                hasattr(self, "Meta")
+                and hasattr(self.Meta, "composite_field_insert_values")
+                and field_name in self.Meta.composite_field_insert_values
+            ):
+                update_dict["insert_value"] = self.Meta.composite_field_insert_values[
+                    field_name
+                ]
 
         kwargs.update(update_dict)
+
         return self._meta.get_field(field_name).get_value(
             self._datasource, field_name, **kwargs
         )
@@ -174,7 +185,23 @@ class Model(metaclass=ABCMeta):
         _subset_name = list(subset_dict.keys())
         if not _subset_name:
             return
-        return new_inst.subset(_subset_name[0]).id
+
+        # map subset to mesh
+
+        # subset_ids = new_inst.subset(_subset_name[0]).id
+        # if self.Meta.lookup_fields[0] == "id":
+        #     ids = new_inst.get_field_value("id")
+        # elif self.Meta.lookup_fields[0] == "_mesh_id" and "_mesh_id" in self.Meta.composite_fields.keys():
+        #     ids = new_inst.get_field_value("_mesh_id")[1:]
+        subset_ids = new_inst.subset(_subset_name[0]).id
+        if self.Meta.lookup_fields[0] == "id":
+            ids = new_inst.get_field_value("id")
+        elif (
+            self.Meta.lookup_fields[0] == "_mesh_id"
+            and "_mesh_id" in self.Meta.composite_fields.keys()
+        ):
+            ids = new_inst.get_field_value("_mesh_id")
+        return create_np_lookup_index_for(subset_ids, ids)
 
     def get_filtered_field_value(
         self, field_name, ts_filter=None, lookup_index=None, subset_index=None
@@ -203,9 +230,7 @@ class Model(metaclass=ABCMeta):
 
             # Use the get function to retrieve the computed/filtered
             # value for the ArrayField with name: 'name'
-            x = super().__getattribute__("get_filtered_field_value")(attr_name)
-
-            return x
+            return super().__getattribute__("get_filtered_field_value")(attr_name)
 
         # Default behaviour, return the attribute from superclass
         return attr

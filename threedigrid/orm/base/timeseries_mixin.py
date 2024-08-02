@@ -68,9 +68,9 @@ class ResultMixin:
             return
 
         fields = {}
-        id_value = self.get_field_value("id")
+        id_value = self.get_field_value(self.Meta.lookup_fields[0])
         if id_value is not None and hasattr(id_value, "size"):
-            count = self.get_field_value("id").size
+            count = id_value.size
         else:
             # Dummy value
             count = 1024

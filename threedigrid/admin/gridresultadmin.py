@@ -20,14 +20,12 @@ from threedigrid.admin.h5py_datasource import H5pyResultGroup
 from threedigrid.admin.h5py_swmr import H5SwmrFile
 from threedigrid.admin.lines.models import Lines
 from threedigrid.admin.lines.timeseries_mixin import (
-    construct_line_base_composite_fields,
     get_customized_lines_result_mixin,
     LinesAggregateResultsMixin,
     LinesResultsMixin,
 )
 from threedigrid.admin.nodes.models import Nodes
 from threedigrid.admin.nodes.timeseries_mixin import (
-    construct_node_customized_base_composite_fields,
     get_customized_nodes_results_mixin,
     get_substance_result_mixin,
     NodesAggregateResultsMixin,
@@ -42,7 +40,6 @@ from threedigrid.admin.structure_controls.models import (
     StructureControl,
     StructureControlTypes,
 )
-from threedigrid.numpy_utils import create_np_lookup_index_for
 from threedigrid.orm.models import Model
 
 logger = logging.getLogger(__name__)
@@ -638,20 +635,7 @@ class CustomizedResultsAdmin(GridH5Admin):
             self.netcdf_file = H5SwmrFile(netcdf_file_path, file_modus)
         else:
             self.netcdf_file = h5py.File(netcdf_file_path, file_modus)
-
-        # ids
-        self._node_ids = self._get_ids("Mesh2DNode_id", "Mesh1DNode_id")
-        self._node_lookup_values = np.arange(self._node_ids.size)
-        self._lines_ids = self._get_ids("Mesh2DLine_id", "Mesh1DLine_id")
-        self._lines_lookup_values = np.arange(self._lines_ids.size)
-
-        # composite fields
-        self.node_composite_fields = construct_node_customized_base_composite_fields(
-            self.netcdf_file.keys(), ""
-        )
-        self.lines_composite_fields = construct_line_base_composite_fields(
-            self.netcdf_file.keys()
-        )
+        self.set_timeseries_chunk_size(DEFAULT_CHUNK_TIMESERIES.stop)
 
         for key in self.netcdf_file.keys():
             regex_match = re.search(r"Mesh\d{1,2}D(Node|Line|Pump)_id_area\d+", key)
@@ -691,10 +675,7 @@ class CustomizedResultsAdmin(GridH5Admin):
                 self._grid_kwargs,
                 **{
                     "mixin": get_customized_nodes_results_mixin(
-                        construct_node_customized_base_composite_fields(
-                            self.netcdf_file.keys(), area
-                        ),
-                        create_np_lookup_index_for(node_ids, self._node_ids),
+                        self.netcdf_file.keys(), area
                     )
                 },
             ),
@@ -711,8 +692,8 @@ class CustomizedResultsAdmin(GridH5Admin):
                 self._grid_kwargs,
                 **{
                     "mixin": get_customized_lines_result_mixin(
-                        self.lines_composite_fields,
-                        create_np_lookup_index_for(line_ids, self._lines_ids),
+                        self.netcdf_file.keys(),
+                        area,
                     )
                 },
             ),
@@ -731,6 +712,20 @@ class CustomizedResultsAdmin(GridH5Admin):
         )
         return np.sort(np.concatenate([[0], node_ids_2d, node_ids_1d], dtype=np.int32))
 
+    def set_timeseries_chunk_size(self, new_chunk_size):
+        """
+        overwrite the default chunk size for timeseries queries.
+        :param new_chunk_size <int>: new chunk size for
+            timeseries queries
+        :raises ValueError when the given value is less than 1
+        """
+        _chunk_size = int(new_chunk_size)
+        if _chunk_size < 1:
+            raise ValueError("Chunk size must be greater than 0")
+        self._timeseries_chunk_size = slice(0, _chunk_size)
+        logger.info("New chunk for timeseries size has been set to %d", new_chunk_size)
+        self._grid_kwargs.update({"timeseries_chunk_size": self._timeseries_chunk_size})
+
 
 class _CustomizedAreaResultAdmin:
     def __init__(
@@ -738,6 +733,8 @@ class _CustomizedAreaResultAdmin:
     ) -> None:
         self.cra = customized_result_admin
         self.area_name = area_name
+        self._timeseries_chunk_size = customized_result_admin._timeseries_chunk_size
+        self._grid_kwargs = customized_result_admin._grid_kwargs
 
     @property
     def nodes(self):
