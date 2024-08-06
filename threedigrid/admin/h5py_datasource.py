@@ -122,17 +122,17 @@ class H5pyGroup(DataSource):
         if hasattr(model, "get_timeseries_mask_filter"):
             timeseries_filter = model.get_timeseries_mask_filter()
 
-        if model._mixin and hasattr(model.Meta, "lookup_fields"):
-            try:  # Single cell models don't have Lines
-                lookup_index = model._meta._get_lookup_index()
-            except AttributeError:
-                return np.array([])
-
         if model._mixin and hasattr(model.Meta, "subset_fields"):
             has_subsets = True
 
         for n in model._field_names:
             if not model.only_fields or n in model.only_fields:
+                if model._mixin and hasattr(model.Meta, "lookup_fields"):
+                    try:  # Single cell models don't have Lines
+                        lookup_index = model._meta._get_lookup_index(field_name=n)
+                    except AttributeError:
+                        return np.array([])
+
                 if isinstance(timeseries_filter, dict):
                     ts_filter = timeseries_filter.get(n)
                 else:
