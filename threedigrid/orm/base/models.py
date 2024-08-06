@@ -187,12 +187,6 @@ class Model(metaclass=ABCMeta):
             return
 
         # map subset to mesh
-
-        # subset_ids = new_inst.subset(_subset_name[0]).id
-        # if self.Meta.lookup_fields[0] == "id":
-        #     ids = new_inst.get_field_value("id")
-        # elif self.Meta.lookup_fields[0] == "_mesh_id" and "_mesh_id" in self.Meta.composite_fields.keys():
-        #     ids = new_inst.get_field_value("_mesh_id")[1:]
         subset_ids = new_inst.subset(_subset_name[0]).id
         if self.Meta.lookup_fields[0] == "id":
             ids = new_inst.get_field_value("id")

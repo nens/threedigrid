@@ -23,24 +23,6 @@ BASE_SUBSET_FIELDS = {
 }
 
 
-def construct_line_base_composite_fields(fields: List[str]):
-    composite_fields = {
-        "au": [],
-        "u1": [],
-        "q": [],
-        "qp": [],
-        "up1": [],
-        "_mesh_id": [],
-    }
-
-    for field in fields:
-        for key, values in BASE_COMPOSITE_FIELDS.items():
-            if field in values:
-                composite_fields[key].append(field)
-
-    return composite_fields
-
-
 class LinesResultsMixin(ResultMixin):
     class Meta:
         # attributes for the given fields
@@ -92,7 +74,7 @@ class LinesAggregateResultsMixin(AggregateResultMixin):
         super().__init__(**kwargs)
 
 
-def get_customized_lines_result_mixin(fields: List[str], area: str):
+def get_lines_customized_result_mixin(fields: List[str], area: str):
     def construct_line_customized_base_composite_fields(fields: List[str], area: str):
         """ID is added as a composite field as it is not equal to the grid ids"""
         composite_fields = {}
@@ -136,7 +118,7 @@ def get_customized_lines_result_mixin(fields: List[str], area: str):
     composites = construct_line_customized_base_composite_fields(fields, area)
     subsets = construct_line_customized_base_subset_fields(fields)
 
-    class CustomizedLinesResultsMixin(LinesResultsMixin):
+    class LinesCustomizedResultsMixin(LinesResultsMixin):
         class Meta:
             field_attrs = ["units", "long_name", "standard_name"]
 
@@ -149,4 +131,4 @@ def get_customized_lines_result_mixin(fields: List[str], area: str):
         def __init__(self, **kwargs):
             super().__init__(**kwargs)
 
-    return CustomizedLinesResultsMixin
+    return LinesCustomizedResultsMixin

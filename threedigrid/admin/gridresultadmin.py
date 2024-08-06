@@ -21,13 +21,13 @@ from threedigrid.admin.h5py_datasource import H5pyResultGroup
 from threedigrid.admin.h5py_swmr import H5SwmrFile
 from threedigrid.admin.lines.models import Lines
 from threedigrid.admin.lines.timeseries_mixin import (
-    get_customized_lines_result_mixin,
+    get_lines_customized_result_mixin,
     LinesAggregateResultsMixin,
     LinesResultsMixin,
 )
 from threedigrid.admin.nodes.models import Nodes
 from threedigrid.admin.nodes.timeseries_mixin import (
-    get_customized_nodes_results_mixin,
+    get_nodes_customized_results_mixin,
     get_substance_result_mixin,
     NodesAggregateResultsMixin,
     NodesResultsMixin,
@@ -616,6 +616,19 @@ class GridH5WaterQualityResultAdmin(GridH5Admin):
 
 
 class CustomizedResultsAdmin(GridH5Admin):
+    """Interface for customized 3Di result files
+
+    This interface can be used to extract data from customized 3Di result files. It
+    contains functions to extract data from nodes, lines, breaches, and pumps.
+    Additionally, it can be used to specify the result area of interest.
+
+        >>> cra = CustomizedResultsAdmin(gridadmin_path, customized_results_3di.nc)
+        >>> cra.nodes.id
+        >>> cra.lines.id
+        >>> cra.area1.nodes.subset("1D_ALL").id
+        >>> cra.area1.lines.subset("2D_ALL").s1
+    """
+
     def __init__(
         self,
         h5_file_path: str,
@@ -689,7 +702,7 @@ class CustomizedResultsAdmin(GridH5Admin):
             H5pyResultGroup(self.h5py_file, "nodes", self.netcdf_file),
             **dict(
                 self._grid_kwargs,
-                **{"mixin": get_customized_nodes_results_mixin(self.netcdf_keys, area)},
+                **{"mixin": get_nodes_customized_results_mixin(self.netcdf_keys, area)},
             ),
         )
 
@@ -703,7 +716,7 @@ class CustomizedResultsAdmin(GridH5Admin):
             **dict(
                 self._grid_kwargs,
                 **{
-                    "mixin": get_customized_lines_result_mixin(
+                    "mixin": get_lines_customized_result_mixin(
                         self.netcdf_keys,
                         area,
                     )
@@ -731,12 +744,7 @@ class CustomizedResultsAdmin(GridH5Admin):
         return two_d_size + one_d_size
 
     def set_timeseries_chunk_size(self, new_chunk_size):
-        """
-        overwrite the default chunk size for timeseries queries.
-        :param new_chunk_size <int>: new chunk size for
-            timeseries queries
-        :raises ValueError when the given value is less than 1
-        """
+        """overwrite the default chunk size for timeseries queries"""
         _chunk_size = int(new_chunk_size)
         if _chunk_size < 1:
             raise ValueError("Chunk size must be greater than 0")
@@ -746,6 +754,8 @@ class CustomizedResultsAdmin(GridH5Admin):
 
 
 class _CustomizedAreaResultAdmin:
+    """Nested class for customized 3Di result files to interact with specific areas"""
+
     def __init__(
         self, customized_result_admin: CustomizedResultsAdmin, area_name: str
     ) -> None:

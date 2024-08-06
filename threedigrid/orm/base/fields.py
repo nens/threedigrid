@@ -259,7 +259,7 @@ class TimeSeriesSubsetArrayField(TimeSeriesArrayField):
             lookup_index = kwargs.get("lookup_index")
             if lookup_index is None or lookup_index.size == 0:
                 return np.array([])
-            templ[:, subset_index] = source_data[:, kwargs["lookup_index"]]
+            templ[:, subset_index] = source_data[:, lookup_index]
         return templ
 
     def __repr__(self):

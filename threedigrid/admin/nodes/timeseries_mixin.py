@@ -131,12 +131,12 @@ def get_substance_result_mixin(substance_name: str):
             }
             subset_fields = {}
 
-            lookup_fields = ("_mesh_id",)
+            lookup_fields = ("id", "_mesh_id")
 
     return NodeSubstanceResultMixin
 
 
-def get_customized_nodes_results_mixin(fields: List[str], area: str):
+def get_nodes_customized_results_mixin(fields: List[str], area: str):
     def construct_node_customized_base_composite_fields(fields: List[str], area: str):
         """ID is added as a composite field as it is not equal to the grid ids"""
         composite_fields = {}
@@ -179,7 +179,7 @@ def get_customized_nodes_results_mixin(fields: List[str], area: str):
     composites = construct_node_customized_base_composite_fields(fields, area)
     subsets = construct_node_customized_base_subset_fields(fields)
 
-    class CustomizedNodesResultsMixin(ResultMixin):
+    class NodesCustomizedResultsMixin(ResultMixin):
         class Meta:
             field_attrs = ["units", "long_name", "standard_name"]
 
@@ -191,4 +191,4 @@ def get_customized_nodes_results_mixin(fields: List[str], area: str):
         def __init__(self, **kwargs):
             super().__init__(**kwargs)
 
-    return CustomizedNodesResultsMixin
+    return NodesCustomizedResultsMixin
