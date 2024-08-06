@@ -14,13 +14,13 @@ from .conftest import test_file_dir
 def grc():
     grc = CustomizedResultsAdmin(
         join(test_file_dir, "bergen_with_boundaries/gridadmin.h5"),
-        join(test_file_dir, "bergen_with_boundaries/customized_results_3di_2.nc"),
+        join(test_file_dir, "bergen_with_boundaries/customized_results_3di.nc"),
     )
     yield grc
     grc.close()
 
 
-def test_grc_default_node_ids(grc: CustomizedResultsAdmin):
+def test_grc_root_node_ids(grc: CustomizedResultsAdmin):
     assert_array_equal(
         grc.nodes.id,
         [0, 2077, 2078, 2091, 2092, 7730, 7731, 7744, 7745, 12064, 12311, 12545],
@@ -36,7 +36,7 @@ def test_grc_default_node_ids(grc: CustomizedResultsAdmin):
 
 
 @pytest.mark.parametrize("field", ["s1", "vol", "su", "rain", "q_lat"])
-def test_grc_default_node_results_composites(grc: CustomizedResultsAdmin, field):
+def test_grc_root_node_results_composites(grc: CustomizedResultsAdmin, field):
     """Check composite fields for base nodes attribute"""
     assert_array_equal(
         getattr(grc.nodes, field)[:, 1:],
@@ -59,7 +59,7 @@ def test_grc_default_node_results_composites(grc: CustomizedResultsAdmin, field)
 
 
 @pytest.mark.parametrize("field", ["ucx", "ucy", "q_sss"])
-def test_grc_default_node_results_subsets(grc: CustomizedResultsAdmin, field):
+def test_grc_root_node_results_subsets(grc: CustomizedResultsAdmin, field):
     """Check subset fields for base nodes attribute"""
     assert_array_equal(
         getattr(grc.nodes, field)[:, 1:],
@@ -168,7 +168,7 @@ def test_grc_node_area_results_subsets(grc: CustomizedResultsAdmin, field, area)
     )
 
 
-def test_grc_default_line_ids(grc: CustomizedResultsAdmin):
+def test_grc_root_line_ids(grc: CustomizedResultsAdmin):
     assert_array_equal(
         grc.lines.id,
         [0, 5418, 11150, 22635, 28367, 29085, 29629],
@@ -214,7 +214,7 @@ def test_grc_area2_line_ids(grc: CustomizedResultsAdmin):
 
 
 @pytest.mark.parametrize("field", ["u1", "q", "au"])
-def test_grc_default_line_results_composites(grc: CustomizedResultsAdmin, field):
+def test_grc_root_line_results_composites(grc: CustomizedResultsAdmin, field):
     """Check composite fields for base lines attribute"""
     assert_array_equal(
         getattr(grc.lines, field)[:, 1:],
@@ -237,7 +237,7 @@ def test_grc_default_line_results_composites(grc: CustomizedResultsAdmin, field)
 
 
 @pytest.mark.parametrize("field", ["breach_depth", "breach_width"])
-def test_grc_default_line_results_subsets(grc: CustomizedResultsAdmin, field):
+def test_grc_root_line_results_subsets(grc: CustomizedResultsAdmin, field):
     """Check subset fields for base lines attribute"""
     assert_array_equal(
         getattr(grc.lines, field)[:, 1:],
@@ -334,3 +334,36 @@ def test_grc_line_area2_1d_results(grc, field):
     )
 
     assert_array_equal(getattr(grc.area2.lines.subset("1D_ALL"), field), []),
+
+
+@pytest.mark.skip(reason="todo")
+def test_pumps_root(grc: CustomizedResultsAdmin):
+    assert_array_equal(
+        grc.pumps.id,
+        [0, 1, 2],
+    )
+    assert_array_equal(
+        grc.pumps.subset("2D_ALL").id,
+        [],
+    )
+    assert_array_equal(
+        grc.pumps.subset("1D_ALL").id,
+        [1, 2],
+    )
+
+
+@pytest.mark.skip(reason="todo")
+def test_pumps_areas(grc: CustomizedResultsAdmin):
+    assert_array_equal(
+        grc.area1.pumps.id,
+        [1],
+    )
+    assert_array_equal(
+        grc.area2.pumps.id,
+        [2],
+    )
+
+
+@pytest.mark.skip(reason="todo")
+def test_breaches_root(grc: CustomizedResultsAdmin):
+    pass  # 1111

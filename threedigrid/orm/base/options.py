@@ -198,6 +198,7 @@ class Options:
             ):
                 if (
                     field_name is not None
+                    and hasattr(self.inst.Meta, "subset_fields")
                     and field_name in self.inst.Meta.subset_fields
                 ):
                     subset = list(self.inst.Meta.subset_fields[field_name].keys())[0]

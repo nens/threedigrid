@@ -13,6 +13,7 @@ from threedigrid.admin.breaches.models import Breaches
 from threedigrid.admin.breaches.timeseries_mixin import (
     BreachesAggregateResultsMixin,
     BreachesResultsMixin,
+    get_breaches_customized_result_mixin,
 )
 from threedigrid.admin.constants import DEFAULT_CHUNK_TIMESERIES
 from threedigrid.admin.gridadmin import GridH5Admin
@@ -635,9 +636,11 @@ class CustomizedResultsAdmin(GridH5Admin):
             self.netcdf_file = H5SwmrFile(netcdf_file_path, file_modus)
         else:
             self.netcdf_file = h5py.File(netcdf_file_path, file_modus)
-        self.set_timeseries_chunk_size(DEFAULT_CHUNK_TIMESERIES.stop)
 
-        for key in self.netcdf_file.keys():
+        self.set_timeseries_chunk_size(DEFAULT_CHUNK_TIMESERIES.stop)
+        self.netcdf_keys = self.netcdf_file.keys()
+
+        for key in self.netcdf_keys:
             regex_match = re.search(r"Mesh\d{1,2}D(Node|Line|Pump)_id_area\d+", key)
             if regex_match:
                 area_name = regex_match.group().split("_")[-1]
@@ -664,26 +667,35 @@ class CustomizedResultsAdmin(GridH5Admin):
             self._lines = self._build_lines_result_group("")
         return self._lines
 
+    @property
+    def breaches(self):
+        if not hasattr(self, "_breaches"):
+            if not self.has_breaches:
+                self._breaches = None
+            else:
+                self._breaches = self._build_breaches_result_group("")
+
+        if self._breaches is None:
+            logger.info("Threedimodel has no breaches")
+
+        return self._breaches
+
     def _build_nodes_result_group(self, area: str) -> Optional[Nodes]:
-        node_ids = self._get_ids(f"Mesh2DNode_id{area}", f"Mesh1DNode_id{area}")
-        if node_ids.size == 0:
+        size = self.result_group_size(f"nMesh2D_nodes{area}", f"nMesh1D_nodes{area}")
+        if size == 0:
             return None
 
         return Nodes(
             H5pyResultGroup(self.h5py_file, "nodes", self.netcdf_file),
             **dict(
                 self._grid_kwargs,
-                **{
-                    "mixin": get_customized_nodes_results_mixin(
-                        self.netcdf_file.keys(), area
-                    )
-                },
+                **{"mixin": get_customized_nodes_results_mixin(self.netcdf_keys, area)},
             ),
         )
 
     def _build_lines_result_group(self, area: str) -> Optional[Lines]:
-        line_ids = self._get_ids(f"Mesh2DLine_id{area}", f"Mesh1DLine_id{area}")
-        if line_ids.size == 0:
+        size = self.result_group_size(f"nMesh2D_lines{area}", f"nMesh1D_lines{area}")
+        if size == 0:
             return None
 
         return Lines(
@@ -692,25 +704,31 @@ class CustomizedResultsAdmin(GridH5Admin):
                 self._grid_kwargs,
                 **{
                     "mixin": get_customized_lines_result_mixin(
-                        self.netcdf_file.keys(),
+                        self.netcdf_keys,
                         area,
                     )
                 },
             ),
         )
 
-    def _get_ids(self, field_name_2d: str, field_name_1d) -> np.ndarray:
-        node_ids_2d = (
-            self.netcdf_file.get(field_name_2d)[:]
-            if field_name_2d in self.netcdf_file.keys()
-            else np.array([], dtype=np.int32)
+    def _build_breaches_result_group(self, area: str) -> Breaches:
+        return Breaches(
+            H5pyResultGroup(self.h5py_file, "breaches", self.netcdf_file),
+            **dict(
+                self._grid_kwargs,
+                **{
+                    "mixin": get_breaches_customized_result_mixin(
+                        self.netcdf_keys,
+                        area,
+                    )
+                },
+            ),
         )
-        node_ids_1d = (
-            self.netcdf_file.get(field_name_1d)[:]
-            if field_name_1d in self.netcdf_file.keys()
-            else np.array([], dtype=np.int32)
-        )
-        return np.sort(np.concatenate([[0], node_ids_2d, node_ids_1d], dtype=np.int32))
+
+    def result_group_size(self, field_name_2d: str, field_name_1d) -> np.ndarray:
+        two_d_size = self.netcdf_file.get(field_name_2d, np.array([])).size
+        one_d_size = self.netcdf_file.get(field_name_1d, np.array([])).size
+        return two_d_size + one_d_size
 
     def set_timeseries_chunk_size(self, new_chunk_size):
         """
@@ -749,3 +767,9 @@ class _CustomizedAreaResultAdmin:
         if not hasattr(self, "_lines"):
             self._lines = self.cra._build_lines_result_group(f"_{self.area_name}")
         return self._lines
+
+    @property
+    def breaches(self):
+        if not hasattr(self, "_breaches"):
+            self._breaches = self.cra._build_breaches_result_group(f"_{self.area_name}")
+        return self._breaches
