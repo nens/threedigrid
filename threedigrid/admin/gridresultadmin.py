@@ -618,7 +618,9 @@ class GridH5WaterQualityResultAdmin(GridH5Admin):
 class CustomizedResultsAdmin(GridH5Admin):
     """Interface for customized 3Di result files
 
-    This interface can be used to extract data from customized 3Di result files. It
+    Customized 3Di result files are result files where users can specify nodes, lines,
+    and pumps of interest, combined with specific output variables and intervals.
+    This interface can be used to extract data from customized result files. It
     contains functions to extract data from nodes, lines, breaches, and pumps.
     Additionally, it can be used to specify the result area of interest.
 
