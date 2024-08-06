@@ -168,13 +168,18 @@ class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
             if source_name not in list(datasource.keys()):
                 continue
 
-            if (
-                isinstance(timeseries_filter_to_use, np.ndarray)
-                and len(datasource[source_name].shape) > 1
-            ):
-                values.append(datasource[source_name][timeseries_filter_to_use, :])
+            source = datasource[source_name]
+            if isinstance(timeseries_filter_to_use, np.ndarray):
+                if len(source.shape) > 1:
+                    values.append(source[timeseries_filter_to_use, :])
+                elif source.size == timeseries_filter_to_use.size:
+                    values.append(source[timeseries_filter_to_use])
+                else:
+                    # Customized result files define some fields as a composite timeseries
+                    # (such as node_type) but it is not a timeseries.
+                    values.append(source[:])
             else:
-                values.append(datasource[source_name][timeseries_filter_to_use])
+                values.append(source[timeseries_filter_to_use])
 
         if not values:
             return np.array([])
