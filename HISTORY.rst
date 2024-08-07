@@ -4,15 +4,13 @@ History
 2.2.12 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Add customized results NetCDF interface.
 
 
 2.2.11 (2024-07-25)
 -------------------
 
 - Fix NumPy 2.0 incompatibilities.
-
-- Add customized results NetCDF interface.
 
 
 2.2.10 (2024-05-29)
