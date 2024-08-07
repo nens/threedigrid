@@ -1,4 +1,6 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
+from typing import List
+
 from threedigrid.orm.base.options import ModelMeta
 from threedigrid.orm.base.timeseries_mixin import AggregateResultMixin, ResultMixin
 
@@ -132,3 +134,61 @@ def get_substance_result_mixin(substance_name: str):
             lookup_fields = ("id", "_mesh_id")
 
     return NodeSubstanceResultMixin
+
+
+def get_nodes_customized_results_mixin(fields: List[str], area: str):
+    def construct_node_customized_base_composite_fields(fields: List[str], area: str):
+        """ID is added as a composite field as it is not equal to the grid ids"""
+        composite_fields = {}
+        for field in fields:
+            for key, values in BASE_COMPOSITE_FIELDS.items():
+                if field in values:
+                    if key not in composite_fields:
+                        composite_fields[key] = [field]
+                    else:
+                        # Sort just to be sure 2D is before 1D
+                        composite_fields[key].insert(0, field)
+                        composite_fields[key].sort(reverse=True)
+
+        if "_mesh_id" in composite_fields:
+            for i, v in enumerate(composite_fields["_mesh_id"]):
+                composite_fields["_mesh_id"][i] = f"{v}{area}"
+
+        composite_fields["id"] = []
+        if "Mesh2DNode_id" in fields:
+            composite_fields["id"].insert(0, "Mesh2DNode_id")
+        if "Mesh1DNode_id" in fields:
+            composite_fields["id"].append("Mesh1DNode_id")
+
+        composite_fields["node_type"] = []
+        if "Mesh2DNode_type" in fields:
+            composite_fields["node_type"].insert(0, "Mesh2DNode_type")
+        if "Mesh1DNode_type" in fields:
+            composite_fields["node_type"].append("Mesh1DNode_type")
+
+        return composite_fields
+
+    def construct_node_customized_base_subset_fields(fields: List[str]):
+        subset_fields = {}
+        for key, value in BASE_SUBSET_FIELDS.items():
+            if value["2d_all"] in fields:
+                subset_fields[key] = {"2d_all": value["2d_all"]}
+
+        return subset_fields
+
+    composites = construct_node_customized_base_composite_fields(fields, area)
+    subsets = construct_node_customized_base_subset_fields(fields)
+
+    class NodesCustomizedResultsMixin(ResultMixin):
+        class Meta:
+            field_attrs = ["units", "long_name", "standard_name"]
+
+            composite_fields = composites
+            subset_fields = subsets
+            lookup_fields = ("_mesh_id", "id")
+            is_customized_mixin = True
+
+        def __init__(self, **kwargs):
+            super().__init__(**kwargs)
+
+    return NodesCustomizedResultsMixin

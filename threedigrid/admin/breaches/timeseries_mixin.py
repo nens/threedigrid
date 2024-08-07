@@ -1,6 +1,7 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
+from typing import List
 
-
+from threedigrid.admin.constants import NO_DATA_VALUE
 from threedigrid.orm.base.options import ModelMeta
 from threedigrid.orm.base.timeseries_mixin import ResultMixin
 
@@ -49,3 +50,29 @@ class BreachesAggregateResultsMixin(ResultMixin):
         :param kwargs:
         """
         super().__init__(**kwargs)
+
+
+def get_breaches_customized_result_mixin(fields: List[str], area: str):
+    if f"Mesh1DLine_id{area}" not in fields:
+        return
+
+    composites = {}
+    composites["id"] = ["Mesh1DLine_id"]
+    composites["_mesh_id"] = [f"Mesh1DLine_id{area}"]
+    if "Mesh1D_breach_depth" in fields:
+        composites["breach_depth"] = ["Mesh1D_breach_depth"]
+    if "Mesh1D_breach_width" in fields:
+        composites["breach_width"] = ["Mesh1D_breach_width"]
+
+    class BreachesResultsCustomizedResultMixin(BreachesResultsMixin):
+        class Meta:
+            field_attrs = ["units", "long_name", "standard_name"]
+            composite_fields = composites
+            lookup_fields = ("_mesh_id", "levl")
+            is_customized_mixin = True
+            composite_field_insert_values = {"_mesh_id": int(NO_DATA_VALUE)}
+
+        def __init__(self, **kwargs):
+            super().__init__(**kwargs)
+
+    return BreachesResultsCustomizedResultMixin

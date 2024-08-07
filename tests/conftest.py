@@ -36,14 +36,14 @@ def ga(request):
 
 
 @pytest.fixture
-def gr_bergermeer_with_boundaries():
+def gr_bergen_with_boundaries():
     """
     Bergermeer including boundaries which results in node_id not to be continous(step 1)
     for `Mesh2D_node_id`
     """
     gr = GridH5ResultAdmin(
-        os.path.join(test_file_dir, "bergermeer_with_boundaries/", "gridadmin.h5"),
-        os.path.join(test_file_dir, "bergermeer_with_boundaries/", "results_3di.nc"),
+        os.path.join(test_file_dir, "bergen_with_boundaries/", "gridadmin.h5"),
+        os.path.join(test_file_dir, "bergen_with_boundaries/", "results_3di.nc"),
     )
     yield gr
     gr.close()

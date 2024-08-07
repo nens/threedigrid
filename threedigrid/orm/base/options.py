@@ -172,7 +172,7 @@ class Options:
             nt = namedtuple(_field, ",".join(self.inst.Meta.field_attrs))
             setattr(self, _field, nt(*meta_values[_field]))
 
-    def _get_lookup_index(self):
+    def _get_lookup_index(self, field_name=None, reset=False):
         """
         creates a look up index array for the model fields which
         can be used to align result arrays to the ordering of
@@ -184,13 +184,26 @@ class Options:
             for details) or None if the field does not have a the
             ``_needs_lookup`` attribute or if the attribute is False
         """
-        if self._lookup is None:
+        if self._lookup is None or reset:
             values = [
                 self.inst.get_field_value(x) for x in self.inst.Meta.lookup_fields
             ]
             for index, value in enumerate(values):
                 if not isinstance(value, np.ndarray):
                     values[index] = np.array(value)
+
+            if (
+                hasattr(self.inst.Meta, "is_customized_mixin")
+                and self.inst.Meta.is_customized_mixin
+            ):
+                if (
+                    field_name is not None
+                    and hasattr(self.inst.Meta, "subset_fields")
+                    and field_name in self.inst.Meta.subset_fields
+                ):
+                    subset = list(self.inst.Meta.subset_fields[field_name].keys())[0]
+                    values[0] = self.inst.subset(subset).id[:]
+                    values[1] = values[1][1:]
             self._lookup = create_np_lookup_index_for(*values)
 
         return self._lookup

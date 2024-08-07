@@ -168,24 +168,32 @@ class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
             if source_name not in list(datasource.keys()):
                 continue
 
-            if (
-                isinstance(timeseries_filter_to_use, np.ndarray)
-                and len(datasource[source_name].shape) > 1
-            ):
-                values.append(datasource[source_name][timeseries_filter_to_use, :])
+            source = datasource[source_name]
+            if isinstance(timeseries_filter_to_use, np.ndarray):
+                if len(source.shape) > 1:
+                    values.append(source[timeseries_filter_to_use, :])
+                elif source.size == timeseries_filter_to_use.size:
+                    values.append(source[timeseries_filter_to_use])
+                else:
+                    # Customized result files define some fields as a composite timeseries
+                    # (such as node_type) but it is not a timeseries.
+                    values.append(source[:])
             else:
-                values.append(datasource[source_name][timeseries_filter_to_use])
+                values.append(source[timeseries_filter_to_use])
 
         if not values:
             return np.array([])
         # combine the two source to a single source
         hs = np.hstack(values)
         axs = 1 if len(hs.shape) == 2 else 0
-        hs = np.insert(hs, 0, 0, axis=axs)
+        insert_value = kwargs.get("insert_value", 0)
+        hs = np.insert(hs, 0, insert_value, axis=axs)
         del values
         # sort the stacked array by lookup
         if lookup_index is not None:
-            return hs[:, lookup_index]
+            if len(hs.shape) > 1:
+                return hs[:, lookup_index]
+            return hs[lookup_index]
         return hs
 
     def __repr__(self):
@@ -240,6 +248,7 @@ class TimeSeriesSubsetArrayField(TimeSeriesArrayField):
 
         if self._source_name not in list(datasource.keys()):
             return np.array([])
+
         source_data = datasource[self._source_name][timeseries_filter_to_use, :]
         shp = (source_data.shape[0], self._size)
         templ = np.zeros(shp, dtype=source_data.dtype)
@@ -248,10 +257,14 @@ class TimeSeriesSubsetArrayField(TimeSeriesArrayField):
         if source_data.shape[1] == subset_index.shape[0] - 1:
             subset_index = subset_index[1:]
 
-        # Note: subset_index already contains correct sorting
-        # that matches with the NetCDF timeseries.
-        templ[:, subset_index] = source_data
-
+        if subset_index.size == source_data.shape[1]:
+            templ[:, subset_index] = source_data
+        else:
+            # Customized result files have a different mapping
+            lookup_index = kwargs.get("lookup_index")
+            if lookup_index is None or lookup_index.size == 0:
+                return np.array([])
+            templ[:, subset_index] = source_data[:, lookup_index]
         return templ
 
     def __repr__(self):

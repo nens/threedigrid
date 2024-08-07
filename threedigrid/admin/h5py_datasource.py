@@ -37,7 +37,7 @@ class H5pyGroup(DataSource):
 
         if lookup_index is None:
             if model._mixin and hasattr(model.Meta, "lookup_fields"):
-                lookup_index = model._meta._get_lookup_index()
+                lookup_index = model._meta._get_lookup_index(field_name)
 
         if lookup_index is not None:
             kwargs.update({"lookup_index": lookup_index})
@@ -48,6 +48,16 @@ class H5pyGroup(DataSource):
 
         if subset_index is not None:
             kwargs.update({"subset_index": model._get_subset_idx(field_name)})
+
+        if model._mixin and hasattr(model.Meta, "composite_field_insert_values"):
+            if field_name in model.Meta.composite_field_insert_values:
+                kwargs.update(
+                    {
+                        "insert_value": model.Meta.composite_field_insert_values[
+                            field_name
+                        ]
+                    }
+                )
 
         value = model.get_field_value(field_name, **kwargs)
 
@@ -68,7 +78,14 @@ class H5pyGroup(DataSource):
         if value is None or value.size == 0:
             return np.array([])
 
+        if model._mixin and hasattr(model.Meta, "lookup_fields"):
+            lookup_index = model._meta._get_lookup_index(reset=True)
+
         _filter = [slice(None)] * (len(value.shape) - 1) + [model.boolean_mask_filter]
+        if lookup_index is not None and isinstance(_filter[-1], np.ndarray):
+            if len(lookup_index) != len(_filter[-1]):
+                # slice the filter to match the length of the lookup index
+                _filter[-1] = np.array(_filter[-1][lookup_index])
 
         # By default load all data from H5,
         # this is WAY much faster
@@ -105,17 +122,17 @@ class H5pyGroup(DataSource):
         if hasattr(model, "get_timeseries_mask_filter"):
             timeseries_filter = model.get_timeseries_mask_filter()
 
-        if model._mixin and hasattr(model.Meta, "lookup_fields"):
-            try:  # Single cell models don't have Lines
-                lookup_index = model._meta._get_lookup_index()
-            except AttributeError:
-                return np.array([])
-
         if model._mixin and hasattr(model.Meta, "subset_fields"):
             has_subsets = True
 
         for n in model._field_names:
             if not model.only_fields or n in model.only_fields:
+                if model._mixin and hasattr(model.Meta, "lookup_fields"):
+                    try:  # Single cell models don't have Lines
+                        lookup_index = model._meta._get_lookup_index(field_name=n)
+                    except AttributeError:
+                        return np.array([])
+
                 if isinstance(timeseries_filter, dict):
                     ts_filter = timeseries_filter.get(n)
                 else:

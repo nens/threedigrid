@@ -5,37 +5,38 @@ from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
 from threedigrid.admin.nodes.models import Nodes
 
 
-def test_gr_with_boundaries(gr_bergermeer_with_boundaries: GridH5ResultAdmin):
-    gr_one_d_line_subset = gr_bergermeer_with_boundaries.lines.subset("1D_ALL")
-    gr_two_d_node_subset = gr_bergermeer_with_boundaries.nodes.subset("2D_ALL")
+def test_gr_with_boundaries(gr_bergen_with_boundaries: GridH5ResultAdmin):
+    gr_bergen_with_boundaries.lines.kcu
+    gr_one_d_line_subset = gr_bergen_with_boundaries.lines.subset("1D_ALL")
+    gr_two_d_node_subset = gr_bergen_with_boundaries.nodes.subset("2D_ALL")
 
     assert np.all(
         gr_one_d_line_subset.id
-        == gr_bergermeer_with_boundaries.netcdf_file["Mesh1DLine_id"][:]
+        == gr_bergen_with_boundaries.netcdf_file["Mesh1DLine_id"][:]
     )
     assert np.all(
         gr_two_d_node_subset.id
-        == gr_bergermeer_with_boundaries.netcdf_file["Mesh2DNode_id"][:]
+        == gr_bergen_with_boundaries.netcdf_file["Mesh2DNode_id"][:]
     )
 
     # Check ordering/correctness of breach_depth and breach_width
     assert np.all(
         gr_one_d_line_subset.breach_depth
-        == gr_bergermeer_with_boundaries.netcdf_file["Mesh1D_breach_depth"][:]
+        == gr_bergen_with_boundaries.netcdf_file["Mesh1D_breach_depth"][:]
     )
     assert np.all(
         gr_one_d_line_subset.breach_width
-        == gr_bergermeer_with_boundaries.netcdf_file["Mesh1D_breach_width"][:]
+        == gr_bergen_with_boundaries.netcdf_file["Mesh1D_breach_width"][:]
     )
 
     # Check ucx and ucy on nodes
     assert np.all(
         gr_two_d_node_subset.ucx
-        == gr_bergermeer_with_boundaries.netcdf_file["Mesh2D_ucx"][:]
+        == gr_bergen_with_boundaries.netcdf_file["Mesh2D_ucx"][:]
     )
     assert np.all(
         gr_two_d_node_subset.ucy
-        == gr_bergermeer_with_boundaries.netcdf_file["Mesh2D_ucy"][:]
+        == gr_bergen_with_boundaries.netcdf_file["Mesh2D_ucy"][:]
     )
 
 

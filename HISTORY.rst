@@ -12,6 +12,8 @@ History
 
 - Fix NumPy 2.0 incompatibilities.
 
+- Add customized results NetCDF interface.
+
 
 2.2.10 (2024-05-29)
 -------------------
