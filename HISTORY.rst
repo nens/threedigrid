@@ -1,8 +1,8 @@
 History
 =======
 
-2.2.12 (unreleased)
--------------------
+2.3.0 (2024-08-07)
+------------------
 
 - Add customized results NetCDF interface.
 
