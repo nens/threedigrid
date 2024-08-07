@@ -34,6 +34,7 @@ from threedigrid.admin.nodes.timeseries_mixin import (
 )
 from threedigrid.admin.pumps.models import Pumps
 from threedigrid.admin.pumps.timeseries_mixin import (
+    get_pumps_customized_result_mixin,
     PumpsAggregateResultsMixin,
     PumpsResultsMixin,
 )
@@ -615,20 +616,22 @@ class GridH5WaterQualityResultAdmin(GridH5Admin):
         self.netcdf_file.close()
 
 
-class CustomizedResultsAdmin(GridH5Admin):
+class CustomizedResultAdmin(GridH5Admin):
     """Interface for customized 3Di result files
 
     Customized 3Di result files are result files where users can specify nodes, lines,
     and pumps of interest, combined with specific output variables and intervals.
     This interface can be used to extract data from customized result files. It
     contains functions to extract data from nodes, lines, breaches, and pumps.
-    Additionally, it can be used to specify the result area of interest.
+    Additionally, it can be used to extract data from the result area of interest.
 
-        >>> cra = CustomizedResultsAdmin(gridadmin_path, customized_results_3di.nc)
+        >>> cra = CustomizedResultAdmin(gridadmin_path, customized_results_3di.nc)
         >>> cra.nodes.id
         >>> cra.lines.id
         >>> cra.area1.nodes.subset("1D_ALL").id
         >>> cra.area1.lines.subset("2D_ALL").s1
+        >>> cra.area1.breaches.id
+        >>> cra.area2.pumps.id
     """
 
     def __init__(
@@ -695,6 +698,19 @@ class CustomizedResultsAdmin(GridH5Admin):
 
         return self._breaches
 
+    @property
+    def pumps(self):
+        if not hasattr(self, "_pumps"):
+            if not self.has_pumpstations:
+                self._pumps = None
+            else:
+                self._pumps = self._build_pumps_result_group("")
+
+        if self._pumps is None:
+            logger.info("Threedimodel has no pumps")
+
+        return self._pumps
+
     def _build_nodes_result_group(self, area: str) -> Optional[Nodes]:
         size = self.result_group_size(f"nMesh2D_nodes{area}", f"nMesh1D_nodes{area}")
         if size == 0:
@@ -740,6 +756,20 @@ class CustomizedResultsAdmin(GridH5Admin):
             ),
         )
 
+    def _build_pumps_result_group(self, area: str) -> Pumps:
+        return Pumps(
+            H5pyResultGroup(self.h5py_file, "pumps", self.netcdf_file),
+            **dict(
+                self._grid_kwargs,
+                **{
+                    "mixin": get_pumps_customized_result_mixin(
+                        self.netcdf_keys,
+                        area,
+                    ),
+                },
+            ),
+        )
+
     def result_group_size(self, field_name_2d: str, field_name_1d) -> np.ndarray:
         two_d_size = self.netcdf_file.get(field_name_2d, np.array([])).size
         one_d_size = self.netcdf_file.get(field_name_1d, np.array([])).size
@@ -759,7 +789,7 @@ class _CustomizedAreaResultAdmin:
     """Nested class for customized 3Di result files to interact with specific areas"""
 
     def __init__(
-        self, customized_result_admin: CustomizedResultsAdmin, area_name: str
+        self, customized_result_admin: CustomizedResultAdmin, area_name: str
     ) -> None:
         self.cra = customized_result_admin
         self.area_name = area_name
@@ -785,3 +815,9 @@ class _CustomizedAreaResultAdmin:
         if not hasattr(self, "_breaches"):
             self._breaches = self.cra._build_breaches_result_group(f"_{self.area_name}")
         return self._breaches
+
+    @property
+    def pumps(self):
+        if not hasattr(self, "_pumps"):
+            self._pumps = self.cra._build_pumps_result_group(f"_{self.area_name}")
+        return self._pumps

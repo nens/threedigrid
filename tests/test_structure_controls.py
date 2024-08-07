@@ -100,7 +100,7 @@ def test_group_by_action_value_negative(gsc: GridH5StructureControl):
     assert struct_cntrls[0].id == "tablecrestlevel_1_0_3153600000"
 
 
-def test_export_method(gsc):
-    csv_path = os.path.join(test_file_dir, "test_struct_control_actions.csv")
+def test_export_method(gsc, tmp_path):
+    csv_path = os.path.join(tmp_path, "test_struct_control_actions.csv")
     structure_control_actions_to_csv(gsc, csv_path)
     assert os.path.exists(csv_path)

@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from numpy.testing import assert_array_equal
 
-from threedigrid.admin.gridresultadmin import CustomizedResultsAdmin
+from threedigrid.admin.gridresultadmin import CustomizedResultAdmin
 from threedigrid.numpy_utils import create_np_lookup_index_for
 
 from .conftest import test_file_dir
@@ -12,7 +12,7 @@ from .conftest import test_file_dir
 
 @pytest.fixture
 def grc():
-    grc = CustomizedResultsAdmin(
+    grc = CustomizedResultAdmin(
         join(test_file_dir, "bergen_with_boundaries/gridadmin.h5"),
         join(test_file_dir, "bergen_with_boundaries/customized_results_3di.nc"),
     )
@@ -20,7 +20,17 @@ def grc():
     grc.close()
 
 
-def test_grc_root_node_ids(grc: CustomizedResultsAdmin):
+@pytest.fixture
+def grc_breach():
+    grc = CustomizedResultAdmin(
+        join(test_file_dir, "breach_growth/gridadmin.h5"),
+        join(test_file_dir, "breach_growth/customized_results_3di.nc"),
+    )
+    yield grc
+    grc.close()
+
+
+def test_grc_root_node_ids(grc: CustomizedResultAdmin):
     assert_array_equal(
         grc.nodes.id,
         [0, 2077, 2078, 2091, 2092, 7730, 7731, 7744, 7745, 12064, 12311, 12545],
@@ -36,7 +46,7 @@ def test_grc_root_node_ids(grc: CustomizedResultsAdmin):
 
 
 @pytest.mark.parametrize("field", ["s1", "vol", "su", "rain", "q_lat"])
-def test_grc_root_node_results_composites(grc: CustomizedResultsAdmin, field):
+def test_grc_root_node_results_composites(grc: CustomizedResultAdmin, field):
     """Check composite fields for base nodes attribute"""
     assert_array_equal(
         getattr(grc.nodes, field)[:, 1:],
@@ -59,7 +69,7 @@ def test_grc_root_node_results_composites(grc: CustomizedResultsAdmin, field):
 
 
 @pytest.mark.parametrize("field", ["ucx", "ucy", "q_sss"])
-def test_grc_root_node_results_subsets(grc: CustomizedResultsAdmin, field):
+def test_grc_root_node_results_subsets(grc: CustomizedResultAdmin, field):
     """Check subset fields for base nodes attribute"""
     assert_array_equal(
         getattr(grc.nodes, field)[:, 1:],
@@ -77,7 +87,7 @@ def test_grc_root_node_results_subsets(grc: CustomizedResultsAdmin, field):
     )
 
 
-def test_grc_area1_node_ids(grc: CustomizedResultsAdmin):
+def test_grc_area1_node_ids(grc: CustomizedResultAdmin):
     assert_array_equal(
         grc.area1.nodes.id,
         [0, 2078, 2092, 7731, 7745, 12064, 12311, 12545],
@@ -92,7 +102,7 @@ def test_grc_area1_node_ids(grc: CustomizedResultsAdmin):
     )
 
 
-def test_grc_area2_node_ids(grc: CustomizedResultsAdmin):
+def test_grc_area2_node_ids(grc: CustomizedResultAdmin):
     assert_array_equal(
         grc.area2.nodes.id,
         [0, 2077, 2091, 7730, 7744],
@@ -109,7 +119,7 @@ def test_grc_area2_node_ids(grc: CustomizedResultsAdmin):
 
 @pytest.mark.parametrize("field", ["s1", "vol", "su", "rain", "q_lat"])
 @pytest.mark.parametrize("area", ["area1", "area2"])
-def test_grc_node_areas_results_composites(grc: CustomizedResultsAdmin, field, area):
+def test_grc_node_areas_results_composites(grc: CustomizedResultAdmin, field, area):
     """Check composite fields for areas nodes attribute"""
     subset_index_2d = create_np_lookup_index_for(
         getattr(grc, area).nodes.subset("2D_ALL").id,
@@ -140,7 +150,7 @@ def test_grc_node_areas_results_composites(grc: CustomizedResultsAdmin, field, a
 
 @pytest.mark.parametrize("field", ["ucx", "ucy", "q_sss"])
 @pytest.mark.parametrize("area", ["area1", "area2"])
-def test_grc_node_area_results_subsets(grc: CustomizedResultsAdmin, field, area):
+def test_grc_node_area_results_subsets(grc: CustomizedResultAdmin, field, area):
     """Check subset fields for area nodes attribute"""
     subset_index_2d = create_np_lookup_index_for(
         getattr(grc, area).nodes.subset("2D_ALL").id,
@@ -168,7 +178,7 @@ def test_grc_node_area_results_subsets(grc: CustomizedResultsAdmin, field, area)
     )
 
 
-def test_grc_root_line_ids(grc: CustomizedResultsAdmin):
+def test_grc_root_line_ids(grc: CustomizedResultAdmin):
     assert_array_equal(
         grc.lines.id,
         [0, 5418, 11150, 22635, 28367, 29085, 29629],
@@ -183,7 +193,7 @@ def test_grc_root_line_ids(grc: CustomizedResultsAdmin):
     )
 
 
-def test_grc_area1_line_ids(grc: CustomizedResultsAdmin):
+def test_grc_area1_line_ids(grc: CustomizedResultAdmin):
     assert_array_equal(
         grc.area1.lines.id,
         [0, 28367, 29085, 29629],
@@ -198,7 +208,7 @@ def test_grc_area1_line_ids(grc: CustomizedResultsAdmin):
     )
 
 
-def test_grc_area2_line_ids(grc: CustomizedResultsAdmin):
+def test_grc_area2_line_ids(grc: CustomizedResultAdmin):
     assert_array_equal(
         grc.area2.lines.id,
         [0, 5418, 11150, 22635],
@@ -214,7 +224,7 @@ def test_grc_area2_line_ids(grc: CustomizedResultsAdmin):
 
 
 @pytest.mark.parametrize("field", ["u1", "q", "au"])
-def test_grc_root_line_results_composites(grc: CustomizedResultsAdmin, field):
+def test_grc_root_line_results_composites(grc: CustomizedResultAdmin, field):
     """Check composite fields for base lines attribute"""
     assert_array_equal(
         getattr(grc.lines, field)[:, 1:],
@@ -237,7 +247,7 @@ def test_grc_root_line_results_composites(grc: CustomizedResultsAdmin, field):
 
 
 @pytest.mark.parametrize("field", ["breach_depth", "breach_width"])
-def test_grc_root_line_results_subsets(grc: CustomizedResultsAdmin, field):
+def test_grc_root_line_results_subsets(grc: CustomizedResultAdmin, field):
     """Check subset fields for base lines attribute"""
     assert_array_equal(
         getattr(grc.lines, field)[:, 1:],
@@ -261,7 +271,7 @@ def test_grc_root_line_results_subsets(grc: CustomizedResultsAdmin, field):
 
 @pytest.mark.parametrize("field", ["u1", "q", "au"])
 @pytest.mark.parametrize("area", ["area1", "area2"])
-def test_grc_area_line_results_composites(grc: CustomizedResultsAdmin, field, area):
+def test_grc_area_line_results_composites(grc: CustomizedResultAdmin, field, area):
     """Check composite fields for area lines attribute"""
     subset_index_2d = create_np_lookup_index_for(
         getattr(grc, area).lines.subset("2D_ALL").id,
@@ -336,34 +346,86 @@ def test_grc_line_area2_1d_results(grc, field):
     assert_array_equal(getattr(grc.area2.lines.subset("1D_ALL"), field), []),
 
 
-@pytest.mark.skip(reason="todo")
-def test_pumps_root(grc: CustomizedResultsAdmin):
+def test_pumps_root(grc: CustomizedResultAdmin):
     assert_array_equal(
         grc.pumps.id,
         [0, 1, 2],
     )
     assert_array_equal(
-        grc.pumps.subset("2D_ALL").id,
-        [],
-    )
-    assert_array_equal(
-        grc.pumps.subset("1D_ALL").id,
-        [1, 2],
+        grc.pumps.q_pump[:, 1:],
+        grc.netcdf_file["Mesh1D_q_pump"][:10],
     )
 
 
-@pytest.mark.skip(reason="todo")
-def test_pumps_areas(grc: CustomizedResultsAdmin):
+def test_pumps_area1(grc: CustomizedResultAdmin):
     assert_array_equal(
         grc.area1.pumps.id,
-        [1],
+        [0, 1],
     )
     assert_array_equal(
-        grc.area2.pumps.id,
-        [2],
+        grc.area1.pumps.q_pump[:, 1:].flatten(),
+        grc.netcdf_file["Mesh1D_q_pump"][:10, 0],
     )
 
 
-@pytest.mark.skip(reason="todo")
-def test_breaches_root(grc: CustomizedResultsAdmin):
-    pass  # 1111
+def test_pumps_area2(grc: CustomizedResultAdmin):
+    assert_array_equal(
+        grc.area2.pumps.id,
+        [0, 2],
+    )
+    assert_array_equal(
+        grc.area2.pumps.q_pump[:, 1:].flatten(),
+        grc.netcdf_file["Mesh1D_q_pump"][:10, 1],
+    )
+
+
+def test_breaches_root(grc_breach: CustomizedResultAdmin):
+    grc_breach.set_timeseries_chunk_size(50)
+    assert_array_equal(
+        grc_breach.breaches.id,
+        [0, 764, 765],
+    )
+    assert_array_equal(
+        grc_breach.breaches.timestamps,
+        grc_breach.netcdf_file["time"][:],
+    )
+    assert_array_equal(
+        grc_breach.breaches.breach_depth[:, 1:],
+        grc_breach.netcdf_file["Mesh1D_breach_depth"][:],
+    )
+    assert_array_equal(
+        grc_breach.breaches.breach_width[:, 1:],
+        grc_breach.netcdf_file["Mesh1D_breach_width"][:],
+    )
+
+
+def test_breaches_area1(grc_breach: CustomizedResultAdmin):
+    grc_breach.set_timeseries_chunk_size(50)
+    assert_array_equal(
+        grc_breach.area1.breaches.id[1:],
+        [764],
+    )
+    assert_array_equal(
+        grc_breach.area1.breaches.breach_depth[:, 1:].flatten(),
+        grc_breach.netcdf_file["Mesh1D_breach_depth"][:, 0],
+    )
+    assert_array_equal(
+        grc_breach.area1.breaches.breach_width[:, 1:].flatten(),
+        grc_breach.netcdf_file["Mesh1D_breach_width"][:, 0],
+    )
+
+
+def test_breaches_area2(grc_breach: CustomizedResultAdmin):
+    grc_breach.set_timeseries_chunk_size(50)
+    assert_array_equal(
+        grc_breach.area2.breaches.id[1:],
+        [765],
+    )
+    assert_array_equal(
+        grc_breach.area2.breaches.breach_depth[:, 1:].flatten(),
+        grc_breach.netcdf_file["Mesh1D_breach_depth"][:, 1],
+    )
+    assert_array_equal(
+        grc_breach.area2.breaches.breach_width[:, 1:].flatten(),
+        grc_breach.netcdf_file["Mesh1D_breach_width"][:, 1],
+    )
