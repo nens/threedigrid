@@ -28,6 +28,7 @@ from threedigrid.admin.lines.timeseries_mixin import (
 from threedigrid.admin.nodes.models import Nodes
 from threedigrid.admin.nodes.timeseries_mixin import (
     get_nodes_customized_results_mixin,
+    get_nodes_customized_water_quality_results_mixin,
     get_substance_result_mixin,
     NodesAggregateResultsMixin,
     NodesResultsMixin,
@@ -580,6 +581,8 @@ class GridH5WaterQualityResultAdmin(GridH5Admin):
                         value = self.netcdf_file[key].attrs.get(name)
                         if isinstance(value, bytes):
                             value = value.decode("utf-8")
+                        elif isinstance(value, h5py.Empty):
+                            value = ""
                         self.__getattribute__(substance).__setattr__(attr, value)
         self.substances = list(substances)
 
@@ -658,11 +661,13 @@ class CustomizedResultAdmin(GridH5Admin):
         self.set_timeseries_chunk_size(DEFAULT_CHUNK_TIMESERIES.stop)
         self.netcdf_keys = self.netcdf_file.keys()
 
+        self.areas = []
         for key in self.netcdf_keys:
-            regex_match = re.search(r"Mesh\d{1,2}D(Node|Line|Pump)_id_area\d+", key)
+            regex_match = re.search(r"Mesh(1|2)D(Node|Line|Pump)_id_area\d+", key)
             if regex_match:
                 area_name = regex_match.group().split("_")[-1]
                 if not hasattr(self, area_name):
+                    self.areas += [area_name]
                     self.__setattr__(
                         area_name, _CustomizedAreaResultAdmin(self, area_name)
                     )
@@ -710,6 +715,22 @@ class CustomizedResultAdmin(GridH5Admin):
             logger.info("Threedimodel has no pumps")
 
         return self._pumps
+
+    @property
+    def levees(self):
+        return None
+
+    @property
+    def nodes_embedded(self):
+        return None
+
+    @property
+    def cross_sections(self):
+        return None
+
+    @property
+    def cells(self):
+        return None
 
     def _build_nodes_result_group(self, area: str) -> Optional[Nodes]:
         size = self.result_group_size(f"nMesh2D_nodes{area}", f"nMesh1D_nodes{area}")
@@ -821,3 +842,202 @@ class _CustomizedAreaResultAdmin:
         if not hasattr(self, "_pumps"):
             self._pumps = self.cra._build_pumps_result_group(f"_{self.area_name}")
         return self._pumps
+
+
+class CustomizedWaterQualityResultAdmin(GridH5Admin):
+    """Interface for customized 3Di water quality result files
+
+    Customized water quality 3Di result files are result files where users can specify
+    nodes, lines, and pumps of interest. This interface can be used to extract data from
+    customized water quality result files. It can be used to extract data from the
+    result area of interest.
+
+        >>> cwqa = CustomizedWaterQualityResultAdmin(gridadmin_path, customized_water_quality_results_3di.nc)
+        >>> cwqa.substance1.concentration
+        >>> cwqa.substance2.name
+        >>> cwqa.area1.substance1.subset("1D_ALL").id
+        >>> cwqa.area2.substance2.subset("2D_ALL").concentration
+    """
+
+    def __init__(
+        self,
+        h5_file_path: str,
+        netcdf_file_path: str,
+        file_modus: str = "r",
+        swmr: bool = False,
+    ) -> None:
+        """
+        :param h5_file_path: path to the hdf5 gridadmin file
+        :param netcdf_file_path: path to the water quality result file
+            (usually structure_control_actions_3di.nc)
+        :param file_modus: modus in which to open the files
+        """
+        self._netcdf_file_path: str = netcdf_file_path
+        super().__init__(h5_file_path, file_modus)
+
+        if swmr:
+            self.netcdf_file = H5SwmrFile(netcdf_file_path, file_modus)
+        else:
+            self.netcdf_file = h5py.File(netcdf_file_path, file_modus)
+        self.netcdf_keys = self.netcdf_file.keys()
+
+        self._timeseries_chunk_size = slice(0, DEFAULT_CHUNK_TIMESERIES.stop)
+        self._grid_kwargs.update({"timeseries_chunk_size": self._timeseries_chunk_size})
+
+        # Get substances, sets substances as attributes: cwqa.substance1
+        self.substances = []
+        for key in self.netcdf_keys:
+            regex_match = re.search(r"substance\d+", key)
+            if regex_match:
+                substance = regex_match.group()
+                self.substances.append(substance)
+                result_group = self._build_substance_result_group(substance, "")
+                self.__setattr__(substance, result_group)
+                self._set_substance_attributes_on_result_group(result_group, substance)
+
+        # Get areas, sets areas as attributes: cwqa.area1
+        self.areas = []
+        self._add_area_groups()
+
+    def get_model_instance_by_field_name(self, field_name):
+        """
+        :param field_name: name of a models field
+        :return: instance of the model the field belongs to
+        :raises AttributeError if the model instance cannot be found
+        """
+        try:
+            model_instance = self.__getattribute__(field_name)
+            return model_instance
+        except AttributeError:
+            raise AttributeError(
+                f"Model instance with field name {field_name} not found"
+            )
+
+    def set_timeseries_chunk_size(self, new_chunk_size: int) -> None:
+        """
+        overwrite the default chunk size for timeseries queries.
+        :param new_chunk_size <int>: new chunk size for
+            timeseries queries
+        :raises ValueError when the given value is less than 1
+        """
+        _chunk_size = int(new_chunk_size)
+        if _chunk_size < 1:
+            raise ValueError("Chunk size must be greater than 0")
+        self._timeseries_chunk_size = slice(0, _chunk_size)
+        logger.info("New chunk for timeseries size has been set to %d", new_chunk_size)
+        self._grid_kwargs.update({"timeseries_chunk_size": self._timeseries_chunk_size})
+
+        # Update timeseries chunk size for all substances
+        for substance in self.substances:
+            result_group = self.__getattribute__(substance)
+            result_group.class_kwargs.update(
+                {"timeseries_chunk_size": self._timeseries_chunk_size}
+            )
+
+        # Update timeseries chunk size for all substances per area
+        for area in self.areas:
+            for substance in self.substances:
+                result_group = self.__getattribute__(area).__getattribute__(substance)
+                result_group.class_kwargs.update(
+                    {"timeseries_chunk_size": self._timeseries_chunk_size}
+                )
+
+    def _build_substance_result_group(self, substance: str, area: str) -> None:
+        return Nodes(
+            H5pyResultGroup(self.h5py_file, "nodes", self.netcdf_file),
+            **dict(
+                self._grid_kwargs,
+                **{
+                    "mixin": get_nodes_customized_water_quality_results_mixin(
+                        substance, self.netcdf_keys, area
+                    )
+                },
+            ),
+        )
+
+    def _set_substance_attributes_on_result_group(
+        self, result_group: Nodes, substance: str
+    ) -> None:
+        for key in self.netcdf_keys:
+            regex_match = re.search(rf"{substance}_(1|2)D", key)
+            if regex_match:
+                dataset = regex_match.group()
+                attrs_map = [("name", "substance_name"), ("units", "units")]
+                for attr, name in attrs_map:
+                    value = self.netcdf_file[dataset].attrs.get(name)
+                    if isinstance(value, bytes):
+                        value = value.decode("utf-8")
+                    elif isinstance(value, h5py.Empty):
+                        value = ""
+
+                    result_group.__setattr__(attr, value)
+
+    def _add_area_groups(self) -> None:
+        for key in self.netcdf_keys:
+            regex_match = re.search(r"Mesh\d{1,2}DNode_id_area\d+", key)
+            if regex_match:
+                area_name = regex_match.group().split("_")[-1]
+                if not hasattr(self, area_name):
+                    self.areas += [area_name]
+                    self.__setattr__(
+                        area_name,
+                        _CustomizedWaterQualityAreaResultAdmin(self, area_name),
+                    )
+
+    def close(self) -> None:
+        super().close()
+        self.netcdf_file.close()
+
+    @property
+    def nodes(self):
+        return None
+
+    @property
+    def lines(self):
+        return None
+
+    @property
+    def breaches(self):
+        return None
+
+    @property
+    def pumps(self):
+        return None
+
+    @property
+    def levees(self):
+        return None
+
+    @property
+    def nodes_embedded(self):
+        return None
+
+    @property
+    def cross_sections(self):
+        return None
+
+    @property
+    def cells(self):
+        return None
+
+
+class _CustomizedWaterQualityAreaResultAdmin:
+    """Nested class for customized water quality 3Di result files to interact with
+    specific areas"""
+
+    def __init__(
+        self, customized_result_admin: CustomizedWaterQualityResultAdmin, area_name: str
+    ) -> None:
+        self.cwqra = customized_result_admin
+        self.area_name = area_name
+        self._timeseries_chunk_size = customized_result_admin._timeseries_chunk_size
+        self._grid_kwargs = customized_result_admin._grid_kwargs
+
+        for substance in self.cwqra.substances:
+            result_group = self.cwqra._build_substance_result_group(
+                substance, f"_{area_name}"
+            )
+            self.__setattr__(substance, result_group)
+            self.cwqra._set_substance_attributes_on_result_group(
+                result_group, substance
+            )
