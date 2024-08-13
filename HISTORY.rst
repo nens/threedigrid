@@ -4,7 +4,7 @@ History
 2.3.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add customized water quality results NetCDF interface.
 
 
 2.3.0 (2024-08-07)

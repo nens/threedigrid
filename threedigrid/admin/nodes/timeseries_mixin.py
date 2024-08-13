@@ -156,15 +156,15 @@ def get_nodes_customized_results_mixin(fields: List[str], area: str):
 
         composite_fields["id"] = []
         if "Mesh2DNode_id" in fields:
-            composite_fields["id"].insert(0, "Mesh2DNode_id")
+            composite_fields["id"] += ["Mesh2DNode_id"]
         if "Mesh1DNode_id" in fields:
-            composite_fields["id"].append("Mesh1DNode_id")
+            composite_fields["id"] += ["Mesh1DNode_id"]
 
         composite_fields["node_type"] = []
         if "Mesh2DNode_type" in fields:
-            composite_fields["node_type"].insert(0, "Mesh2DNode_type")
+            composite_fields["node_type"] += ["Mesh2DNode_type"]
         if "Mesh1DNode_type" in fields:
-            composite_fields["node_type"].append("Mesh1DNode_type")
+            composite_fields["node_type"] += ["Mesh1DNode_type"]
 
         return composite_fields
 
@@ -192,3 +192,46 @@ def get_nodes_customized_results_mixin(fields: List[str], area: str):
             super().__init__(**kwargs)
 
     return NodesCustomizedResultsMixin
+
+
+def get_nodes_customized_water_quality_results_mixin(
+    substance_name: str, fields: List[str], area: str
+):
+    composites = {}
+    composites["id"] = []
+    if "Mesh2DNode_id" in fields:
+        composites["id"] += ["Mesh2DNode_id"]
+    if "Mesh1DNode_id" in fields:
+        composites["id"] += ["Mesh1DNode_id"]
+
+    composites["_mesh_id"] = []
+    if f"Mesh2DNode_id{area}" in fields:
+        composites["_mesh_id"] += [f"Mesh2DNode_id{area}"]
+    if f"Mesh1DNode_id{area}" in fields:
+        composites["_mesh_id"] += [f"Mesh1DNode_id{area}"]
+
+    composites["node_type"] = []
+    if "Mesh2DNode_type" in fields:
+        composites["node_type"] += ["Mesh2DNode_type"]
+    if "Mesh1DNode_type" in fields:
+        composites["node_type"] += ["Mesh1DNode_type"]
+
+    composites["concentration"] = []
+    if f"{substance_name}_2D" in fields:
+        composites["concentration"] += [f"{substance_name}_2D"]
+    if f"{substance_name}_1D" in fields:
+        composites["concentration"] += [f"{substance_name}_1D"]
+
+    class NodesCustomizedWaterQualityResultsMixin(ResultMixin):
+        class Meta:
+            field_attrs = ["units", "long_name", "standard_name"]
+
+            composite_fields = composites
+            subset_fields = {}
+            lookup_fields = ("_mesh_id", "id")
+            is_customized_mixin = True
+
+        def __init__(self, **kwargs):
+            super().__init__(**kwargs)
+
+    return NodesCustomizedWaterQualityResultsMixin

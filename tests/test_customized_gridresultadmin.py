@@ -30,6 +30,17 @@ def grc_breach():
     grc.close()
 
 
+def test_overriden_grc_properties(grc: CustomizedResultAdmin):
+    assert grc.levees is None
+    assert grc.nodes_embedded is None
+    assert grc.cross_sections is None
+    assert grc.cells is None
+
+
+def test_grc_areas(grc: CustomizedResultAdmin):
+    assert grc.areas == ["area1", "area2"]
+
+
 def test_grc_root_node_ids(grc: CustomizedResultAdmin):
     assert_array_equal(
         grc.nodes.id,

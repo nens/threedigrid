@@ -94,15 +94,15 @@ def get_lines_customized_result_mixin(fields: List[str], area: str):
 
         composite_fields["id"] = []
         if "Mesh2DLine_id" in fields:
-            composite_fields["id"].insert(0, "Mesh2DLine_id")
+            composite_fields["id"] += ["Mesh2DLine_id"]
         if "Mesh1DLine_id" in fields:
-            composite_fields["id"].append("Mesh1DLine_id")
+            composite_fields["id"] += ["Mesh1DLine_id"]
 
         composite_fields["kcu"] = []
         if "Mesh2DLine_type" in fields:
-            composite_fields["kcu"].insert(0, "Mesh2DLine_type")
+            composite_fields["kcu"] += ["Mesh2DLine_type"]
         if "Mesh1DLine_type" in fields:
-            composite_fields["kcu"].append("Mesh1DLine_type")
+            composite_fields["kcu"] += ["Mesh1DLine_type"]
 
         return composite_fields
 
