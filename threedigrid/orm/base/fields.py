@@ -169,6 +169,18 @@ class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
                 continue
 
             source = datasource[source_name]
+            if (
+                isinstance(timeseries_filter_to_use, slice)
+                and timeseries_filter_to_use.stop is not None
+            ):
+                timeseries_filter_to_use = np.array(
+                    range(
+                        timeseries_filter_to_use.start or 0,
+                        timeseries_filter_to_use.stop,
+                        timeseries_filter_to_use.step or 1,
+                    )
+                )
+
             if isinstance(timeseries_filter_to_use, np.ndarray):
                 if len(source.shape) > 1:
                     values.append(source[timeseries_filter_to_use, :])
