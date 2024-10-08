@@ -39,6 +39,8 @@ def test_overriden_grc_properties(grc: CustomizedResultAdmin):
 
 def test_grc_areas(grc: CustomizedResultAdmin):
     assert grc.areas == ["area1", "area2"]
+    assert grc.area1.name == "test 1"
+    assert grc.area2.name == "area2"
 
 
 def test_grc_root_node_ids(grc: CustomizedResultAdmin):

@@ -665,11 +665,14 @@ class CustomizedResultAdmin(GridH5Admin):
         for key in self.netcdf_keys:
             regex_match = re.search(r"Mesh(1|2)D(Node|Line|Pump)_id_area\d+", key)
             if regex_match:
-                area_name = regex_match.group().split("_")[-1]
-                if not hasattr(self, area_name):
-                    self.areas += [area_name]
+                # Set area as attribute and create area result admin
+                dataset_name = regex_match.group().split("_")[-1]
+                area_name = self.netcdf_file[key].attrs.get("area_name", dataset_name)
+                if not hasattr(self, dataset_name):
+                    self.areas += [dataset_name]
                     self.__setattr__(
-                        area_name, _CustomizedAreaResultAdmin(self, area_name)
+                        dataset_name,
+                        _CustomizedAreaResultAdmin(self, dataset_name, area_name),
                     )
 
     def close(self) -> None:
@@ -810,10 +813,14 @@ class _CustomizedAreaResultAdmin:
     """Nested class for customized 3Di result files to interact with specific areas"""
 
     def __init__(
-        self, customized_result_admin: CustomizedResultAdmin, area_name: str
+        self,
+        customized_result_admin: CustomizedResultAdmin,
+        dataset_name: str,
+        area_name: str,
     ) -> None:
         self.cra = customized_result_admin
-        self.area_name = area_name
+        self.dataset_name = dataset_name
+        self.name = area_name
         self._timeseries_chunk_size = customized_result_admin._timeseries_chunk_size
         self._grid_kwargs = customized_result_admin._grid_kwargs
 
@@ -821,26 +828,28 @@ class _CustomizedAreaResultAdmin:
     def nodes(self):
         """Build nodes interface if there are nodes present in the result file."""
         if not hasattr(self, "_nodes"):
-            self._nodes = self.cra._build_nodes_result_group(f"_{self.area_name}")
+            self._nodes = self.cra._build_nodes_result_group(f"_{self.dataset_name}")
         return self._nodes
 
     @property
     def lines(self):
         """Build lines interface if there are lines present in the result file."""
         if not hasattr(self, "_lines"):
-            self._lines = self.cra._build_lines_result_group(f"_{self.area_name}")
+            self._lines = self.cra._build_lines_result_group(f"_{self.dataset_name}")
         return self._lines
 
     @property
     def breaches(self):
         if not hasattr(self, "_breaches"):
-            self._breaches = self.cra._build_breaches_result_group(f"_{self.area_name}")
+            self._breaches = self.cra._build_breaches_result_group(
+                f"_{self.dataset_name}"
+            )
         return self._breaches
 
     @property
     def pumps(self):
         if not hasattr(self, "_pumps"):
-            self._pumps = self.cra._build_pumps_result_group(f"_{self.area_name}")
+            self._pumps = self.cra._build_pumps_result_group(f"_{self.dataset_name}")
         return self._pumps
 
 
@@ -976,12 +985,16 @@ class CustomizedWaterQualityResultAdmin(GridH5Admin):
         for key in self.netcdf_keys:
             regex_match = re.search(r"Mesh\d{1,2}DNode_id_area\d+", key)
             if regex_match:
-                area_name = regex_match.group().split("_")[-1]
-                if not hasattr(self, area_name):
-                    self.areas += [area_name]
+                # Set area as attribute and create area result admin
+                dataset_name = regex_match.group().split("_")[-1]
+                area_name = self.netcdf_file[key].attrs.get("area_name", dataset_name)
+                if not hasattr(self, dataset_name):
+                    self.areas += [dataset_name]
                     self.__setattr__(
-                        area_name,
-                        _CustomizedWaterQualityAreaResultAdmin(self, area_name),
+                        dataset_name,
+                        _CustomizedWaterQualityAreaResultAdmin(
+                            self, dataset_name, area_name
+                        ),
                     )
 
     def close(self) -> None:
@@ -1026,16 +1039,19 @@ class _CustomizedWaterQualityAreaResultAdmin:
     specific areas"""
 
     def __init__(
-        self, customized_result_admin: CustomizedWaterQualityResultAdmin, area_name: str
+        self,
+        customized_result_admin: CustomizedWaterQualityResultAdmin,
+        dataset_name: str,
+        area_name: str,
     ) -> None:
         self.cwqra = customized_result_admin
-        self.area_name = area_name
+        self.name = area_name
         self._timeseries_chunk_size = customized_result_admin._timeseries_chunk_size
         self._grid_kwargs = customized_result_admin._grid_kwargs
 
         for substance in self.cwqra.substances:
             result_group = self.cwqra._build_substance_result_group(
-                substance, f"_{area_name}"
+                substance, f"_{dataset_name}"
             )
             self.__setattr__(substance, result_group)
             self.cwqra._set_substance_attributes_on_result_group(
