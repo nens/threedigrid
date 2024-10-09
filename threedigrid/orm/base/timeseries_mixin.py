@@ -50,8 +50,15 @@ class ResultMixin:
         if not hasattr(self.Meta, "composite_fields"):
             return
 
+        composite_fields_skip_timeseries_filter = getattr(
+            self.Meta, "composite_fields_skip_timeseries_filter", []
+        )
+
         fields = {
-            v: TimeSeriesCompositeArrayField(meta=self.Meta)
+            v: TimeSeriesCompositeArrayField(
+                meta=self.Meta,
+                skip_timeseries_filter=v in composite_fields_skip_timeseries_filter,
+            )
             for v in self.Meta.composite_fields.keys()
         }
         self._meta.add_fields(fields, hide_private=True)
