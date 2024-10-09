@@ -89,6 +89,8 @@ def test_substance_units_customized(cwqa: CustomizedWaterQualityResultAdmin):
 
 def test_areas_list(cwqa: CustomizedWaterQualityResultAdmin):
     assert cwqa.areas == ["area1", "area2"]
+    assert cwqa.area1.name == "test 1"
+    assert cwqa.area2.name == "area2"
 
 
 def test_node_ids(cwqa: CustomizedWaterQualityResultAdmin):

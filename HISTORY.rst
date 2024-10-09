@@ -6,6 +6,8 @@ History
 
 - Add customized water quality results NetCDF interface.
 
+- Extract area name from customized NetCDF files.
+
 
 2.3.0 (2024-08-07)
 ------------------
