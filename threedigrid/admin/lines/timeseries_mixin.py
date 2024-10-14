@@ -123,6 +123,7 @@ def get_lines_customized_result_mixin(fields: List[str], area: str):
             field_attrs = ["units", "long_name", "standard_name"]
 
             composite_fields = composites
+            composite_fields_skip_timeseries_filter = ["id", "_mesh_id", "kcu"]
             subset_fields = subsets
             lookup_fields = ("_mesh_id", "id")
             is_customized_mixin = True

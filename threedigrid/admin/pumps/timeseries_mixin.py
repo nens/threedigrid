@@ -61,6 +61,7 @@ def get_pumps_customized_result_mixin(fields: List[str], area: str):
         class Meta:
             field_attrs = ["units", "long_name", "standard_name"]
             composite_fields = composites
+            composite_fields_skip_timeseries_filter = ["id", "_mesh_id"]
             lookup_fields = ("_mesh_id", "id")
             is_customized_mixins = True
 

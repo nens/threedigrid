@@ -176,7 +176,6 @@ class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
                 values.append(source[:])
             else:
                 if isinstance(timeseries_filter_to_use, np.ndarray):
-                    print(timeseries_filter_to_use, source)
                     if len(source.shape) > 1:
                         values.append(source[timeseries_filter_to_use, :])
                     elif source.size == timeseries_filter_to_use.size:
