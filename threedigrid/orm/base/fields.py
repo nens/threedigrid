@@ -122,8 +122,9 @@ class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
 
     """
 
-    def __init__(self, meta=None):
+    def __init__(self, meta=None, skip_timeseries_filter=False):
         self._meta = meta
+        self.skip_timeseries_filter = skip_timeseries_filter
 
     def get_value(self, datasource, name, **kwargs):
         """
@@ -169,17 +170,22 @@ class TimeSeriesCompositeArrayField(TimeSeriesArrayField):
                 continue
 
             source = datasource[source_name]
-            if isinstance(timeseries_filter_to_use, np.ndarray):
-                if len(source.shape) > 1:
-                    values.append(source[timeseries_filter_to_use, :])
-                elif source.size == timeseries_filter_to_use.size:
-                    values.append(source[timeseries_filter_to_use])
-                else:
-                    # Customized result files define some fields as a composite timeseries
-                    # (such as node_type) but it is not a timeseries.
-                    values.append(source[:])
+
+            if self.skip_timeseries_filter:
+                # Skip timeseries_filter for this field
+                values.append(source[:])
             else:
-                values.append(source[timeseries_filter_to_use])
+                if isinstance(timeseries_filter_to_use, np.ndarray):
+                    if len(source.shape) > 1:
+                        values.append(source[timeseries_filter_to_use, :])
+                    elif source.size == timeseries_filter_to_use.size:
+                        values.append(source[timeseries_filter_to_use])
+                    else:
+                        # Customized result files define some fields as a composite timeseries
+                        # (such as node_type) but it is not a timeseries.
+                        values.append(source[:])
+                else:
+                    values.append(source[timeseries_filter_to_use])
 
         if not values:
             return np.array([])
