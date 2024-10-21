@@ -8,6 +8,8 @@ History
 
 - Extract area name from customized NetCDF files.
 
+- Fix slicing of Id fields in customized NetCDF files.
+
 
 2.3.0 (2024-08-07)
 ------------------
