@@ -13,3 +13,4 @@ Supported files
    customized_results
    structure_control
    water_quality_results
+   customized_water_quality_results

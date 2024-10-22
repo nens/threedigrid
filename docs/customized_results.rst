@@ -3,7 +3,7 @@
 customized_results_3di.nc
 =========================
 
-The customized_results_3di.nc file contains a snapshot results for a spatial selection of nodes, flowlines, and pumps, for a selected list of variables. It is accessed through the ``CustomizedResultAdmin`` class.
+The customized_results_3di.nc file contains snapshot results for a spatial selection of nodes, flowlines, and pumps, for a selected list of variables. It is accessed through the ``CustomizedResultAdmin`` class.
 
 Minimal example
 ---------------
@@ -11,7 +11,6 @@ Minimal example
 .. code-block:: python
 
     from threedigrid.admin.gridresultadmin import CustomizedResultAdmin
-    from threedigrid.admin.gridadmin import GridH5Admin
 
     # Instantiate GridH5Admin and GridH5ResultAdmin objects
     gridadmin_filename = r"C:\3Di\My Model\gridadmin.h5"
