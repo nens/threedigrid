@@ -70,8 +70,8 @@ class GridH5ResultAdmin(GridH5Admin):
         :param file_modus: modus in which to open the files
         """
         self._field_model_dict = defaultdict(list)
-        self._netcdf_file_path = str(netcdf_file_path)
-        super().__init__(str(h5_file_path), file_modus)
+        self._netcdf_file_path = netcdf_file_path
+        super().__init__(h5_file_path, file_modus)
 
         self.result_datasource_class = H5pyResultGroup
 
