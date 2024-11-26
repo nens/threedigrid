@@ -1,4 +1,4 @@
-from enum import Enum, StrEnum
+from enum import Enum
 from typing import List
 
 
@@ -8,7 +8,7 @@ class StructureControlTypes(Enum):
     timed_control = "timed_control"
 
 
-class StructureControlSourceTypes(StrEnum):
+class StructureControlSourceTypes(str, Enum):
     LINES = "lines"
     NODES = "nodes"
     PUMPS = "pumps"
