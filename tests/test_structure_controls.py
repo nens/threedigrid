@@ -8,7 +8,10 @@ from threedigrid.admin.gridresultadmin import GridH5StructureControl
 from threedigrid.admin.structure_controls.exporters import (
     structure_control_actions_to_csv,
 )
-from threedigrid.admin.structure_controls.models import StructureControl
+from threedigrid.admin.structure_controls.models import (
+    StructureControl,
+    StructureControlSourceTypes,
+)
 
 test_file_dir = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), "test_files/structure_controls"
@@ -104,3 +107,20 @@ def test_export_method(gsc, tmp_path):
     csv_path = os.path.join(tmp_path, "test_struct_control_actions.csv")
     structure_control_actions_to_csv(gsc, csv_path)
     assert os.path.exists(csv_path)
+
+
+def test_get_source_type(gsc: GridH5StructureControl):
+    struct_cntrls: List[StructureControl] = gsc.table_control.group_by_action_type(
+        "set_pump_capacity"
+    )
+    assert len(struct_cntrls) == 2
+    assert isinstance(struct_cntrls[0], StructureControl)
+    assert struct_cntrls[0].source_type == StructureControlSourceTypes.PUMPS
+    assert struct_cntrls[1].source_type == StructureControlSourceTypes.PUMPS
+
+
+def test_get_source_type_2(gsc: GridH5StructureControl):
+    assert gsc.get_source_type("set_pump_capacity") == StructureControlSourceTypes.PUMPS
+    assert gsc.get_source_type("set_crest_level") == StructureControlSourceTypes.LINES
+    with pytest.raises(NotImplementedError):
+        gsc.get_source_type("this_action_most_likely_does_not_exist")
