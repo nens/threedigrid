@@ -4,7 +4,7 @@ History
 2.3.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Reverted string-casting of file paths in GridH5ResultAdmin constructor.
 
 
 2.3.2 (2024-11-26)
