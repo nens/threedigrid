@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import List
 
 
@@ -8,6 +8,12 @@ class StructureControlTypes(Enum):
     timed_control = "timed_control"
 
 
+class StructureControlSourceTypes(StrEnum):
+    LINES = "lines"
+    NODES = "nodes"
+    PUMPS = "pumps"
+
+
 class StructureControl:
     def __init__(
         self,
@@ -15,6 +21,7 @@ class StructureControl:
         grid_id: int,
         source_table: str,
         source_table_id: int,
+        source_type: StructureControlSourceTypes,
         time: List[float],
         action_type: str,
         action_value_1: List[float],
@@ -25,6 +32,7 @@ class StructureControl:
         self.grid_id = grid_id
         self.source_table = source_table
         self.source_table_id = source_table_id
+        self.source_type = source_type
         self.time = time
         self.action_type = action_type
         self.action_value_1 = action_value_1

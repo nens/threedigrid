@@ -41,6 +41,7 @@ from threedigrid.admin.pumps.timeseries_mixin import (
 )
 from threedigrid.admin.structure_controls.models import (
     StructureControl,
+    StructureControlSourceTypes,
     StructureControlTypes,
 )
 from threedigrid.orm.models import Model
@@ -355,6 +356,19 @@ class GridH5StructureControl(GridH5Admin):
 
         return source_table, source_table_id
 
+    def get_source_type(self, action_type):
+        """Indicates whether the action is applied on a line, pump (or node) feature"""
+        if action_type == "set_pump_capacity":
+            return StructureControlSourceTypes.PUMPS
+        elif action_type in [
+            "set_discharge_coefficients",
+            "set_crest_level",
+            "set_gate_level",
+        ]:
+            return StructureControlSourceTypes.LINES
+        else:
+            raise NotImplementedError
+
 
 class _GridH5NestedStructureControl:
     def __init__(
@@ -447,12 +461,14 @@ class _GridH5NestedStructureControl:
         source_table, source_table_id = self.struct_control.get_source_table(
             action_type, grid_id
         )
+        source_type = self.struct_control.get_source_type(action_type)
 
         return StructureControl(
             id=id,
             grid_id=grid_id,
             source_table=source_table,
             source_table_id=source_table_id,
+            source_type=source_type,
             time=self.time[mask],
             action_type=action_type,
             action_value_1=self.action_value_1[mask],

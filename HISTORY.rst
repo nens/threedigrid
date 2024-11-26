@@ -4,7 +4,7 @@ History
 2.3.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Added get_source_type() to GridH5StructureControl.
 
 
 2.3.1 (2024-10-21)

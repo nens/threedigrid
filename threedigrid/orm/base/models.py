@@ -572,5 +572,5 @@ class Model(metaclass=ABCMeta):
         return "<orm {} instance of {}>".format(self.__contenttype__(), self.model_name)
 
     def __contenttype__(self):
-        """conent type, e.g. lines, nodes, cells, ..."""
+        """content type, e.g. lines, nodes, cells, ..."""
         return self._datasource.group_name
