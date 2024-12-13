@@ -36,10 +36,13 @@ def ga(request):
 
 
 @pytest.fixture()
-def ga_fragments():
-    with GridH5Admin(
-        os.path.join(test_file_dir, "fragments", "gridadmin_fragments.h5")
-    ) as ga:
+def ga_fragment_path():
+    return os.path.join(test_file_dir, "fragments", "gridadmin_fragments.h5")
+
+
+@pytest.fixture()
+def ga_fragments(ga_fragment_path):
+    with GridH5Admin(ga_fragment_path) as ga:
         yield ga
 
 

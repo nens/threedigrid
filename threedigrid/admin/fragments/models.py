@@ -8,6 +8,12 @@ class Fragments(Model):
     node_id = ArrayField(type=int)
     coords = PolygonArrayField()
 
+    GPKG_DEFAULT_FIELD_MAP = {
+        "id": "id",
+        "node_id": "node_id",
+        "coords": "the_geom",
+    }
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

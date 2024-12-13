@@ -13,6 +13,7 @@ except ImportError:
 
 from threedigrid.admin import exporter_constants as const
 from threedigrid.geo_utils import get_spatial_reference
+from threedigrid.numpy_utils import reshape_flat_array
 from threedigrid.orm.base.exporters import BaseOgrExporter
 
 logger = logging.getLogger(__name__)
@@ -38,6 +39,12 @@ def get_geometry(field_name, field_type, data, index, **kwargs):
         ring.AddPoint(data[field_name][0][index], data[field_name][1][index])
 
         # Create polygon from ring
+        geom.AddGeometry(ring)
+    elif field_type == "polygon":
+        ring = ogr.Geometry(ogr.wkbLinearRing)
+        polygon_points = reshape_flat_array(data[field_name][index]).T
+        for x in polygon_points:
+            ring.AddPoint(x[0], x[1])
         geom.AddGeometry(ring)
     elif field_type == "line":
         view = data[field_name].astype("float64")

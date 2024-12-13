@@ -26,6 +26,7 @@ if ogr is not None:
         "line": ogr.wkbLineString,
         "multiline": ogr.wkbLineString,
         "bbox": ogr.wkbPolygon,
+        "polygon": ogr.wkbPolygon,
     }
 
 SHP_DRIVER_NAME = "ESRI Shapefile"

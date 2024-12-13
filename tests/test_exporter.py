@@ -4,6 +4,7 @@ import os
 import pytest
 from osgeo import ogr
 
+from threedigrid.admin.exporters.geopackage import GeopackageExporter
 from threedigrid.admin.exporters.geopackage.exporter import GpkgExporter
 from threedigrid.admin.fragments.exporters import FragmentsOgrExporter
 from threedigrid.admin.lines.exporters import LinesOgrExporter
@@ -47,6 +48,11 @@ def test_fragments_gpgk_export(ga_fragments, tmp_path):
     assert layer.GetFeatureCount() == (
         ga_fragments.fragments.id.size - 1
     )  # minus dummy
+
+
+def test_fragments_gpkg_conversion_smoke(ga_fragment_path):
+    exporter = GeopackageExporter(ga_fragment_path, "fragment_export.gpkg")
+    exporter.export()
 
 
 def test_meta_data_gpgk_export(ga, tmp_path):
