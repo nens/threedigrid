@@ -150,6 +150,30 @@ Subscription usage::
     async for item in subscription.enumerate():
           # do something with item
 
+Local development
+-----------------
+
+In order to set up a virtual environment, perform the following steps:
+
+Clone the repo and fetch the LFS objects::
+
+    git lfs fetch origin refs/remotes/origin/master
+    git lfs checkout
+
+Install platform dependencies::
+
+    sudo apt-get update && sudo apt-get install --yes --no-install-recommends libgdal-dev
+
+Create and activate a virtual environment::
+
+    python -m venv ./venv
+    source ./venv/bin/activate
+
+Install the dependencies. For your distribution, check the dependency matrix in .github/workflows/test.yml. For example, for Python 3.10::
+
+    pip install --disable-pip-version-check --upgrade pip setuptools wheel
+    pip install -e .[geo,results] pygdal==$(gdal-config --version).* ipython pytest flake8 sphinx==1.8.5 docutils==0.17.* sphinx_rtd_theme>=0.4.3 numpy==1.23.* h5py==3.7.* shapely==1.8.* pyproj==3.4.* geojson==2.5.* mercantile==1.2.1 cftime==1.6.2
+
 
 Credits
 -------

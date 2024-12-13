@@ -10,6 +10,7 @@ import numpy as np
 
 from threedigrid.admin.breaches.models import Breaches
 from threedigrid.admin.crosssections.models import CrossSections
+from threedigrid.admin.fragments.models import Fragments
 from threedigrid.admin.h5py_datasource import H5pyGroup
 from threedigrid.admin.levees.models import Levees
 from threedigrid.admin.lines.models import Lines
@@ -113,6 +114,12 @@ class GridH5Admin:
     def lines(self):
         return Lines(
             self.datasource_class(self.h5py_file, "lines"), **self._grid_kwargs
+        )
+
+    @property
+    def fragments(self):
+        return Fragments(
+            self.datasource_class(self.h5py_file, "fragments"), **self._grid_kwargs
         )
 
     @property

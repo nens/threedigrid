@@ -35,6 +35,14 @@ def ga(request):
         yield ga
 
 
+@pytest.fixture()
+def ga_fragments():
+    with GridH5Admin(
+        os.path.join(test_file_dir, "fragments", "gridadmin_fragments.h5")
+    ) as ga:
+        yield ga
+
+
 @pytest.fixture
 def gr_bergen_with_boundaries():
     """

@@ -5,6 +5,7 @@ import pytest
 from osgeo import ogr
 
 from threedigrid.admin.exporters.geopackage.exporter import GpkgExporter
+from threedigrid.admin.fragments.exporters import FragmentsOgrExporter
 from threedigrid.admin.lines.exporters import LinesOgrExporter
 
 test_file_dir = os.path.join(os.getcwd(), "tests/test_files")
@@ -34,6 +35,18 @@ def test_nodes_gpgk_export(ga, tmp_path):
     s = ogr.Open(path)
     layer = s.GetLayer("nodes")
     assert layer.GetFeatureCount() == nodes_2d_open_water.id.size
+
+
+def test_fragments_gpgk_export(ga_fragments, tmp_path):
+    path = str(tmp_path / ("exporter_test_fragments.gpkg"))
+    exporter = FragmentsOgrExporter(ga_fragments.fragments)
+    exporter.save(path, "fragments", "4326")
+    assert os.path.exists(path)
+    s = ogr.Open(path)
+    layer = s.GetLayer()
+    assert layer.GetFeatureCount() == (
+        ga_fragments.fragments.id.size - 1
+    )  # minus dummy
 
 
 def test_meta_data_gpgk_export(ga, tmp_path):
