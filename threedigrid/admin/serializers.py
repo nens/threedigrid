@@ -5,7 +5,7 @@ from collections import OrderedDict
 import numpy as np
 
 from threedigrid.admin import constants
-from threedigrid.geo_utils import raise_import_exception, transform_bbox
+from threedigrid.geo_utils import raise_import_exception, transform_bbox, transform_xys
 from threedigrid.orm.base.encoder import NumpyEncoder
 from threedigrid.orm.base.models import Model
 
@@ -125,6 +125,26 @@ class GeoJsonSerializer:
                 polygon = geojson.Polygon(
                     [(left_top, right_top, right_bottom, left_bottom, left_top)]
                 )
+                properties = fill_properties(self.fields, data, i, model_type)
+                yield geojson.Feature(geometry=polygon, properties=properties)
+        elif content_type == "fragments":
+            for i in range(data["id"].shape[-1]):
+                coords = np.round(
+                    data["coords"][i].reshape(2, -1).astype("float64"),
+                    constants.LONLAT_DIGITS,
+                )
+                if (
+                    self._model.reproject_to_epsg is not None
+                    and self._model.reproject_to_epsg != self._model.epsg_code
+                ):
+                    # Pick reproject_to_epsg or original model epsg_code
+                    coords = transform_xys(
+                        np.array(coords[0]),
+                        np.array(coords[1]),
+                        self._model.epsg_code,
+                        self._model.reproject_to_epsg,
+                    )
+                polygon = geojson.Polygon(coords.T.tolist())
                 properties = fill_properties(self.fields, data, i, model_type)
                 yield geojson.Feature(geometry=polygon, properties=properties)
         elif content_type == "levees":

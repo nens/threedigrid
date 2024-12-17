@@ -179,6 +179,8 @@ CELLS_EXPORT_FIELDS = [
     "z_coordinate",
 ]
 
+FRAGMENTS_EXPORT_FIELDS = ["id", "node_id"]
+
 DEFAULT_EXPORT_FIELDS = {
     "Lines": "ALL",
     "Pipes": PIPES_EXPORT_FIELDS,
@@ -194,4 +196,5 @@ DEFAULT_EXPORT_FIELDS = {
     "Breaches": BREACHES_EXPORT_FIELDS,
     "Levees": LEVEES_EXPORT_FIELDS,
     "Pumps": PUMPS_EXPORT_FIELDS,
+    "Fragments": FRAGMENTS_EXPORT_FIELDS,
 }
