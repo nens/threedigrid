@@ -598,3 +598,13 @@ class FragmentFilterTests(unittest.TestCase):
         )
         expected = self.parser.fragments.data["node_id"][trues]
         np.testing.assert_equal(filtered, expected)
+
+    def test_fragments_no_fragments(self):
+        grid_admin_h5_file = os.path.join(test_file_dir, "gridadmin.h5")
+        file = GridH5Admin(grid_admin_h5_file)
+        assert type(file.fragments.id) is np.ndarray
+        assert file.fragments.id.size == 0
+        assert len(file.fragments.id) == 0
+        assert file.fragments.count == 0
+        assert file.fragments.coords.size == 0
+        assert file.fragments.node_id.size == 0
