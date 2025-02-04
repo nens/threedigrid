@@ -12,6 +12,7 @@ on:
     paths:  
       - 'threedigrid/**.py'
       - './github/workflows/test.yml'
+  workflow_dispatch:
 
 jobs:
   TestLinux:
