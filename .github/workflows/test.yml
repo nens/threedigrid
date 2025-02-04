@@ -12,6 +12,7 @@ on:
     paths:  
       - 'threedigrid/**.py'
       - './github/workflows/test.yml'
+  workflow_dispatch:
 
 jobs:
   TestLinux:
@@ -24,23 +25,23 @@ jobs:
           - display_name: "2019"
             python: 3.8
             os: ubuntu-20.04
-            pins: "numpy==1.17.* h5py==2.10.* shapely==1.6.4 pyproj==2.4.* geojson==2.5.* mercantile==1.1.2 cftime==1.0.4"
+            pins: "numpy==1.17.* h5py==2.10.* shapely==1.6.4 pyproj==2.4.* geojson==2.5.* mercantile==1.1.2 cftime==1.0.4 pygdal==3.0.4.*"
           - display_name: "2020"
             python: 3.9
             os: ubuntu-20.04
-            pins: "numpy==1.19.* h5py==3.1.* shapely==1.7.1 pyproj==3.0.* geojson==2.5.* mercantile==1.1.6 cftime==1.2.1"
+            pins: "numpy==1.19.* h5py==3.1.* shapely==1.7.1 pyproj==3.0.* geojson==2.5.* mercantile==1.1.6 cftime==1.2.1 pygdal==3.0.4.*"
           - display_name: "2021"
             python: 3.9
             os: ubuntu-20.04
-            pins: "numpy==1.21.* h5py==3.3.* shapely==1.8.0 pyproj==3.2.* geojson==2.5.* mercantile==1.2.1 cftime==1.4.1"
+            pins: "numpy==1.21.* h5py==3.3.* shapely==1.8.0 pyproj==3.2.* geojson==2.5.* mercantile==1.2.1 cftime==1.4.1 pygdal==3.0.4.*"
           - display_name: "2022"
             python: '3.10'
             os: ubuntu-22.04
-            pins: "numpy==1.23.* h5py==3.7.* shapely==1.8.* pyproj==3.4.* geojson==2.5.* mercantile==1.2.1 cftime==1.6.2"
+            pins: "numpy==1.23.* h5py==3.7.* shapely==1.8.* pyproj==3.4.* geojson==2.5.* mercantile==1.2.1 cftime==1.6.2 GDAL==3.4.1"
           - display_name: "latest"
             python: '3.10'
             os: ubuntu-latest
-            pins: ""
+            pins: "GDAL==3.8.4"
 
     steps:
       - uses: actions/checkout@v4
@@ -61,7 +62,7 @@ jobs:
         shell: bash
         run: |
           pip install --disable-pip-version-check --upgrade pip setuptools wheel
-          pip install -e .[geo,results] ${{ matrix.pins }} pygdal==$(gdal-config --version).* ipython pytest flake8 sphinx==1.8.5 docutils==0.17.* sphinx_rtd_theme>=0.4.3
+          pip install -e .[geo,results] ${{ matrix.pins }} ipython pytest flake8 sphinx==1.8.5 docutils==0.17.* sphinx_rtd_theme>=0.4.3
           pip list
 
       - name: Run tests
