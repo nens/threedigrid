@@ -61,6 +61,7 @@ class GeopackageExporter:
             lines = ga.lines.filter(id__gte=1)
             nodes = ga.nodes.filter(id__gte=1)
             obstacles = ga.lines.filter(kcu=101)
+            fragments = ga.fragments.filter(id__gte=1)
 
             # Linestring geometry for pumps
             pumps_linestring = pumps.filter(node1_id__ne=-9999, node2_id__ne=-9999)
@@ -76,6 +77,7 @@ class GeopackageExporter:
                     + nodes.count
                     + obstacles_count
                     + pumps_linestring.count
+                    + fragments.count
                 )
                 self.start = 0
 
@@ -104,6 +106,7 @@ class GeopackageExporter:
             )
             nodes.to_gpkg(self.gpkg_filename, progress_func=internal_func)
             cells.to_gpkg(self.gpkg_filename, progress_func=internal_func)
+            fragments.to_gpkg(self.gpkg_filename, progress_func=internal_func)
 
             if obstacles_count > 0:
                 # override the value for 'cross_pixel_coords'

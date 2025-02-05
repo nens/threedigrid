@@ -572,3 +572,39 @@ class LineFilterTests(unittest.TestCase):
         )
         expected = self.parser.lines.data["line_coords"][:, trues]
         np.testing.assert_equal(filtered, expected)
+
+
+class FragmentFilterTests(unittest.TestCase):
+    def setUp(self):
+        grid_admin_h5_file = os.path.join(
+            test_file_dir, "fragments", "gridadmin_fragments.h5"
+        )
+        self.parser = GridH5Admin(grid_admin_h5_file)
+
+    def test_fragments_filter_id_eq(self):
+
+        filtered = self.parser.fragments.filter(id=3).data["node_id"]
+        (trues,) = np.where(self.parser.fragments.data["id"] == 3)
+        expected = self.parser.fragments.data["node_id"][trues]
+        np.testing.assert_equal(filtered, expected)
+
+    def test_fragments_filter_id_in(self):
+        filtered = self.parser.fragments.filter(id__in=list(range(3, 7))).data[
+            "node_id"
+        ]
+        (trues,) = np.where(
+            (self.parser.fragments.data["id"] >= 3)
+            & (self.parser.fragments.data["id"] < 7)
+        )
+        expected = self.parser.fragments.data["node_id"][trues]
+        np.testing.assert_equal(filtered, expected)
+
+    def test_fragments_no_fragments(self):
+        grid_admin_h5_file = os.path.join(test_file_dir, "gridadmin.h5")
+        file = GridH5Admin(grid_admin_h5_file)
+        assert isinstance(file.fragments.id, np.ndarray)
+        assert file.fragments.id.size == 0
+        assert len(file.fragments.id) == 0
+        assert file.fragments.count == 0
+        assert file.fragments.coords.size == 0
+        assert file.fragments.node_id.size == 0

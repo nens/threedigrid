@@ -508,6 +508,20 @@ class GridAdminH5Export:
             dest, indent=self._indent
         )
 
+    def export_fragments(self):
+        if not self.ga.fragments.id.size == 0:
+            logger.info(
+                "[*] Model {} does not have fragments, "
+                "skipping export fragments...".format(self.ga.model_name)
+            )
+            return
+
+        dest_ow = os.path.join(self._dest, "fragments" + self._extension)
+        getattr(
+            self.ga.fragments.reproject_to(self._epsg),
+            self._export_method,
+        )(dest_ow, indent=self._indent)
+
     def export_levees(self):
         """
         writes shapefile of levees
