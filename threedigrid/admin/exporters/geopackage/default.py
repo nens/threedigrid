@@ -56,7 +56,7 @@ class GeopackageExporter:
             del PUMPS_LINESTRING_FIELD_DEFINITIONS["coordinates"]
             PUMPS_LINESTRING_FIELD_DEFINITIONS.update({"node_coordinates": "the_geom"})
 
-            cells = ga.cells.filter(id__gte=1).filter(node_type_in=[1, 2])
+            cells = ga.cells.filter(id__gte=1).filter(node_type__in=[1, 2])
             pumps = ga.pumps.filter(id__gte=1)
             lines = ga.lines.filter(id__gte=1)
             nodes = ga.nodes.filter(id__gte=1)
