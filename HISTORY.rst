@@ -4,7 +4,7 @@ History
 2.3.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Correct fragments package init filename.
 
 
 2.3.4 (2025-05-09)
