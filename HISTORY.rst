@@ -1,7 +1,7 @@
 History
 =======
 
-2.3.4 (unreleased)
+2.3.4 (2025-05-09)
 ------------------
 
 - Added Fragments model (#254)
