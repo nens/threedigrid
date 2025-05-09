@@ -2,66 +2,74 @@ name: Linux
 
 # Run on PR requests. And on master itself.
 on:
-  push:
-    branches:
-      - master
-    paths:
-      - 'threedigrid/**.py'
-      - './github/workflows/test.yml'
-  pull_request:
-    paths:  
-      - 'threedigrid/**.py'
-      - './github/workflows/test.yml'
-  workflow_dispatch:
+    push:
+        branches:
+            - master
+        paths:
+            - "threedigrid/**.py"
+            - "./github/workflows/test.yml"
+    pull_request:
+        paths:
+            - "threedigrid/**.py"
+            - "./github/workflows/test.yml"
+    workflow_dispatch:
 
 jobs:
-  TestLinux:
-    name: Python ${{ matrix.python }} ${{ matrix.display_name }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - display_name: "2020"
-            python: 3.9
-            os: ubuntu-22.04
-            pins: "numpy==1.19.* h5py==3.1.* shapely==1.7.1 pyproj==3.0.* geojson==2.5.* mercantile==1.1.6 cftime==1.2.1 GDAL==3.4.1"
-          - display_name: "2021"
-            python: 3.9
-            os: ubuntu-22.04
-            pins: "numpy==1.21.* h5py==3.3.* shapely==1.8.0 pyproj==3.2.* geojson==2.5.* mercantile==1.2.1 cftime==1.4.1 GDAL==3.4.1"
-          - display_name: "2022"
-            python: '3.10'
-            os: ubuntu-22.04
-            pins: "numpy==1.23.* h5py==3.7.* shapely==1.8.* pyproj==3.4.* geojson==2.5.* mercantile==1.2.1 cftime==1.6.2 GDAL==3.4.1"
-          - display_name: "latest"
-            python: '3.10'
-            os: ubuntu-latest
-            pins: "GDAL==3.8.4"
+    TestLinux:
+        name: Python ${{ matrix.python }} ${{ matrix.display_name }}
+        runs-on: ${{ matrix.os }}
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                    - display_name: "2020"
+                      python: 3.9
+                      os: ubuntu-22.04
+                      pins: "numpy==1.19.* h5py==3.1.* shapely==1.7.1 pyproj==3.0.* geojson==2.5.* mercantile==1.1.6 cftime==1.2.1 GDAL==3.4.1"
+                    - display_name: "2021"
+                      python: 3.9
+                      os: ubuntu-22.04
+                      pins: "numpy==1.21.* h5py==3.3.* shapely==1.8.0 pyproj==3.2.* geojson==2.5.* mercantile==1.2.1 cftime==1.4.1 GDAL==3.4.1"
+                    - display_name: "2022"
+                      python: "3.10"
+                      os: ubuntu-22.04
+                      pins: "numpy==1.23.* h5py==3.7.* shapely==1.8.* pyproj==3.4.* geojson==2.5.* mercantile==1.2.1 cftime==1.6.2 GDAL==3.4.1"
+                    - display_name: "latest"
+                      python: "3.10"
+                      os: ubuntu-latest
+                      pins: "GDAL==3.8.4"
+                    - display_name: "2023"
+                      python: "3.11"
+                      os: ubuntu-24.04
+                      pins: "numpy==1.24.* h5py==3.8.* shapely==2.0.* pyproj==3.5.* geojson==3.0.* mercantile==1.2.* cftime==1.6.* GDAL==3.8.*"
+                    - display_name: "2024"
+                      python: "3.12"
+                      os: ubuntu-24.04
+                      pins: "numpy==1.26.* h5py==3.10.* shapely==2.0.* pyproj==3.6.* geojson==3.0.* mercantile==1.2.* cftime==1.6.* GDAL==3.8.*"
 
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          lfs: true
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  lfs: true
 
-      - name: Set up Python ${{ matrix.python }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python }}
+            - name: Set up Python ${{ matrix.python }}
+              uses: actions/setup-python@v5
+              with:
+                  python-version: ${{ matrix.python }}
 
-      - name: Install gdal
-        run: |
-          sudo apt-get update
-          sudo apt-get install --yes --no-install-recommends libgdal-dev
-      
-      - name: Install python dependencies
-        shell: bash
-        run: |
-          pip install --disable-pip-version-check --upgrade pip setuptools wheel
-          pip install -e .[geo,results] ${{ matrix.pins }} ipython pytest flake8 sphinx==1.8.5 docutils==0.17.* sphinx_rtd_theme>=0.4.3
-          pip list
+            - name: Install gdal
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install --yes --no-install-recommends libgdal-dev
 
-      - name: Run tests
-        shell: bash
-        run: |
-          pytest
+            - name: Install python dependencies
+              shell: bash
+              run: |
+                  pip install --disable-pip-version-check --upgrade pip setuptools wheel
+                  pip install -e .[geo,results] ${{ matrix.pins }} ipython pytest flake8 sphinx==1.8.5 docutils==0.17.* sphinx_rtd_theme>=0.4.3
+                  pip list
+
+            - name: Run tests
+              shell: bash
+              run: |
+                  pytest
