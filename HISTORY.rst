@@ -5,7 +5,7 @@ History
 ------------------
 
 - Added Fragments model (#254)
-
+- Add groundwater cells to the geopackage exporter
 
 2.3.3 (2024-11-26)
 ------------------
@@ -115,7 +115,7 @@ History
   affected: Nodes [infiltration_rate_simple, ucx, ucy, leak, intercepted_volume, q_sss]
   Lines: [qp, up1, breach_depth, breach_width]
 
-- Note: The `depth` and `width` field are broken for `breaches` object. 
+- Note: The `depth` and `width` field are broken for `breaches` object.
   Please use `breach_depth` and `breach_width` on the `lines` object instead.
 
 
@@ -186,7 +186,7 @@ History
 
 - Added `meta` table to Geokpackage export with meta information about 3Di model.
 
-- Added 2D groundwater boundary line types 600, 700, 800, 900. 
+- Added 2D groundwater boundary line types 600, 700, 800, 900.
   Eextended the '2D_GROUNDWATER' subset.
 
 

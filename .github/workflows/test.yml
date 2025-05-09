@@ -22,18 +22,14 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - display_name: "2019"
-            python: 3.8
-            os: ubuntu-20.04
-            pins: "numpy==1.17.* h5py==2.10.* shapely==1.6.4 pyproj==2.4.* geojson==2.5.* mercantile==1.1.2 cftime==1.0.4 pygdal==3.0.4.*"
           - display_name: "2020"
             python: 3.9
-            os: ubuntu-20.04
-            pins: "numpy==1.19.* h5py==3.1.* shapely==1.7.1 pyproj==3.0.* geojson==2.5.* mercantile==1.1.6 cftime==1.2.1 pygdal==3.0.4.*"
+            os: ubuntu-22.04
+            pins: "numpy==1.19.* h5py==3.1.* shapely==1.7.1 pyproj==3.0.* geojson==2.5.* mercantile==1.1.6 cftime==1.2.1 GDAL==3.4.1"
           - display_name: "2021"
             python: 3.9
-            os: ubuntu-20.04
-            pins: "numpy==1.21.* h5py==3.3.* shapely==1.8.0 pyproj==3.2.* geojson==2.5.* mercantile==1.2.1 cftime==1.4.1 pygdal==3.0.4.*"
+            os: ubuntu-22.04
+            pins: "numpy==1.21.* h5py==3.3.* shapely==1.8.0 pyproj==3.2.* geojson==2.5.* mercantile==1.2.1 cftime==1.4.1 GDAL==3.4.1"
           - display_name: "2022"
             python: '3.10'
             os: ubuntu-22.04
