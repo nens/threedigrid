@@ -201,6 +201,7 @@ class GridAdminNodeTest(unittest.TestCase):
             "seq_id",
             "zoom_category",
             "is_manhole",
+            "node_geometries",
             "sumax",
             "drain_level",
             "storage_area",
@@ -277,11 +278,13 @@ class GridAdminCellsTest(unittest.TestCase):
         # should have also z_coordinate
         assert set(self.parser.cells._meta.get_fields().keys()) == {
             "cell_coords",
+            "cell_geometries",
             "content_pk",
             "coordinates",
             "id",
             "calculation_type",
             "node_type",
+            "node_geometries",
             "seq_id",
             "z_coordinate",
             "zoom_category",
