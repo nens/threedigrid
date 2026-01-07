@@ -92,7 +92,7 @@ class Model(BaseModel):
         layer_name=None,
         field_definitions=None,
         progress_func=None,
-        **kwargs
+        **kwargs,
     ):
         # By default use class name in lowercase as layer_name
         if layer_name is None:
@@ -101,19 +101,15 @@ class Model(BaseModel):
                 layer_name = layer_name[:-1]
 
         if field_definitions is None:
-            if not hasattr(self, "GPKG_DEFAULT_FIELD_MAP"):
-                raise Exception(
-                    "field_definitions is not defined and no default field map present"
-                )
+            field_definitions = self.gpkg_field_map
 
-            field_definitions = self.GPKG_DEFAULT_FIELD_MAP
         exporter = GpkgExporter(self)
         exporter.save(
             file_name,
             layer_name=layer_name,
             field_definitions=field_definitions,
             progress_func=progress_func,
-            **kwargs
+            **kwargs,
         )
 
     def to_geojson(self, file_name, **kwargs):
@@ -151,3 +147,12 @@ class Model(BaseModel):
             if driver_name in exporter.supported_drivers:
                 return exporter
         return None
+
+    @property
+    def gpkg_field_map(self):
+        if hasattr(self, "GPKG_DEFAULT_FIELD_MAP"):
+            return self.GPKG_DEFAULT_FIELD_MAP
+
+        raise Exception(
+            "field_definitions is not defined and no default field map present"
+        )

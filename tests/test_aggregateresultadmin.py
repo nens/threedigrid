@@ -95,6 +95,7 @@ def test_get_meta_fields_nodes(agg_gr):
         "intercepted_volume_cum",
         "is_manhole",
         "leak_cum",
+        "node_geometries",
         "node_type",
         "q_lat_cum",
         "rain_avg",

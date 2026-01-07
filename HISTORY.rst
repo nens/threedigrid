@@ -4,7 +4,7 @@ History
 2.3.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fragments geopackage export.
 
 
 2.3.5 (2025-05-09)
