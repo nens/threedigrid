@@ -11,7 +11,6 @@ For examples how to query the ``Nodes`` model see :ref:`api-label`
 
 """
 
-
 import itertools
 
 import numpy as np
@@ -20,7 +19,12 @@ from threedigrid.admin.nodes import exporters, subsets
 from threedigrid.geo_utils import transform_xys
 from threedigrid.numpy_utils import get_smallest_uint_dtype
 from threedigrid.orm.base.fields import BooleanArrayField
-from threedigrid.orm.fields import ArrayField, BboxArrayField, PointArrayField, PolygonArrayField
+from threedigrid.orm.fields import (
+    ArrayField,
+    BboxArrayField,
+    PointArrayField,
+    PolygonArrayField,
+)
 from threedigrid.orm.models import Model
 
 NODE_SUBSETS = {
@@ -95,14 +99,14 @@ class Nodes(Model):
                 data["coordinates"][1].tolist(),
             )
         )
-    
+
     @property
     def gpkg_field_map(self):
         field_map = self.GPKG_DEFAULT_FIELD_MAP.copy()
         if len(self.node_geometries) > 0 and "coordinates" in field_map.keys():
             del field_map["coordinates"]
             field_map["node_geometries"] = "the_geom"
-        
+
         return field_map
 
 
@@ -279,14 +283,14 @@ class Cells(Nodes):
                 pixel_coords__intersects_bbox=(x1 + 1, y1 + 1, x2 - 1, y2 - 1)
             )
             yield (x1, y1, x2, y2), result
-    
+
     @property
     def gpkg_field_map(self):
         field_map = self.GPKG_DEFAULT_FIELD_MAP.copy()
         if len(self.cell_geometries) > 0 and "cell_coords" in field_map.keys():
             del field_map["cell_coords"]
             field_map["cell_geometries"] = "the_geom"
-        
+
         return field_map
 
     def __repr__(self):
