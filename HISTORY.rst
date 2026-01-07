@@ -1,7 +1,7 @@
 History
 =======
 
-2.3.6 (unreleased)
+2.3.6 (2026-01-07)
 ------------------
 
 - Fragments geopackage export.
