@@ -585,7 +585,6 @@ class FragmentFilterTests(unittest.TestCase):
         self.parser = GridH5Admin(grid_admin_h5_file)
 
     def test_fragments_filter_id_eq(self):
-
         filtered = self.parser.fragments.filter(id=3).data["node_id"]
         (trues,) = np.where(self.parser.fragments.data["id"] == 3)
         expected = self.parser.fragments.data["node_id"][trues]
