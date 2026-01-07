@@ -92,7 +92,7 @@ class Model(BaseModel):
         layer_name=None,
         field_definitions=None,
         progress_func=None,
-        **kwargs
+        **kwargs,
     ):
         # By default use class name in lowercase as layer_name
         if layer_name is None:
@@ -109,7 +109,7 @@ class Model(BaseModel):
             layer_name=layer_name,
             field_definitions=field_definitions,
             progress_func=progress_func,
-            **kwargs
+            **kwargs,
         )
 
     def to_geojson(self, file_name, **kwargs):

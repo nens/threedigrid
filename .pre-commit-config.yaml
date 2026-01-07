@@ -1,19 +1,14 @@
 default_language_version:
   python: python3
 repos:
-- repo: https://github.com/pycqa/isort
-  rev: '6.0.1'
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.9.1
   hooks:
-  - id: isort
-    exclude: 'settings'
-- repo: https://github.com/psf/black
-  rev: '25.1.0'
-  hooks:
-  - id: black
-    exclude: 'migrations*|urls*|settings*|setup.py'
-- repo: https://github.com/pycqa/flake8
-  rev: '7.2.0'
-  hooks:
-  - id: flake8
-    # NB The "exclude" setting in setup.cfg is ignored by pre-commit
-    exclude: 'docs*'
+    - id: ruff
+      args: ["--fix"]
+    - id: ruff  # isort
+      name: ruff-isort
+      args: ["check", "--select", "I", "--fix"]
+    - id: ruff-format
+      name: ruff-format
+      args: ["--exclude", "docs/*"]
