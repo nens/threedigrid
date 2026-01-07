@@ -20,7 +20,7 @@ from threedigrid.admin.nodes import exporters, subsets
 from threedigrid.geo_utils import transform_xys
 from threedigrid.numpy_utils import get_smallest_uint_dtype
 from threedigrid.orm.base.fields import BooleanArrayField
-from threedigrid.orm.fields import ArrayField, BboxArrayField, PointArrayField
+from threedigrid.orm.fields import ArrayField, BboxArrayField, PointArrayField, PolygonArrayField
 from threedigrid.orm.models import Model
 
 NODE_SUBSETS = {
@@ -44,6 +44,7 @@ class Nodes(Model):
     dmax = ArrayField(type=float)
     initial_waterlevel = ArrayField(type=float)
     dimp = ArrayField(type=float)
+    node_geometries = PointArrayField()
 
     SUBSETS = NODE_SUBSETS
 
@@ -94,6 +95,15 @@ class Nodes(Model):
                 data["coordinates"][1].tolist(),
             )
         )
+    
+    @property
+    def gpkg_field_map(self):
+        field_map = self.GPKG_DEFAULT_FIELD_MAP.copy()
+        if len(self.node_geometries) > 0 and "coordinates" in field_map.keys():
+            del field_map["coordinates"]
+            field_map["node_geometries"] = "the_geom"
+        
+        return field_map
 
 
 class AddedCalculationNodes(Nodes):
@@ -131,6 +141,7 @@ class Cells(Nodes):
     pixel_width = ArrayField(type=int)
     pixel_coords = BboxArrayField()
     has_dem_averaged = BooleanArrayField()
+    cell_geometries = PolygonArrayField()
 
     GPKG_DEFAULT_FIELD_MAP = {
         "id": "id",
@@ -268,6 +279,15 @@ class Cells(Nodes):
                 pixel_coords__intersects_bbox=(x1 + 1, y1 + 1, x2 - 1, y2 - 1)
             )
             yield (x1, y1, x2, y2), result
+    
+    @property
+    def gpkg_field_map(self):
+        field_map = self.GPKG_DEFAULT_FIELD_MAP.copy()
+        if len(self.cell_geometries) > 0 and "cell_coords" in field_map.keys():
+            del field_map["cell_coords"]
+            field_map["cell_geometries"] = "the_geom"
+        
+        return field_map
 
     def __repr__(self):
         return "<orm cells instance of {}>".format(self.model_name)
