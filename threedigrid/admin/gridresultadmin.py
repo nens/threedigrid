@@ -21,23 +21,24 @@ from threedigrid.admin.h5py_datasource import H5pyResultGroup
 from threedigrid.admin.h5py_swmr import H5SwmrFile
 from threedigrid.admin.lines.models import Lines
 from threedigrid.admin.lines.timeseries_mixin import (
-    get_lines_customized_result_mixin,
     LinesAggregateResultsMixin,
     LinesResultsMixin,
+    get_lines_customized_result_mixin,
 )
 from threedigrid.admin.nodes.models import Nodes
 from threedigrid.admin.nodes.timeseries_mixin import (
+    NodesAggregateResultsMixin,
+    NodesDebugResultsMixin,
+    NodesResultsMixin,
     get_nodes_customized_results_mixin,
     get_nodes_customized_water_quality_results_mixin,
     get_substance_result_mixin,
-    NodesAggregateResultsMixin,
-    NodesResultsMixin,
 )
 from threedigrid.admin.pumps.models import Pumps
 from threedigrid.admin.pumps.timeseries_mixin import (
-    get_pumps_customized_result_mixin,
     PumpsAggregateResultsMixin,
     PumpsResultsMixin,
+    get_pumps_customized_result_mixin,
 )
 from threedigrid.admin.structure_controls.models import (
     StructureControl,
@@ -180,7 +181,7 @@ class GridH5ResultAdmin(GridH5Admin):
                 attr = getattr(self, attr_name)
             except AttributeError:
                 logger.warning(
-                    "Attribute: '{}' does not " "exist in h5py_file.".format(attr_name)
+                    "Attribute: '{}' does not exist in h5py_file.".format(attr_name)
                 )
                 continue
             if not issubclass(type(attr), Model):
@@ -1073,3 +1074,40 @@ class _CustomizedWaterQualityAreaResultAdmin:
             self.cwqra._set_substance_attributes_on_result_group(
                 result_group, substance
             )
+
+
+class GridH5DebugResultAdmin(GridH5ResultAdmin):
+    """
+    Admin interface for threedicore result queries.
+    """
+
+    def __init__(self, h5_file_path, netcdf_file_path, file_modus="r"):
+        """
+
+        :param h5_file_path: path to the hdf5 gridadmin file
+        :param netcdf_file_path: path to the netcdf result file (usually
+            called subgrid_map.nc)
+        :param file_modus: modus in which to open the files
+        """
+        super().__init__(h5_file_path, netcdf_file_path, file_modus)
+
+    @property
+    def lines(self):
+        raise NotImplementedError("Lines are not implemented in the debug result admin")
+
+    @property
+    def nodes(self):
+        return Nodes(
+            H5pyResultGroup(self.h5py_file, "nodes", self.netcdf_file),
+            **dict(self._grid_kwargs, **{"mixin": NodesDebugResultsMixin}),
+        )
+
+    @property
+    def breaches(self):
+        raise NotImplementedError(
+            "Breaches are not implemented in the debug result admin"
+        )
+
+    @property
+    def pumps(self):
+        raise NotImplementedError("Pumps are not implemented in the debug result admin")

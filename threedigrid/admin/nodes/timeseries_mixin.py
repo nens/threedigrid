@@ -238,3 +238,38 @@ def get_nodes_customized_water_quality_results_mixin(
             super().__init__(**kwargs)
 
     return NodesCustomizedWaterQualityResultsMixin
+
+
+class NodesDebugResultsMixin(ResultMixin):
+    class Meta:
+        # attributes for the given fields
+        field_attrs = ["units", "long_name", "standard_name"]
+
+        # values of *_COMPOSITE_FIELDS are the variables names as known in
+        # the result netCDF file. They are split into 1D and 2D subsets.
+        # As threedigrid has its own subsection ecosystem they are merged
+        # into a single field (e.g. the keys of *_COMPOSITE_FIELDS).
+
+        # N.B. # fields starting with '_' are private and will not be added to
+        # fields property
+        composite_fields = BASE_COMPOSITE_FIELDS = {
+            "epss1": ["Mesh2D_epss1", "Mesh1D_epss1"],
+            "epss1_cum": ["Mesh2D_epss1_cum", "Mesh1D_epss1_cum"],
+            "epss1_avg": ["Mesh2D_epss1_avg", "Mesh1D_epss1_avg"],
+            "epss1_max": ["Mesh2D_epss1_max", "Mesh1D_epss1_max"],
+            "_mesh_id": ["Mesh2DNode_id", "Mesh1DNode_id"],
+        }
+        subset_fields = {}
+
+        lookup_fields = ("id", "_mesh_id")
+
+    def __init__(self, **kwargs):
+        """Instantiate a node with netcdf results.
+
+        Variables stored in the netcdf and related to nodes are dynamically
+        added as attributes as TimeSeriesCompositeArrayField.
+
+        :param netcdf_keys: list of netcdf variables
+        :param kwargs:
+        """
+        super().__init__(**kwargs)
