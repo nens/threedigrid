@@ -4,7 +4,7 @@ History
 2.3.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add Debug result admin.
 
 
 2.3.6 (2026-01-07)

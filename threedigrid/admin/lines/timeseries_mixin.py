@@ -133,3 +133,30 @@ def get_lines_customized_result_mixin(fields: List[str], area: str):
             super().__init__(**kwargs)
 
     return LinesCustomizedResultsMixin
+
+
+class LinesDebugResultsMixin(LinesResultsMixin):
+    class Meta:
+        field_attrs = ["units", "long_name", "standard_name"]
+
+        composite_fields = BASE_COMPOSITE_FIELDS = {
+            "cfl": ["Mesh2D_cfl", "Mesh1D_cfl"],
+            "cfl_cum": ["Mesh2D_cfl_cum", "Mesh1D_cfl_cum"],
+            "cfl_avg": ["Mesh2D_cfl_avg", "Mesh1D_cfl_avg"],
+            "cfl_max": ["Mesh2D_cfl_max", "Mesh1D_cfl_max"],
+            "_mesh_id": ["Mesh2DLine_id", "Mesh1DLine_id"],
+        }
+        subset_fields = {}
+
+        lookup_fields = ("id", "_mesh_id")
+
+    def __init__(self, **kwargs):
+        """Instantiate a line with netcdf results.
+
+        Variables stored in the netcdf and related to lines are dynamically
+        added as attributes as TimeSeriesArrayField.
+
+        :param netcdf_keys: list of netcdf variables
+        :param kwargs:
+        """
+        super().__init__(**kwargs)
