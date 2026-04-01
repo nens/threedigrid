@@ -22,6 +22,7 @@ from threedigrid.admin.h5py_swmr import H5SwmrFile
 from threedigrid.admin.lines.models import Lines
 from threedigrid.admin.lines.timeseries_mixin import (
     LinesAggregateResultsMixin,
+    LinesDebugResultsMixin,
     LinesResultsMixin,
     get_lines_customized_result_mixin,
 )
@@ -1093,7 +1094,10 @@ class GridH5DebugResultAdmin(GridH5ResultAdmin):
 
     @property
     def lines(self):
-        raise NotImplementedError("Lines are not implemented in the debug result admin")
+        return Lines(
+            H5pyResultGroup(self.h5py_file, "lines", self.netcdf_file),
+            **dict(self._grid_kwargs, **{"mixin": LinesDebugResultsMixin}),
+        )
 
     @property
     def nodes(self):
