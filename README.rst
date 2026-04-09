@@ -174,7 +174,7 @@ Install the dependencies. For your distribution, check the dependency matrix in 
     pip install --disable-pip-version-check --upgrade pip setuptools wheel
     pip install -e .[geo,results] GDAL==$(gdal-config --version).* ipython pytest
 
-"GDAL==3.8.4"
+
 Credits
 -------
 
