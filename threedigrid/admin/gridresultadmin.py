@@ -180,7 +180,7 @@ class GridH5ResultAdmin(GridH5Admin):
                 continue
             try:
                 attr = getattr(self, attr_name)
-            except AttributeError:
+            except (AttributeError, NotImplementedError):
                 logger.warning(
                     "Attribute: '{}' does not exist in h5py_file.".format(attr_name)
                 )
