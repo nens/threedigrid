@@ -1,7 +1,7 @@
 History
 =======
 
-2.3.8 (unreleased)
+2.3.8 (2026-04-09)
 ------------------
 
 - Fixed get_model_instance_by_field_name for Debug result admin (#267)
