@@ -169,10 +169,10 @@ Create and activate a virtual environment::
     python -m venv ./venv
     source ./venv/bin/activate
 
-Install the dependencies. For your distribution, check the dependency matrix in .github/workflows/test.yml. For example, for Python 3.10::
+Install the dependencies. For your distribution, check the dependency matrix in .github/workflows/test.yml. For Python 3.12 on Ubuntu 24::
 
     pip install --disable-pip-version-check --upgrade pip setuptools wheel
-    pip install -e .[geo,results] pygdal==$(gdal-config --version).* ipython pytest flake8 sphinx==1.8.5 docutils==0.17.* sphinx_rtd_theme>=0.4.3 numpy==1.23.* h5py==3.7.* shapely==1.8.* pyproj==3.4.* geojson==2.5.* mercantile==1.2.1 cftime==1.6.2
+    pip install -e .[geo,results] GDAL==$(gdal-config --version).* ipython pytest
 
 
 Credits

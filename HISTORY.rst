@@ -4,7 +4,7 @@ History
 2.3.8 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fixed get_model_instance_by_field_name for Debug result admin (#267)
 
 
 2.3.7 (2026-04-01)
