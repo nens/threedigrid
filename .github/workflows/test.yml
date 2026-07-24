@@ -57,7 +57,7 @@ jobs:
         shell: bash
         run: |
           pip install --disable-pip-version-check --upgrade pip setuptools wheel
-          pip install .[geo,results] pytest
+          pip install .[geo,results,docs] pytest 
           pip install --no-build-isolation --no-cache-dir --force-reinstall GDAL==$(gdal-config --version).*
           pip list
 
