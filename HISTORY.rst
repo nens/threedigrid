@@ -1,7 +1,7 @@
 History
 =======
 
-2.3.9 (unreleased)
+2.3.9 (2026-07-24)
 ------------------
 
 - Upgrade python version to minimum 3.10
