@@ -4,7 +4,8 @@ History
 2.3.9 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Upgrade python version to minimum 3.10
+- numpy version to minimum 2
 
 
 2.3.8 (2026-04-09)
