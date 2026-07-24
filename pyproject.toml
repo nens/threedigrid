@@ -1,0 +1,95 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "threedigrid"
+description = "Python package for the threedigrid administration"
+readme = "README.rst"
+requires-python = ">=3.10"
+license = {text = "BSD license"}
+authors = [
+    {name = "Lars Claussen", email = "info@nelen-schuurmans.nl"},
+    {name = "Jelle Prins", email = "info@nelen-schuurmans.nl"},
+    {name = "Daan van Ingen", email = "info@nelen-schuurmans.nl"},
+]
+keywords = ["threedigrid"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = [
+    "numpy>=2.0<3.0",
+    "h5py>=2.9",
+    "six",
+]
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://github.com/nens/threedigrid"
+Documentation = "https://threedigrid.readthedocs.io"
+
+[project.optional-dependencies]
+geo = [
+    "Click>=6.0",
+    "mercantile>=1.0.4",
+    "pyproj>=2.2",
+    "Shapely>=1.6",
+    "geojson>=2.4",
+]
+results = ["cftime>=1.0.1"]
+rpc = ["asyncio-rpc>=0.1.10"]
+docs = [
+    "sphinx~=7.2.6",
+    "sphinx_rtd_theme>=2.0.0",
+]
+
+[project.scripts]
+3digrid_explore = "threedigrid.management.commands.kick:kick_start"
+3digrid_export = "threedigrid.management.commands.kick:export_to"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+exclude = ["*.tests", "*.tests.*", "tests.*", "tests"]
+
+[tool.setuptools.dynamic]
+version = {attr = "threedigrid.__version__"}
+
+[tool.bumpversion]
+current_version = "0.1.0"
+commit = true
+tag = true
+
+[[tool.bumpversion.files]]
+filename = "threedigrid/__init__.py"
+search = "__version__ = '{current_version}'"
+replace = "__version__ = '{new_version}'"
+
+[tool.isort]
+profile = "black"
+force_alphabetical_sort_within_sections = true
+
+[tool.flake8]
+exclude = ["docs"]
+ignore = ["E203", "E266", "E501", "W503"]
+
+[tool.zest-releaser]
+create-wheel = false
+release = false
+python-file-with-version = "threedigrid/__init__.py"
+
+[tool.pytest.ini_options]
+addopts = "--doctest-modules"
+doctest_encoding = "utf-8"
+testpaths = ["tests"]
