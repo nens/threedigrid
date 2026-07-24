@@ -28,7 +28,7 @@ classifiers = [
     "Topic :: Scientific/Engineering",
 ]
 dependencies = [
-    "numpy>=2.0<3.0",
+    "numpy>=2,<3",
     "h5py>=2.9",
     "six",
 ]
