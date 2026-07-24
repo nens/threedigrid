@@ -22,22 +22,21 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - display_name: "2020"
-            python: 3.9
-            os: ubuntu-22.04
-            pins: "numpy==1.19.* h5py==3.1.* shapely==1.7.1 pyproj==3.0.* geojson==2.5.* mercantile==1.1.6 cftime==1.2.1 GDAL==3.4.1"
-          - display_name: "2021"
-            python: 3.9
-            os: ubuntu-22.04
-            pins: "numpy==1.21.* h5py==3.3.* shapely==1.8.0 pyproj==3.2.* geojson==2.5.* mercantile==1.2.1 cftime==1.4.1 GDAL==3.4.1"
-          - display_name: "2022"
+          - display_name: "3.10"
             python: '3.10'
             os: ubuntu-22.04
-            pins: "numpy==1.23.* h5py==3.7.* shapely==1.8.* pyproj==3.4.* geojson==2.5.* mercantile==1.2.1 cftime==1.6.2 GDAL==3.4.1"
-          - display_name: "latest"
-            python: '3.10'
+          - display_name: "3.11"
+            python: '3.11'
+            os: ubuntu-22.04
+          - display_name: "3.12"
+            python: '3.12'
+            os: ubuntu-22.04
+          - display_name: "3.13"
+            python: '3.13'
+            os: ubuntu-22.04
+          - display_name: "3.14"
+            python: '3.14'
             os: ubuntu-latest
-            pins: "GDAL==3.8.4"
 
     steps:
       - uses: actions/checkout@v4
@@ -58,7 +57,8 @@ jobs:
         shell: bash
         run: |
           pip install --disable-pip-version-check --upgrade pip setuptools wheel
-          pip install -e .[geo,results] ${{ matrix.pins }} ipython pytest flake8 sphinx==1.8.5 docutils==0.17.* sphinx_rtd_theme>=0.4.3
+          pip install .[geo,results,docs] pytest 
+          pip install --no-build-isolation --no-cache-dir --force-reinstall GDAL==$(gdal-config --version).*
           pip list
 
       - name: Run tests
