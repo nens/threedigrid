@@ -4,7 +4,7 @@ History
 2.3.9 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Updated SEWERAGE_TYPES according to https://docs.ranawaterintelligence.com/d_1d_objects.html#sewerage-type
 
 
 2.3.8 (2026-04-09)
