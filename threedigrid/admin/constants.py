@@ -119,7 +119,10 @@ SEWERAGE_TYPES = {
     5: "sinker",
     6: "storage",
     7: "storage settling tank",
-    8: None,
+    8: "infiltration",
+    9: "slot",
+    10: "pressure",
+    11: None,
 }
 
 
